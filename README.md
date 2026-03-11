@@ -2,6 +2,16 @@
 
 Personal Claude Code configuration: agents, rules, skills, and settings.
 
+## Credits
+
+The agents in this repo are derived from
+[VoltAgent/awesome-claude-code-subagents](https://github.com/VoltAgent/awesome-claude-code-subagents).
+Modifications include: stripped boilerplate (fake JSON communication protocols,
+workflow phases, MCP tool sections), corrected tool lists to real Claude Code
+tools only, added `model:` assignments (`opusplan` / `sonnet` / `haiku`),
+added `disallowedTools:` on read-only agents, and added `memory: user` on
+select agents.
+
 ## Installation
 
 ### New machine
