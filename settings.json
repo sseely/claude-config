@@ -1,0 +1,39 @@
+{
+  "model": "opusplan",
+  "attribution": {
+    "commit": ""
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "osascript -e 'display notification \"Claude Code finished\" with title \"Claude Code\" sound name \"Glass\"'",
+            "async": true
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(openssl rand:*)",
+      "Bash(npm install:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(chmod:*)",
+      "Bash([ -d node_modules ])",
+      "Bash(npm run dev:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(find:*)",
+      "Bash(node -e:*)",
+      "Bash(python3:*)",
+      "Bash(grep:*)",
+      "Bash(gh workflow list:*)",
+      "Bash(npm run test:*)",
+      "Bash(npx eslint:*)"
+    ]
+  }
+}

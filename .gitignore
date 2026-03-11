@@ -1,0 +1,24 @@
+# Claude Code runtime state
+.DS_Store
+backups/
+cache/
+claude.json
+debug/
+downloads/
+file-history/
+history.jsonl
+ide/
+mcp-needs-auth-cache.json
+paste-cache/
+plans/
+plugins/
+projects/
+settings.local.json
+shell-snapshots/
+stats-cache.json
+statsig/
+tasks/
+todos/
+
+# MCP config has machine-specific paths
+.mcp.json
