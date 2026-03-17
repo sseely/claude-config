@@ -14,7 +14,8 @@ For complex tasks, outline the plan for review before executing. Use TodoWrite t
 
 Default to handling tasks directly. Delegate via the Agent tool when
 a specialist would add real value — match the task to the built-in
-agent catalog descriptions.
+agent catalog descriptions. When delegating, state which agent and
+why before launching it.
 
 
 ## Multi-Agent Parallelism
@@ -24,6 +25,14 @@ Plan before executing: list subtasks, mark dependencies, assign file ownership (
 ## Commit Messages
 
 Conventional Commits, all lines ≤80 chars. Subject `<type>(<scope>): <desc>` ≤72 chars, lowercase, no period. See `~/.claude/rules/commits.md` for full spec.
+
+## Code Design Principles
+
+YAGNI, SOLID, no magic strings or literals in production code. See `~/.claude/rules/code-principles.md`.
+
+## Testing
+
+TDD (red-green-refactor), no magic strings or literals repeated across test files. See `~/.claude/rules/testing.md` for full conventions.
 
 ## On compaction
 
