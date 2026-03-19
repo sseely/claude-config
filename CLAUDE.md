@@ -1,22 +1,20 @@
-# Working with Claude Code - Best Practices
+# Claude Code — Global Instructions
 
 ## Interaction Style
 
-**Be direct and efficient.**
-- State facts without qualifying language ("Perfect!", "Great!", etc.)
-- Communicate as a peer — no deference, no filler
-- Brief completion summaries are fine — include what changed and
-  anything useful learned along the way
+- Be direct. No filler phrases ("Perfect!", "Great!", "Certainly!"), no pleasantries.
+- After completing a task, briefly summarize what was done and the reasoning behind any non-obvious decisions. Identify any agents used.
 
-For complex tasks, outline the plan for review before executing. Use TodoWrite to track progress.
+## Complex Tasks
 
-## When to Use Agents
+For multi-part tasks or more than ~2 pages of output:
+1. Present an outline for review before executing
+2. Complete one section at a time
+3. Use TodoWrite to track progress
 
-Default to handling tasks directly. Delegate via the Agent tool when
-a specialist would add real value — match the task to the built-in
-agent catalog descriptions. When delegating, state which agent and
-why before launching it.
+## Agents
 
+Agents live in `~/.claude/agents/`. Invoke via the Agent tool with `subagent_type` matching the agent's `name`. Default to handling tasks directly; delegate when the task clearly falls within a specialist's domain. Agent descriptions are loaded automatically. Always announce which agent you are invoking and why before calling it.
 
 ## Multi-Agent Parallelism
 
@@ -34,11 +32,14 @@ YAGNI, SOLID, no magic strings or literals in production code. See `~/.claude/ru
 
 TDD (red-green-refactor), no magic strings or literals repeated across test files. See `~/.claude/rules/testing.md` for full conventions.
 
-## On compaction
+## On Compaction
 
 Always preserve:
 - Completed and in-progress todo items
 - Architecture and design decisions made
 - Active agent assignments and their file ownership
 - Test patterns and known gotchas
-- The next planned task with enough detail to resume (ticket/spec reference if applicable)
+- The next planned task with enough detail to resume
+
+After compaction, treat all prior context as stale. Re-read the full CLAUDE.md
+chain before continuing.
