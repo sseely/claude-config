@@ -31,11 +31,12 @@ Mark any that appear already applied based on step 1.
 ```
 Which production skills do you want to add?
 
-  [ ] testing-setup    — Vitest + Workers pool, 80/80/80 coverage, ESLint, Prettier, husky, CI workflow
-  [ ] i18n-setup       — i18next, 18 locales, Claude-powered translate script
-  [ ] auth-setup       — OAuth (LinkedIn / Google / Microsoft), KV sessions
-  [ ] payments-setup   — Stripe Checkout, session packs, coupon system
-  [ ] compliance-setup — GDPR consent, data export, SBOM, Termly policy pages
+  [ ] testing-setup     — Vitest + Workers pool, 80/80/80 coverage, ESLint, Prettier, husky, CI workflow
+  [ ] i18n-setup        — i18next, 18 locales, Claude-powered translate script
+  [ ] auth-setup        — OAuth (LinkedIn / Google / Microsoft), KV sessions
+  [ ] payments-setup    — Stripe Checkout, session packs, coupon system
+  [ ] compliance-setup  — GDPR consent, data export, SBOM, Termly policy pages
+  [ ] analytics-setup   — PostHog event plan + instrumentation (backend + frontend)
 ```
 
 Accept any combination. The user may type numbers, names, or "all".
@@ -48,11 +49,12 @@ Apply these dependency rules regardless of what the user selected:
 
 | Skill              | Requires                                              |
 |--------------------|-------------------------------------------------------|
-| `testing-setup`    | nothing (but knows about auth/payments if selected)   |
-| `auth-setup`       | nothing                                               |
-| `i18n-setup`       | nothing                                               |
-| `payments-setup`   | `auth-setup` (needs User + sessions)                  |
+| `testing-setup`    | nothing (but knows about auth/payments if selected)    |
+| `auth-setup`       | nothing                                                |
+| `i18n-setup`       | nothing                                                |
+| `payments-setup`   | `auth-setup` (needs User + sessions)                   |
 | `compliance-setup` | `auth-setup` (needs User row), optionally `i18n-setup` |
+| `analytics-setup`  | optionally `auth-setup` (for identify), `compliance-setup` (for consent gate), `payments-setup` (for payment events) |
 
 If the user selected `payments-setup` without `auth-setup`, and auth is not
 already set up in the project, warn:
@@ -68,6 +70,7 @@ Execution order when multiple skills are selected:
 3. `auth-setup` (users table and session middleware)
 4. `payments-setup` (depends on User)
 5. `compliance-setup` (depends on User, benefits from i18n namespaces)
+6. `analytics-setup` (runs last — needs to know which other skills are in place to plan events and consent gating correctly)
 
 ---
 
