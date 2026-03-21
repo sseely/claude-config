@@ -1,0 +1,285 @@
+@import "tailwindcss";
+
+/* ============================================================================
+   THEME TOKENS — Warm Studio
+
+   Four combinations via two independent axes on <html>:
+     data-color-mode = "light" | "dark"
+     data-contrast   = "standard" | "high-contrast"
+
+   Components reference variables directly: bg-[var(--bg)], text-[var(--text-primary)], etc.
+   No conditional logic in components — the cascade handles everything.
+   ============================================================================ */
+
+/* ─── Light + Standard ──────────────────────────────────────────────────────── */
+
+:root[data-color-mode="light"][data-contrast="standard"] {
+  --bg: #FAF7F2;
+  --bg-warm: #F5F0E8;
+  --card-bg: #FFFFFF;
+  --sidebar-bg: #2C2218;
+  --sidebar-text: #D4C8B8;
+  --sidebar-text-active: #FFFFFF;
+  --sidebar-hover: rgba(255, 255, 255, 0.08);
+  --sidebar-surface: rgba(255, 255, 255, 0.12);
+
+  --text-primary: #2C2218;
+  --text-secondary: #6B5E4F;
+  --text-muted: #A89F91;
+  --text-on-accent: #FFFFFF;
+
+  --border: #E8E0D4;
+  --border-width: 1px;
+
+  --accent: #C45D3E;
+  --accent-hover: #A84D33;
+  --accent-light: rgba(196, 93, 62, 0.1);
+  --danger: #C44B4B;
+  --danger-light: rgba(196, 75, 75, 0.1);
+  --success: #5A9E6F;
+  --success-light: rgba(90, 158, 111, 0.1);
+  --warning: #D4952B;
+  --warning-light: rgba(212, 149, 43, 0.1);
+
+  --focus-ring: rgba(196, 93, 62, 0.4);
+  --focus-ring-width: 2px;
+
+  --font-size-base: 14px;
+  --font-size-stat-label: 12px;
+
+  --shadow-sm: 0 1px 2px rgba(44, 34, 24, 0.05);
+  --shadow-md: 0 4px 6px rgba(44, 34, 24, 0.07);
+  --shadow-lg: 0 10px 15px rgba(44, 34, 24, 0.1);
+}
+
+/* ─── Light + High Contrast ─────────────────────────────────────────────────── */
+
+:root[data-color-mode="light"][data-contrast="high-contrast"] {
+  --bg: #FFFFFF;
+  --bg-warm: #F2EDE5;
+  --card-bg: #FFFFFF;
+  --sidebar-bg: #1A1207;
+  --sidebar-text: #D4C8B8;
+  --sidebar-text-active: #FFFFFF;
+  --sidebar-hover: rgba(255, 255, 255, 0.1);
+  --sidebar-surface: rgba(255, 255, 255, 0.15);
+
+  --text-primary: #1A1207;
+  --text-secondary: #4A3F30;
+  --text-muted: #6D6050;
+  --text-on-accent: #FFFFFF;
+
+  --border: #C4B8A5;
+  --border-width: 2px;
+
+  --accent: #9E3A1E;
+  --accent-hover: #7D2E18;
+  --accent-light: rgba(158, 58, 30, 0.12);
+  --danger: #B91C1C;
+  --danger-light: rgba(185, 28, 28, 0.12);
+  --success: #1E40AF; /* Blue, not green — deuteranopia-safe */
+  --success-light: rgba(30, 64, 175, 0.12);
+  --warning: #92400E;
+  --warning-light: rgba(146, 64, 14, 0.12);
+
+  --focus-ring: rgba(158, 58, 30, 0.6);
+  --focus-ring-width: 3px;
+
+  --font-size-base: 15px;
+  --font-size-stat-label: 13px;
+
+  --shadow-sm: 0 1px 3px rgba(26, 18, 7, 0.08);
+  --shadow-md: 0 4px 8px rgba(26, 18, 7, 0.1);
+  --shadow-lg: 0 10px 20px rgba(26, 18, 7, 0.14);
+}
+
+/* ─── Dark + Standard ───────────────────────────────────────────────────────── */
+
+:root[data-color-mode="dark"][data-contrast="standard"] {
+  --bg: #1C1612;
+  --bg-warm: #252017;
+  --card-bg: #2C2520;
+  --sidebar-bg: #121010;
+  --sidebar-text: #B8AE9E;
+  --sidebar-text-active: #FFFFFF;
+  --sidebar-hover: rgba(255, 255, 255, 0.08);
+  --sidebar-surface: rgba(255, 255, 255, 0.12);
+
+  --text-primary: #E8E0D4;
+  --text-secondary: #B8AE9E;
+  --text-muted: #8A7F70;
+  --text-on-accent: #FFFFFF;
+
+  --border: #3D352C;
+  --border-width: 1px;
+
+  --accent: #E07350;
+  --accent-hover: #F08060;
+  --accent-light: rgba(224, 115, 80, 0.15);
+  --danger: #E06060;
+  --danger-light: rgba(224, 96, 96, 0.15);
+  --success: #6BAF80;
+  --success-light: rgba(107, 175, 128, 0.15);
+  --warning: #E0A840;
+  --warning-light: rgba(224, 168, 64, 0.15);
+
+  --focus-ring: rgba(224, 115, 80, 0.4);
+  --focus-ring-width: 2px;
+
+  --font-size-base: 14px;
+  --font-size-stat-label: 12px;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+}
+
+/* ─── Dark + High Contrast ──────────────────────────────────────────────────── */
+
+:root[data-color-mode="dark"][data-contrast="high-contrast"] {
+  --bg: #0F0B08;
+  --bg-warm: #1A1510;
+  --card-bg: #1C1612;
+  --sidebar-bg: #080604;
+  --sidebar-text: #D4C8B8;
+  --sidebar-text-active: #FFFFFF;
+  --sidebar-hover: rgba(255, 255, 255, 0.1);
+  --sidebar-surface: rgba(255, 255, 255, 0.15);
+
+  --text-primary: #F5F0EA;
+  --text-secondary: #D0C5B5;
+  --text-muted: #A09585;
+  --text-on-accent: #FFFFFF;
+
+  --border: #5A4F3E;
+  --border-width: 2px;
+
+  --accent: #F09070;
+  --accent-hover: #FFA080;
+  --accent-light: rgba(240, 144, 112, 0.18);
+  --danger: #F07070;
+  --danger-light: rgba(240, 112, 112, 0.18);
+  --success: #5B8BD4; /* Blue — deuteranopia-safe */
+  --success-light: rgba(91, 139, 212, 0.18);
+  --warning: #F0B850;
+  --warning-light: rgba(240, 184, 80, 0.18);
+
+  --focus-ring: rgba(240, 144, 112, 0.6);
+  --focus-ring-width: 3px;
+
+  --font-size-base: 15px;
+  --font-size-stat-label: 13px;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.6);
+}
+
+/* ─── Fallback: default to light-standard if attributes not yet set ──────── */
+
+:root:not([data-color-mode]) {
+  --bg: #FAF7F2;
+  --bg-warm: #F5F0E8;
+  --card-bg: #FFFFFF;
+  --sidebar-bg: #2C2218;
+  --sidebar-text: #D4C8B8;
+  --sidebar-text-active: #FFFFFF;
+  --sidebar-hover: rgba(255, 255, 255, 0.08);
+  --sidebar-surface: rgba(255, 255, 255, 0.12);
+  --text-primary: #2C2218;
+  --text-secondary: #6B5E4F;
+  --text-muted: #A89F91;
+  --text-on-accent: #FFFFFF;
+  --border: #E8E0D4;
+  --border-width: 1px;
+  --accent: #C45D3E;
+  --accent-hover: #A84D33;
+  --accent-light: rgba(196, 93, 62, 0.1);
+  --danger: #C44B4B;
+  --danger-light: rgba(196, 75, 75, 0.1);
+  --success: #5A9E6F;
+  --success-light: rgba(90, 158, 111, 0.1);
+  --warning: #D4952B;
+  --warning-light: rgba(212, 149, 43, 0.1);
+  --focus-ring: rgba(196, 93, 62, 0.4);
+  --focus-ring-width: 2px;
+  --font-size-base: 14px;
+  --font-size-stat-label: 12px;
+  --shadow-sm: 0 1px 2px rgba(44, 34, 24, 0.05);
+  --shadow-md: 0 4px 6px rgba(44, 34, 24, 0.07);
+  --shadow-lg: 0 10px 15px rgba(44, 34, 24, 0.1);
+}
+
+/* ============================================================================
+   HIGH CONTRAST — Accessibility overrides (mode-independent)
+   ============================================================================ */
+
+:root[data-contrast="high-contrast"] a:not([class*="no-underline"]) {
+  text-decoration: underline;
+}
+
+:root[data-contrast="high-contrast"] *:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* ============================================================================
+   BASE STYLES
+   ============================================================================ */
+
+body {
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  background-color: var(--bg);
+}
+
+/* ============================================================================
+   OS PREFERENCE FALLBACKS — for first-time visitors (no localStorage yet)
+   ============================================================================ */
+
+/* Respect OS dark mode preference */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-color-mode]) {
+    --bg: #1C1612;
+    --bg-warm: #252017;
+    --card-bg: #2C2520;
+    --sidebar-bg: #121010;
+    --sidebar-text: #B8AE9E;
+    --sidebar-text-active: #FFFFFF;
+    --sidebar-hover: rgba(255, 255, 255, 0.08);
+    --sidebar-surface: rgba(255, 255, 255, 0.12);
+    --text-primary: #E8E0D4;
+    --text-secondary: #B8AE9E;
+    --text-muted: #8A7F70;
+    --text-on-accent: #FFFFFF;
+    --border: #3D352C;
+    --border-width: 1px;
+    --accent: #E07350;
+    --accent-hover: #F08060;
+    --accent-light: rgba(224, 115, 80, 0.15);
+    --danger: #E06060;
+    --danger-light: rgba(224, 96, 96, 0.15);
+    --success: #6BAF80;
+    --success-light: rgba(107, 175, 128, 0.15);
+    --warning: #E0A840;
+    --warning-light: rgba(224, 168, 64, 0.15);
+    --focus-ring: rgba(224, 115, 80, 0.4);
+    --focus-ring-width: 2px;
+    --font-size-base: 14px;
+    --font-size-stat-label: 12px;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* Respect OS high-contrast preference */
+@media (prefers-contrast: more) {
+  :root:not([data-contrast]) {
+    --border: #C4B8A5;
+    --border-width: 2px;
+    --focus-ring-width: 3px;
+    --font-size-base: 15px;
+    --font-size-stat-label: 13px;
+  }
+}
