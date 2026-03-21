@@ -155,9 +155,8 @@ Copy from `ui/Sidebar.tsx`. Adapt:
 
 ## Step 11 — Copy the Knowvah logo
 
-Copy `knowvah_logo.svg` to `ui/public/knowvah_logo.svg` in the new project.
-
-Source: `/Users/scottseely/git/knowvah-audience-insights/ui/public/knowvah_logo.svg`
+Copy `knowvah_logo.svg` from this skill's template directory to
+`ui/public/knowvah_logo.svg` in the new project.
 
 ---
 
