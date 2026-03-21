@@ -1,0 +1,22 @@
+# Merge this job into your existing .github/workflows/ci.yml.
+# Requires: npm run i18n:check defined in ui/package.json.
+# If that script doesn't exist yet, add it before merging this job.
+
+  i18n-audit:
+    name: i18n key audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
+
+      - run: npm ci
+        working-directory: ui
+
+      - name: Check for orphaned or missing translation keys
+        run: npm run i18n:check
+        working-directory: ui

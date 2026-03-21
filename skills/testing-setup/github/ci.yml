@@ -1,0 +1,142 @@
+# GitHub Actions CI — runs on every PR and push to main.
+# ADAPT: update the postgres env vars (POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD)
+#        to match your docker-compose.yml and DATABASE_URL.
+# ADAPT: remove the stripe-mock service block if not using payments-setup.
+# ADAPT: remove the i18n-audit job if not using i18n-setup.
+# ADAPT: remove the python-tests job if there is no Python service.
+# ADAPT: update the python test command and working-directory to match your layout.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Backend + integration tests with coverage
+  # ---------------------------------------------------------------------------
+  test:
+    name: Test & Coverage
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB:       myapp    # ADAPT
+          POSTGRES_USER:     dev      # ADAPT
+          POSTGRES_PASSWORD: devpass  # ADAPT
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U dev -d myapp"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+      # ADAPT: remove if not using payments-setup
+      stripe-mock:
+        image: stripe/stripe-mock:latest
+        ports:
+          - 12111:12111
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Apply schema
+        env:
+          DATABASE_URL: postgresql://dev:devpass@localhost:5432/myapp  # ADAPT
+        run: |
+          psql "$DATABASE_URL" -f src/db/schema.sql
+          for f in $(ls src/db/migrations/*.sql 2>/dev/null | sort); do
+            psql "$DATABASE_URL" -f "$f"
+          done
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test with coverage
+        env:
+          DATABASE_URL:    postgresql://dev:devpass@localhost:5432/myapp  # ADAPT
+          STRIPE_BASE_URL: http://localhost:12111  # ADAPT: remove if not using Stripe
+        run: npm run test:coverage
+
+  # ---------------------------------------------------------------------------
+  # i18n audit — verify all translation keys are present and no orphans
+  # ADAPT: remove this job if not using i18n-setup
+  # ---------------------------------------------------------------------------
+  i18n-audit:
+    name: i18n Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
+
+      - name: Install UI dependencies
+        run: npm ci
+        working-directory: ui
+
+      - name: Check translation keys
+        run: npm run i18n:check
+        working-directory: ui
+
+  # ---------------------------------------------------------------------------
+  # Python service tests
+  # ADAPT: remove this job if there is no Python service in the project
+  # ---------------------------------------------------------------------------
+  python-tests:
+    name: Python Service Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB:       myapp    # ADAPT
+          POSTGRES_USER:     dev      # ADAPT
+          POSTGRES_PASSWORD: devpass  # ADAPT
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U dev -d myapp"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Apply schema
+        env:
+          DATABASE_URL: postgresql://dev:devpass@localhost:5432/myapp  # ADAPT
+        run: psql "$DATABASE_URL" -f src/db/schema.sql
+
+      - name: Install Python dependencies
+        run: |
+          python -m venv .venv
+          .venv/bin/pip install -r requirements.txt
+        working-directory: services/reports  # ADAPT: update to your Python service path
+
+      - name: Run tests
+        run: .venv/bin/pytest -v --tb=short
+        working-directory: services/reports  # ADAPT

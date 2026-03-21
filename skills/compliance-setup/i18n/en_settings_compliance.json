@@ -1,0 +1,41 @@
+{
+  "privacy": {
+    "heading": "Privacy & Consent",
+    "tos": "Terms of Service: ",
+    "tosAccepted": "Accepted version {{version}} on {{date}}",
+    "tosNotAccepted": "Not yet accepted",
+    "privacy": "Privacy Policy: ",
+    "privacyAccepted": "Accepted version {{version}} on {{date}}",
+    "privacyNotAccepted": "Not yet accepted"
+  },
+  "export": {
+    "heading": "Export Your Data",
+    "subtitle": "Download a copy of all your data as a JSON file.",
+    "button": "Download My Data",
+    "preparing": "Preparing download…",
+    "error": "Export failed"
+  },
+  "sbom": {
+    "heading": "Open Source Compliance",
+    "subtitle": "This application provides a Software Bill of Materials (SBOM) on request, in SPDX 2.3 and CycloneDX 1.6 formats.",
+    "downloadLinks": "Download links (expires {{date}}):",
+    "spdx": "SPDX 2.3",
+    "cyclonedx": "CycloneDX 1.6",
+    "pending": "Your SBOM download links will be emailed to {{email}} within the next day.",
+    "request": "Request SBOM Download",
+    "requesting": "Requesting…",
+    "note": "Download links will be emailed to {{email}} within the next day.",
+    "error": "Request failed"
+  },
+  "danger": {
+    "heading": "Danger Zone",
+    "subtitle": "Deleting your account will remove your personal data. Your data is retained for 30 days in case you change your mind.",
+    "confirmLabel": "Type DELETE to confirm:",
+    "confirmPlaceholder": "DELETE",
+    "delete": "Delete My Account",
+    "deleting": "Deleting…",
+    "error": "Deletion failed",
+    "initiatedHeading": "Account Deletion Initiated",
+    "initiatedBody": "Your account has been scheduled for deletion. You have until {{date}} to recover it."
+  }
+}

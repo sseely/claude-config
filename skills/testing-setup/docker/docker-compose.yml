@@ -1,0 +1,36 @@
+# Local development services — PostgreSQL and (optionally) stripe-mock.
+# Start with: docker compose up -d --wait postgres stripe-mock
+# ADAPT: update POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD to match
+#        your DATABASE_URL in vitest.config.ts and globalSetup.ts.
+# ADAPT: remove the stripe-mock service if not using payments-setup.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB:       myapp       # ADAPT: match DATABASE_URL db name
+      POSTGRES_USER:     dev         # ADAPT: match DATABASE_URL user
+      POSTGRES_PASSWORD: devpass     # ADAPT: match DATABASE_URL password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dev -d myapp"]  # ADAPT
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ADAPT: remove if not using Stripe / payments-setup
+  stripe-mock:
+    image: stripe/stripe-mock:latest
+    ports:
+      - "12111:12111"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--spider", "http://localhost:12111"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:

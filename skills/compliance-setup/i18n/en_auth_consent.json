@@ -1,0 +1,22 @@
+{
+  "consent": {
+    "title": "Before you continue",
+    "subtitle": "Please review and accept our terms to continue.",
+    "bodyPrefix": "By clicking \"I Accept\", you agree to our",
+    "termsLink": "Terms of Service",
+    "bodySeparator": "and",
+    "privacyLink": "Privacy Policy",
+    "dataNote": "We collect only what's needed to run your sessions. We never sell your data.",
+    "accept": "I Accept",
+    "saving": "Saving…",
+    "error": "Failed to save consent"
+  },
+  "login": {
+    "footer": {
+      "privacy": "Privacy Policy",
+      "terms": "Terms",
+      "cookies": "Cookie Policy",
+      "feedback": "Feedback"
+    }
+  }
+}
