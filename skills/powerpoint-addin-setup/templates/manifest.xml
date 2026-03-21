@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  PowerPoint Office Add-in manifest template
+  ADAPT: replace every XXXXXXXX placeholder below
+
+  Two surfaces available (remove whichever you don't need):
+    1. Task pane  — side panel (auth, management UI)
+    2. Content    — embedded iframe inside a slide
+
+  Dev:  Add-in served from Vite dev server (https://localhost:3000).
+        Run `npx office-addin-dev-certs install` once per machine.
+
+  Prod: Replace https://localhost:3000 with your production domain.
+        The add-in is built into dist/ by `npm run build`.
+
+  To sideload in PowerPoint:
+    Insert → Add-ins → Manage My Add-ins → Upload My Add-in → select this file
+-->
+<OfficeApp
+  xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
+  xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides"
+  xsi:type="TaskPaneApp">
+
+  <!-- ADAPT: generate a fresh GUID — never reuse across add-ins -->
+  <!-- Generate one with: node -e "const {randomUUID}=require('crypto');console.log(randomUUID())" -->
+  <Id>XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX</Id>
+  <Version>1.0.0.0</Version>
+  <!-- ADAPT: your company / publisher name -->
+  <ProviderName>XXXXXXXX</ProviderName>
+  <DefaultLocale>en-US</DefaultLocale>
+  <!-- ADAPT: display name shown in Office ribbon and add-in store -->
+  <DisplayName DefaultValue="XXXXXXXX"/>
+  <!-- ADAPT: description shown in the add-in store -->
+  <Description DefaultValue="XXXXXXXX"/>
+
+  <!-- ADAPT: replace with your icon URLs (prod domain in production) -->
+  <IconUrl DefaultValue="https://localhost:3000/addin/assets/icon-80.png"/>
+  <HighResolutionIconUrl DefaultValue="https://localhost:3000/addin/assets/icon-80.png"/>
+  <!-- ADAPT: your support URL -->
+  <SupportUrl DefaultValue="https://XXXXXXXX/support"/>
+
+  <AppDomains>
+    <!-- ADAPT: add your production domain here too when deploying -->
+    <AppDomain>https://localhost:3000</AppDomain>
+  </AppDomains>
+
+  <Hosts>
+    <Host Name="Presentation"/>
+  </Hosts>
+
+  <Requirements>
+    <Sets DefaultMinVersion="1.5">
+      <Set Name="PowerPointApi" MinVersion="1.5"/>
+    </Sets>
+  </Requirements>
+
+  <DefaultSettings>
+    <SourceLocation DefaultValue="https://localhost:3000/addin/taskpane/index.html"/>
+  </DefaultSettings>
+
+  <Permissions>ReadWriteDocument</Permissions>
+
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
+
+    <Hosts>
+      <Host xsi:type="Presentation">
+
+        <Runtimes>
+          <Runtime resid="TaskPaneRuntime.Url" lifetime="long"/>
+        </Runtimes>
+
+        <AllFormFactors>
+          <!-- Content surface — embedded iframe inside a slide -->
+          <!-- ADAPT: remove this ExtensionPoint block if you only need a task pane -->
+          <ExtensionPoint xsi:type="PresentationContent">
+            <Content>
+              <SourceLocation resid="ContentApp.Url"/>
+              <RequestedWidth>600</RequestedWidth>
+              <RequestedHeight>400</RequestedHeight>
+            </Content>
+          </ExtensionPoint>
+        </AllFormFactors>
+
+        <DesktopFormFactor>
+
+          <!-- Ribbon button — opens the task pane -->
+          <ExtensionPoint xsi:type="PresentationCommandSurface">
+            <OfficeTab id="TabHome">
+              <!-- ADAPT: update Group id to match your add-in name (no spaces) -->
+              <Group id="XXXXXXXX.Group">
+                <Label resid="Group.Label"/>
+                <Icon>
+                  <bt:Image size="16" resid="Icon.16x16"/>
+                  <bt:Image size="32" resid="Icon.32x32"/>
+                  <bt:Image size="80" resid="Icon.80x80"/>
+                </Icon>
+                <!-- ADAPT: update Control id to match your add-in name -->
+                <Control xsi:type="Button" id="XXXXXXXX.OpenTaskPane">
+                  <Label resid="TaskPane.Label"/>
+                  <Supertip>
+                    <Title resid="TaskPane.Label"/>
+                    <Description resid="TaskPane.Tooltip"/>
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16x16"/>
+                    <bt:Image size="32" resid="Icon.32x32"/>
+                    <bt:Image size="80" resid="Icon.80x80"/>
+                  </Icon>
+                  <!-- ADAPT: update TaskpaneId to match your add-in name -->
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>XXXXXXXX.TaskPane</TaskpaneId>
+                    <SourceLocation resid="TaskPane.Url"/>
+                  </Action>
+                </Control>
+              </Group>
+            </OfficeTab>
+          </ExtensionPoint>
+
+        </DesktopFormFactor>
+      </Host>
+    </Hosts>
+
+    <Resources>
+      <bt:Images>
+        <!-- ADAPT: replace localhost:3000 with prod domain when deploying -->
+        <bt:Image id="Icon.16x16" DefaultValue="https://localhost:3000/addin/assets/icon-16.png"/>
+        <bt:Image id="Icon.32x32" DefaultValue="https://localhost:3000/addin/assets/icon-32.png"/>
+        <bt:Image id="Icon.80x80" DefaultValue="https://localhost:3000/addin/assets/icon-80.png"/>
+      </bt:Images>
+      <bt:Urls>
+        <bt:Url id="TaskPaneRuntime.Url" DefaultValue="https://localhost:3000/addin/taskpane/index.html"/>
+        <bt:Url id="TaskPane.Url" DefaultValue="https://localhost:3000/addin/taskpane/index.html"/>
+        <!-- ADAPT: remove ContentApp.Url if not using the content surface -->
+        <bt:Url id="ContentApp.Url" DefaultValue="https://localhost:3000/addin/content/index.html"/>
+      </bt:Urls>
+      <bt:ShortStrings>
+        <!-- ADAPT: ribbon group label -->
+        <bt:String id="Group.Label" DefaultValue="XXXXXXXX"/>
+        <!-- ADAPT: ribbon button label -->
+        <bt:String id="TaskPane.Label" DefaultValue="XXXXXXXX"/>
+      </bt:ShortStrings>
+      <bt:LongStrings>
+        <!-- ADAPT: ribbon button tooltip -->
+        <bt:String id="TaskPane.Tooltip" DefaultValue="XXXXXXXX"/>
+      </bt:LongStrings>
+    </Resources>
+
+  </VersionOverrides>
+</OfficeApp>
