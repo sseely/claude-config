@@ -1,8 +1,50 @@
 {
-  "model": "opusplan",
   "attribution": {
     "commit": ""
   },
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(openssl rand:*)",
+      "Bash(npm install:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(chmod:*)",
+      "Bash([ -d node_modules ])",
+      "Bash(npm run dev:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(find:*)",
+      "Bash(node -e:*)",
+      "Bash(python3:*)",
+      "Bash(grep:*)",
+      "Bash(gh workflow list:*)",
+      "Bash(npm run test:*)",
+      "Bash(npx eslint:*)",
+      "Bash(npx vitest:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(git stash:*)",
+      "Bash(docker compose:*)",
+      "Edit(~/git/**)",
+      "Write(~/git/**)",
+      "Read(~/git/**)",
+      "Glob(~/git/**)",
+      "Grep(~/git/**)",
+      "Edit(~/.claude/**)",
+      "Write(~/.claude/**)",
+      "Read(~/.claude/**)",
+      "Glob(~/.claude/**)",
+      "Grep(~/.claude/**)",
+      "Edit(~/church/**)",
+      "Write(~/church/**)",
+      "Read(~/church/**)",
+      "Glob(~/church/**)",
+      "Grep(~/church/**)",
+      "WebFetch(*)",
+      "Skill(update-config)",
+      "Skill(update-config:*)"
+    ]
+  },
+  "model": "opusplan",
   "hooks": {
     "UserPromptSubmit": [
       {
@@ -25,26 +67,6 @@
           }
         ]
       }
-    ]
-  },
-  "permissions": {
-    "allow": [
-      "Bash(ls:*)",
-      "Bash(openssl rand:*)",
-      "Bash(npm install:*)",
-      "Bash(docker-compose up:*)",
-      "Bash(chmod:*)",
-      "Bash([ -d node_modules ])",
-      "Bash(npm run dev:*)",
-      "Bash(git add:*)",
-      "Bash(git commit:*)",
-      "Bash(find:*)",
-      "Bash(node -e:*)",
-      "Bash(python3:*)",
-      "Bash(grep:*)",
-      "Bash(gh workflow list:*)",
-      "Bash(npm run test:*)",
-      "Bash(npx eslint:*)"
     ]
   }
 }

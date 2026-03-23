@@ -1,6 +1,6 @@
 ---
 name: commit
-description: Stage and commit changes following Conventional Commits with a mandatory Jira footer. Use when ready to commit — do not invoke automatically.
+description: Stage and commit changes following Conventional Commits. Use when ready to commit — do not invoke automatically.
 disable-model-invocation: true
 allowed-tools: Bash
 ---

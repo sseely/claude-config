@@ -1,5 +1,3 @@
-
-
 # Testing Conventions
 
 ## TDD — Test-Driven Development
