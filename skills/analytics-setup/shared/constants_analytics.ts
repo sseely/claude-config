@@ -17,6 +17,9 @@ export const AnalyticsEvent = {
   PAYMENT_COMPLETED: 'payment_completed', // properties: { pack_size, amount_cents }
   COUPON_REDEEMED:   'coupon_redeemed',   // properties: { pack_size }
 
+  // --- Navigation ---
+  PAGE_VIEW: '$pageview',                 // properties: { $current_url }
+
   // --- Errors (frontend) ---
   API_ERROR: 'api_error',                 // properties: { status, path, method }
 } as const;

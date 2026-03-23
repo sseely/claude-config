@@ -29,7 +29,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const res = await fetch('/api/me');
       setUser(res.ok ? await res.json() : null);
-    } catch {
+    } catch (err) {
+      console.error('[auth refresh]', err instanceof Error ? err.message : String(err));
       setUser(null);
     } finally {
       setLoading(false);

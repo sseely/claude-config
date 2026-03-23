@@ -10,6 +10,8 @@
 import { createDbClient } from '../db/client';
 import { Env } from '../types';
 
+const SBOM_EXPIRY_HOURS = 48;
+
 export async function processPendingSbomRequests(env: Env): Promise<void> {
   const db = await createDbClient(env);
   try {
@@ -22,7 +24,7 @@ export async function processPendingSbomRequests(env: Env): Promise<void> {
 
     for (const req of pending) {
       try {
-        const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000);
+        const expiresAt = new Date(Date.now() + SBOM_EXPIRY_HOURS * 60 * 60 * 1000);
         let spdxUrl = '';
         let cdxUrl = '';
 
@@ -32,12 +34,12 @@ export async function processPendingSbomRequests(env: Env): Promise<void> {
           spdxUrl = await generateR2PresignedUrl(
             env,
             'R2_SBOM_PREFIX/sbom.PROJECT_NAME.spdx.json',
-            48 * 3600
+            SBOM_EXPIRY_HOURS * 3600
           );
           cdxUrl = await generateR2PresignedUrl(
             env,
             'R2_SBOM_PREFIX/sbom.PROJECT_NAME.cdx.json',
-            48 * 3600
+            SBOM_EXPIRY_HOURS * 3600
           );
         }
 
@@ -64,6 +66,10 @@ export async function processPendingSbomRequests(env: Env): Promise<void> {
   }
 }
 
+// WARNING: This is a simplified placeholder. Production deployments MUST use
+// proper AWS SigV4 signing (e.g. @aws-sdk/s3-request-presigner) or
+// Cloudflare R2's built-in createSignedUrl() API. The current implementation
+// produces unsigned URLs that can be forged.
 async function generateR2PresignedUrl(
   env: Env,
   key: string,
@@ -71,7 +77,6 @@ async function generateR2PresignedUrl(
 ): Promise<string> {
   const endpoint = env.R2_ENDPOINT ?? '';
   const expiresAt = new Date(Date.now() + expiresInSeconds * 1000);
-  // Simplified presigning — for production implement proper AWS SigV4
   return `${endpoint}/${key}?X-Expires=${expiresAt.toISOString()}`;
 }
 
@@ -82,7 +87,7 @@ async function sendSbomEmail(
   cdxUrl: string
 ): Promise<void> {
   // ADAPT: replace NOREPLY_EMAIL and APP_DISPLAY_NAME
-  await fetch('https://api.sendgrid.com/v3/mail/send', {
+  const res = await fetch('https://api.sendgrid.com/v3/mail/send', {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${env.SENDGRID_API_KEY}`,
@@ -95,9 +100,12 @@ async function sendSbomEmail(
       content: [
         {
           type: 'text/plain',
-          value: `Your SBOM download links (valid for 48 hours):\n\nSPDX 2.3: ${spdxUrl}\nCycloneDX 1.6: ${cdxUrl}\n\nThese links expire in 48 hours.`,
+          value: `Your SBOM download links (valid for ${SBOM_EXPIRY_HOURS} hours):\n\nSPDX 2.3: ${spdxUrl}\nCycloneDX 1.6: ${cdxUrl}\n\nThese links expire in ${SBOM_EXPIRY_HOURS} hours.`,
         },
       ],
     }),
   });
+  if (!res.ok) {
+    throw new Error(`SendGrid email failed: ${res.status} ${res.statusText}`);
+  }
 }

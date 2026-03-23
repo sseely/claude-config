@@ -36,14 +36,14 @@ function createStripeClient(env: Env): Stripe {
 
 export async function handleBuyPack(request: Request, env: Env, user: User): Promise<Response> {
   const body = await request.json<{ pack?: string }>();
-  const pack = body.pack as PackKey;
 
-  if (!PACKS[pack]) {
+  if (typeof body.pack !== 'string' || !PACKS[body.pack as PackKey]) {
     return Response.json(
       { error: `Invalid pack. Choose: ${Object.keys(PACKS).join(', ')}.` },
       { status: 400 }
     );
   }
+  const pack = body.pack as PackKey;
   if (!env.STRIPE_SECRET_KEY) {
     return Response.json({ error: 'Payments not configured' }, { status: 503 });
   }
@@ -114,8 +114,11 @@ export async function handleStripeWebhook(
   let event: Stripe.Event;
   try {
     event = await stripe.webhooks.constructEventAsync(body, signature, env.STRIPE_WEBHOOK_SECRET);
-  } catch {
-    return new Response('Webhook signature verification failed', { status: 400 });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const isSignatureError = msg.toLowerCase().includes('signature');
+    console.error('[stripe webhook]', isSignatureError ? 'Signature validation failed' : 'Webhook error', msg);
+    return new Response('Webhook error', { status: isSignatureError ? 400 : 500 });
   }
 
   if (event.type === 'checkout.session.completed') {

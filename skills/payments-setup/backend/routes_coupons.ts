@@ -24,7 +24,10 @@ export async function handleCreateCoupons(request: Request, env: Env): Promise<R
 
   const body = await request.json<{ pack_size?: number; email?: string; max_uses?: number }>();
   const { pack_size, max_uses = 1 } = body;
-  const email = body.email ? body.email.toLowerCase() : undefined;
+  const email = body.email ? body.email.toLowerCase().trim() : undefined;
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return Response.json({ error: 'Invalid email format' }, { status: 400 });
+  }
 
   if (!pack_size || !(VALID_PACK_SIZES as readonly number[]).includes(pack_size)) {
     return Response.json(
@@ -136,7 +139,10 @@ export async function handleIssueCoupons(request: Request, env: Env): Promise<Re
     email?: string;
   }>();
   const { pack_size, max_uses = 1 } = body;
-  const email = body.email ? body.email.toLowerCase() : undefined;
+  const email = body.email ? body.email.toLowerCase().trim() : undefined;
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return Response.json({ error: 'Invalid email format' }, { status: 400 });
+  }
 
   if (!pack_size || !(VALID_PACK_SIZES as readonly number[]).includes(pack_size)) {
     return Response.json(

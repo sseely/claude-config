@@ -8,8 +8,14 @@ import { AdminCoupon } from '../types/shared'; // ADAPT: update import path
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, init);
   if (!res.ok) {
-    const body = await res.json<{ error?: string }>().catch(() => ({}));
-    throw new Error(body.error ?? `HTTP ${res.status}`);
+    let errorMessage = `HTTP ${res.status}`;
+    try {
+      const body = await res.json<{ error?: string }>();
+      if (body.error) errorMessage = body.error;
+    } catch {
+      // Response body not JSON — use status code message
+    }
+    throw new Error(errorMessage);
   }
   return res.json<T>();
 }

@@ -17,6 +17,18 @@ import {
 import { parseCookies } from '../middleware/auth';
 import { COOKIE, COOKIE_MAX_AGE, OAUTH } from '../constants';
 
+function safeDecodeURIComponent(value: string): string | null {
+  try { return decodeURIComponent(value); } catch { return null; }
+}
+
+function validateAppUrl(url: string): string {
+  const parsed = new URL(url);
+  if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+    throw new Error(`APP_URL must use http(s), got: ${parsed.protocol}`);
+  }
+  return parsed.origin;
+}
+
 // ADAPT: list only the columns that exist in your users table
 const USER_COLS = `id, linkedin_id, google_id, microsoft_id,
                    email, name, profile_url, linkedin_access_token,
@@ -117,7 +129,7 @@ function authInitResponse(authUrl: URL, returnTo: string | null): Response {
     if (safe !== '/dashboard') {
       headers.append(
         'Set-Cookie',
-        `${COOKIE.RETURN_TO}=${encodeURIComponent(safe)}; HttpOnly; SameSite=Lax; Max-Age=${COOKIE_MAX_AGE.RETURN_TO}; Path=/`
+        `${COOKIE.RETURN_TO}=${encodeURIComponent(safe)}; HttpOnly; Secure; SameSite=Lax; Max-Age=${COOKIE_MAX_AGE.RETURN_TO}; Path=/`
       );
     }
   }
@@ -129,7 +141,7 @@ async function createSessionAndRedirect(request: Request, env: Env, user: User):
   await storeSession(env, token, user.id);
   const cookies = parseCookies(request.headers.get('Cookie') || '');
   const returnToRaw = cookies[COOKIE.RETURN_TO]
-    ? (() => { try { return decodeURIComponent(cookies[COOKIE.RETURN_TO]); } catch { return null; } })()
+    ? safeDecodeURIComponent(cookies[COOKIE.RETURN_TO])
     : null;
   const location = safeReturnTo(returnToRaw);
   const headers = new Headers({
@@ -160,7 +172,7 @@ export async function handleLinkedInAuth(request: Request, env: Env): Promise<Re
   const authUrl = new URL(OAUTH.linkedin.authUrl);
   authUrl.searchParams.set('response_type', 'code');
   authUrl.searchParams.set('client_id', env.LINKEDIN_CLIENT_ID ?? '');
-  authUrl.searchParams.set('redirect_uri', `${env.APP_URL}/auth/linkedin/callback`);
+  authUrl.searchParams.set('redirect_uri', `${validateAppUrl(env.APP_URL)}/auth/linkedin/callback`);
   authUrl.searchParams.set('scope', OAUTH.linkedin.scope);
   authUrl.searchParams.set('state', state);
   return authInitResponse(authUrl, returnTo);
@@ -181,7 +193,7 @@ export async function handleLinkedInCallback(
       code,
       clientId: env.LINKEDIN_CLIENT_ID ?? '',
       clientSecret: env.LINKEDIN_CLIENT_SECRET ?? '',
-      redirectUri: `${env.APP_URL}/auth/linkedin/callback`,
+      redirectUri: `${validateAppUrl(env.APP_URL)}/auth/linkedin/callback`,
     });
     const profile = await fetchUserProfile(OAUTH.linkedin.userInfoUrl, tokens.access_token);
     const { user } = await upsertUser(env, {
@@ -194,7 +206,7 @@ export async function handleLinkedInCallback(
     });
     return createSessionAndRedirect(request, env, user);
   } catch (err) {
-    console.error('[linkedin callback]', err);
+    console.error('[linkedin callback]', err instanceof Error ? err.message : String(err));
     return new Response('Authentication failed', { status: 502 });
   }
 }
@@ -209,7 +221,7 @@ export async function handleGoogleAuth(request: Request, env: Env): Promise<Resp
   const authUrl = new URL(OAUTH.google.authUrl);
   authUrl.searchParams.set('response_type', 'code');
   authUrl.searchParams.set('client_id', env.GOOGLE_CLIENT_ID ?? '');
-  authUrl.searchParams.set('redirect_uri', `${env.APP_URL}/auth/google/callback`);
+  authUrl.searchParams.set('redirect_uri', `${validateAppUrl(env.APP_URL)}/auth/google/callback`);
   authUrl.searchParams.set('scope', OAUTH.google.scope);
   authUrl.searchParams.set('state', state);
   return authInitResponse(authUrl, returnTo);
@@ -230,7 +242,7 @@ export async function handleGoogleCallback(
       code,
       clientId: env.GOOGLE_CLIENT_ID ?? '',
       clientSecret: env.GOOGLE_CLIENT_SECRET ?? '',
-      redirectUri: `${env.APP_URL}/auth/google/callback`,
+      redirectUri: `${validateAppUrl(env.APP_URL)}/auth/google/callback`,
     });
     const profile = await fetchUserProfile(OAUTH.google.userInfoUrl, tokens.access_token);
     const { user } = await upsertUser(env, {
@@ -242,7 +254,7 @@ export async function handleGoogleCallback(
     });
     return createSessionAndRedirect(request, env, user);
   } catch (err) {
-    console.error('[google callback]', err);
+    console.error('[google callback]', err instanceof Error ? err.message : String(err));
     return new Response('Authentication failed', { status: 502 });
   }
 }
@@ -257,7 +269,7 @@ export async function handleMicrosoftAuth(request: Request, env: Env): Promise<R
   const authUrl = new URL(OAUTH.microsoft.authUrl);
   authUrl.searchParams.set('response_type', 'code');
   authUrl.searchParams.set('client_id', env.MICROSOFT_CLIENT_ID ?? '');
-  authUrl.searchParams.set('redirect_uri', `${env.APP_URL}/auth/microsoft/callback`);
+  authUrl.searchParams.set('redirect_uri', `${validateAppUrl(env.APP_URL)}/auth/microsoft/callback`);
   authUrl.searchParams.set('scope', OAUTH.microsoft.scope);
   authUrl.searchParams.set('state', state);
   return authInitResponse(authUrl, returnTo);
@@ -278,7 +290,7 @@ export async function handleMicrosoftCallback(
       code,
       clientId: env.MICROSOFT_CLIENT_ID ?? '',
       clientSecret: env.MICROSOFT_CLIENT_SECRET ?? '',
-      redirectUri: `${env.APP_URL}/auth/microsoft/callback`,
+      redirectUri: `${validateAppUrl(env.APP_URL)}/auth/microsoft/callback`,
     });
     const profile = await fetchUserProfile(OAUTH.microsoft.userInfoUrl, tokens.access_token);
     const { user } = await upsertUser(env, {
@@ -290,7 +302,7 @@ export async function handleMicrosoftCallback(
     });
     return createSessionAndRedirect(request, env, user);
   } catch (err) {
-    console.error('[microsoft callback]', err);
+    console.error('[microsoft callback]', err instanceof Error ? err.message : String(err));
     return new Response('Authentication failed', { status: 502 });
   }
 }

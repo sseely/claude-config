@@ -65,7 +65,10 @@ export async function exchangeCode(opts: {
       redirect_uri: opts.redirectUri,
     }),
   });
-  if (!res.ok) throw new Error(`Token exchange failed: ${res.status}`);
+  if (!res.ok) {
+    const category = res.status < 500 ? 'client' : 'provider';
+    throw new Error(`Token exchange failed (${category} error ${res.status})`);
+  }
   return res.json();
 }
 
@@ -74,7 +77,10 @@ export async function fetchUserProfile(
   accessToken: string
 ): Promise<{ sub: string; email: string; name: string; picture?: string }> {
   const res = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
-  if (!res.ok) throw new Error(`Profile fetch failed: ${res.status}`);
+  if (!res.ok) {
+    const category = res.status < 500 ? 'client' : 'provider';
+    throw new Error(`Profile fetch failed (${category} error ${res.status})`);
+  }
   return res.json();
 }
 

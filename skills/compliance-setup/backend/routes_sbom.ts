@@ -2,7 +2,9 @@ import { createDbClient } from '../db/client';
 import { Env, User } from '../types';
 import { logAuditEvent, AuditAction } from '../services/audit';
 
-// POST /api/sbom/request — rate-limited to 1 per user per 30 days
+const SBOM_REQUEST_THROTTLE_DAYS = 30;
+
+// POST /api/sbom/request — rate-limited to 1 per user per SBOM_REQUEST_THROTTLE_DAYS
 export async function handleRequestSbom(
   request: Request,
   env: Env,
@@ -13,14 +15,14 @@ export async function handleRequestSbom(
   try {
     const { rows: recent } = await db.query(
       `SELECT id, requested_at FROM sbom_requests
-       WHERE user_id = $1 AND requested_at > NOW() - INTERVAL '30 days'
+       WHERE user_id = $1 AND requested_at > NOW() - INTERVAL '1 day' * ${SBOM_REQUEST_THROTTLE_DAYS}
        ORDER BY requested_at DESC LIMIT 1`,
       [user.id]
     );
 
     if (recent.length > 0) {
       const nextAvailable = new Date(recent[0].requested_at);
-      nextAvailable.setDate(nextAvailable.getDate() + 30);
+      nextAvailable.setDate(nextAvailable.getDate() + SBOM_REQUEST_THROTTLE_DAYS);
       return Response.json(
         { error: 'Rate limited', next_available_at: nextAvailable.toISOString() },
         { status: 429 }
@@ -36,13 +38,13 @@ export async function handleRequestSbom(
       [user.id, ipAddress ?? null]
     );
 
-    logAuditEvent(env, ctx, {
+    ctx.waitUntil(logAuditEvent(env, ctx, {
       actorId: user.id,
       action: AuditAction.SBOM_REQUESTED,
       targetType: 'sbom_request',
       targetId: rows[0].id,
       ipAddress,
-    });
+    }));
 
     return Response.json(rows[0], { status: 201 });
   } finally {

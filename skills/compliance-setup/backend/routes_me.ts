@@ -3,6 +3,8 @@ import { Env, User } from '../types';
 import { logAuditEvent, AuditAction } from '../services/audit';
 import { COOKIE, COOKIE_MAX_AGE } from '../constants';
 
+const ACCOUNT_RECOVERY_WINDOW_DAYS = 30;
+
 // ---------------------------------------------------------------------------
 // POST /api/me/consent
 // ---------------------------------------------------------------------------
@@ -92,13 +94,13 @@ export async function handleExportData(
 ): Promise<Response> {
   const payload = await buildExportPayload(user.id, env);
 
-  logAuditEvent(env, ctx, {
+  ctx.waitUntil(logAuditEvent(env, ctx, {
     actorId: user.id,
     action: AuditAction.USER_DATA_EXPORTED,
     targetType: 'user',
     targetId: user.id,
     ipAddress: request.headers.get('CF-Connecting-IP') ?? undefined,
-  });
+  }));
 
   return new Response(JSON.stringify(payload, null, 2), {
     headers: {
@@ -134,7 +136,7 @@ export async function handleDeleteAccount(
     });
   }
 
-  const recoveryExpiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+  const recoveryExpiry = new Date(Date.now() + ACCOUNT_RECOVERY_WINDOW_DAYS * 24 * 60 * 60 * 1000);
 
   const db = await createDbClient(env);
   try {
@@ -154,13 +156,13 @@ export async function handleDeleteAccount(
     await db.end();
   }
 
-  logAuditEvent(env, ctx, {
+  ctx.waitUntil(logAuditEvent(env, ctx, {
     actorId: user.id,
     action: AuditAction.USER_DELETED,
     targetType: 'user',
     targetId: user.id,
     ipAddress: request.headers.get('CF-Connecting-IP') ?? undefined,
-  });
+  }));
 
   return new Response(JSON.stringify({ recovery_expires_at: recoveryExpiry.toISOString() }), {
     headers: {
@@ -206,13 +208,13 @@ export async function handleRestoreAccount(
     await db.end();
   }
 
-  logAuditEvent(env, ctx, {
+  ctx.waitUntil(logAuditEvent(env, ctx, {
     actorId: user.id,
     action: AuditAction.ACCOUNT_RESTORED,
     targetType: 'user',
     targetId: user.id,
     ipAddress: request.headers.get('CF-Connecting-IP') ?? undefined,
-  });
+  }));
 
   return Response.json({ restored: true });
 }

@@ -20,6 +20,7 @@ import { AnalyticsProvider, useAnalytics } from './contexts/AnalyticsContext';
 import { Layout } from './components/Layout';
 import CannyFeedback from './components/CannyFeedback';
 import { ROUTES } from './constants/routes';
+import { AnalyticsEvent } from '../shared/constants_analytics';
 
 // ADAPT: add/remove lazy imports to match this app's pages
 const LoginPage    = lazy(() => import('./pages/LoginPage'));
@@ -58,7 +59,7 @@ function PageViewTracker() {
   const location = useLocation();
   const { capture } = useAnalytics();
   useEffect(() => {
-    capture('$pageview', { $current_url: window.location.href });
+    capture(AnalyticsEvent.PAGE_VIEW, { $current_url: window.location.href });
   }, [location.pathname, capture]);
   return null;
 }
