@@ -42,8 +42,12 @@ and its specific checklist below.
   (e.g. `BASE_URL + '/users'` instead of two separate hardcoded strings)
 - Functions doing more than one thing (single responsibility)
 - DRY violations — duplicated logic that should be shared
-- Cyclomatic complexity: flag any function with complexity > 10; suggest
-  how to decompose it
+- Duplication: flag any block of 5+ lines that appears more than once
+  in the same file or across touched files; recommend extraction
+- Cyclomatic complexity (tiered):
+  - \>7: **Suggestion** — suggest simplification
+  - \>10: **Warning** — flag for simplification
+  - \>15: **Critical** — require decomposition before merge
 - Dead code: unreachable branches, commented-out blocks, unused
   variables/exports/imports
 

@@ -30,9 +30,9 @@ not repeated inline.
 When you notice a literal repeated across test files, extract it
 immediately — don't defer it.
 
-## Coverage — 80/80/80 rule
+## Coverage — 90/90/90 rule
 
-Target at least 80% line coverage, 80% branch coverage, and 80%
+Target at least 90% line coverage, 90% branch coverage, and 90%
 function coverage. Treat these as a floor, not a ceiling.
 
 ## Test helper location
