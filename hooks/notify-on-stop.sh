@@ -2,7 +2,7 @@
 set -e
 # Chimes when Claude finishes, but only if the turn took longer than 30 seconds.
 THRESHOLD=30
-START_FILE=/tmp/claude-turn-start
+START_FILE="$HOME/.claude/.runtime/claude-turn-start"
 
 if [[ -f "$START_FILE" ]] && [[ -s "$START_FILE" ]]; then
     START=$(cat "$START_FILE")
@@ -17,5 +17,10 @@ else
 fi
 
 if [[ $ELAPSED -ge $THRESHOLD ]]; then
-    osascript -e 'display notification "Claude Code finished" with title "Claude Code" sound name "Glass"'
+    if [[ $ELAPSED -ge 60 ]]; then
+        DURATION="$((ELAPSED / 60))m $((ELAPSED % 60))s"
+    else
+        DURATION="${ELAPSED}s"
+    fi
+    osascript -e "display notification \"Claude Code finished (${DURATION})\" with title \"Claude Code\" sound name \"Glass\""
 fi

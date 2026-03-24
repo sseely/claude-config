@@ -99,7 +99,7 @@ else
     fi
 
     # .NET projects
-    if ls *.sln &>/dev/null || ls *.csproj &>/dev/null; then
+    if compgen -G "*.sln" >/dev/null 2>&1 || compgen -G "*.csproj" >/dev/null 2>&1; then
         run_gate "dotnet-build" "dotnet build --no-restore"
         run_gate "dotnet-test" "dotnet test --no-build"
     fi

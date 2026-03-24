@@ -28,6 +28,10 @@ Conventional Commits, all lines â‰¤80 chars. Subject `<type>(<scope>): <desc>` â
 
 YAGNI, SOLID, no magic strings or literals in production code. See `~/.claude/rules/code-principles.md`.
 
+## Security
+
+Validate input at system boundaries. Never hardcode secrets, credentials, or API keys. Never leak stack traces, DB schema, file paths, or internal IDs in error responses. See `~/.claude/rules/security.md` for full checklist.
+
 ## Testing
 
 TDD (red-green-refactor), no magic strings or literals repeated across test files. See `~/.claude/rules/testing.md` for full conventions.

@@ -3,11 +3,10 @@ name: code-review
 description: >
   Run a comprehensive parallel code review covering correctness, security,
   formatting, error handling, dependencies, test coverage, logging, type
-  safety, performance, dead code, and cyclomatic complexity. Defaults to
+  safety, performance, API contracts, dead code, and cyclomatic complexity. Defaults to
   staged changes; accepts an optional argument to scope the review differently
   (e.g. "full project", a file path, or a glob).
-disable-model-invocation: true
-allowed-tools: Bash, Read, Grep, Glob
+disable-model-invocation: false
 ---
 
 # Code Review
@@ -166,6 +165,24 @@ and its specific checklist below.
 - Unbounded loops or recursion over large collections
 - Missing indexes implied by query patterns (flag for DB review)
 - Large payloads serialized/deserialized unnecessarily
+
+---
+
+### Agent 10 — API Contracts
+
+- Breaking changes: renamed or removed fields, changed types, removed
+  endpoints, altered response shapes
+- Additive changes verified: new optional fields should not break
+  existing consumers (no required fields added to responses)
+- Versioning strategy: if the project uses URL or header versioning,
+  are breaking changes gated behind a new version?
+- Downstream consumers: if the change modifies a shared type, API
+  response, or event payload, identify all callers/consumers in the
+  repo and verify they still work
+- Contract tests: if the project has contract or snapshot tests for
+  API responses, do they need updating?
+- Deprecation: if an endpoint or field is being replaced, is the old
+  one marked deprecated with a removal timeline?
 
 ---
 

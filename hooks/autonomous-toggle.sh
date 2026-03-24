@@ -52,11 +52,12 @@ case "$ACTION" in
 
         # Ensure .claude/ is gitignored
         GITIGNORE="$PROJECT_DIR/.gitignore"
-        if [[ -f "$GITIGNORE" ]]; then
-            if ! grep -q '\.claude/' "$GITIGNORE" 2>/dev/null; then
-                echo '.claude/' >> "$GITIGNORE"
-                echo "Added .claude/ to .gitignore"
-            fi
+        if [[ ! -f "$GITIGNORE" ]]; then
+            echo '.claude/' > "$GITIGNORE"
+            echo "Created .gitignore with .claude/"
+        elif ! grep -q '\.claude/' "$GITIGNORE" 2>/dev/null; then
+            echo '.claude/' >> "$GITIGNORE"
+            echo "Added .claude/ to .gitignore"
         fi
         ;;
     off)

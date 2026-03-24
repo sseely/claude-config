@@ -13,12 +13,16 @@ paste-cache/
 plans/
 plugins/
 projects/
+sessions/
 settings.local.json
 shell-snapshots/
 stats-cache.json
 statsig/
 tasks/
 todos/
+
+# Hook runtime state (turn timestamps, etc.)
+.runtime/
 
 # MCP config has machine-specific paths
 .mcp.json
