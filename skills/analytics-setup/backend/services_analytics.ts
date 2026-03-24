@@ -34,7 +34,10 @@ export function captureEvent(
       distinct_id: distinctId,
       properties,
     }),
-  }).catch(() => {}); // Never throw — analytics must not affect request reliability
+  }).catch((err) => {
+    // Log but never throw — analytics must not affect request reliability
+    console.warn('[posthog]', event, err instanceof Error ? err.message : String(err));
+  });
 
   // waitUntil keeps the fetch alive after the response is sent.
   // Without this, Cloudflare may cancel the fetch when the Worker returns.

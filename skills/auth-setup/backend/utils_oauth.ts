@@ -1,21 +1,32 @@
 import { Env } from '../types';
-import { STATE_EXPIRY_MS } from '../constants';
+import { STATE_EXPIRY_MS, SESSION_TTL_SECONDS } from '../constants';
 
 // ---------------------------------------------------------------------------
 // OAuth state signing
 // State = "<timestamp_ms>.<hex_hmac>" — no KV needed, HMAC proves we issued it.
 // ---------------------------------------------------------------------------
 
-async function hmacHex(message: string, secret: string): Promise<string> {
+/** Cache imported CryptoKey per APP_SECRET value to avoid re-importing on every call. */
+let cachedSecret: string | null = null;
+let cachedKey: CryptoKey | null = null;
+
+async function getHmacKey(secret: string): Promise<CryptoKey> {
+  if (cachedKey && cachedSecret === secret) return cachedKey;
   const enc = new TextEncoder();
-  const key = await crypto.subtle.importKey(
+  cachedKey = await crypto.subtle.importKey(
     'raw',
     enc.encode(secret),
     { name: 'HMAC', hash: 'SHA-256' },
     false,
     ['sign']
   );
-  const sig = await crypto.subtle.sign('HMAC', key, enc.encode(message));
+  cachedSecret = secret;
+  return cachedKey;
+}
+
+async function hmacHex(message: string, secret: string): Promise<string> {
+  const key = await getHmacKey(secret);
+  const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(message));
   return Array.from(new Uint8Array(sig))
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('');
@@ -69,7 +80,11 @@ export async function exchangeCode(opts: {
     const category = res.status < 500 ? 'client' : 'provider';
     throw new Error(`Token exchange failed (${category} error ${res.status})`);
   }
-  return res.json();
+  const data = (await res.json()) as Record<string, unknown>;
+  if (typeof data.access_token !== 'string') {
+    throw new Error('Token exchange response missing access_token');
+  }
+  return data as { access_token: string; [key: string]: unknown };
 }
 
 export async function fetchUserProfile(
@@ -81,15 +96,22 @@ export async function fetchUserProfile(
     const category = res.status < 500 ? 'client' : 'provider';
     throw new Error(`Profile fetch failed (${category} error ${res.status})`);
   }
-  return res.json();
+  const data = (await res.json()) as Record<string, unknown>;
+  if (typeof data.sub !== 'string' || typeof data.email !== 'string') {
+    throw new Error('Profile response missing required fields (sub, email)');
+  }
+  return {
+    sub: data.sub,
+    email: data.email,
+    name: typeof data.name === 'string' ? data.name : '',
+    picture: typeof data.picture === 'string' ? data.picture : undefined,
+  };
 }
 
 // ---------------------------------------------------------------------------
-// Session helpers — KV-backed, 30-day TTL
+// Session helpers — KV-backed, TTL from shared constant
 // Requires: SESSION_STORE KVNamespace binding in wrangler.toml
 // ---------------------------------------------------------------------------
-
-const SESSION_TTL_SECONDS = 30 * 24 * 60 * 60;
 
 export async function storeSession(env: Env, token: string, userId: string): Promise<void> {
   await env.SESSION_STORE.put(token, userId, { expirationTtl: SESSION_TTL_SECONDS });

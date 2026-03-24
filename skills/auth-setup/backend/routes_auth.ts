@@ -44,6 +44,28 @@ const PROVIDER_ID_FIELD = {
 type Provider = keyof typeof PROVIDER_ID_FIELD;
 
 // ---------------------------------------------------------------------------
+// Provider credential lookups — ADAPT: delete unused providers
+// ---------------------------------------------------------------------------
+
+function getClientId(env: Env, provider: Provider): string {
+  const map: Record<Provider, string | undefined> = {
+    linkedin:  env.LINKEDIN_CLIENT_ID,
+    google:    env.GOOGLE_CLIENT_ID,
+    microsoft: env.MICROSOFT_CLIENT_ID,
+  };
+  return map[provider] ?? '';
+}
+
+function getClientSecret(env: Env, provider: Provider): string {
+  const map: Record<Provider, string | undefined> = {
+    linkedin:  env.LINKEDIN_CLIENT_SECRET,
+    google:    env.GOOGLE_CLIENT_SECRET,
+    microsoft: env.MICROSOFT_CLIENT_SECRET,
+  };
+  return map[provider] ?? '';
+}
+
+// ---------------------------------------------------------------------------
 // upsertUser — shared across all providers
 // 1. Fast path: existing provider link
 // 2. Email match: link new provider to existing account
@@ -163,25 +185,33 @@ function getCallbackParams(request: Request): { code: string | null; state: stri
 }
 
 // ---------------------------------------------------------------------------
-// LinkedIn — ADAPT: delete this section if not using LinkedIn
+// Generic OAuth init — builds the authorization URL for any provider
 // ---------------------------------------------------------------------------
 
-export async function handleLinkedInAuth(request: Request, env: Env): Promise<Response> {
+async function handleOAuthInit(
+  request: Request,
+  env: Env,
+  provider: Provider
+): Promise<Response> {
   const returnTo = new URL(request.url).searchParams.get('returnTo');
   const state = await generateState(env);
-  const authUrl = new URL(OAUTH.linkedin.authUrl);
+  const authUrl = new URL(OAUTH[provider].authUrl);
   authUrl.searchParams.set('response_type', 'code');
-  authUrl.searchParams.set('client_id', env.LINKEDIN_CLIENT_ID ?? '');
-  authUrl.searchParams.set('redirect_uri', `${validateAppUrl(env.APP_URL)}/auth/linkedin/callback`);
-  authUrl.searchParams.set('scope', OAUTH.linkedin.scope);
+  authUrl.searchParams.set('client_id', getClientId(env, provider));
+  authUrl.searchParams.set('redirect_uri', `${validateAppUrl(env.APP_URL)}/auth/${provider}/callback`);
+  authUrl.searchParams.set('scope', OAUTH[provider].scope);
   authUrl.searchParams.set('state', state);
   return authInitResponse(authUrl, returnTo);
 }
 
-export async function handleLinkedInCallback(
+// ---------------------------------------------------------------------------
+// Generic OAuth callback — exchanges code, upserts user, creates session
+// ---------------------------------------------------------------------------
+
+async function handleOAuthCallback(
   request: Request,
   env: Env,
-  ctx?: ExecutionContext
+  provider: Provider
 ): Promise<Response> {
   const { code, state } = getCallbackParams(request);
   if (!code || !state || !(await verifyState(state, env))) {
@@ -189,122 +219,56 @@ export async function handleLinkedInCallback(
   }
   try {
     const tokens = await exchangeCode({
-      tokenUrl: OAUTH.linkedin.tokenUrl,
+      tokenUrl: OAUTH[provider].tokenUrl,
       code,
-      clientId: env.LINKEDIN_CLIENT_ID ?? '',
-      clientSecret: env.LINKEDIN_CLIENT_SECRET ?? '',
-      redirectUri: `${validateAppUrl(env.APP_URL)}/auth/linkedin/callback`,
+      clientId: getClientId(env, provider),
+      clientSecret: getClientSecret(env, provider),
+      redirectUri: `${validateAppUrl(env.APP_URL)}/auth/${provider}/callback`,
     });
-    const profile = await fetchUserProfile(OAUTH.linkedin.userInfoUrl, tokens.access_token);
+    const profile = await fetchUserProfile(OAUTH[provider].userInfoUrl, tokens.access_token);
     const { user } = await upsertUser(env, {
-      provider: 'linkedin',
+      provider,
       provider_id: profile.sub,
       email: profile.email,
       name: profile.name?.trim(),
       picture: profile.picture,
-      linkedin_access_token: tokens.access_token, // ADAPT: remove if not posting to LinkedIn
+      // ADAPT: remove linkedin_access_token if not posting to LinkedIn
+      linkedin_access_token: provider === 'linkedin' ? tokens.access_token : undefined,
     });
     return createSessionAndRedirect(request, env, user);
   } catch (err) {
-    console.error('[linkedin callback]', err instanceof Error ? err.message : String(err));
+    console.error(`[${provider} callback]`, err instanceof Error ? err.message : String(err));
     return new Response('Authentication failed', { status: 502 });
   }
 }
 
 // ---------------------------------------------------------------------------
-// Google — ADAPT: delete this section if not using Google
+// Exported handlers — thin wrappers around the generic functions
+// ADAPT: delete handlers for providers you are not using
 // ---------------------------------------------------------------------------
 
-export async function handleGoogleAuth(request: Request, env: Env): Promise<Response> {
-  const returnTo = new URL(request.url).searchParams.get('returnTo');
-  const state = await generateState(env);
-  const authUrl = new URL(OAUTH.google.authUrl);
-  authUrl.searchParams.set('response_type', 'code');
-  authUrl.searchParams.set('client_id', env.GOOGLE_CLIENT_ID ?? '');
-  authUrl.searchParams.set('redirect_uri', `${validateAppUrl(env.APP_URL)}/auth/google/callback`);
-  authUrl.searchParams.set('scope', OAUTH.google.scope);
-  authUrl.searchParams.set('state', state);
-  return authInitResponse(authUrl, returnTo);
+export function handleLinkedInAuth(request: Request, env: Env): Promise<Response> {
+  return handleOAuthInit(request, env, 'linkedin');
 }
 
-export async function handleGoogleCallback(
-  request: Request,
-  env: Env,
-  ctx?: ExecutionContext
-): Promise<Response> {
-  const { code, state } = getCallbackParams(request);
-  if (!code || !state || !(await verifyState(state, env))) {
-    return new Response('Invalid callback', { status: 400 });
-  }
-  try {
-    const tokens = await exchangeCode({
-      tokenUrl: OAUTH.google.tokenUrl,
-      code,
-      clientId: env.GOOGLE_CLIENT_ID ?? '',
-      clientSecret: env.GOOGLE_CLIENT_SECRET ?? '',
-      redirectUri: `${validateAppUrl(env.APP_URL)}/auth/google/callback`,
-    });
-    const profile = await fetchUserProfile(OAUTH.google.userInfoUrl, tokens.access_token);
-    const { user } = await upsertUser(env, {
-      provider: 'google',
-      provider_id: profile.sub,
-      email: profile.email,
-      name: profile.name?.trim(),
-      picture: profile.picture,
-    });
-    return createSessionAndRedirect(request, env, user);
-  } catch (err) {
-    console.error('[google callback]', err instanceof Error ? err.message : String(err));
-    return new Response('Authentication failed', { status: 502 });
-  }
+export function handleLinkedInCallback(request: Request, env: Env, ctx?: ExecutionContext): Promise<Response> {
+  return handleOAuthCallback(request, env, 'linkedin');
 }
 
-// ---------------------------------------------------------------------------
-// Microsoft — ADAPT: delete this section if not using Microsoft
-// ---------------------------------------------------------------------------
-
-export async function handleMicrosoftAuth(request: Request, env: Env): Promise<Response> {
-  const returnTo = new URL(request.url).searchParams.get('returnTo');
-  const state = await generateState(env);
-  const authUrl = new URL(OAUTH.microsoft.authUrl);
-  authUrl.searchParams.set('response_type', 'code');
-  authUrl.searchParams.set('client_id', env.MICROSOFT_CLIENT_ID ?? '');
-  authUrl.searchParams.set('redirect_uri', `${validateAppUrl(env.APP_URL)}/auth/microsoft/callback`);
-  authUrl.searchParams.set('scope', OAUTH.microsoft.scope);
-  authUrl.searchParams.set('state', state);
-  return authInitResponse(authUrl, returnTo);
+export function handleGoogleAuth(request: Request, env: Env): Promise<Response> {
+  return handleOAuthInit(request, env, 'google');
 }
 
-export async function handleMicrosoftCallback(
-  request: Request,
-  env: Env,
-  ctx?: ExecutionContext
-): Promise<Response> {
-  const { code, state } = getCallbackParams(request);
-  if (!code || !state || !(await verifyState(state, env))) {
-    return new Response('Invalid callback', { status: 400 });
-  }
-  try {
-    const tokens = await exchangeCode({
-      tokenUrl: OAUTH.microsoft.tokenUrl,
-      code,
-      clientId: env.MICROSOFT_CLIENT_ID ?? '',
-      clientSecret: env.MICROSOFT_CLIENT_SECRET ?? '',
-      redirectUri: `${validateAppUrl(env.APP_URL)}/auth/microsoft/callback`,
-    });
-    const profile = await fetchUserProfile(OAUTH.microsoft.userInfoUrl, tokens.access_token);
-    const { user } = await upsertUser(env, {
-      provider: 'microsoft',
-      provider_id: profile.sub,
-      email: profile.email,
-      name: profile.name?.trim(),
-      picture: profile.picture,
-    });
-    return createSessionAndRedirect(request, env, user);
-  } catch (err) {
-    console.error('[microsoft callback]', err instanceof Error ? err.message : String(err));
-    return new Response('Authentication failed', { status: 502 });
-  }
+export function handleGoogleCallback(request: Request, env: Env, ctx?: ExecutionContext): Promise<Response> {
+  return handleOAuthCallback(request, env, 'google');
+}
+
+export function handleMicrosoftAuth(request: Request, env: Env): Promise<Response> {
+  return handleOAuthInit(request, env, 'microsoft');
+}
+
+export function handleMicrosoftCallback(request: Request, env: Env, ctx?: ExecutionContext): Promise<Response> {
+  return handleOAuthCallback(request, env, 'microsoft');
 }
 
 // ---------------------------------------------------------------------------

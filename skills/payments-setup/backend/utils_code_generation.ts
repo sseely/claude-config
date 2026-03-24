@@ -7,6 +7,12 @@ import { COUPON_CODE_CHARS } from '../constants';
 /**
  * Generate a random string of `length` characters drawn from `chars`.
  * Uses crypto.getRandomValues for cryptographic security.
+ *
+ * Note: uses `byte % chars.length` which introduces modulo bias when
+ * `chars.length` does not divide 256 evenly. For the default 30-char
+ * COUPON_CODE_CHARS set the first 16 chars are ~6.7% more likely.
+ * Acceptable for coupon codes; use rejection sampling if uniformity
+ * is critical.
  */
 export function generateCode(chars: string, length: number): string {
   const bytes = crypto.getRandomValues(new Uint8Array(length));

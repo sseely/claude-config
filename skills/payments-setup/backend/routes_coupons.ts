@@ -10,6 +10,66 @@ import { VALID_PACK_SIZES, MAX_COUPON_COUNT } from '../constants';
 import { generateCouponCode } from '../utils/code-generation';
 
 const COUPON_EXPIRY_DAYS = 14; // ADAPT: change default coupon lifetime
+const COUPON_CODE_RETRY_ATTEMPTS = 5;
+const DEFAULT_PAGE_LIMIT = 50;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// ---------------------------------------------------------------------------
+// Shared helpers
+// ---------------------------------------------------------------------------
+
+function isValidPackSize(value: unknown): value is 1 | 3 | 10 {
+  return typeof value === 'number' && (VALID_PACK_SIZES as readonly number[]).includes(value);
+}
+
+function validateCouponInput(
+  pack_size: unknown,
+  max_uses: unknown,
+  email: string | undefined
+): string | null {
+  if (!isValidPackSize(pack_size)) {
+    return `pack_size must be ${VALID_PACK_SIZES.join(', ')}`;
+  }
+  if (typeof max_uses !== 'number' || max_uses < 1 || max_uses > MAX_COUPON_COUNT) {
+    return `max_uses must be between 1 and ${MAX_COUPON_COUNT}`;
+  }
+  if (email && !EMAIL_REGEX.test(email)) {
+    return 'Invalid email format';
+  }
+  return null;
+}
+
+/**
+ * Constant-time string comparison to prevent timing attacks.
+ */
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return diff === 0;
+}
+
+/**
+ * Generate a unique coupon code, retrying up to COUPON_CODE_RETRY_ATTEMPTS
+ * times on collision. Throws if all attempts collide.
+ */
+async function generateUniqueCouponCode(
+  db: { query: (sql: string, params: unknown[]) => Promise<{ rows: unknown[] }> }
+): Promise<string> {
+  for (let attempt = 0; attempt < COUPON_CODE_RETRY_ATTEMPTS; attempt++) {
+    const code = generateCouponCode();
+    const { rows } = await db.query(
+      'SELECT id FROM coupon_codes WHERE code = $1',
+      [code]
+    );
+    if (rows.length === 0) return code;
+  }
+  throw new Error(
+    `Failed to generate unique coupon code after ${COUPON_CODE_RETRY_ATTEMPTS} attempts`
+  );
+}
 
 // ---------------------------------------------------------------------------
 // POST /admin/coupons — server-to-server coupon creation (X-Admin-Secret)
@@ -18,44 +78,40 @@ const COUPON_EXPIRY_DAYS = 14; // ADAPT: change default coupon lifetime
 
 export async function handleCreateCoupons(request: Request, env: Env): Promise<Response> {
   const secret = request.headers.get('X-Admin-Secret');
-  if (!env.ADMIN_SECRET || secret !== env.ADMIN_SECRET) {
+  if (!env.ADMIN_SECRET || !secret || !timingSafeEqual(secret, env.ADMIN_SECRET)) {
     return Response.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const body = await request.json<{ pack_size?: number; email?: string; max_uses?: number }>();
-  const { pack_size, max_uses = 1 } = body;
-  const email = body.email ? body.email.toLowerCase().trim() : undefined;
-  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return Response.json({ error: 'Invalid email format' }, { status: 400 });
+  let body: Record<string, unknown>;
+  try {
+    body = (await request.json()) as Record<string, unknown>;
+  } catch {
+    return Response.json({ error: 'Invalid request body' }, { status: 400 });
   }
 
-  if (!pack_size || !(VALID_PACK_SIZES as readonly number[]).includes(pack_size)) {
-    return Response.json(
-      { error: `pack_size must be ${VALID_PACK_SIZES.join(', ')}` },
-      { status: 400 }
-    );
-  }
-  if (max_uses < 1 || max_uses > MAX_COUPON_COUNT) {
-    return Response.json(
-      { error: `max_uses must be between 1 and ${MAX_COUPON_COUNT}` },
-      { status: 400 }
-    );
+  const { pack_size, max_uses = 1 } = body as { pack_size?: number; max_uses?: number };
+  const email = typeof body.email === 'string' ? body.email.toLowerCase().trim() : undefined;
+
+  const validationError = validateCouponInput(pack_size, max_uses, email);
+  if (validationError) {
+    return Response.json({ error: validationError }, { status: 400 });
   }
 
   const db = await createDbClient(env);
   try {
-    let code = generateCouponCode();
-    for (let attempt = 0; attempt < 5; attempt++) {
-      const { rows } = await db.query('SELECT id FROM coupon_codes WHERE code = $1', [code]);
-      if (rows.length === 0) break;
-      code = generateCouponCode();
-    }
+    const code = await generateUniqueCouponCode(db);
     const { rows: inserted } = await db.query(
       `INSERT INTO coupon_codes (code, pack_size, max_uses, email)
        VALUES ($1, $2, $3, $4)
        RETURNING code, pack_size, max_uses, email, expires_at`,
       [code, pack_size, max_uses, email ?? null]
     );
+
+    console.info(
+      '[coupons] created',
+      JSON.stringify({ code, pack_size, max_uses, email: email ?? null })
+    );
+
     return Response.json(inserted[0], { status: 201 });
   } finally {
     await db.end();
@@ -63,14 +119,22 @@ export async function handleCreateCoupons(request: Request, env: Env): Promise<R
 }
 
 // ---------------------------------------------------------------------------
-// GET /api/admin/coupons — list all coupons with redemption counts
+// GET /api/admin/coupons — list coupons with redemption counts (paginated)
 // Requires: authenticated admin user
+// Query params: ?limit=50&offset=0
 // ---------------------------------------------------------------------------
 
 export async function handleListCoupons(request: Request, env: Env): Promise<Response> {
   const user = await requireAuth(request, env);
   if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
   if (!user.is_admin) return Response.json({ error: 'Forbidden' }, { status: 403 });
+
+  const url = new URL(request.url);
+  const limit = Math.min(
+    Math.max(parseInt(url.searchParams.get('limit') ?? '', 10) || DEFAULT_PAGE_LIMIT, 1),
+    200
+  );
+  const offset = Math.max(parseInt(url.searchParams.get('offset') ?? '', 10) || 0, 0);
 
   const db = await createDbClient(env);
   try {
@@ -80,7 +144,9 @@ export async function handleListCoupons(request: Request, env: Env): Promise<Res
        FROM coupon_codes c
        LEFT JOIN coupon_redemptions r ON r.coupon_id = c.id
        GROUP BY c.id
-       ORDER BY c.created_at DESC`
+       ORDER BY c.created_at DESC
+       LIMIT $1 OFFSET $2`,
+      [limit, offset]
     );
     return Response.json(rows);
   } finally {
@@ -132,34 +198,24 @@ export async function handleIssueCoupons(request: Request, env: Env): Promise<Re
   if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
   if (!user.is_admin) return Response.json({ error: 'Forbidden' }, { status: 403 });
 
-  const body = await request.json<{
-    pack_size?: number;
-    max_uses?: number;
-    expires_at?: string;
-    email?: string;
-  }>();
-  const { pack_size, max_uses = 1 } = body;
-  const email = body.email ? body.email.toLowerCase().trim() : undefined;
-  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return Response.json({ error: 'Invalid email format' }, { status: 400 });
+  let body: Record<string, unknown>;
+  try {
+    body = (await request.json()) as Record<string, unknown>;
+  } catch {
+    return Response.json({ error: 'Invalid request body' }, { status: 400 });
   }
 
-  if (!pack_size || !(VALID_PACK_SIZES as readonly number[]).includes(pack_size)) {
-    return Response.json(
-      { error: `pack_size must be ${VALID_PACK_SIZES.join(', ')}` },
-      { status: 400 }
-    );
-  }
-  if (max_uses < 1 || max_uses > MAX_COUPON_COUNT) {
-    return Response.json(
-      { error: `max_uses must be between 1 and ${MAX_COUPON_COUNT}` },
-      { status: 400 }
-    );
+  const { pack_size, max_uses = 1 } = body as { pack_size?: number; max_uses?: number };
+  const email = typeof body.email === 'string' ? body.email.toLowerCase().trim() : undefined;
+
+  const validationError = validateCouponInput(pack_size, max_uses, email);
+  if (validationError) {
+    return Response.json({ error: validationError }, { status: 400 });
   }
 
   let expiresAt: Date | null = null;
   if (body.expires_at) {
-    expiresAt = new Date(body.expires_at);
+    expiresAt = new Date(body.expires_at as string);
     if (isNaN(expiresAt.getTime()) || expiresAt <= new Date()) {
       return Response.json({ error: 'expires_at must be a future date' }, { status: 400 });
     }
@@ -167,12 +223,7 @@ export async function handleIssueCoupons(request: Request, env: Env): Promise<Re
 
   const db = await createDbClient(env);
   try {
-    let code = generateCouponCode();
-    for (let attempt = 0; attempt < 5; attempt++) {
-      const { rows } = await db.query('SELECT id FROM coupon_codes WHERE code = $1', [code]);
-      if (rows.length === 0) break;
-      code = generateCouponCode();
-    }
+    const code = await generateUniqueCouponCode(db);
     const defaultExpiry =
       expiresAt ?? new Date(Date.now() + COUPON_EXPIRY_DAYS * 24 * 60 * 60 * 1000);
     const { rows: inserted } = await db.query(
@@ -181,6 +232,12 @@ export async function handleIssueCoupons(request: Request, env: Env): Promise<Re
        RETURNING code, pack_size, max_uses, email, expires_at`,
       [code, pack_size, max_uses, email ?? null, defaultExpiry]
     );
+
+    console.info(
+      '[coupons] issued',
+      JSON.stringify({ code, pack_size, max_uses, email: email ?? null, issuedBy: user.id })
+    );
+
     return Response.json(inserted[0], { status: 201 });
   } finally {
     await db.end();
@@ -191,6 +248,7 @@ export async function handleIssueCoupons(request: Request, env: Env): Promise<Re
 // POST /api/coupons/redeem — user redeems a coupon code
 // Body: { code: string }
 // Requires: authenticated user
+// Uses SELECT FOR UPDATE to prevent race conditions on concurrent redemptions.
 // ---------------------------------------------------------------------------
 
 export async function handleRedeemCoupon(
@@ -201,62 +259,90 @@ export async function handleRedeemCoupon(
   const user = await requireAuth(request, env);
   if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const body = await request.json<{ code?: string }>();
-  const code = (body.code ?? '').trim().toUpperCase();
+  let body: Record<string, unknown>;
+  try {
+    body = (await request.json()) as Record<string, unknown>;
+  } catch {
+    return Response.json({ error: 'Invalid request body' }, { status: 400 });
+  }
+
+  const code = (typeof body.code === 'string' ? body.code : '').trim().toUpperCase();
   if (!code) return Response.json({ error: 'code is required' }, { status: 400 });
 
   const db = await createDbClient(env);
   try {
-    const { rows } = await db.query(
-      `SELECT c.id, c.pack_size, c.email, c.max_uses, c.expires_at,
-              COUNT(r.id)::int AS use_count
-       FROM coupon_codes c
-       LEFT JOIN coupon_redemptions r ON r.coupon_id = c.id
-       WHERE c.code = $1
-       GROUP BY c.id`,
-      [code]
-    );
+    await db.query('BEGIN');
 
-    if (rows.length === 0) return Response.json({ error: 'Invalid coupon code' }, { status: 404 });
+    try {
+      const { rows } = await db.query(
+        `SELECT c.id, c.pack_size, c.email, c.max_uses, c.expires_at,
+                COUNT(r.id)::int AS use_count
+         FROM coupon_codes c
+         LEFT JOIN coupon_redemptions r ON r.coupon_id = c.id
+         WHERE c.code = $1
+         GROUP BY c.id
+         FOR UPDATE OF c`,
+        [code]
+      );
 
-    const coupon = rows[0] as {
-      id: string; pack_size: number; email: string | null;
-      max_uses: number; expires_at: string; use_count: number;
-    };
+      if (rows.length === 0) {
+        await db.query('ROLLBACK');
+        return Response.json({ error: 'Invalid coupon code' }, { status: 404 });
+      }
 
-    if (new Date(coupon.expires_at) < new Date()) {
-      return Response.json({ error: 'This coupon has expired' }, { status: 410 });
+      const coupon = rows[0] as {
+        id: string; pack_size: number; email: string | null;
+        max_uses: number; expires_at: string; use_count: number;
+      };
+
+      if (new Date(coupon.expires_at) < new Date()) {
+        await db.query('ROLLBACK');
+        return Response.json({ error: 'This coupon has expired' }, { status: 410 });
+      }
+      if (coupon.use_count >= coupon.max_uses) {
+        await db.query('ROLLBACK');
+        return Response.json({ error: 'Coupon fully redeemed' }, { status: 409 });
+      }
+      if (coupon.email && coupon.email.toLowerCase() !== user.email.toLowerCase()) {
+        await db.query('ROLLBACK');
+        return Response.json({ error: 'This coupon is for a different email address' }, { status: 403 });
+      }
+
+      const { rows: existing } = await db.query(
+        `SELECT id FROM coupon_redemptions WHERE coupon_id = $1 AND user_id = $2`,
+        [coupon.id, user.id]
+      );
+      if (existing.length > 0) {
+        await db.query('ROLLBACK');
+        return Response.json({ error: 'You have already redeemed this coupon' }, { status: 409 });
+      }
+
+      await db.query(
+        `INSERT INTO session_packs (user_id, pack_size, amount_cents, sessions_remaining)
+         VALUES ($1, $2, 0, $2)`,
+        [user.id, coupon.pack_size]
+      );
+      await db.query(
+        `INSERT INTO coupon_redemptions (coupon_id, user_id) VALUES ($1, $2)`,
+        [coupon.id, user.id]
+      );
+
+      await db.query('COMMIT');
+
+      console.info(
+        '[coupons] redeemed',
+        JSON.stringify({ code, userId: user.id, packSize: coupon.pack_size })
+      );
+
+      return Response.json({
+        redeemed:        true,
+        pack_size:       coupon.pack_size,
+        sessions_added:  coupon.pack_size,
+      });
+    } catch (err) {
+      await db.query('ROLLBACK');
+      throw err;
     }
-    if (coupon.use_count >= coupon.max_uses) {
-      return Response.json({ error: 'Coupon fully redeemed' }, { status: 409 });
-    }
-    if (coupon.email && coupon.email.toLowerCase() !== user.email.toLowerCase()) {
-      return Response.json({ error: 'This coupon is for a different email address' }, { status: 403 });
-    }
-
-    const { rows: existing } = await db.query(
-      `SELECT id FROM coupon_redemptions WHERE coupon_id = $1 AND user_id = $2`,
-      [coupon.id, user.id]
-    );
-    if (existing.length > 0) {
-      return Response.json({ error: 'You have already redeemed this coupon' }, { status: 409 });
-    }
-
-    await db.query(
-      `INSERT INTO session_packs (user_id, pack_size, amount_cents, sessions_remaining)
-       VALUES ($1, $2, 0, $2)`,
-      [user.id, coupon.pack_size]
-    );
-    await db.query(
-      `INSERT INTO coupon_redemptions (coupon_id, user_id) VALUES ($1, $2)`,
-      [coupon.id, user.id]
-    );
-
-    return Response.json({
-      redeemed:        true,
-      pack_size:       coupon.pack_size,
-      sessions_added:  coupon.pack_size,
-    });
   } finally {
     await db.end();
   }

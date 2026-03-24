@@ -19,6 +19,9 @@ const PACKS = {
 export type PackKey = keyof typeof PACKS;
 
 function createStripeClient(env: Env): Stripe {
+  if (!env.STRIPE_SECRET_KEY) {
+    throw new Error('Stripe not configured: STRIPE_SECRET_KEY missing');
+  }
   // @ts-ignore — stripe-mock runs an older API; suppress version mismatch in tests
   const config: Stripe.StripeConfig = { apiVersion: STRIPE_API_VERSION };
   if (env.STRIPE_BASE_URL) {
@@ -27,7 +30,7 @@ function createStripeClient(env: Env): Stripe {
     config.port     = url.port || (url.protocol === 'http:' ? '80' : '443');
     config.protocol = url.protocol.replace(':', '') as 'http' | 'https';
   }
-  return new Stripe(env.STRIPE_SECRET_KEY!, config);
+  return new Stripe(env.STRIPE_SECRET_KEY, config);
 }
 
 // ---------------------------------------------------------------------------
@@ -35,7 +38,12 @@ function createStripeClient(env: Env): Stripe {
 // ---------------------------------------------------------------------------
 
 export async function handleBuyPack(request: Request, env: Env, user: User): Promise<Response> {
-  const body = await request.json<{ pack?: string }>();
+  let body: Record<string, unknown>;
+  try {
+    body = (await request.json()) as Record<string, unknown>;
+  } catch {
+    return Response.json({ error: 'Invalid request body' }, { status: 400 });
+  }
 
   if (typeof body.pack !== 'string' || !PACKS[body.pack as PackKey]) {
     return Response.json(
@@ -44,11 +52,14 @@ export async function handleBuyPack(request: Request, env: Env, user: User): Pro
     );
   }
   const pack = body.pack as PackKey;
-  if (!env.STRIPE_SECRET_KEY) {
+
+  let stripe: Stripe;
+  try {
+    stripe = createStripeClient(env);
+  } catch {
     return Response.json({ error: 'Payments not configured' }, { status: 503 });
   }
 
-  const stripe = createStripeClient(env);
   const packInfo = PACKS[pack];
   const session = await stripe.checkout.sessions.create({
     mode: 'payment',
@@ -109,7 +120,13 @@ export async function handleStripeWebhook(
 
   const stripe = createStripeClient(env);
   const signature = request.headers.get('stripe-signature') ?? '';
-  const body = await request.text();
+
+  let body: string;
+  try {
+    body = await request.text();
+  } catch {
+    return new Response('Failed to read request body', { status: 400 });
+  }
 
   let event: Stripe.Event;
   try {
@@ -143,6 +160,11 @@ export async function handleStripeWebhook(
     } finally {
       await db.end();
     }
+
+    console.info(
+      '[stripe webhook] checkout.session.completed',
+      JSON.stringify({ userId, pack: packKey, amountCents: packInfo.amount_cents, stripeSessionId: session.id })
+    );
   }
 
   return Response.json({ received: true });

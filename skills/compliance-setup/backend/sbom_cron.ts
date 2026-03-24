@@ -11,6 +11,8 @@ import { createDbClient } from '../db/client';
 import { Env } from '../types';
 
 const SBOM_EXPIRY_HOURS = 48;
+const SECONDS_PER_HOUR = 3600;
+const SBOM_BATCH_LIMIT = 100;
 
 export async function processPendingSbomRequests(env: Env): Promise<void> {
   const db = await createDbClient(env);
@@ -19,12 +21,19 @@ export async function processPendingSbomRequests(env: Env): Promise<void> {
       `SELECT sr.id, sr.user_id, u.email
        FROM sbom_requests sr
        JOIN users u ON u.id = sr.user_id
-       WHERE sr.status = 'pending'`
+       WHERE sr.status = 'pending'
+       LIMIT $1`,
+      [SBOM_BATCH_LIMIT]
     );
+
+    if (pending.length === 0) return;
+
+    const delivered: { id: string; urls: string; expiresAt: Date }[] = [];
+    const failed: string[] = [];
 
     for (const req of pending) {
       try {
-        const expiresAt = new Date(Date.now() + SBOM_EXPIRY_HOURS * 60 * 60 * 1000);
+        const expiresAt = new Date(Date.now() + SBOM_EXPIRY_HOURS * SECONDS_PER_HOUR * 1000);
         let spdxUrl = '';
         let cdxUrl = '';
 
@@ -34,12 +43,12 @@ export async function processPendingSbomRequests(env: Env): Promise<void> {
           spdxUrl = await generateR2PresignedUrl(
             env,
             'R2_SBOM_PREFIX/sbom.PROJECT_NAME.spdx.json',
-            SBOM_EXPIRY_HOURS * 3600
+            SBOM_EXPIRY_HOURS * SECONDS_PER_HOUR
           );
           cdxUrl = await generateR2PresignedUrl(
             env,
             'R2_SBOM_PREFIX/sbom.PROJECT_NAME.cdx.json',
-            SBOM_EXPIRY_HOURS * 3600
+            SBOM_EXPIRY_HOURS * SECONDS_PER_HOUR
           );
         }
 
@@ -47,34 +56,69 @@ export async function processPendingSbomRequests(env: Env): Promise<void> {
           await sendSbomEmail(env, req.email, spdxUrl, cdxUrl);
         }
 
-        await db.query(
-          `UPDATE sbom_requests
-           SET status = 'delivered',
-               delivered_at = NOW(),
-               download_urls = $2,
-               download_expires_at = $3
-           WHERE id = $1`,
-          [req.id, JSON.stringify({ spdx: spdxUrl, cyclonedx: cdxUrl }), expiresAt]
-        );
+        delivered.push({
+          id: req.id,
+          urls: JSON.stringify({ spdx: spdxUrl, cyclonedx: cdxUrl }),
+          expiresAt,
+        });
       } catch (err) {
-        console.error(`SBOM delivery failed for request ${req.id}:`, err);
-        await db.query(`UPDATE sbom_requests SET status = 'failed' WHERE id = $1`, [req.id]);
+        console.error(`[sbom] delivery failed for request ${req.id}:`, err);
+        failed.push(req.id);
       }
     }
+
+    // Batch UPDATE for delivered requests
+    if (delivered.length > 0) {
+      const ids = delivered.map((d) => d.id);
+      const urls = delivered.map((d) => d.urls);
+      const expires = delivered.map((d) => d.expiresAt);
+      await db.query(
+        `UPDATE sbom_requests
+         SET status = 'delivered',
+             delivered_at = NOW(),
+             download_urls = data.urls::jsonb,
+             download_expires_at = data.expires_at
+         FROM (SELECT unnest($1::uuid[]) AS id,
+                      unnest($2::text[])  AS urls,
+                      unnest($3::timestamptz[]) AS expires_at) data
+         WHERE sbom_requests.id = data.id`,
+        [ids, urls, expires]
+      );
+    }
+
+    // Batch UPDATE for failed requests
+    if (failed.length > 0) {
+      await db.query(
+        `UPDATE sbom_requests SET status = 'failed' WHERE id = ANY($1::uuid[])`,
+        [failed]
+      );
+    }
+
+    console.info(`[sbom] processed ${pending.length}: ${delivered.length} delivered, ${failed.length} failed`);
   } finally {
     await db.end();
   }
 }
 
-// WARNING: This is a simplified placeholder. Production deployments MUST use
-// proper AWS SigV4 signing (e.g. @aws-sdk/s3-request-presigner) or
-// Cloudflare R2's built-in createSignedUrl() API. The current implementation
-// produces unsigned URLs that can be forged.
+/**
+ * SECURITY WARNING: This is a placeholder that returns unsigned URLs.
+ * Production deployments MUST replace this with proper AWS SigV4 signing
+ * (e.g. @aws-sdk/s3-request-presigner) or Cloudflare R2's createSignedUrl() API.
+ * The current implementation produces URLs that can be forged.
+ *
+ * See: https://developers.cloudflare.com/r2/api/s3/presigned-urls/
+ */
 async function generateR2PresignedUrl(
   env: Env,
   key: string,
   expiresInSeconds: number
 ): Promise<string> {
+  // ADAPT: replace with real presigned URL generation before production use.
+  // Example with @aws-sdk/s3-request-presigner:
+  //   import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
+  //   import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+  //   const s3 = new S3Client({ region: 'auto', endpoint: env.R2_ENDPOINT, credentials: {...} });
+  //   return getSignedUrl(s3, new GetObjectCommand({ Bucket: env.R2_BUCKET, Key: key }), { expiresIn: expiresInSeconds });
   const endpoint = env.R2_ENDPOINT ?? '';
   const expiresAt = new Date(Date.now() + expiresInSeconds * 1000);
   return `${endpoint}/${key}?X-Expires=${expiresAt.toISOString()}`;

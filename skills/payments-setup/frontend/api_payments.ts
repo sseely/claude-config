@@ -2,7 +2,9 @@
 // ADAPT: update the request() helper import to match your project's API client.
 // ADAPT: update AdminCoupon and CouponRedemption imports from your shared types.
 
-import { AdminCoupon } from '../types/shared'; // ADAPT: update import path
+// ADAPT: update import path to match where you placed AdminCoupon in Step 6
+// (may be ../types, ../types/shared, ../../shared/types, etc.)
+import { AdminCoupon } from '../types/shared';
 
 // ADAPT: replace with your project's fetch wrapper
 async function request<T>(url: string, init?: RequestInit): Promise<T> {

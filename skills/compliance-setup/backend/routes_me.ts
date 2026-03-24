@@ -14,13 +14,15 @@ export async function handlePostConsent(
   env: Env,
   user: User
 ): Promise<Response> {
-  const body = await request.json<{
-    terms_version?: string;
-    privacy_policy_version?: string;
-  }>();
+  let body: Record<string, unknown>;
+  try {
+    body = (await request.json()) as Record<string, unknown>;
+  } catch {
+    return Response.json({ error: 'Invalid request body' }, { status: 400 });
+  }
 
-  const termsVersion = body.terms_version ?? env.TERMS_VERSION ?? '2026-01';
-  const privacyVersion = body.privacy_policy_version ?? env.PRIVACY_VERSION ?? '2026-01';
+  const termsVersion = (body.terms_version as string) ?? env.TERMS_VERSION ?? '2026-01';
+  const privacyVersion = (body.privacy_policy_version as string) ?? env.PRIVACY_VERSION ?? '2026-01';
 
   const db = await createDbClient(env);
   try {
@@ -120,7 +122,13 @@ export async function handleDeleteAccount(
   user: User,
   ctx: ExecutionContext
 ): Promise<Response> {
-  const body = await request.json<{ confirmation?: string }>();
+  let body: Record<string, unknown>;
+  try {
+    body = (await request.json()) as Record<string, unknown>;
+  } catch {
+    return Response.json({ error: 'Invalid request body' }, { status: 400 });
+  }
+
   if (body.confirmation !== 'DELETE') {
     return Response.json(
       { error: 'Send { "confirmation": "DELETE" } to confirm account deletion' },

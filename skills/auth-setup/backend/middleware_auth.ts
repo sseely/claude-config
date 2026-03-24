@@ -6,9 +6,10 @@ import { COOKIE } from '../constants';
 export function parseCookies(cookieHeader: string): Record<string, string> {
   if (!cookieHeader) return {};
   return Object.fromEntries(
-    cookieHeader.split('; ').map((c) => {
-      const eq = c.indexOf('=');
-      return eq === -1 ? [c, ''] : [c.slice(0, eq), c.slice(eq + 1)];
+    cookieHeader.split(';').map((c) => {
+      const trimmed = c.trim();
+      const eq = trimmed.indexOf('=');
+      return eq === -1 ? [trimmed, ''] : [trimmed.slice(0, eq), trimmed.slice(eq + 1)];
     })
   );
 }
