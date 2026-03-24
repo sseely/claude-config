@@ -1,0 +1,217 @@
+---
+name: upgrade-deps
+description: >
+  Audit and upgrade all dependencies in a project. Detects languages
+  and frameworks, runs parallel research and security agents, spins up
+  the appropriate language-pro agents for changes, then runs an
+  iterative review loop until the code-reviewer approves or 6
+  iterations are exhausted. For complex upgrades (breaking changes or
+  multiple languages), integrates with /plan-mission to generate a
+  mission brief instead of executing directly.
+disable-model-invocation: false
+---
+
+# Upgrade Dependencies
+
+Audit and upgrade all dependencies for the current project.
+
+**Input:** `$ARGUMENTS` — optional scope. If empty, upgrades all
+dependencies. If provided, treats as a package name or glob
+(e.g. `django`, `@angular/*`) and scopes to matching packages only.
+
+## Phase 1 — Detect project languages and frameworks
+
+Scan the project root and `src/` for manifest files and key
+indicators. Build a roster of detected languages:
+
+| Signal | Language/Framework | Agent |
+|--------|-------------------|-------|
+| `pyproject.toml`, `requirements.txt`, `setup.py` | Python | `python-pro` |
+| `package.json` + `tsconfig.json` | TypeScript | `typescript-pro` |
+| `package.json` (no tsconfig) | JavaScript | `javascript-pro` |
+| `package.json` + `"next"` in deps | Next.js | `nextjs-developer` |
+| `package.json` + `"react"` in deps (no Next) | React | `react-specialist` |
+| `package.json` + `"vue"` in deps | Vue | `vue-expert` |
+| `package.json` + `"@angular/core"` in deps | Angular | `angular-architect` |
+| `*.csproj`, `*.sln` + `<TargetFramework>net[5-9]` | .NET Core | `dotnet-core-expert` |
+| `*.csproj` + `<TargetFrameworkVersion>v4` | .NET Framework | `dotnet-framework-4.8-expert` |
+| `*.csproj` (C# without above) | C# | `csharp-developer` |
+| `pom.xml` + Spring Boot deps | Spring Boot | `spring-boot-engineer` |
+| `pom.xml` or `build.gradle` (no Spring) | Java | `java-architect` |
+| `build.gradle.kts` + Kotlin | Kotlin | `kotlin-specialist` |
+| `Cargo.toml` | Rust | `rust-engineer` |
+| `go.mod` | Go | `golang-pro` |
+| `Gemfile` + `rails` gem | Rails | `rails-expert` |
+| `Gemfile` (no Rails) | Ruby | `ruby-specialist` |
+| `composer.json` + Laravel | Laravel | `laravel-specialist` |
+| `composer.json` (no Laravel) | PHP | `php-pro` |
+| `Package.swift` | Swift | `swift-expert` |
+| `.sql` files or `migrations/` | SQL | `sql-pro` |
+| `.html`/`.css` (no JS framework) | Frontend | `frontend-developer` |
+
+If multiple manifests are found, build the full roster — all detected
+languages get an agent.
+
+Announce: "Detected languages: [list]. Agents: [list]."
+
+## Phase 2 — Research (parallel)
+
+Run `dependency-manager` and `security-auditor` in parallel.
+
+**dependency-manager prompt:**
+```
+Context: [project name, stack, manifest file paths]
+Task: Audit all dependencies. For each package:
+  1. Find the latest stable version (check PyPI/npm/NuGet/crates.io/etc.)
+  2. Note the current version and the gap (patch/minor/major)
+  3. Identify any breaking changes between current and latest
+  4. List which files in the repo import or use this package
+  5. Flag any that require code changes beyond a version bump
+Read-set: all manifest files, lockfiles, key source files that import packages
+Write-set: none
+Output: structured table with columns:
+  Package | Current | Latest | Change Type | Breaking | Files Affected | Notes
+```
+
+**security-auditor prompt:**
+```
+Context: [dependency-manager findings]
+Task: Review the proposed upgrades for security issues:
+  - Packages with known CVEs in the current version (must upgrade)
+  - Packages with CVEs in the proposed target version (flag)
+  - Any package being downgraded or pinned below latest for unusual reasons
+  - New transitive dependencies introduced by the upgrades
+Read-set: manifest files, dependency-manager output
+Write-set: none
+Output: security findings with severity (Critical/High/Medium/Low)
+```
+
+Wait for both agents to complete before proceeding.
+
+## Phase 3 — Scope evaluation
+
+Evaluate complexity based on research findings:
+
+**Execute directly** (proceed to Phase 4) when ALL of:
+- Only 1 language detected
+- No major version bumps flagged
+- No breaking changes requiring code edits
+- No Critical/High security findings requiring immediate action
+
+**Generate a mission brief** (hand off to `/plan-mission`) when ANY of:
+- 2+ languages detected
+- Any major version bump with breaking changes
+- Critical security findings requiring coordinated fixes across languages
+- Security-auditor flagged systemic issues
+
+For mission-brief mode: pass the dependency-manager and
+security-auditor findings to `/plan-mission` as the feature
+description. The mission brief will structure the upgrade as
+batched tasks per language, with the review loop as the final batch.
+Tell the user:
+
+> "This upgrade is complex ([reason]). Generating a mission brief
+> via /plan-mission for structured execution."
+
+Then stop — plan-mission takes over.
+
+## Phase 4 — Build language agent prompts
+
+For each language agent in the roster, construct a self-contained
+prompt:
+
+```
+Context:
+  Project: [name and brief description]
+  Stack: [full detected stack]
+  Your scope: [language/framework] files only
+
+Dependency findings (your packages only):
+  [filtered table from dependency-manager for this language]
+
+Security findings (your packages only):
+  [filtered list from security-auditor for this language]
+
+Task:
+  1. Update the manifest file(s) for your language to the latest
+     stable versions identified in the findings
+  2. Apply any code changes required by breaking changes (see your
+     Upgrade & Migration guidance)
+  3. Run your post-upgrade commands (listed in your Upgrade &
+     Migration section)
+  4. Fix any test or build failures introduced by the upgrade
+  5. Do NOT touch files owned by other language agents
+
+Write-set: [manifest file(s) and source files for this language only]
+Read-set: [manifest files, lockfiles, source files that import upgraded packages]
+
+Quality bar: build and tests must pass before you finish.
+Report: list every package changed (old → new version) and any
+code changes made, with file:line references.
+```
+
+**File ownership rule:** if a file is referenced by multiple language
+agents (e.g. a shared config importing both Python and TS packages),
+assign it to the agent whose language *defines* the dependency. Flag
+shared-boundary files explicitly in both prompts.
+
+## Phase 5 — Execute language agents (parallel)
+
+Launch all language agents in parallel. Each owns its file set
+exclusively.
+
+Wait for all to complete. Collect their reports (packages changed,
+code changes made, test results).
+
+If any agent reports test failures it could not fix, STOP and report
+to the user before continuing.
+
+## Phase 6 — Review loop
+
+Run `code-reviewer` with a prompt scoped to the changed files:
+
+```
+Context: Dependency upgrade review, iteration [N] of 6
+Changed files: [list from agent reports]
+Prior review findings: [findings from iteration N-1, if any]
+
+Task: Review the dependency upgrades and any associated code changes.
+Focus on:
+  - Breaking change handling: are deprecated APIs fully replaced
+    (no partial migrations, no old import paths remaining)?
+  - Do tests cover the changed behavior?
+  - Any new magic strings/literals introduced by version changes?
+  - Any `any` casts or type suppressions added to silence upgrade errors?
+  - Lockfile updated and committed?
+
+Output: APPROVE or a list of required changes with file:line.
+Mark each finding as NEW or RECURRING (appeared in a prior iteration).
+```
+
+**Loop logic:**
+- If `code-reviewer` outputs APPROVE → done, proceed to Phase 7
+- If findings exist:
+  - Extract the list of required changes
+  - Pass them back to the relevant language agent(s) for fixes
+  - Re-run `code-reviewer` (increment N)
+- After 6 iterations without APPROVE:
+  - Identify any RECURRING findings (same issue appeared 2+ times)
+  - Present to user: "The following items could not be resolved after
+    6 iterations. Please advise: [list with file:line and description]"
+  - Stop and wait for user input
+
+## Phase 7 — Summary
+
+Report:
+- Total packages upgraded (by language)
+- Breaking changes handled (list)
+- Security issues resolved (list)
+- Iterations needed for review approval
+- Any packages intentionally left at current version and why
+
+Suggest a commit message following the project's commit conventions:
+```
+chore(deps): upgrade all dependencies to latest stable
+
+[summary of major changes]
+```

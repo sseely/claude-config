@@ -112,12 +112,17 @@ Break the work into tasks following these rules:
 6. Every task that creates or modifies logic must include writing
    tests for that logic (TDD — test is part of the task, not a
    separate task).
+7. Write 2-5 acceptance criteria per task using
+   Given/When/Then format. Each criterion must be testable —
+   it becomes both the definition of done and the test spec.
 
 Present the task sequence to the user:
 
 ```
 Batch 1 (parallel):
   T1: [description] → agent: [type], writes: [files]
+      - Given a valid token, when POST /confirm, then 201 + subscription activated
+      - Given an expired token, when POST /confirm, then 410 Gone
   T2: [description] → agent: [type], writes: [files]
 
 Batch 2 (parallel, after Batch 1):
@@ -197,11 +202,22 @@ overview docs.
    from Phase 3.
 4. For each batch, write `batch-N/overview.md` with:
    - Batch description and dependency summary
-   - Task table (ID, description, agent, files, depends-on, done)
+   - Task table with explicit dependency column:
+     `| ID | Description | Agent | Writes | Depends On | Done |`
+     The `Depends On` column lists task IDs (e.g. `T1, T2`) or
+     `—` for tasks with no dependencies. Tasks within the same
+     batch that have `—` or depend only on prior-batch tasks can
+     run in parallel; the executor uses this column to decide.
 5. For each task, write `batch-N/TN-[name].md` following the
    agent prompt structure from `parallelism.md`:
    - Context, task, write-set, read-set, architecture decisions
-     relevant to this task, interface contracts, quality bar
+     relevant to this task, interface contracts, acceptance
+     criteria (Given/When/Then from Phase 4), quality bar
+   - **Scope read-set references.** Instead of listing whole
+     files, point to the relevant section or line range:
+     `decisions.md#token-storage`, `src/api/subscribe.js:15-40`.
+     This keeps agent context small — load only what the task
+     needs, not the entire artifact.
    - The executor can pass this file directly as the agent prompt
 6. Write mermaid diagrams in `diagrams/`:
    - `data-flow.md` — sequence diagrams for key flows affected
