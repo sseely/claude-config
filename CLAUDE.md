@@ -12,6 +12,8 @@ For multi-part tasks or more than ~2 pages of output:
 2. Complete one section at a time
 3. Use TodoWrite to track progress
 
+For features requiring 1-4 hours of autonomous work, use `/plan-mission` to generate a mission brief first.
+
 ## Agents
 
 Agents live in `~/.claude/agents/`. Invoke via the Agent tool with `subagent_type` matching the agent's `name`. Default to handling tasks directly; delegate when the task clearly falls within a specialist's domain. Agent descriptions are loaded automatically. Always announce which agent you are invoking and why before calling it.

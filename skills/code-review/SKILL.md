@@ -3,9 +3,9 @@ name: code-review
 description: >
   Run a comprehensive parallel code review covering correctness, security,
   formatting, error handling, dependencies, test coverage, logging, type
-  safety, performance, API contracts, dead code, and cyclomatic complexity. Defaults to
-  staged changes; accepts an optional argument to scope the review differently
-  (e.g. "full project", a file path, or a glob).
+  safety, performance, API contracts, dead code, and cyclomatic complexity.
+  Defaults to staged changes; accepts an optional argument to scope the
+  review differently (e.g. "full project", a file path, or a glob).
 disable-model-invocation: false
 ---
 
@@ -43,10 +43,8 @@ and its specific checklist below.
 - DRY violations — duplicated logic that should be shared
 - Duplication: flag any block of 5+ lines that appears more than once
   in the same file or across touched files; recommend extraction
-- Cyclomatic complexity (tiered):
-  - \>7: **Suggestion** — suggest simplification
-  - \>10: **Warning** — flag for simplification
-  - \>15: **Critical** — require decomposition before merge
+- Cyclomatic complexity: suggest simplification for anything > 7; flag
+  anything > 10 as a Warning; require decomposition for anything > 15
 - Dead code: unreachable branches, commented-out blocks, unused
   variables/exports/imports
 
@@ -60,7 +58,9 @@ and its specific checklist below.
 - SQL injection, XSS, command injection vectors
 - Hardcoded secrets, credentials, or API keys in source
 - Sensitive data not logged or exposed in error messages
-- **Web APIs and sites — OWASP Top 10:**
+- Insecure deserialization: `pickle`, `YAML.load` (without SafeLoader),
+  XML with entity expansion (XXE), `eval`/`exec` on external input
+- **Web APIs and sites only — OWASP Top 10:**
   - Broken access control
   - Cryptographic failures
   - Injection
@@ -71,11 +71,11 @@ and its specific checklist below.
   - Software and data integrity failures
   - Logging and monitoring failures
   - SSRF
-- **CSP (Content Security Policy):**
+- **Web APIs and sites only — CSP (Content Security Policy):**
   - Is a CSP header set?
   - Does it avoid `unsafe-inline` and `unsafe-eval`?
   - Are allowed origins as restrictive as possible?
-- **External JavaScript:**
+- **Web APIs and sites only — External JavaScript:**
   - Is third-party JS loaded from CDNs using Subresource Integrity (SRI)?
   - Are external script sources explicitly allowlisted in CSP?
 
@@ -92,7 +92,7 @@ and its specific checklist below.
 - If the project is TypeScript or JavaScript and prettier is NOT
   configured as a pre-commit / commit-msg hook (check `.husky/`,
   `.git/hooks/`, `lint-staged` config, `.pre-commit-config.yaml`),
-  recommend adding it with setup instructions
+  note it as a Suggestion (not all projects require it)
 - Check for consistent indentation, trailing whitespace, missing
   newlines at EOF
 
@@ -107,6 +107,11 @@ and its specific checklist below.
   rejections, missing try/catch around awaits)
 - Fallback/default values that could mask real failures
 - HTTP error status codes used correctly (4xx vs 5xx)
+- Retry logic on non-idempotent operations (payments, writes) without
+  a deduplication/idempotency key — retrying these blindly causes
+  double-writes
+- External calls (HTTP, DB, queue) with no timeout configured — a
+  hung dependency will hang the caller indefinitely
 
 ---
 
@@ -115,8 +120,11 @@ and its specific checklist below.
 - Unused imports and dependencies (imported but never referenced)
 - Run `npm audit` / `pip audit` / equivalent if available; report
   any vulnerabilities found
-- Unpinned dependency versions (`^`, `~`, `*`) in production
-  dependencies — flag and recommend pinning
+- Missing or uncommitted lockfile — Critical; this is the real
+  reproducibility risk
+- `*` version ranges in production dependencies — Warning
+- `^` / `~` ranges are acceptable when a lockfile is present; ignore
+  them unless there is no lockfile
 - Packages that are duplicated or could be replaced by a stdlib
   equivalent
 
@@ -130,7 +138,14 @@ and its specific checklist below.
 - Are failure/error paths tested, not just the happy path?
 - Tests asserting behavior, not implementation details (avoid testing
   internal state directly)
+- Tests that only exercise mocks — if the test would pass even if the
+  real implementation were deleted, it proves nothing
+- If a local integration harness exists (`onebox.sh` or equivalent),
+  prefer integration tests over mocked unit tests for new behavior —
+  a passing mock proves nothing the harness would catch
 - Missing tests for security-sensitive code paths
+- Test files in unexpected locations or not matching the project's
+  naming convention — misplaced tests are silently excluded from runs
 
 ---
 
@@ -142,18 +157,24 @@ and its specific checklist below.
 - Logs are structured (key-value or JSON), not free-form strings
 - No sensitive data (passwords, tokens, PII) in log output
 - Errors logged with enough context to diagnose without reproduction
+- Log lines in services handling concurrent requests include a
+  correlation/trace ID — without it, interleaved logs are
+  undiagnosable in production
+- Services that call other services: check for distributed tracing
+  instrumentation (OpenTelemetry or equivalent)
 
 ---
 
 ### Agent 8 — Type Safety (TypeScript / statically typed languages)
 
 - `any` usage that should be replaced with a proper type
+- External data (API responses, JSON parse results) typed as `any`
+  or cast directly — should be received as `unknown` and narrowed
+  through validation (zod, io-ts, manual guards)
 - Non-null assertions (`!`) that could panic at runtime — should have
   a guard or be explained with a comment
 - Type casts (`as X`) that bypass safety checks
 - Missing return type annotations on public functions/methods
-- Implicit `any` from untyped external data (API responses, JSON
-  parse results) that should go through a validation/parse step
 
 ---
 
@@ -165,24 +186,22 @@ and its specific checklist below.
 - Unbounded loops or recursion over large collections
 - Missing indexes implied by query patterns (flag for DB review)
 - Large payloads serialized/deserialized unnecessarily
+- Missing cache headers on responses that are static or change
+  infrequently (wasteful round-trips for callers)
+- Unnecessary recomputation in render loops: missing `useMemo`,
+  `useCallback`, or equivalent memoization where inputs are stable
 
 ---
 
-### Agent 10 — API Contracts
+### Agent 10 — API Contract & Backwards Compatibility
 
-- Breaking changes: renamed or removed fields, changed types, removed
-  endpoints, altered response shapes
-- Additive changes verified: new optional fields should not break
-  existing consumers (no required fields added to responses)
-- Versioning strategy: if the project uses URL or header versioning,
-  are breaking changes gated behind a new version?
-- Downstream consumers: if the change modifies a shared type, API
-  response, or event payload, identify all callers/consumers in the
-  repo and verify they still work
-- Contract tests: if the project has contract or snapshot tests for
-  API responses, do they need updating?
-- Deprecation: if an endpoint or field is being replaced, is the old
-  one marked deprecated with a removal timeline?
+- Removed or renamed fields in request/response shapes
+- Changed field types or nullability
+- Removed or renamed endpoints
+- Changed HTTP methods or status codes on existing endpoints
+- Breaking changes to function/method signatures in shared libraries
+- Missing API versioning strategy when breaking changes are unavoidable
+- Callers in the same repo that are now broken by the change
 
 ---
 

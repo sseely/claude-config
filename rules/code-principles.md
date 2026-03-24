@@ -44,3 +44,23 @@ entry — not repeated inline.
 
 When you spot a repeated literal while working on something else,
 extract it. Don't leave it for later.
+
+## HTTP clients
+
+Prefer the platform's native HTTP over external libraries. Only reach
+for a library when the native API is genuinely insufficient.
+
+**By runtime:**
+- **Cloudflare Workers / edge runtimes** — use the native `fetch` API.
+  Do not add `axios`, `got`, or `node-fetch`; they either won't bundle
+  or add needless weight. The Workers runtime has full `fetch` support.
+- **Node.js (server)** — native `fetch` is available from Node 18+;
+  prefer it. If a library is needed (e.g. for retry, interceptors, or
+  streaming helpers), use `ky` (fetch-based, tree-shakeable) or `axios`.
+- **Browser** — native `fetch`. No library unless the project already
+  has one standardized.
+- **Deno / Bun** — native `fetch` only.
+
+When you see raw `new XMLHttpRequest()`, `require('http')`, or an
+external HTTP library where native fetch would work, flag it and
+suggest the native alternative.

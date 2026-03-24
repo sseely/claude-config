@@ -51,7 +51,11 @@
       "WebSearch",
       "Skill(update-config)",
       "Skill(update-config:*)",
-      "Edit(~/.claude/skills/code-review/**)"
+      "Edit(~/.claude/skills/code-review/**)",
+      "Bash(curl -s https://raw.githubusercontent.com/sseely-experity/claude-config/main/CLAUDE.md)",
+      "Bash(curl -s https://raw.githubusercontent.com/sseely-experity/claude-config/main/rules/commits.md)",
+      "Bash(curl -s https://raw.githubusercontent.com/sseely-experity/claude-config/main/settings.json)",
+      "Bash(gh api:*)"
     ],
     "additionalDirectories": [
       "/tmp",
