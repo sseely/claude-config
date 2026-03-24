@@ -32,6 +32,10 @@ YAGNI, SOLID, no magic strings or literals in production code. See `~/.claude/ru
 
 TDD (red-green-refactor), no magic strings or literals repeated across test files. See `~/.claude/rules/testing.md` for full conventions.
 
+## Autonomous Execution
+
+Mission-brief-driven autonomous sessions. See `~/.claude/rules/autonomous-execution.md` for full protocol.
+
 ## On Compaction
 
 Always preserve:

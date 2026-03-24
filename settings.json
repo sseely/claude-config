@@ -41,7 +41,29 @@
       "Grep(~/church/**)",
       "WebFetch(*)",
       "Skill(update-config)",
-      "Skill(update-config:*)"
+      "Skill(update-config:*)",
+      "WebSearch",
+      "Bash(~/.claude/hooks/quality-gate.sh /tmp)",
+      "Edit(~/.claude/skills/plan-mission/**)",
+      "Bash(mkdir -p test-project)",
+      "Bash(~/.claude/hooks/autonomous-toggle.sh on:*)",
+      "Bash(~/.claude/hooks/autonomous-toggle.sh off:*)",
+      "Bash(rm -rf /tmp/test-project)",
+      "Bash(mkdir -p test-proj/.claude)",
+      "Bash(rm -rf /tmp/test-proj)",
+      "Edit(~/.claude/skills/auth-setup/**)",
+      "Edit(~/.claude/skills/payments-setup/**)",
+      "Edit(~/.claude/skills/analytics-setup/**)",
+      "Edit(~/.claude/skills/compliance-setup/**)"
+    ],
+    "additionalDirectories": [
+      "/tmp",
+      "/private/tmp",
+      "/Users/scottseely/.claude/templates",
+      "/Users/scottseely/.claude/rules",
+      "/Users/scottseely/.claude/hooks",
+      "/Users/scottseely/.claude",
+      "/Users/scottseely/.claude/skills"
     ]
   },
   "model": "opusplan",
