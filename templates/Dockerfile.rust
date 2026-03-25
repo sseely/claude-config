@@ -1,0 +1,10 @@
+# Language fragment: Rust
+# Appended to Dockerfile.base by the /sandbox skill. No FROM line.
+# Uses rustup non-interactively. --no-modify-path keeps PATH management
+# explicit via the ENV instruction below rather than relying on shell
+# profile sourcing.
+
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+        | sh -s -- -y --no-modify-path
+
+ENV PATH="$PATH:/root/.cargo/bin"

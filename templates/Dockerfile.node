@@ -1,0 +1,5 @@
+# Language fragment: Node.js extras
+# Appended to Dockerfile.base by the /sandbox skill. No FROM line.
+# node/npm are already present in the base image; this adds yarn and pnpm.
+
+RUN npm install -g yarn pnpm

@@ -52,6 +52,15 @@ and its specific checklist below.
 
 ### Agent 2 — Security
 
+Use WebSearch and WebFetch to:
+- Look up CVEs for any libraries, frameworks, or components identified in
+  the code. Search NVD (nvd.nist.gov) or OSV (osv.dev) for known
+  vulnerabilities in the exact versions declared
+- Check the library's GitHub/GitLab security advisories tab and open issues
+  for disclosed vulnerabilities not yet in NVD
+- If a CVE exists, fetch the advisory to confirm whether the code's usage
+  pattern actually triggers the vulnerable code path
+
 - Authentication: every endpoint/operation that should require auth does
 - Authorization: callers can only access resources they own
 - Input validation at system boundaries (user input, external APIs)
@@ -116,6 +125,21 @@ and its specific checklist below.
 ---
 
 ### Agent 5 — Dependencies
+
+Use WebSearch and WebFetch to:
+- Look up the current stable version of each dependency and flag anything
+  more than one major version behind
+- Check NVD (nvd.nist.gov) or OSV (osv.dev) for CVEs in the exact
+  versions declared
+- Verify EOL/maintenance status of libraries (e.g. unmaintained packages
+  with no recent releases)
+- Check the library's GitHub/GitLab repo (releases, changelog, README)
+  to verify the declared version is being initialized and called correctly:
+  look for deprecated APIs, renamed methods, or constructor changes between
+  the declared version and current that the code may be using incorrectly
+- If the library has a migration guide or breaking-change notes between the
+  declared version and current, flag any patterns in the code that would
+  break on upgrade
 
 - Unused imports and dependencies (imported but never referenced)
 - Run `npm audit` / `pip audit` / equivalent if available; report

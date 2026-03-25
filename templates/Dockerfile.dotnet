@@ -1,0 +1,12 @@
+# Language fragment: .NET 8
+# Appended to Dockerfile.base by the /sandbox skill. No FROM line.
+# Installs the .NET 8 SDK via the official dotnet-install script into
+# /usr/local/dotnet so it is available system-wide without PATH trickery
+# inside scripts that source /etc/environment.
+
+RUN curl -sSL https://dot.net/v1/dotnet-install.sh \
+        | bash /dev/stdin --channel 8.0 --install-dir /usr/local/dotnet \
+    && ln -s /usr/local/dotnet/dotnet /usr/local/bin/dotnet
+
+ENV DOTNET_ROOT=/usr/local/dotnet
+ENV PATH="$PATH:/usr/local/dotnet"

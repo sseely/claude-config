@@ -1,0 +1,7 @@
+# Language fragment: Python
+# Appended to Dockerfile.base by the /sandbox skill. No FROM line.
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3-pip \
+    python3-venv \
+    && rm -rf /var/lib/apt/lists/*
