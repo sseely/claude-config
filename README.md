@@ -176,6 +176,15 @@ Model assignments:
 
 \* `opusplan` model
 
+## Dependencies
+
+The following agents are sourced from external repos and should be
+updated when those repos change:
+
+| Agent | Source repo |
+|-------|-------------|
+| `agents/memory-curator.md` | [sseely/claude-memory](https://github.com/sseely/claude-memory) |
+
 ## Updating
 
 ```bash
