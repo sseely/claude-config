@@ -27,7 +27,7 @@ indicators. Build a roster of detected languages:
 | Signal | Language/Framework | Agent |
 |--------|-------------------|-------|
 | `pyproject.toml`, `requirements.txt`, `setup.py` | Python | `python-pro` |
-| `package.json` + `tsconfig.json` | TypeScript | `typescript-pro` |
+| `package.json` + `tsconfig.json` | TypeScript | `typescript-pro` (includes TS5→TS6 migration) |
 | `package.json` (no tsconfig) | JavaScript | `javascript-pro` |
 | `package.json` + `"next"` in deps | Next.js | `nextjs-developer` |
 | `package.json` + `"react"` in deps (no Next) | React | `react-specialist` |
@@ -53,6 +53,71 @@ If multiple manifests are found, build the full roster — all detected
 languages get an agent.
 
 Announce: "Detected languages: [list]. Agents: [list]."
+
+## Phase 1B — TypeScript migration scan (conditional)
+
+If TypeScript was detected in Phase 1, check the installed version:
+
+```bash
+npx tsc --version
+```
+
+If the major version is already 6+, skip this phase entirely — the
+codebase is current. Only proceed if the project is on TypeScript 5.x
+or lower.
+
+Run `typescript-pro` with this prompt:
+
+```
+Context: [project name, tsconfig path(s), source directories]
+Task: Scan for TS5-era patterns that are deprecated or removed in TS6.
+Check both tsconfig and source code:
+
+tsconfig:
+  - target below es2025
+  - baseUrl used for path aliasing
+  - moduleResolution set to "node" or "classic"
+  - outFile, downlevelIteration, module amd/umd/systemjs/none
+  - esModuleInterop set to false
+  - allowSyntheticDefaultImports set to false
+  - missing explicit rootDir, types, verbatimModuleSyntax
+  - types not explicitly set (TS6 defaults to [] — no @types loaded)
+  - missing isolatedDeclarations (recommended for monorepos)
+
+Source code:
+  - `module Foo {}` syntax (should be `namespace Foo {}`)
+  - import assertions (`assert {}`) instead of attributes (`with {}`)
+  - `/// <reference no-default-lib="true"/>` directives (removed in TS6)
+  - `Date` usage where Temporal API is appropriate
+  - `Map` has/get/set patterns where getOrInsert fits
+  - manual regex escaping where RegExp.escape() works
+  - baseUrl-relative imports that should use #/ subpath imports
+  - const enums in declaration files
+
+For each finding, provide:
+  - file:line
+  - Current pattern
+  - TS6-forward replacement
+  - Whether ts5to6 CLI can auto-fix it
+
+Read-set: tsconfig*.json, src/**/*.ts, src/**/*.tsx
+Write-set: none (scan only)
+Output: structured table with columns:
+  File | Line | Pattern | Replacement | Auto-fixable
+```
+
+If `ts5to6` can handle any findings, note it — Phase 4 will run it
+before the manual `typescript-pro` agent pass.
+
+If no TS5 patterns are found, skip this and proceed normally.
+
+Regardless of whether TS5 patterns were found, if the project does
+not already run `tsgo --noEmit` or `--stableTypeOrdering` in CI,
+add a **Suggestion** to the final report:
+
+> Consider adding `npx tsgo --noEmit` as a non-blocking CI job and
+> `--stableTypeOrdering` to your test script to detect TS7
+> incompatibilities before they become hard errors.
 
 ## Phase 2 — Research (parallel)
 
@@ -115,6 +180,40 @@ Tell the user:
 
 Then stop — plan-mission takes over.
 
+## Phase 3B — TypeScript migration execution (conditional)
+
+If Phase 1B found TS5 patterns, execute fixes before the general
+dependency upgrade:
+
+1. If any findings are marked auto-fixable, run `npx ts5to6` first
+   to handle `baseUrl` and `rootDir` adjustments automatically.
+2. Run `typescript-pro` with the remaining findings:
+
+```
+Context: [project name, stack, tsconfig path(s)]
+Task: Apply TS6-forward fixes for the following TS5 patterns:
+  [findings table from Phase 1B, excluding auto-fixed items]
+
+For each finding:
+  1. Apply the replacement shown in the scan results
+  2. Update tsconfig to TS7-forward defaults (see your agent instructions)
+  3. Verify the build still passes after each change
+  4. Run tests and fix any failures caused by the migration
+
+Additional:
+  - Add --stableTypeOrdering to the test script in CI config if
+    present (package.json scripts, GitHub Actions, etc.)
+  - Do NOT upgrade package versions — that happens in Phase 5.
+    This phase is tsconfig + source pattern migration only.
+
+Write-set: tsconfig*.json, source files listed in findings
+Read-set: [manifest files, source files]
+Quality bar: tsc --noEmit must pass. All tests must pass.
+```
+
+3. If `typescript-pro` reports failures it cannot fix, STOP and
+   present the findings to the user before continuing.
+
 ## Phase 4 — Build language agent prompts
 
 For each language agent in the roster, construct a self-contained
@@ -131,6 +230,11 @@ Dependency findings (your packages only):
 
 Security findings (your packages only):
   [filtered list from security-auditor for this language]
+
+TS migration status (TypeScript only):
+  [summary of Phase 3B changes if applicable — tsconfig defaults
+   already updated, source patterns already migrated. This phase
+   handles package version bumps only.]
 
 Task:
   1. Update the manifest file(s) for your language to the latest
