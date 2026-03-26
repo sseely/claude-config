@@ -38,6 +38,15 @@ Validate input at system boundaries. Never hardcode secrets, credentials, or API
 
 TDD (red-green-refactor), no magic strings or literals repeated across test files. See `~/.claude/rules/testing.md` for full conventions.
 
+## Agent Memory
+
+Two-tier memory: local `.agent-notes/` observations + long-term Mem0
+via MCP. Before any task, search Mem0 for prior discoveries. During
+execution, write observations to `.agent-notes/{task-id}.md`. Do not
+write directly to Mem0 — the `memory-curator` agent handles promotion.
+See the project's `MEMORY_SYSTEM.md` for the full spec (scoping,
+durability, sponge-worthy criteria).
+
 ## Autonomous Execution
 
 Mission-brief-driven autonomous sessions. See `~/.claude/rules/autonomous-execution.md` for full protocol.

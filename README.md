@@ -105,7 +105,7 @@ Shell scripts triggered by Claude Code lifecycle events.
 
 ### `agents/`
 
-127 specialist agents across 10 categories. Invoked automatically by Claude
+128 specialist agents across 10 categories. Invoked automatically by Claude
 Code when a task matches their domain, or explicitly via the `Agent` tool.
 
 Model assignments:
@@ -166,8 +166,8 @@ Model assignments:
 `legal-advisor`, `product-manager`, `project-manager`, `sales-engineer`,
 `scrum-master`, `technical-writer`, `ux-researcher`
 
-**09-meta-orchestration** (2 agents)
-`agent-installer`, `it-ops-orchestrator`
+**09-meta-orchestration** (3 agents)
+`agent-installer`, `it-ops-orchestrator`, `memory-curator`
 
 **10-research-analysis** (7 agents)
 `competitive-analyst`, `data-researcher`, `market-researcher`,
@@ -183,7 +183,7 @@ updated when those repos change:
 
 | Agent | Source repo |
 |-------|-------------|
-| `agents/memory-curator.md` | [sseely/claude-memory](https://github.com/sseely/claude-memory) |
+| `agents/09-meta-orchestration/memory-curator.md` | [sseely/claude-memory](https://github.com/sseely/claude-memory) |
 
 ## Updating
 
