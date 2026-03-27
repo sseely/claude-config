@@ -90,6 +90,19 @@ Print a summary table. See the output format section below.
 - "The GraphQL schema codegen step must run before TypeScript compilation or the build fails silently with a type error in a generated file." — reusable, non-obvious, stable, actionable.
 - "The `user_id` field in the events table is a UUID stored as a string, not a native UUID column. Comparisons using `::uuid` cast will fail." — reusable, non-obvious, stable, actionable.
 
+### Promote as `contextual` (with TTL)
+
+Structural maps that orient agents quickly but change as code evolves.
+Tag these `contextual` with a 7-14 day TTL:
+
+- "Entry points for this repo: `src/api/routes.ts`, `src/workers/queue.ts`, `src/cli/index.ts`." — reusable, non-obvious, actionable, but changes with refactors.
+- "Dependency graph: API → AuthService → UserRepo → PostgresClient." — orients agents before they start reading files.
+- "This monorepo has 3 packages: `@org/api`, `@org/shared`, `@org/worker`." — saves agents from exploring the directory tree.
+
+These are especially valuable when Serena (code intelligence) discovers
+them during exploration — they compress minutes of navigation into a
+single memory lookup.
+
 ### Skip these
 
 - "The PR is waiting on review from Alice." — temporary state, not stable, not reusable.
