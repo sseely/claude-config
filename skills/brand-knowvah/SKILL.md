@@ -1,4 +1,4 @@
-# /knowvah-brand
+# brand-knowvah
 
 Apply the Knowvah "Warm Studio" visual identity and app shell to a new
 `*.knowvah.com` React/Vite project. Covers CSS theme tokens, ThemeContext,
