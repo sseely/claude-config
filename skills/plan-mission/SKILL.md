@@ -99,22 +99,14 @@ override each one. These become the "Architecture Decisions
 
 ## Phase 4 — Decompose into tasks
 
-Break the work into tasks following these rules:
+Break the work into tasks. File ownership and agent prompt structure
+follow `parallelism.md`. Additionally:
 
-1. Each task = one commit. If it needs two commits, split it.
-2. Each task has an explicit write-set (files it creates or
-   modifies). No two tasks in the same batch write the same file.
-3. Tasks that can run in parallel go in the same batch.
-4. Tasks that depend on another task's output go in a later batch.
-5. Assign an agent type to each task based on what it does
-   (e.g., `backend-developer`, `frontend-developer`,
-   `test-automator`, `technical-writer`).
-6. Every task that creates or modifies logic must include writing
-   tests for that logic (TDD — test is part of the task, not a
-   separate task).
-7. Write 2-5 acceptance criteria per task using
-   Given/When/Then format. Each criterion must be testable —
-   it becomes both the definition of done and the test spec.
+1. Each task = one commit
+2. No two tasks in the same batch write the same file
+3. Every task that modifies logic includes its tests (TDD)
+4. Write 2-5 acceptance criteria per task in Given/When/Then format
+   — each becomes both the definition of done and the test spec
 
 Present the task sequence to the user:
 

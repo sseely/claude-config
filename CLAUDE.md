@@ -26,39 +26,20 @@ Plan before executing: list subtasks, mark dependencies, assign file ownership (
 
 Conventional Commits, all lines ≤80 chars. Subject `<type>(<scope>): <desc>` ≤72 chars, lowercase, no period. See `~/.claude/rules/commits.md` for full spec.
 
-## Code Design Principles
+## Rules
 
-YAGNI, SOLID, no magic strings or literals in production code. See `~/.claude/rules/code-principles.md`.
-
-## Security
-
-Validate input at system boundaries. Never hardcode secrets, credentials, or API keys. Never leak stack traces, DB schema, file paths, or internal IDs in error responses. See `~/.claude/rules/security.md` for full checklist.
-
-## Testing
-
-TDD (red-green-refactor), no magic strings or literals repeated across test files. See `~/.claude/rules/testing.md` for full conventions.
+See `~/.claude/rules/` for: code-principles (YAGNI, SOLID, no magic
+strings, native fetch), security (validation, secrets, error hygiene),
+testing (TDD, 90/90/90 coverage), commits (Conventional Commits),
+parallelism (multi-agent execution), autonomous-execution (mission briefs).
 
 ## Agent Memory
 
-Two-tier memory: local `.agent-notes/` observations + long-term Mem0
-via MCP. Before any task, search Mem0 for prior discoveries. During
-execution, write observations to `.agent-notes/{task-id}.md`. Do not
-write directly to Mem0 — the `memory-curator` agent handles promotion.
-See the project's `MEMORY_SYSTEM.md` for the full spec (scoping,
-durability, sponge-worthy criteria).
-
-## Autonomous Execution
-
-Mission-brief-driven autonomous sessions. See `~/.claude/rules/autonomous-execution.md` for full protocol.
+Two-tier: local `.agent-notes/` observations + long-term Mem0 via MCP.
+The `memory-curator` agent handles promotion. See `MEMORY_SYSTEM.md`.
 
 ## On Compaction
 
-Always preserve:
-- Completed and in-progress todo items
-- Architecture and design decisions made
-- Active agent assignments and their file ownership
-- Test patterns and known gotchas
-- The next planned task with enough detail to resume
-
-After compaction, treat all prior context as stale. Re-read the full CLAUDE.md
-chain before continuing.
+After compaction, treat all prior context as stale. Re-read CLAUDE.md
+and the active mission brief (if any) before continuing. See
+`autonomous-execution.md` for the full post-compaction recovery sequence.

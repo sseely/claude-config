@@ -20,54 +20,24 @@ Drive a failing test, build error, or runtime error to green.
 
 ## Phase 1 — Establish baseline
 
-Run the test suite (or targeted test if $ARGUMENTS is a test name).
-Capture the full error output.
-
-If $ARGUMENTS is empty and the test suite is green, stop:
-> "No failures found. Nothing to fix."
-
-Detect the project stack (same language detection as `/upgrade-deps`)
-to know which agent to use for fixes and which commands to run.
-
-Identify the test/build command:
-- `pytest` / `python -m pytest`
-- `npm test` / `vitest` / `jest`
-- `dotnet test`
-- `go test ./...`
-- `cargo test`
-- `./gradlew test` / `mvn test`
-- `bundle exec rspec`
-- `ng test`
-
-If no test command is detectable, ask the user before proceeding.
+1. Run the test suite (or targeted test from $ARGUMENTS); capture error
+2. If empty and all green, stop: "No failures found."
+3. Detect project stack and test command (pytest, npm test, dotnet
+   test, go test, cargo test, etc.)
+4. If no test command detectable, ask the user
 
 ## Phase 2 — Diagnose
 
-Invoke the `debugger` agent with a self-contained prompt:
+Invoke `debugger` agent. Prompt per `parallelism.md` structure with:
+- **Context:** project name, stack, test framework
+- **Task:** Diagnose root cause (not symptom). Identify files/lines
+  to change, describe the fix, flag whether test or implementation
+  bug. Do NOT make changes.
+- **Read-set:** files in stack trace + their imports one level deep
+- **Write-set:** none
 
-```
-Context: [project name, stack, test framework]
-Error output:
-[full error message, stack trace, or test failure output]
-
-Relevant files: [files mentioned in the stack trace or test output]
-
-Task: Diagnose the root cause of this failure. Do NOT make any
-changes. Identify:
-1. The root cause (not just the symptom)
-2. The specific file(s) and line(s) that need to change
-3. What the fix should be (describe it — don't implement it)
-4. Whether this is likely a test bug or an implementation bug
-5. Any related code that may need to change as a consequence
-
-Read-set: all files mentioned in the error, their imports/dependencies
-  one level deep, and any test fixtures or factories they use.
-Write-set: none
-```
-
-Present the diagnosis to the user as a one-paragraph summary before
-proceeding. If the debugger identifies it as a test bug (the test is
-wrong, not the code), confirm with the user before fixing the test.
+Present the diagnosis to the user. If flagged as a test bug, confirm
+before modifying tests.
 
 ## Phase 3 — Fix loop (max 5 iterations)
 
@@ -75,39 +45,14 @@ wrong, not the code), confirm with the user before fixing the test.
 
 **Step A — Implement fix**
 
-Select the appropriate language agent based on the file(s) to change:
-- `.py` → `python-pro`
-- `.ts`/`.tsx` → `typescript-pro`
-- `.js`/`.jsx` → `javascript-pro`
-- `.cs` → `csharp-developer`
-- `.go` → `golang-pro`
-- `.rs` → `rust-engineer`
-- `.rb` → `ruby-specialist`
-- `.java` → `java-architect` or `spring-boot-engineer`
-- `.kt` → `kotlin-specialist`
-- `.swift` → `swift-expert`
-- `.php` → `php-pro`
-- `.sql` or migration file → `sql-pro`
-- multiple languages → select agent for the primary failing file;
-  if fixes span languages, run agents in parallel with non-overlapping
-  write-sets
+Select the language agent by file extension (same mapping as
+`/upgrade-deps` Phase 1). If fixes span languages, run agents in
+parallel with non-overlapping write-sets.
 
-Agent prompt:
-```
-Context: [project name, stack]
-Diagnosis: [debugger findings from Phase 2, plus any new error output
-  from prior iterations]
-
-Task: Fix the failure described above. Apply the minimum change
-needed — do not refactor surrounding code or fix unrelated issues.
-If the diagnosis says it's a test bug, fix the test. Otherwise fix
-the implementation.
-
-Write-set: [specific files identified by debugger]
-Read-set: [those files plus their direct dependencies]
-Quality bar: do not run the tests yourself — just make the change
-  and report exactly what you changed and why.
-```
+Agent prompt per `parallelism.md` structure with:
+- **Task:** Fix the failure. Minimum change — no refactoring.
+- **Write-set:** files identified by debugger
+- **Quality bar:** don't run tests; report what changed and why
 
 **Step B — Run tests**
 

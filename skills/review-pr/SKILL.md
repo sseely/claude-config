@@ -83,42 +83,11 @@ For each finding that has a `file:line` reference, compute the GitHub
 diff position (the 1-based line index within the unified diff hunk
 required by the GitHub review API).
 
-Use this algorithm in a Python script:
-
-```python
-import json, re
-
-with open('/tmp/pr_files.json') as f:
-    files = json.load(f)
-
-def get_position(filename, target_line):
-    for file in files:
-        if file['filename'] != filename:
-            continue
-        patch = file.get('patch', '')
-        if not patch:
-            return None
-        pos, current_line = 0, 0
-        for line in patch.split('\n'):
-            if line.startswith('@@'):
-                m = re.search(r'\+(\d+)', line)
-                if m:
-                    current_line = int(m.group(1)) - 1
-                pos += 1
-            elif line.startswith('-'):
-                pos += 1
-            elif line.startswith('+'):
-                current_line += 1
-                pos += 1
-                if current_line == target_line:
-                    return pos
-            else:
-                current_line += 1
-                pos += 1
-                if current_line == target_line:
-                    return pos
-    return None
-```
+Write a Python script that maps `(filename, target_line)` to a GitHub
+diff position by walking each file's patch hunks from
+`/tmp/pr_files.json`. Track `@@` hunk headers to set the starting
+line, then increment position for every patch line. Return `None` if
+the target line falls outside all hunks.
 
 - If `get_position` returns a value → attach the comment inline at
   that position.

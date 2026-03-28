@@ -109,122 +109,23 @@ Readiness steps:
 - Add `tsgo --noEmit` as a non-blocking CI job to test TS7
   compatibility before cutting over
 
-## TypeScript development checklist
+## Checklist
 
-- Strict mode enabled with all compiler flags
-- No explicit `any` usage without justification comment
+- No `any` without justification comment
 - 100% type coverage for public APIs
-- ESLint and Prettier configured
-- Test coverage exceeding 90%
-- Source maps properly configured
-- Declaration files generated
-- Bundle size optimization applied
-
-## Advanced type patterns
-
-- Conditional types for flexible APIs
-- Mapped types for transformations
-- Template literal types for string manipulation
-- Discriminated unions for state machines
-- Type predicates and guards
-- Branded types for domain modeling
-- Const assertions for literal types
-- Satisfies operator for type validation
-
-## Type system mastery
-
-- Generic constraints and variance annotations (`in`/`out`)
-- Higher-kinded types simulation
-- Recursive type definitions
-- Type-level programming
-- Infer keyword usage
-- Distributive conditional types
-- Index access types
-- Utility type creation
-- NoInfer<T> for inference control
-
-## Full-stack type safety
-
-- Shared types between frontend/backend
-- tRPC for end-to-end type safety
-- GraphQL code generation
-- Type-safe API clients
-- Form validation with types (zod, valibot)
-- Database query builders (drizzle, kysely, prisma)
-- Type-safe routing
-- WebSocket type definitions
-
-## Build and tooling
-
-- tsconfig.json optimization (see defaults above)
-- Project references setup
-- Incremental compilation
-- `#/` subpath imports (not `baseUrl` path mapping)
-- Module resolution configuration (bundler vs nodenext)
-- Source map generation
-- Declaration bundling
-- Tree shaking optimization
-
-## Testing with types
-
-- Type-safe test utilities
-- Mock type generation
-- Test fixture typing
-- Assertion helpers
-- Coverage for type logic
-- Property-based testing
-- Avoid snapshot tests on union types (ordering may change)
-- Integration test types
-
-## Framework expertise
-
-- React with TypeScript patterns
-- Vue 3 composition API typing
-- Angular strict mode
-- Next.js type safety
-- Express/Fastify typing
-- NestJS decorators
-- Svelte type checking
-- Solid.js reactivity types
-
-## Performance patterns
-
+- ESLint + Prettier configured
+- Test coverage ≥90%; avoid snapshot tests on union types (ordering
+  may change between TS versions)
 - As-const objects over const enums (safer across declaration boundaries)
-- Type-only imports (`import type`)
-- Lazy type evaluation
-- Union type optimization
-- Intersection performance
-- Generic instantiation costs
-- Compiler performance tuning
-- Bundle size analysis
-
-## Error handling
-
-- Result types for errors
-- Never type usage
-- Exhaustive checking
-- Error boundaries typing
-- Custom error classes
-- Type-safe try-catch
-- Validation errors (zod, valibot)
-- API error responses
+- Use `import type` for type-only imports
+- Validate external data with zod/valibot at system boundaries — receive
+  as `unknown`, narrow through validation, never cast `as X` directly
+- Prefer discriminated unions for state machines (forces exhaustive checking)
+- Use `Result<T, E>` patterns for recoverable errors; `throw` only for
+  unrecoverable failures
 
 ## TS5 → TS6 migration
 
-For project-wide upgrades (tsconfig + dependencies + source patterns),
-recommend `/upgrade-deps` — it orchestrates the full migration
-including `ts5to6`, dependency audits, and iterative code review.
-Use the checklist below for spot fixes during normal development.
-
-When reviewing or upgrading TS5-era code:
-
-1. Scan for banned patterns (see list above) in tsconfig and source
-2. Replace `baseUrl` path aliases with `#/` subpath imports
-3. Replace `module Foo {}` with `namespace Foo {}`
-4. Replace `assert {}` with `with {}` in import attributes
-5. Replace `Date` usage with `Temporal` where appropriate
-6. Replace `Map` has/get/set with `getOrInsert`/`getOrInsertComputed`
-7. Replace manual regex escaping with `RegExp.escape()`
-8. Update tsconfig to TS7-forward defaults
-9. Run `npx ts5to6` for automated baseUrl and rootDir adjustments
-10. Enable `--stableTypeOrdering` in test CI to catch TS7 regressions
+For project-wide upgrades, recommend `/upgrade-deps` — it orchestrates
+the full migration including `ts5to6`, dependency audits, and iterative
+code review. For spot fixes, apply the banned patterns list above.

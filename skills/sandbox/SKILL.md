@@ -56,22 +56,15 @@ Missing Keychain secret: SECRET_NAME
 Fix: security add-generic-password -a "$USER" -s "SECRET_NAME" -w "your-value-here"
 ```
 
-Always required — check and report all missing before stopping:
-- `GITHUB_ORG_TOKEN`
+**Required:** `GITHUB_ORG_TOKEN`
+**API credentials (one set):** `ANTHROPIC_API_KEY` OR all three
+`AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY` + `AWS_DEFAULT_REGION`
 
-At least one credential set required — check in this order:
-1. `ANTHROPIC_API_KEY` — if non-empty, use Anthropic direct. Done.
-2. Otherwise check all three: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`,
-   `AWS_DEFAULT_REGION`. If all three are non-empty, use Bedrock. Done.
-3. If neither set is complete, print fix commands for all missing keys and
-   stop:
-   ```
-   Missing API credentials. Provide either ANTHROPIC_API_KEY or all three AWS keys.
-   Fix: security add-generic-password -a "$USER" -s "ANTHROPIC_API_KEY" -w "your-key"
-   Fix: security add-generic-password -a "$USER" -s "AWS_ACCESS_KEY_ID" -w "your-key"
-   Fix: security add-generic-password -a "$USER" -s "AWS_SECRET_ACCESS_KEY" -w "your-secret"
-   Fix: security add-generic-password -a "$USER" -s "AWS_DEFAULT_REGION" -w "us-east-1"
-   ```
+Check all keys. For each missing key, print the fix command:
+```
+security add-generic-password -a "$USER" -s "KEY_NAME" -w "value"
+```
+Report all missing keys at once, then STOP.
 
 Store all retrieved values as shell variables for use in Phase 7.
 
@@ -152,25 +145,8 @@ reused — this is the resumability mechanism. Do not delete existing volumes.
 
 ## Phase 7 — Run container
 
-Print the full `docker run` command before executing it. Redact all secret
-values in the printed version, replacing each with `***`:
-
-```
-docker run --rm \
-  -e REPO_URL="$REPO_URL" \
-  -e TASK_PROMPT="(see below)" \
-  -e GITHUB_ORG_TOKEN="***" \
-  -e ANTHROPIC_API_KEY="***" \
-  -e AWS_ACCESS_KEY_ID="***" \
-  -e AWS_SECRET_ACCESS_KEY="***" \
-  -e AWS_DEFAULT_REGION="***" \
-  --mount type=bind,source="$HOME/.claude",target=/root/.claude,readonly \
-  --mount type=volume,source="claude-sandbox-${SESSION_NAME}",target=/workspace \
-  --mount type=volume,source="claude-sandbox-${SESSION_NAME}-meta",target=/workspace-meta \
-  claude-sandbox-${SESSION_NAME}
-```
-
-Then run the actual command with real values:
+Print the `docker run` command with secrets redacted (`***`), then
+execute with real values. The command shape:
 
 ```bash
 docker run --rm \
@@ -185,10 +161,9 @@ docker run --rm \
   --mount type=volume,source="claude-sandbox-${SESSION_NAME}",target=/workspace \
   --mount type=volume,source="claude-sandbox-${SESSION_NAME}-meta",target=/workspace-meta \
   "claude-sandbox-${SESSION_NAME}"
-EXIT_CODE=$?
 ```
 
-Capture the exit code in `EXIT_CODE`.
+Capture the exit code.
 
 ## Phase 8 — Report
 

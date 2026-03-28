@@ -15,20 +15,11 @@ the tests for the existing behaviour before changing anything.
 Exceptions: pure config files, generated code, one-off migration
 scripts, and UI markup with no logic.
 
-## DRY: No magic strings or literals in tests
+## DRY in tests
 
-Any value used in more than one test file belongs in a shared helper,
-not repeated inline.
-
-**Common cases:**
-- Base URLs (e.g. `http://localhost:8787`) → export `BASE_URL` from
-  the test helpers file
-- Auth headers, cookie names → export named constants
-- Repeated fixture builders (create user, create session) → export
-  helper functions
-
-When you notice a literal repeated across test files, extract it
-immediately — don't defer it.
+Apply the no-magic-strings rule (see `code-principles.md`) to test
+code. Extract repeated values (BASE_URL, auth headers, fixture
+builders) to `test/helpers/`.
 
 ## Coverage — 90/90/90 rule
 

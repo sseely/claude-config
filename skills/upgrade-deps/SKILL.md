@@ -24,30 +24,27 @@ dependencies. If provided, treats as a package name or glob
 Scan the project root and `src/` for manifest files and key
 indicators. Build a roster of detected languages:
 
-| Signal | Language/Framework | Agent |
-|--------|-------------------|-------|
-| `pyproject.toml`, `requirements.txt`, `setup.py` | Python | `python-pro` |
-| `package.json` + `tsconfig.json` | TypeScript | `typescript-pro` (includes TS5→TS6 migration) |
-| `package.json` (no tsconfig) | JavaScript | `javascript-pro` |
-| `package.json` + `"next"` in deps | Next.js | `nextjs-developer` |
-| `package.json` + `"react"` in deps (no Next) | React | `react-specialist` |
-| `package.json` + `"vue"` in deps | Vue | `vue-expert` |
-| `package.json` + `"@angular/core"` in deps | Angular | `angular-architect` |
-| `*.csproj`, `*.sln` + `<TargetFramework>net[5-9]` | .NET Core | `dotnet-core-expert` |
-| `*.csproj` + `<TargetFrameworkVersion>v4` | .NET Framework | `dotnet-framework-4.8-expert` |
-| `*.csproj` (C# without above) | C# | `csharp-developer` |
-| `pom.xml` + Spring Boot deps | Spring Boot | `spring-boot-engineer` |
-| `pom.xml` or `build.gradle` (no Spring) | Java | `java-architect` |
-| `build.gradle.kts` + Kotlin | Kotlin | `kotlin-specialist` |
-| `Cargo.toml` | Rust | `rust-engineer` |
-| `go.mod` | Go | `golang-pro` |
-| `Gemfile` + `rails` gem | Rails | `rails-expert` |
-| `Gemfile` (no Rails) | Ruby | `ruby-specialist` |
-| `composer.json` + Laravel | Laravel | `laravel-specialist` |
-| `composer.json` (no Laravel) | PHP | `php-pro` |
-| `Package.swift` | Swift | `swift-expert` |
-| `.sql` files or `migrations/` | SQL | `sql-pro` |
-| `.html`/`.css` (no JS framework) | Frontend | `frontend-developer` |
+| Signal | Agent |
+|--------|-------|
+| `pyproject.toml` / `requirements.txt` / `setup.py` | `python-pro` |
+| `package.json` + `tsconfig.json` | `typescript-pro` (TS5→TS6) |
+| `package.json` (no tsconfig) | `javascript-pro` |
+| `package.json` + `next` | `nextjs-developer` |
+| `package.json` + `react` (no Next) | `react-specialist` |
+| `package.json` + `vue` | `vue-expert` |
+| `package.json` + `@angular/core` | `angular-architect` |
+| `*.csproj` / `*.sln` (.NET 5+) | `dotnet-core-expert` |
+| `*.csproj` (.NET Framework 4.x) | `dotnet-framework-4.8-expert` |
+| `pom.xml` + Spring Boot | `spring-boot-engineer` |
+| `pom.xml` / `build.gradle` (no Spring) | `java-architect` |
+| `build.gradle.kts` + Kotlin | `kotlin-specialist` |
+| `Cargo.toml` | `rust-engineer` |
+| `go.mod` | `golang-pro` |
+| `Gemfile` + `rails` | `rails-expert` |
+| `Gemfile` (no Rails) | `ruby-specialist` |
+| `composer.json` + Laravel | `laravel-specialist` |
+| `composer.json` (no Laravel) | `php-pro` |
+| `Package.swift` | `swift-expert` |
 
 If multiple manifests are found, build the full roster — all detected
 languages get an agent.
@@ -123,33 +120,16 @@ add a **Suggestion** to the final report:
 
 Run `dependency-manager` and `security-auditor` in parallel.
 
-**dependency-manager prompt:**
-```
-Context: [project name, stack, manifest file paths]
-Task: Audit all dependencies. For each package:
-  1. Find the latest stable version (check PyPI/npm/NuGet/crates.io/etc.)
-  2. Note the current version and the gap (patch/minor/major)
-  3. Identify any breaking changes between current and latest
-  4. List which files in the repo import or use this package
-  5. Flag any that require code changes beyond a version bump
-Read-set: all manifest files, lockfiles, key source files that import packages
-Write-set: none
-Output: structured table with columns:
-  Package | Current | Latest | Change Type | Breaking | Files Affected | Notes
-```
+**dependency-manager** — audit all deps: current vs latest version,
+change type (patch/minor/major), breaking changes, affected files.
+Output: `Package | Current | Latest | Change Type | Breaking | Files | Notes`
 
-**security-auditor prompt:**
-```
-Context: [dependency-manager findings]
-Task: Review the proposed upgrades for security issues:
-  - Packages with known CVEs in the current version (must upgrade)
-  - Packages with CVEs in the proposed target version (flag)
-  - Any package being downgraded or pinned below latest for unusual reasons
-  - New transitive dependencies introduced by the upgrades
-Read-set: manifest files, dependency-manager output
-Write-set: none
-Output: security findings with severity (Critical/High/Medium/Low)
-```
+**security-auditor** — review upgrades for CVEs in current and target
+versions, downgrades, new transitive deps. Output: findings with
+severity (Critical/High/Medium/Low).
+
+Both agents: prompt per `parallelism.md`, read-set = manifests +
+lockfiles, write-set = none.
 
 Wait for both agents to complete before proceeding.
 
