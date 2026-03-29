@@ -26,3 +26,9 @@ todos/
 
 # MCP config has machine-specific paths
 .mcp.json
+
+# Anthropic-proprietary skills (© 2025 Anthropic, PBC — no redistribution)
+skills/doc-pdf/
+skills/doc-docx/
+skills/doc-pptx/
+skills/doc-xlsx/
