@@ -16,12 +16,16 @@ The `/fix` and `/upgrade-deps` skills are adapted from
 [sseely-experity/claude-config](https://github.com/sseely-experity/claude-config).
 
 Several skills (`changelog-generator`, `video-downloader`, `file-organizer`,
-`internal-comms`, `webapp-testing`, `doc-pdf`, `doc-docx`, `doc-pptx`,
-`doc-xlsx`) are adapted from
+`internal-comms`, `webapp-testing`) are adapted from
 [ComposioHQ/awesome-claude-skills](https://github.com/ComposioHQ/awesome-claude-skills).
 Modifications include: fixed macOS compatibility issues, corrected skill `name`
 fields to match directory names, trimmed preamble and padding sections, removed
 vendor-specific infrastructure requirements, and added missing prerequisites.
+
+The document skills (`doc-pdf`, `doc-docx`, `doc-pptx`, `doc-xlsx`) are also
+sourced from that repo but are excluded from this public repo — they carry a
+proprietary Anthropic license (© 2025 Anthropic, PBC) that prohibits
+redistribution.
 
 ## Installation
 
