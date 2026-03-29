@@ -13,6 +13,13 @@ To test local web applications, write native Python Playwright scripts.
 
 **Always run scripts with `--help` first** to see usage. DO NOT read the source until you try running the script first and find that a customized solution is absolutely necessary. These scripts can be very large and thus pollute your context window. They exist to be called directly as black-box scripts rather than ingested into your context window.
 
+## Prerequisites
+
+If Playwright is not installed:
+```bash
+pip install playwright && playwright install chromium
+```
+
 ## Decision Tree: Choosing Your Approach
 
 ```
@@ -58,6 +65,7 @@ with sync_playwright() as p:
     page = browser.new_page()
     page.goto('http://localhost:5173') # Server already running and ready
     page.wait_for_load_state('networkidle') # CRITICAL: Wait for JS to execute
+    # If app has continuous polling, add timeout: wait_for_load_state('networkidle', timeout=5000)
     # ... your automation logic
     browser.close()
 ```
@@ -82,7 +90,7 @@ with sync_playwright() as p:
 
 ## Best Practices
 
-- **Use bundled scripts as black boxes** - To accomplish a task, consider whether one of the scripts available in `scripts/` can help. These scripts handle common, complex workflows reliably without cluttering the context window. Use `--help` to see usage, then invoke directly. 
+- **Use bundled scripts as black boxes** - To accomplish a task, consider whether one of the scripts available in `scripts/` can help. These scripts handle common, complex workflows reliably without cluttering the context window. Use `--help` to see usage, then invoke directly.
 - Use `sync_playwright()` for synchronous scripts
 - Always close the browser when done
 - Use descriptive selectors: `text=`, `role=`, CSS selectors, or IDs

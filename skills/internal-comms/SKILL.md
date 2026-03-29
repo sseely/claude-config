@@ -1,6 +1,6 @@
 ---
 name: internal-comms
-description: A set of resources to help me write all kinds of internal communications, using the formats that my company likes to use. Claude should use this skill whenever asked to write some sort of internal communications (status reports, leadership updates, 3P updates, company newsletters, FAQs, incident reports, project updates, etc.).
+description: A set of resources to help write all kinds of internal communications, using the formats that your company likes to use. Claude should use this skill whenever asked to write some sort of internal communications (status reports, leadership updates, 3P updates, company newsletters, FAQs, incident reports, project updates, etc.).
 license: Complete terms in LICENSE.txt
 ---
 
@@ -27,6 +27,5 @@ To write any internal communication:
 3. **Follow the specific instructions** in that file for formatting, tone, and content gathering
 
 If the communication type doesn't match any existing guideline, ask for clarification or more context about the desired format.
+If the `examples/` directory is missing or the type doesn't match, fall back to `examples/general-comms.md` or ask the user for their preferred format.
 
-## Keywords
-3P updates, company newsletter, company comms, weekly update, faqs, common questions, updates, internal comms

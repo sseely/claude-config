@@ -10,8 +10,6 @@ description: >
 
 # Changelog Generator
 
-Turn git commits into polished, customer-readable release notes.
-
 ## Phase 1 — Determine scope
 
 If `$ARGUMENTS` specifies a tag (e.g. `v2.4.0`) or date range (e.g.
