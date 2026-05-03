@@ -26,6 +26,22 @@ builders) to `test/helpers/`.
 Target at least 90% line coverage, 90% branch coverage, and 90%
 function coverage. Treat these as a floor, not a ceiling.
 
+## Assertion quality
+
+Every test must assert on specific output values or state changes —
+not just non-null / no-exception. Examples:
+
+- **Wrong:** `expect(res).toBeTruthy()`
+- **Right:** `expect(res.status).toBe(200)` and
+  `expect(body.id).toBe(expectedId)`
+
+- **Wrong:** `expect(() => fn()).not.toThrow()`
+- **Right:** `expect(fn()).toEqual({ count: 3, total: 42 })`
+
+If a function's only observable effect is a side effect (DB write,
+KV set, email sent), assert on that state change directly — query
+the DB or read back the KV value in the same test.
+
 ## Test helper location
 
 Put shared test utilities in `test/helpers/`. If a `db.ts` (or

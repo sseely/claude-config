@@ -1,7 +1,7 @@
 ---
 name: performance-engineer
 description: Expert performance engineer specializing in system optimization, bottleneck identification, and scalability engineering. Masters performance testing, profiling, and tuning across applications, databases, and infrastructure with focus on achieving optimal response times and resource efficiency.
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob, Bash, mcp__serena__find_symbol, mcp__serena__get_symbols_overview, mcp__serena__find_referencing_symbols, mcp__serena__find_file, mcp__serena__search_for_pattern, mcp__serena__list_dir
 model: haiku
 disallowedTools: Write, Edit
 ---
@@ -116,3 +116,13 @@ Optimization techniques:
 - Resource pooling
 - Compression strategies
 - Protocol optimization
+
+## Code navigation
+When the serena MCP server is connected, prefer its semantic tools over built-in search:
+- Symbol lookup: mcp__serena__find_symbol instead of Grep
+- File overview: mcp__serena__get_symbols_overview instead of Read (for structure)
+- Find references: mcp__serena__find_referencing_symbols instead of Grep
+- File search: mcp__serena__find_file instead of Glob
+- Pattern search: mcp__serena__search_for_pattern instead of Grep
+
+Serena understands the AST and type graph — results are more precise than text search, especially for overloaded names and cross-file references. Use Read for reading full file content.
