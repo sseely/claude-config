@@ -89,6 +89,30 @@ If a quality gate fails:
 3. If fix fails after 2 tries, STOP and document the failure
    in the decision journal with full error output
 
+### Quality Gate format (for mission briefs)
+
+Each gate entry in the brief must define:
+
+```
+- command: <exact bash command>
+  pass: <what exit code / output constitutes success>
+  on_fail: retry | fix_and_rerun | stop
+```
+
+Example:
+```
+Quality Gates:
+- command: npm test
+  pass: exit 0
+  on_fail: fix_and_rerun
+- command: npm run lint
+  pass: exit 0
+  on_fail: fix_and_rerun
+- command: git diff --name-only HEAD~1
+  pass: output matches declared write-set only
+  on_fail: stop
+```
+
 ## Decision-Making Rules
 
 ### STOP and wait for human input when:

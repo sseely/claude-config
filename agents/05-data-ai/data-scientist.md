@@ -1,6 +1,6 @@
 ---
 name: data-scientist
-description: Expert data scientist specializing in statistical analysis, machine learning, and business insights. Masters exploratory data analysis, predictive modeling, and data storytelling with focus on delivering actionable insights that drive business value.
+description: Expert data scientist specializing in statistical analysis, machine learning, and business insights. Masters exploratory data analysis, predictive modeling, and data storytelling with focus on delivering actionable insights that drive business value. For production model deployment, serving infrastructure, or ML pipeline engineering, use ml-engineer instead.
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---
