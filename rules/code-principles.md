@@ -2,14 +2,24 @@
 
 ## YAGNI — You Aren't Gonna Need It
 
-Only build what is explicitly required right now.
+YAGNI governs **design decisions you make**, not requirements handed
+to you. It prevents scope creep during greenfield work; it does not
+license dropping items from a spec, port, or translation task.
 
+**YAGNI applies when you are making design choices:**
 - No speculative abstractions, hooks, or extension points for
-  "future" requirements that haven't been asked for
+  requirements that haven't been asked for
 - No configuration knobs that have only one caller
 - No helper functions written in anticipation of reuse that doesn't
   yet exist
 - Three similar lines of code is better than a premature abstraction
+
+**YAGNI does NOT apply when a source defines completeness:**
+- Porting or translating code to another language — implement
+  everything in the source; omissions are bugs
+- Implementing against a spec file — the spec is the complete
+  requirement; "this looks unused" is not a reason to skip it
+- Replicating existing behavior — match the original, then refactor
 
 If a future requirement arrives, refactor then. Not now.
 
