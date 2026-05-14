@@ -320,14 +320,45 @@ Give agents this scoring rubric verbatim:
 
 Filtering rules after scoring:
 
-- **Drop** any finding scored below **50** — false positive or too minor
-  to act on.
-- **Downgrade severity** for any finding scored 50–64: cap at Suggestion
+- **Drop** any finding scored **0** — confirmed false positive with no
+  residual value.
+- **Classify as Note or Suggestion** for scores **1–49**: do not drop;
+  apply the criteria below to decide which bucket.
+- **Downgrade severity** for scores **50–64**: cap at Suggestion
   regardless of what the reviewing agent assigned.
-- **Keep as-is** findings scored 65 and above.
-- **Never drop** a finding scored 75+ regardless of severity — always
+- **Keep as-is** findings scored **65 and above**.
+- **Never drop** a finding scored **75+** regardless of severity — always
   include it.
 - **Positives** skip scoring — include all of them in the final report.
+
+### Classifying below-50 findings: Note vs. Suggestion
+
+**Suggestion** — the code could be improved but it is low-priority:
+- Structural or stylistic improvement with no risk implication
+- Refactoring opportunity (extract function, simplify logic)
+- Pattern inconsistency that would improve readability or consistency
+- Missing check unlikely to be hit under normal conditions
+
+**Note** — a concern worth preserving as an inline code comment so
+future readers are aware even if no change is warranted now:
+- A latent risk that would surface only under specific conditions
+- An assumption in the code that could break if circumstances change
+- A concurrency hazard, ordering dependency, or shared-state concern
+- An edge case the author likely did not consider
+- A design trade-off with future maintenance implications
+
+For each **Note** finding, produce a suggested inline comment to add
+at the flagged location:
+
+```
+// Code review: <what was found>. Revisit if <triggering condition>.
+```
+
+Example:
+```
+// Code review: concurrent writes to this cache are not synchronized.
+// Revisit if this handler is ever called from multiple goroutines.
+```
 
 False positives to instruct scoring agents to watch for:
 
@@ -353,10 +384,14 @@ severity:
 **Critical** — must fix before merge  
 **Warning** — should fix  
 **Suggestion** — consider improving  
+**Note** — low-confidence finding; consider adding the suggested inline comment  
 **Positive** — good practices worth noting  
 
-For each finding include: `file:line`, confidence score, what the issue
-is, and a concrete fix or recommendation.
+For Critical, Warning, and Suggestion: include `file:line`, confidence
+score, what the issue is, and a concrete fix or recommendation.
+
+For Notes: include `file:line`, what the review surfaced, and the
+suggested inline comment text ready to paste.
 
 End with a one-line verdict: **APPROVE**, **APPROVE WITH NITS**, or
 **REQUEST CHANGES**.
