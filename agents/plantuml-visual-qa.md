@@ -38,7 +38,14 @@ and generates `test-results/visual-qa/index.html` with side-by-side images.
 ### Step 3 — Inspect the report
 
 Open `test-results/visual-qa/index.html` in a browser (or use the Playwright
-`browser_navigate` tool to open it). Scan each row for the differences below.
+`browser_navigate` tool to open it). The report has two sections:
+
+- **Top table** — one row per diagram type (sequence, class, …) using a single
+  canonical example each
+- **Bottom table** — one row per dot fixture (35 slugs), labelled
+  "Dot (@startdot) — per-fixture"
+
+Scan all rows for the differences below.
 
 ## Accuracy Guidelines
 
@@ -147,10 +154,52 @@ wrong semantics = Tier 1 failure.
 | Sequence return message | Dashed line + open arrowhead |
 | Use case `<<extend>>` / `<<include>>` | Dashed line + open arrow + stereotype label visible |
 
-#### Principle 5 — No viewport clipping
+#### Principle 5 — Dot graph layout quality
+
+Applies only to `@startdot` diagrams. Evaluate each fixture row in the
+"Dot" section of the report against these criteria.
+
+**Layout topology (Tier 1):**
+- If node A appears above node B in the reference, A must appear above B
+  locally. Rank inversion is a Tier 1 failure.
+- No edge crossing in the local render that is absent in the reference. An
+  increased crossing count is a Tier 1 failure.
+- If the reference shows a back-edge routing around the graph (curving up
+  and over or down and under), the local render must route it in the same
+  direction — not as a straight line through intermediate nodes.
+
+**Label and annotation placement (Tier 1):**
+- Edge labels must appear approximately at the midpoint of the edge, not
+  pushed to either endpoint or into an adjacent node.
+- Title text (if present) must be horizontally centered at the same
+  relative position as in the reference.
+- Node labels must be fully inside their node boundaries — not overflowing
+  or clipped.
+
+**Node shape fidelity (Tier 1):**
+- Any shape change between reference and local is a Tier 1 failure: a
+  diamond must remain a diamond, a hexagon a hexagon, an ellipse an
+  ellipse. "Bigger but same shape" is acceptable; "different shape" is not.
+- Nodes rendered without any visible boundary when the reference shows a
+  boundary (or vice versa) are Tier 1 failures.
+
+**Cluster and subgraph containment (Tier 1):**
+- Any node shown inside a cluster/subgraph boundary in the reference must
+  be visually inside that boundary locally. A node that migrates outside
+  its containing cluster is a Tier 1 failure.
+
+**Color and style fidelity (Tier 1):**
+- Skinparam-specified colors (node fill, border, font, arrow) must be
+  reflected in the local render. A node with a red background in the
+  reference that renders white locally is a Tier 1 failure.
+- Edge line style (solid vs dashed) and arrowhead type must match the
+  reference for the same edge.
+
+#### Principle 6 — No viewport clipping
 
 No structural element — node, label, edge, arrowhead — may be cut off at the
 SVG viewBox boundary. Any clipping is a Tier 1 failure. This includes:
+
 
 - Sequence participant footer boxes at the bottom
 - Edge labels or arcs near the diagram boundary
@@ -159,7 +208,7 @@ SVG viewBox boundary. Any clipping is a Tier 1 failure. This includes:
 
 ---
 
-If all five principles and the baseline checks pass, the comparison is a
+If all six principles and the baseline checks pass, the comparison is a
 **pass**. Do not iterate on cosmetic issues.
 
 **Tier 2 — Pixel similarity (tiebreaker only)**
@@ -183,8 +232,10 @@ If iteration is stuck on pixel differences, log and stop:
 | Colored badges on classifier headers | Intentional UX enhancement |
 | `dominant-baseline: middle` text centering | Corrects SVG baseline asymmetry |
 | Monochrome vs colored visibility icons | Style choice |
-| Sub-pixel coordinate variance | GraphViz heuristics produce one valid layout among many |
+| Sub-pixel coordinate variance | Graphviz heuristics produce one valid layout among many |
 | Font anti-aliasing differences | Platform rendering, not a correctness issue |
+| Dot: node spacing slightly different | Smetana uses integer arithmetic; our port may have fractional offsets |
+| Dot: equivalent-quality layout with different crossing order | Graphviz crossing minimization is heuristic; a different valid minimum is acceptable |
 
 ### Acceptable cosmetic differences (Tier 1 passing — do not fix)
 
@@ -205,6 +256,16 @@ When you find a "must match" difference:
 3. Identify the likely source file (layout.ts, renderer.ts, parser.ts)
 4. Suggest a fix or ask the user how to proceed
 
+When reporting any Tier 1 failure, always include this reminder to the
+caller so they know where to look for the authoritative algorithm source:
+
+> **Reference sources for investigation:**
+> - Graphviz C source: `~/git/graphviz/lib/dotgen/` — authoritative dot
+>   algorithm (rank.c, mincross.c, position.c, dotsplines.c, acyclic.c)
+> - PlantUML / Smetana Java source: `~/git/plantuml/` — the Java port of
+>   the same graphviz 2.38 code; useful when cross-referencing behavior
+>   with the upstream plantuml-js is porting
+
 When all "must match" criteria pass, report: "Visual QA passed — only
 cosmetic differences observed."
 
@@ -217,6 +278,9 @@ cosmetic differences observed."
 - `usecase` — use case diagrams with actors
 - `activity` — activity diagrams
 - `object` — object instance diagrams
+- `dot` — Graphviz `@startdot` diagrams; 35 per-fixture reference images in
+  `tests/visual/reference/dot/`; evaluated with Principle 5 (layout quality)
+  criteria instead of the anatomy rules above
 
 ## Project Context
 

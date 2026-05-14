@@ -166,7 +166,6 @@
       "/Users/scottseely/git/plantuml-js/.claude"
     ]
   },
-  "model": "opusplan",
   "hooks": {
     "UserPromptSubmit": [
       {
@@ -221,5 +220,6 @@
         "url": "https://github.com/anthropics/claude-plugins-official.git"
       }
     }
-  }
+  },
+  "agentPushNotifEnabled": true
 }
