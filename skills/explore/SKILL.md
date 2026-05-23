@@ -16,8 +16,9 @@ Perform a full architecture exploration of the current project and its related r
 
 4. Use `gh repo list $ORG --limit 200 --json name,description` to list repos in the org.
 5. Read the current project's name, dependencies, and any service references (imports, config files, docker-compose, README) to infer which other repos in the org are directly related.
-6. For each related repo that isn't already cloned locally alongside the current project:
-   - Clone it into `docs/architecture/repos/<repo-name>` using `gh repo clone $ORG/<repo-name> docs/architecture/repos/<repo-name>`
+6. Determine the parent directory of the current project: `PARENT=$(git rev-parse --show-toplevel | xargs dirname)`.
+7. For each related repo that isn't already cloned as a sibling of the current project:
+   - Clone it into `$PARENT/<repo-name>` using `gh repo clone $ORG/<repo-name> $PARENT/<repo-name>`
 
 ## Analyze each repository (current + cloned)
 
