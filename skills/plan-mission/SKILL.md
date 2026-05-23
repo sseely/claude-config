@@ -22,9 +22,13 @@ built.
 
 ## Phase 1 — Understand the codebase
 
-Check whether `architecture-temp/overview.md` exists in the current
-project. If it does, read it and skip to Phase 2. If it doesn't,
-tell the user:
+Check whether an architecture overview exists in the current project.
+Look in this order:
+
+1. `docs/architecture/overview.md`
+2. `architecture/overview.md` (top-level)
+
+If found, read it and skip to Phase 2. If neither exists, tell the user:
 
 > No architecture overview found. Run `/explore` first for the
 > best results, or I can do a lighter-weight scan now.
