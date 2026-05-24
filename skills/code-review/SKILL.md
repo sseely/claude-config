@@ -61,7 +61,7 @@ absent from the output, investigate why before proceeding:
 - **Lock files and dependency manifests** (`package-lock.json`,
   `requirements.txt`, `Gemfile.lock`) — absence is itself a finding
 
-## Step 2 — Ten parallel agents (launch all simultaneously)
+## Step 2 — Eleven parallel agents (launch all simultaneously)
 
 Each agent receives the full file inventory from Step 1. Agents use
 Read, Grep, Glob, Bash, WebSearch, and WebFetch. They must work through
@@ -220,7 +220,7 @@ Use WebSearch and WebFetch to check current stable versions and CVEs.
 - No sensitive data (tokens, PII, raw upstream errors) in logs
 - Errors logged with enough context to diagnose without reproduction
 - Concurrent-request handlers: correlation/trace ID in every log line
-- Fire-and-forget background tasks: errors surfaced, not silently lost
+
 
 ---
 
@@ -245,10 +245,6 @@ Use WebSearch and WebFetch to check current stable versions and CVEs.
 - Missing pagination on list endpoints
 - Synchronous/blocking operations that should be async
 - Unbounded loops or recursion over large collections
-- **Resource allocation inside long-lived objects:** any DB client,
-  HTTP client, or connection created per request/message inside a
-  Durable Object, singleton, or worker with long lifetime — allocate
-  once, reuse, or pass in from the caller
 - Missing DB indexes implied by query patterns
 - Large payloads serialized unnecessarily
 - Missing cache headers on static/infrequent responses
@@ -310,7 +306,7 @@ Use WebSearch and WebFetch to check current stable versions and CVEs.
 
 ## Step 3 — Deduplication pass (run after all 11 agents complete)
 
-Run a single dedup agent. Give it all findings from all 10 agents.
+Run a single dedup agent. Give it all findings from all 11 agents.
 
 The dedup agent must:
 
