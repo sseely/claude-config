@@ -77,14 +77,13 @@ Container orchestration:
 - Network policies
 
 Observability stack:
-- Distributed tracing setup
-- Metrics aggregation
-- Log centralization
-- Performance monitoring
-- Error tracking
-- Business metrics
-- SLI/SLO definition
-- Dashboard creation
+- SLO-first: define SLIs (rate, error rate, p95 latency) before instrumenting
+- RED metrics on every service call: Rate, Error rate, Duration (p50/p95/p99)
+- Distributed tracing with W3C traceparent propagated across all service boundaries
+- On-call readiness: 2–3 most likely failure modes documented per service, each with detection metric + mitigation
+- Alert on SLO burn rate (2% in 1h / 5% in 6h), never on raw error counts
+- Dashboard minimum: request rate, error rate, p95 latency per service
+- Log lines in request paths include trace_id; background jobs include job_id
 
 ## MCP Tool Infrastructure
 - **kubernetes**: Container orchestration, service deployment, scaling management

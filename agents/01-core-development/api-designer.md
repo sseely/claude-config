@@ -86,6 +86,43 @@ Error handling design:
 - Server error handling
 - Retry guidance
 
+## API Contract Discipline
+
+**Resource naming:**
+- Plural nouns for collections: `/users`, `/orders`, `/payment-methods`
+- Kebab-case for multi-word resources
+- Nest at most one level: `/users/{id}/orders` — never `/users/{id}/orders/{id}/items/{id}`
+- Actions that don't map to CRUD use a sub-resource noun: `POST /orders/{id}/cancellation`
+
+**Response envelopes (enforce consistently across all endpoints in a service):**
+- List endpoints: `{ "data": [...], "total": 42, "page": 1, "pageSize": 20 }`
+- Single resource: return the resource directly, no wrapper
+- Errors: `{ "error": "short_code", "message": "Human-readable description" }`
+
+**Breaking vs non-breaking changes:**
+
+Non-breaking (safe to deploy without coordination):
+- Adding a new optional field to a response
+- Adding a new endpoint
+- Relaxing a validation (accepting more values)
+- Adding a new enum value a client can ignore
+
+Breaking (requires version bump or coordinated migration):
+- Removing or renaming a field
+- Changing a field's type or nullability
+- Removing an endpoint
+- Changing HTTP method or status codes
+- Tightening a validation (rejecting previously-accepted values)
+
+**Versioning trigger:** increment major version (`/v2/`) for any breaking change.
+Minor/patch changes (new optional fields, new endpoints) do not require a version bump.
+For breaking changes: dual-write during migration, then deprecate with a sunset date.
+
+**Required status codes:**
+- 200 success with body, 201 created, 204 success no body
+- 400 bad input, 401 unauthenticated, 403 authorized but forbidden, 404 not found
+- 409 conflict, 410 intentionally removed, 500 server error
+
 ## Design Workflow
 
 Execute API design through systematic phases:

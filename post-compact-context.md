@@ -29,3 +29,37 @@ disk is canonical.
 - After completing a task, briefly summarize what was done and the
   reasoning behind any non-obvious decisions.
 - One commit per completed task; Conventional Commits format.
+
+---
+
+## Coverage Rule (restored)
+
+Target 90% line coverage, 90% branch coverage, 90% function coverage as a floor.
+Never approve or merge code that drops below these thresholds.
+
+---
+
+## Parallelism Rule (restored)
+
+Before multi-agent work: list subtasks, mark dependencies, assign file ownership
+(one writer per file), batch independent work in parallel.
+
+**Autonomous mode exception:** When a mission brief is active, skip the user
+review step — log the execution plan to decision-journal.md instead.
+
+---
+
+## Agent Delegation (restored)
+
+Agents live in `~/.claude/agents/`. Delegate when the task clearly falls within
+a specialist's domain. Default to handling directly for tasks under ~30 min.
+Model routing: Opus for planning/architecture, Sonnet for implementation,
+Haiku for scoring/dedup/validation.
+
+---
+
+## Security: Error Responses (restored)
+
+Return generic error messages to clients ("Bad Request", "Internal Server Error").
+Never expose stack traces, SQL errors, file paths, or internal IDs in responses.
+Log full details server-side at ERROR level.

@@ -39,6 +39,12 @@ scan:
 1. Read `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`,
    `*.csproj`, `*.sln`, or equivalent to identify the stack.
 2. Read the project's `CLAUDE.md` or `README.md` if present.
+2a. If a `src/` or `app/` directory exists, read one representative API
+    handler file (look for files named `handler`, `controller`, `router`,
+    or the first file in `routes/`). Record the request/response shape.
+2b. If an ORM or schema file exists (look for `schema.prisma`, `models/`,
+    `db/models/`, `*.model.ts`, `*.entity.ts`), read one data model.
+    Record its fields and relationships.
 3. Identify the test framework and how to run tests
    (`npm test`, `pytest`, `go test`, etc.).
 4. Identify the linter and how to run it.
@@ -51,19 +57,31 @@ write files yet.
 
 ## Phase 2 — Identify the blast radius
 
+Think system-first, files-last. Work through these four layers in order
+before producing the file table.
+
+**Layer 1 — Data model**
+Does the feature change a schema, data format, or storage structure?
+What reads the current format? Is a migration required, and can it
+run without downtime?
+
+**Layer 2 — API contracts**
+Does the feature change request/response shapes, status codes, or
+field semantics for any endpoint or event? Who are the consumers
+(other services, mobile clients, third parties)? Is this a breaking
+or non-breaking change per `architecture.md`?
+
+**Layer 3 — Service dependencies**
+Does the feature add, remove, or change a call to another service,
+queue, or external API? What is the failure mode if that dependency
+is unavailable?
+
+**Layer 4 — Files**
+Only after the above: which source files change, which are created,
+and which are read-only context.
+
 Using the codebase understanding from Phase 1 and the feature
-description:
-
-1. Identify which existing files will need modification.
-   For each file, note *what* changes and *why*.
-2. Identify which new files will need to be created.
-3. Identify which files are read-only context (need to understand
-   but not modify).
-4. Check for existing tests covering the files that will change.
-5. Identify external dependencies: new packages, API calls,
-   env vars, database changes.
-
-Present findings to the user as a table:
+description, answer each layer, then present the file table:
 
 ```
 | File | Action | What changes |
@@ -72,6 +90,8 @@ Present findings to the user as a table:
 | src/api/confirm.js | Create | Token verification endpoint |
 | ... | ... | ... |
 ```
+
+Also note: new packages, env vars, and database changes.
 
 Ask: **"Does this blast radius look right? Anything missing or
 out of scope?"**
@@ -101,7 +121,59 @@ Present all decisions together and ask the user to approve or
 override each one. These become the "Architecture Decisions
 (pre-made)" section of the brief.
 
-## Phase 4 — Decompose into tasks
+## Phase 4 — Operational readiness
+
+Before decomposing tasks, answer these questions and present the
+answers for user confirmation. These are not architecture decisions
+(those are Phase 3) — they are operational requirements that must
+be satisfied before the feature can be considered done.
+
+
+**Observability**
+- What are the SLIs for this feature? (rate, error rate, latency
+  for each key operation)
+- What are the alert thresholds — i.e. what value of each SLI means
+  "this is broken"?
+- What traces need instrumentation? (every new service call, every
+  background job)
+- Is there an existing dashboard to update, or does one need to be
+  created?
+
+**Rollback strategy**
+Classify the change as one of:
+- **Reversible** — can be rolled back by reverting the deploy
+- **Reversible with migration** — can be rolled back, but requires
+  a compensating data migration
+- **Irreversible** — cannot be rolled back once deployed to production
+
+If Irreversible: flag it as a mission brief constraint and require
+explicit user acknowledgement before proceeding.
+
+**Scalability envelope**
+- What is the expected load at launch? At 10x?
+- Is there a component that becomes a bottleneck before 10x? (DB
+  query, cache miss, external API rate limit, lock contention?)
+- Is the feature gated behind a flag for gradual rollout?
+
+**On-call story**
+- What are the 2–3 most likely production failure modes?
+- For each: how does an on-call engineer detect it (metric, log
+  pattern, alert)? What is the immediate mitigation?
+- Does this require a new runbook entry or `// on-call:` comment?
+
+**Backwards compatibility**
+- Does this change any API contract (request shape, response shape,
+  status codes, field semantics)?
+- Does this change any data schema visible to consumers?
+- If yes: what is the migration strategy? (versioning, dual-write,
+  deprecation period, coordinated deploy?)
+
+Ask: **"Does this operational readiness picture look right?
+Anything to add or change before we decompose tasks?"**
+
+Wait for user confirmation before proceeding.
+
+## Phase 5 — Decompose into tasks
 
 Break the work into tasks. File ownership and agent prompt structure
 follow `parallelism.md`. Additionally:
@@ -111,15 +183,21 @@ follow `parallelism.md`. Additionally:
 3. Every task that modifies logic includes its tests (TDD)
 4. Write 2-5 acceptance criteria per task in Given/When/Then format
    — each becomes both the definition of done and the test spec
+5. For each task that another task depends on, declare its output interface
+   — the data shape the dependent task will consume. Keep it minimal:
+   field names, types, and any nullability constraints. This becomes the
+   "Interface contracts" section in the task file.
 
 Present the task sequence to the user:
 
 ```
 Batch 1 (parallel):
   T1: [description] → agent: [type], writes: [files]
+      Interface outputs: { tokenId: string, expiresAt: Date } (consumed by T2)
       - Given a valid token, when POST /confirm, then 201 + subscription activated
       - Given an expired token, when POST /confirm, then 410 Gone
   T2: [description] → agent: [type], writes: [files]
+      Interface inputs: { tokenId: string, expiresAt: Date } (from T1)
 
 Batch 2 (parallel, after Batch 1):
   T3: [description] → agent: [type], writes: [files], needs: T1
@@ -131,7 +209,7 @@ be split, merged, or reordered?"**
 
 Wait for user confirmation before proceeding.
 
-## Phase 5 — Define stop conditions
+## Phase 6 — Define stop conditions
 
 Propose stop conditions based on the feature's risk profile:
 
@@ -149,7 +227,7 @@ on its own).
 
 Present both lists. Ask: **"Any stop conditions to add or remove?"**
 
-## Phase 6 — Generate the mission brief and project settings
+## Phase 7 — Generate the mission brief and project settings
 
 The brief is a **directory of focused documents**, not a single
 monolithic file. This keeps each doc within a healthy context
@@ -187,7 +265,7 @@ overview docs.
 2. Write `README.md` as the overview and index:
    - Objective (one paragraph)
    - Branch info
-   - Constraints (stop/push-forward conditions from Phase 5)
+   - Constraints (stop/push-forward conditions from Phase 6)
    - Quality gate commands (from Phase 1)
    - Table of batches with status checkboxes
    - Links to every other doc in the plan
@@ -208,7 +286,14 @@ overview docs.
    agent prompt structure from `parallelism.md`:
    - Context, task, write-set, read-set, architecture decisions
      relevant to this task, interface contracts, acceptance
-     criteria (Given/When/Then from Phase 4), quality bar
+     criteria (Given/When/Then from Phase 5), quality bar
+   - **Observability requirements** — which SLIs this task must
+     instrument, what trace spans to add, whether a dashboard
+     panel needs updating. If none, write "N/A — no new
+     observable operations."
+   - **Rollback notes** — the rollback classification from Phase
+     4 (Reversible / Reversible with migration / Irreversible)
+     and any per-task migration steps required.
    - **Scope read-set references.** Instead of listing whole
      files, point to the relevant section or line range:
      `decisions.md#token-storage`, `src/api/subscribe.js:15-40`.
@@ -238,7 +323,7 @@ overview docs.
    `~/.claude/hooks/autonomous-toggle.sh`).
 9. Ensure `plans/` and `.claude/` are in `.gitignore`.
 
-## Phase 7 — Pre-flight check
+## Phase 8 — Pre-flight check
 
 Before handing off, verify:
 
@@ -249,6 +334,11 @@ Before handing off, verify:
 - [ ] The feature branch doesn't already exist
 - [ ] No uncommitted changes in the working tree that would
       interfere
+- [ ] Every task spec includes observability requirements (even
+      if "N/A")
+- [ ] Every task spec includes rollback classification
+- [ ] Any Irreversible change has explicit user acknowledgement
+      recorded in `decisions.md`
 
 Report results. If anything fails, fix it or flag it.
 
@@ -261,7 +351,7 @@ Print the path to the generated brief and tell the user:
 
 ## Rules
 
-- Never skip a user confirmation step. Phases 2, 3, 4, and 5
+- Never skip a user confirmation step. Phases 2, 3, 4, 5, and 6
   each require explicit user approval.
 - If the user changes a decision, propagate the change to all
   affected tasks before moving forward.
@@ -301,3 +391,18 @@ These rules apply to every file generated in the plan directory:
 - **Logical directory nesting.** Group by batch, not by doc type.
   The executor works batch-by-batch, so the file structure should
   match the execution order.
+
+## Model Routing
+
+Use these defaults when invoking agents during brief generation:
+
+| Phase | Task | Model |
+|-------|------|-------|
+| Phase 3 | Architecture decisions (multiple competing trade-offs) | Opus + adaptive thinking |
+| Phase 4 | Operational readiness questions | Sonnet |
+| Phase 5 | Task decomposition | Opus + adaptive thinking |
+| Phase 7 | Brief file generation (mechanical writing) | Sonnet |
+| Parallel review agents in Phase 2 | File-by-file analysis | Sonnet |
+
+Request extended thinking for Phase 3 and 5 explicitly:
+"Think through the trade-offs before recommending an approach."

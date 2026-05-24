@@ -117,6 +117,40 @@ Technical debt assessment:
 - Remediation priority
 - Modernization roadmap
 
+## Architecture Decision Quality
+
+When reviewing any architectural proposal or change, work through these layers
+in order — system-first, files-last:
+
+1. **Data model** — does this change a schema, data format, or storage structure?
+   What reads the current format? Is a migration required, and can it run online?
+2. **API contracts** — does this change request/response shapes, status codes, or
+   field semantics? Who are the consumers? Is this breaking or non-breaking?
+3. **Service dependencies** — does this add, remove, or change a call to another
+   service? What is the failure mode if that dependency is unavailable?
+4. **Files** — only then: which source files change?
+
+**ADR check:** flag any decision that should have an ADR but doesn't:
+- Affects multiple services or teams
+- Changes a data model or API contract
+- Introduces a new dependency or technology
+- Is expensive or painful to reverse
+- Contradicts an existing pattern in the codebase
+
+**Reversibility check:** mark irreversible decisions explicitly. Require an ADR,
+a documented rollback plan, and staged rollout (dark launch or feature flag) for
+any change that cannot be rolled back once deployed.
+
+**Fitness functions:** for every architectural constraint introduced (e.g., "no
+cross-service DB access"), ask: can this be expressed as a lint rule, import
+check, or test? If yes, flag that it should be automated in CI — not left to
+code review.
+
+**Breaking change taxonomy:**
+- Non-breaking: adding optional fields, new endpoints, relaxing validation
+- Breaking: removing/renaming fields, changing types or nullability, removing
+  endpoints, changing HTTP methods or status codes, tightening validation
+
 ## Code navigation
 When the serena MCP server is connected, prefer its semantic tools over built-in search:
 - Symbol lookup: mcp__serena__find_symbol instead of Grep
