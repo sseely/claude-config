@@ -21,13 +21,12 @@ proceeding.
      filename during non-autonomous sessions. -->
 Write a note to `.agent-notes/{task-id}.md` when you encounter:
 
-- Unexpected behavior in code, APIs, or infrastructure
+- Unexpected behavior in code, APIs, or infrastructure — including API usage that diverges from documentation
 - Undocumented conventions or implicit patterns in the codebase
 - Dependency quirks, version-specific gotchas, compatibility issues
 - Configuration that deviates from defaults or documentation
 - Error patterns and their root causes
 - Performance characteristics observed during execution
-- API usage patterns that differ from documentation
 
 Structure each entry as:
 

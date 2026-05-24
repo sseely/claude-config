@@ -6,6 +6,8 @@ are *written*.
 
 ## Priority order (highest first)
 
+### Core structure principles
+
 1. **Pure functions first.** Extract logic into pure functions — data in,
    data out, no side effects. Pure functions are the primary unit of
    testable code. DI is for the remaining impure seams, not the default
@@ -25,6 +27,8 @@ are *written*.
    A, make B's inputs the outputs of A. Invalid call sequences should be
    structurally impossible (builders, typed state machines), not just
    documented.
+
+### Testing mechanics
 
 5. **Inject non-determinism.** Clocks, random, UUIDs, "now" — pass these
    in or produce them from a controlled source. This is the
