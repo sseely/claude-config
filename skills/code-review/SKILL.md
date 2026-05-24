@@ -274,7 +274,41 @@ Use WebSearch and WebFetch to check current stable versions and CVEs.
 
 ---
 
-## Step 3 — Deduplication pass (run after all 10 agents complete)
+### Agent 11 — Operability & Production Readiness
+
+- **Observability coverage:** are new external calls, state changes,
+  and background jobs instrumented with metrics (rate, error rate,
+  duration) and traces? Are new error paths surfaced to alerting, or
+  do they fail silently?
+- **Silent failures:** fire-and-forget operations that catch errors
+  but do not log, metric, or alert — they will be invisible in
+  production
+- **On-call debuggability:** can an engineer diagnose a production
+  failure without pushing code? Check for: trace IDs in log lines,
+  structured error context, meaningful HTTP error bodies (not raw
+  stack traces), and queryable metrics
+- **Blast radius documentation:** for changes to shared interfaces,
+  data models, or API contracts, is the impact on consumers noted
+  in a comment or migration doc? A change that silently breaks
+  a consumer is worse than one that breaks loudly
+- **Rollback path:** for irreversible changes (schema migrations,
+  external API contract changes, data format changes), is the
+  irreversibility documented and explicitly tested? Is there a
+  compensating migration if rollback is required?
+- **Feature flag coverage:** for significant behavior changes, is
+  the new behavior gated behind a flag for gradual rollout and
+  instant kill-switch?
+- **Runbook coverage:** for new failure modes (new external dep,
+  new background job, new queue consumer), is there a runbook
+  reference or an `// on-call:` inline comment describing the
+  mitigation?
+- **Health check coverage:** if a new service dependency or
+  component is introduced, is it included in health checks and
+  readiness probes?
+
+---
+
+## Step 3 — Deduplication pass (run after all 11 agents complete)
 
 Run a single dedup agent. Give it all findings from all 10 agents.
 
