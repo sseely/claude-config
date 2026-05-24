@@ -55,6 +55,7 @@ All rules live in `~/.claude/rules/`:
 - **observability.md** — SLO-first design, RED metrics, distributed tracing, alerting
 - **architecture.md** — blast radius layers, ADRs, fitness functions, reversibility
 - **research-sources.md** — 5-tier source hierarchy for technical claims and design decisions
+- **prompting-quality.md** — constraint keywords, specificity, instruction bloat, session hygiene
 
 ## Agent Memory
 

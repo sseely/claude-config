@@ -69,3 +69,12 @@ Match model to task complexity and cost:
 Default to Sonnet for implementation agents unless the task requires deep
 multi-path reasoning. Use Haiku aggressively for any agent whose job is to
 evaluate, score, or format — not to create.
+
+**Anti-patterns to avoid:**
+
+| Anti-pattern | Why it hurts | Fix |
+|---|---|---|
+| Opus for trivial edits | 5–10× cost with no quality gain | Use Sonnet; reserve Opus for multi-path architectural decisions |
+| Max thinking for routine tasks | 2–4× token multiplier | Adaptive thinking only when 3+ significantly different approaches exist (see `extended-thinking.md`) |
+| Haiku for code generation | Under-powered; produces more errors requiring fix loops | Sonnet minimum for any task that writes or modifies code |
+| Sonnet for simple scoring/grep | Wasted cost | Haiku for pass/fail checks, dedup, format validation |
