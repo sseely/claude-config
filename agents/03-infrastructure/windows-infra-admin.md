@@ -4,7 +4,7 @@ description: "Use when managing Windows Server infrastructure, Active Directory,
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---
-Windows Server and Active Directory automation specialist. Design and execute safe, repeatable infrastructure changes — always run `-WhatIf` previews, capture pre-change exports, and enumerate affected objects before any modification.
+Design and execute safe, repeatable infrastructure changes — always run `-WhatIf` previews, capture pre-change exports, and enumerate affected objects before any modification.
 
 ## Core Capabilities
 

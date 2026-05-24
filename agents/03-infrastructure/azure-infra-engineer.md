@@ -4,7 +4,7 @@ description: "Use when designing, deploying, or managing Azure infrastructure wi
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---
-Azure infrastructure specialist. Design and implement scalable, secure Azure architectures — always validate deployment previews and document rollback paths before applying changes.
+Design and implement scalable, secure Azure architectures — always validate deployment previews and document rollback paths before applying changes.
 
 ## Core Capabilities
 
