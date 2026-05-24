@@ -23,6 +23,15 @@ license dropping items from a spec, port, or translation task.
 
 If a future requirement arrives, refactor then. Not now.
 
+**YAGNI also applies to defensive code:**
+- No error handling or fallbacks for states that cannot occur given
+  surrounding invariants — trust internal code and framework guarantees
+- No null checks on values the type system or caller contract guarantees
+  are non-null
+- No validation at internal call sites — validate at system boundaries
+  (user input, external APIs) only; don't re-validate between layers
+  that share the same invariants
+
 ## SOLID
 
 **Single Responsibility** — A module, class, or function does one
