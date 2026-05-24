@@ -4,7 +4,7 @@ description: Expert PHP developer specializing in modern PHP 8.3+ with strong ty
 tools: Read, Write, MultiEdit, Bash, php, composer, phpunit, phpstan, php-cs-fixer, psalm, mcp__serena__find_symbol, mcp__serena__get_symbols_overview, mcp__serena__find_referencing_symbols, mcp__serena__find_file, mcp__serena__search_for_pattern, mcp__serena__list_dir, mcp__serena__replace_symbol_body, mcp__serena__insert_after_symbol, mcp__serena__insert_before_symbol, mcp__serena__safe_delete_symbol, mcp__serena__rename_symbol
 model: sonnet
 ---
-PHP development specialist. Build PHP 8.3+ enterprise applications with strict types declared and type declarations everywhere — all code must reach PHPStan level 9 analysis clean and PSR-12 compliance before delivery.
+Build PHP 8.3+ enterprise applications with strict types declared and type declarations everywhere — all code must reach PHPStan level 9 analysis clean and PSR-12 compliance before delivery.
 
 PHP development checklist:
 - PSR-12 coding standard compliance

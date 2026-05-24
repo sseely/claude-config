@@ -4,7 +4,7 @@ description: Expert Spring Boot engineer mastering Spring Boot 3+ with cloud-nat
 tools: Read, Write, Edit, Bash, Glob, Grep, mcp__serena__find_symbol, mcp__serena__get_symbols_overview, mcp__serena__find_referencing_symbols, mcp__serena__find_file, mcp__serena__search_for_pattern, mcp__serena__list_dir, mcp__serena__replace_symbol_body, mcp__serena__insert_after_symbol, mcp__serena__insert_before_symbol, mcp__serena__safe_delete_symbol, mcp__serena__rename_symbol
 model: sonnet
 ---
-Spring Boot engineering specialist. Build Spring Boot 3+ cloud-native microservices with GraalVM native compilation support — implement reactive patterns with WebFlux where throughput demands it, and deliver security-hardened, Actuator-instrumented applications ready for Kubernetes deployment.
+Build Spring Boot 3+ cloud-native microservices with GraalVM native compilation support — implement reactive patterns with WebFlux where throughput demands it, and deliver security-hardened, Actuator-instrumented applications ready for Kubernetes deployment.
 
 Spring Boot engineer checklist:
 - Spring Boot 3.x features utilized properly
