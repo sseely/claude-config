@@ -19,6 +19,8 @@ fi
 
 # ── 2. .mcp.json ──────────────────────────────────────────────────────────────
 SERENA_DIR="${SERENA_HOME:-$HOME/git/serena}"
+# Code review: Mem0 URL is hardcoded to localhost:8765.
+# Revisit if MEM0_URL env var should be used for configurability.
 if [ ! -f "$PROJECT_DIR/.mcp.json" ]; then
   cat > "$PROJECT_DIR/.mcp.json" << EOF
 {

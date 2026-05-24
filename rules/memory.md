@@ -16,6 +16,9 @@ proceeding.
 
 ## During Task Execution
 
+<!-- Code review: {task-id} naming is undefined for interactive sessions.
+     Revisit if note-writing should use a timestamp or topic slug as the
+     filename during non-autonomous sessions. -->
 Write a note to `.agent-notes/{task-id}.md` when you encounter:
 
 - Unexpected behavior in code, APIs, or infrastructure
@@ -68,6 +71,9 @@ different repo benefit?" → project. "Different project?" → org.
 
 ## Search Behavior
 
+<!-- Code review: search order checks org scope before project scope,
+     which may surface broader memories before more precise ones.
+     Revisit if project-scoped memories should be checked before org. -->
 Default search order before a task:
 1. `repo:{current-repo}` scope
 2. `org` scope
