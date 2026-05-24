@@ -320,15 +320,16 @@ Give agents this scoring rubric verbatim:
 
 Filtering rules after scoring:
 
-- **Drop** any finding scored **0** — confirmed false positive with no
-  residual value.
-- **Classify as Note or Suggestion** for scores **1–49**: do not drop;
-  apply the criteria below to decide which bucket.
-- **Downgrade severity** for scores **50–64**: cap at Suggestion
-  regardless of what the reviewing agent assigned.
-- **Keep as-is** findings scored **65 and above**.
-- **Never drop** a finding scored **75+** regardless of severity — always
-  include it.
+Give scoring agents these numeric rules verbatim — do not paraphrase:
+
+> - Score 0: drop (confirmed false positive)
+> - Score 1–24: drop (weak signal, not worth tracking)
+> - Score 25–49: classify as Note or Suggestion (do not drop; see criteria
+>   below)
+> - Score 50–74: keep but cap severity at Suggestion regardless of what
+>   the reviewing agent assigned
+> - Score 75–100: keep as-is; never drop regardless of severity
+
 - **Positives** skip scoring — include all of them in the final report.
 
 ### Classifying below-50 findings: Note vs. Suggestion
@@ -391,6 +392,20 @@ severity:
 **Suggestion** — consider improving  
 **Note** — low-confidence finding; suggested inline comment awaits authorization  
 **Positive** — good practices worth noting  
+
+## Verdict
+
+After the final report, emit one of three verdicts based on the
+deduplicated, scored finding counts:
+
+| Verdict | Condition |
+|---------|-----------|
+| **APPROVE** | Critical = 0 AND Warning = 0 |
+| **APPROVE WITH NITS** | Critical = 0 AND Warning < 3 |
+| **REQUEST CHANGES** | Critical > 0 OR Warning ≥ 3 |
+
+State the verdict on its own line in bold at the top of the final
+report, before the severity sections.
 
 For Critical, Warning, and Suggestion: include `file:line`, confidence
 score, what the issue is, and a concrete fix or recommendation.
