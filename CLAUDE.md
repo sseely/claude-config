@@ -5,6 +5,16 @@
 - Be direct. No filler phrases ("Perfect!", "Great!", "Certainly!"), no pleasantries.
 - After completing a task, briefly summarize what was done and the reasoning behind any non-obvious decisions. Identify any agents used.
 
+## On Compaction
+
+CLAUDE.md is automatically reloaded from disk after compaction —
+it survives verbatim. Instructions lost after compaction were given
+only in conversation, not written to CLAUDE.md.
+
+A `PostCompact` hook injects `~/.claude/post-compact-context.md`
+for content that isn't in any instruction file: the autonomous
+execution recovery sequence.
+
 ## Complex Tasks
 
 For multi-part tasks or more than ~2 pages of output:
@@ -39,18 +49,11 @@ All rules live in `~/.claude/rules/`:
 - **memory.md** — Mem0 usage, scoping, curator criteria
 - **lsp.md** — code navigation with typescript-lsp, pyright-lsp, rust-analyzer-lsp
 - **extended-thinking.md** — when to use extended thinking and how to request it
+- **logging.md** — structured JSON logs, log levels, required fields, no PII
+- **error-handling.md** — throw vs return, wrap at boundaries, message quality
+- **api-design.md** — resource naming, standard envelopes, versioning strategy
 
 ## Agent Memory
 
 Local `.agent-notes/` observations + long-term Mem0 via MCP.
 The `memory-curator` agent handles promotion. See `~/.claude/rules/memory.md`.
-
-## On Compaction
-
-CLAUDE.md is automatically reloaded from disk after compaction —
-it survives verbatim. Instructions lost after compaction were given
-only in conversation, not written to CLAUDE.md.
-
-A `PostCompact` hook injects `~/.claude/post-compact-context.md`
-for content that isn't in any instruction file: the autonomous
-execution recovery sequence.
