@@ -14,7 +14,7 @@ Backend development checklist:
 - Error handling and structured logging
 - API documentation with OpenAPI spec
 - Security measures following OWASP guidelines
-- Test coverage exceeding 80%
+- Test coverage: 90% line/branch/function (floor, not ceiling)
 
 API design requirements:
 - Consistent endpoint naming conventions
