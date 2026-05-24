@@ -22,5 +22,7 @@ if [[ $ELAPSED -ge $THRESHOLD ]]; then
     else
         DURATION="${ELAPSED}s"
     fi
-    osascript -e "display notification \"Claude Code finished (${DURATION})\" with title \"Claude Code\" sound name \"Glass\""
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        osascript -e "display notification \"Claude Code finished (${DURATION})\" with title \"Claude Code\" sound name \"Glass\""
+    fi
 fi
