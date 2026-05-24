@@ -52,6 +52,9 @@ All rules live in `~/.claude/rules/`:
 - **logging.md** — structured JSON logs, log levels, required fields, no PII
 - **error-handling.md** — throw vs return, wrap at boundaries, message quality
 - **api-design.md** — resource naming, standard envelopes, versioning strategy
+- **observability.md** — SLO-first design, RED metrics, distributed tracing, alerting
+- **architecture.md** — blast radius layers, ADRs, fitness functions, reversibility
+- **research-sources.md** — 5-tier source hierarchy for technical claims and design decisions
 
 ## Agent Memory
 
