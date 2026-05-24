@@ -3,6 +3,8 @@
 # Runs as an async UserPromptSubmit hook; all operations are idempotent.
 
 set -euo pipefail
+# Fail-safe: setup errors must never block the user's prompt.
+trap 'exit 0' ERR
 
 PROJECT_DIR="$(pwd)"
 

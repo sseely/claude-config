@@ -36,6 +36,22 @@ Plan before executing: list subtasks, mark dependencies, assign file ownership (
 
 Conventional Commits, all lines ≤80 chars. Subject `<type>(<scope>): <desc>` ≤72 chars, lowercase, no period. See `~/.claude/rules/commits.md` for full spec.
 
+## Verification
+
+Before answering questions about code, APIs, or libraries, use tools first:
+
+- **API/library behavior** → read the docs or use Context7 before answering
+- **File content** → Read the file; don't assume what it contains
+- **Recent facts** → WebSearch first; training data may be stale
+- **Uncertain** → state the uncertainty explicitly; don't fill gaps with guesses
+
+Confidence levels — declare these when the accuracy of a claim matters:
+
+- **HIGH**: Verified via tool or cited source
+- **MEDIUM**: Single source, or strong training knowledge — add a caveat
+- **LOW**: Memory only, unverified — say so
+- **UNKNOWN**: Cannot verify — admit it rather than fabricate
+
 ## Rules
 
 All rules live in `~/.claude/rules/`:

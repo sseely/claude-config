@@ -39,6 +39,23 @@ signal that more time is acceptable: "Take as long as you need."
 Do not request extended thinking for tasks that are already well-scoped
 or have an obvious single solution — it adds latency without benefit.
 
+## Self-refine
+
+For outputs where quality matters more than speed, apply
+GENERATE → FEEDBACK → REFINE:
+
+1. Produce the initial output
+2. Critically evaluate it against the requirements — what is missing,
+   wrong, or imprecise?
+3. Refine based on the evaluation
+
+Two to three passes yield ~20% quality improvement (NeurIPS 2023 self-refine).
+Returns diminish sharply after 3 passes — stop there.
+
+Apply to: architecture proposals, security analyses, test plans, mission brief
+decompositions, complex technical explanations. Not worth the latency for
+routine edits, commits, or single-file changes.
+
 ## Self-assessment trigger
 
 When operating autonomously (no human to prompt), use this heuristic:

@@ -14,6 +14,9 @@ set -euo pipefail
 PROJECT_DIR="${1:-.}"
 cd "$PROJECT_DIR"
 
+# Fail-closed: unexpected script errors count as gate failures, not silent passes.
+trap 'echo "QUALITY GATE ERROR: unexpected script failure"; exit 1' ERR
+
 GATES_FILE=".claude-quality-gates"
 FAILED=0
 TOTAL=0

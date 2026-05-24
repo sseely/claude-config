@@ -70,6 +70,17 @@ Default to Sonnet for implementation agents unless the task requires deep
 multi-path reasoning. Use Haiku aggressively for any agent whose job is to
 evaluate, score, or format — not to create.
 
+**Opus behavioral compensation:**
+
+When routing a task to Opus, add these constraints to the prompt to counteract
+known Opus tendencies (validated in production):
+
+- Do NOT infer unstated requirements — implement the simplest interpretation
+- Do NOT over-engineer — no speculative abstractions or extension points
+- Do NOT spawn subagents unless the task explicitly requires it
+- If scope is ambiguous, implement the minimal interpretation and note the
+  ambiguity; do not silently expand
+
 **Anti-patterns to avoid:**
 
 | Anti-pattern | Why it hurts | Fix |

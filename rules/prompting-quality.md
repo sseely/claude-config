@@ -50,6 +50,39 @@ understanding the codebase. Prefer:
 Attaching 30+ files to a single prompt floods the context window, reduces
 cache hit rates, and makes it harder for the model to attend to what matters.
 
+## Constraint budget
+
+Per MOSAIC research (arxiv:2601.18554), the number of hard constraints per
+section directly affects compliance:
+
+- **1–6 constraints**: Reliable compliance
+- **7–15 constraints**: Unpredictable — partial compliance, constraint blending
+- **>15 constraints**: Degraded — constraints are ignored or averaged together
+
+Keep each section of a rule file, agent prompt, or skill phase to **≤6 hard
+prescriptive constraints**. If a section needs more, split it into named
+sub-sections, each with ≤6 items. Numbered sequential steps (procedures) are
+exempt — the limit applies to parallel prescriptive rules, not ordered steps.
+
+## Register shifting
+
+The verb used in a prompt determines how thoroughly the model processes the
+request. Match verb strength to intent (validated empirically):
+
+**Tier 1 — Systematic scan** (use when thoroughness is required):
+`audit`, `verify`, `critically analyse`, `enumerate`, `identify all`
+
+**Tier 2 — Standard processing** (routine tasks):
+`review`, `check`, `describe`, `summarize`
+
+**Tier 3 — Advisory** (often ignored under context pressure):
+`look at`, `note`, `consider`, `mention`
+
+In agent prompts and skill phases that require complete coverage — security
+audits, architecture reviews, test plans — use Tier 1 verbs. Reserve Tier 2
+for standard implementation guidance. Never use Tier 3 when you need the
+result acted on.
+
 ## Session work-type boundaries
 
 A session that mixes unrelated task types (bug fix → feature design →
