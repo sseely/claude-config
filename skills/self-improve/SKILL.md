@@ -143,6 +143,11 @@ For each skill, evaluate against these dimensions:
 6. **Parallelism plan** — Are there sequential steps that could be
    batched?
 7. **Resumability** — What's preserved if interrupted?
+8. **Operational readiness** — For skills that produce or drive
+   architecture or code changes, do they enforce observability
+   requirements (SLIs, on-call story, alert thresholds), rollback
+   classification, and blast radius documentation? Or do they
+   produce functionally correct output that is operationally blind?
 
 Report per-skill with **Strengths** / **Gaps** / **Priority** /
 **Specific recommendation**. Then a cross-skill section for patterns
@@ -158,7 +163,10 @@ Read these files completely:
 
 Sample these agent definitions for rule propagation:
 - `~/.claude/agents/01-core-development/backend-developer.md`
+- `~/.claude/agents/01-core-development/microservices-architect.md`
+- `~/.claude/agents/01-core-development/api-designer.md`
 - `~/.claude/agents/02-language-specialists/typescript-pro.md`
+- `~/.claude/agents/04-quality-security/architect-reviewer.md`
 - `~/.claude/agents/04-quality-security/code-reviewer.md`
 - `~/.claude/agents/09-meta-orchestration/memory-curator.md`
 
@@ -170,7 +178,10 @@ Evaluate:
 3. **Coverage gaps**: Behaviors with no governing rule. Common
    missing categories: logging standards, error handling strategy,
    API design conventions, file/folder naming, pre-existing code
-   policy, PR/branch workflow.
+   policy, PR/branch workflow, SLO-first observability and on-call
+   readiness, system-first blast radius analysis (data model → API
+   contracts → service deps → files), ADR discipline (when an ADR
+   is required vs optional), research source tiering.
 4. **Rule quality issues**: Unclear thresholds, overly broad
    exceptions, aspirational statements that aren't actionable.
 5. **CLAUDE.md structure**: Are the most critical rules front-loaded?
