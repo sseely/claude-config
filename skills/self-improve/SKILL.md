@@ -9,6 +9,7 @@ description: >
   configuration current with the ecosystem.
 disable-model-invocation: false
 allowed-tools: Bash, Read, Grep, Glob, Agent, Write, Edit, WebFetch, WebSearch, TodoWrite
+clone-dir: ~/temp/self-improve
 ---
 
 # Self-Improve
@@ -35,6 +36,13 @@ Before doing any new work, check what's already known:
 3. State what was found and how it affects scope. If a prior
    self-improve run produced findings that are already in
    `code-review-tasks.md`, skip re-deriving them.
+4. Ensure the clone workspace exists:
+   ```bash
+   mkdir -p ~/temp/self-improve
+   ```
+   Any git repos cloned during research go here so local tools
+   (grep, find, Glob) can run against them without network
+   round-trips.
 
 ---
 
@@ -76,6 +84,12 @@ System Insights**, **Agent Design Patterns**, **Cost Optimization**.
    - Tokenizer changes affecting compaction thresholds
 2. Search for "Claude Code advanced patterns 2025" and
    "Claude Code multi-agent best practices" — read the top 3 results.
+   For any GitHub repos found that contain agent configs, prompt
+   libraries, or Claude Code templates, clone them:
+   ```bash
+   git clone --depth 1 --single-branch <repo-url> ~/temp/self-improve/<repo-name>
+   ```
+   Then use Grep/Glob on the local clone instead of repeated WebFetch.
 3. Report: deprecated patterns in current config, new capabilities
    not yet leveraged, recommended model routing table.
 
@@ -103,7 +117,15 @@ Search using the source hierarchy from `research-sources.md`:
    published guidance on system prompt structure or agent design.
 4. **GitHub**: search for recently starred repos on agent prompt
    design or LLM instruction formatting — note structural patterns
-   not reflected in the current config.
+   not reflected in the current config. Clone any repo with a
+   substantially different structural approach:
+   ```bash
+   git clone --depth 1 --single-branch <repo-url> ~/temp/self-improve/<repo-name>
+   ```
+   Use Grep and Glob on the local clone to extract concrete patterns
+   (e.g., `grep -r "system_prompt\|CLAUDE.md\|agent:" ~/temp/self-improve/<repo-name>`).
+   Do not just read a few files via WebFetch — local grep gives
+   complete coverage without rate limits.
 
 For each principle or pattern found, produce a structured assessment:
 
@@ -382,3 +404,8 @@ to implement directly — offer to do so without a mission brief.
 - Model routing for this skill: use Opus (adaptive thinking) for
   Phase 3 synthesis if there are >20 raw findings; Sonnet is
   sufficient for smaller sets.
+- Cloned repos live in `~/temp/self-improve/`. Clone with
+  `--depth 1 --single-branch` (default branch only, minimal history). Do not delete the directory
+  after the run — subsequent runs reuse existing clones (pull to
+  update if the directory already exists rather than re-cloning).
+  Only clone public repos; skip any private or auth-required URL.
