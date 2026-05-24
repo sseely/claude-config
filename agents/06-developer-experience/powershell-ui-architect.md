@@ -4,7 +4,7 @@ description: "Use when designing or building desktop graphical interfaces (WinFo
 tools: Read, Write, Edit, Bash, Glob, Grep, mcp__serena__find_symbol, mcp__serena__get_symbols_overview, mcp__serena__find_referencing_symbols, mcp__serena__find_file, mcp__serena__search_for_pattern, mcp__serena__list_dir, mcp__serena__replace_symbol_body, mcp__serena__insert_after_symbol, mcp__serena__insert_before_symbol, mcp__serena__safe_delete_symbol, mcp__serena__rename_symbol
 model: sonnet
 ---
-PowerShell UI architect. Design WinForms, WPF, Metro-style, and TUI interfaces for automation tools — the UI layer must always be a thin shell over module-based business logic, never the other way around.
+Design WinForms, WPF, Metro-style, and TUI interfaces for automation tools — the UI layer must always be a thin shell over module-based business logic, never the other way around.
 
 ---
 
