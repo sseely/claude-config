@@ -31,6 +31,15 @@ For each repo, identify and record in `docs/architecture/inventory.md`:
 - **External services**: queues, caches, third-party APIs, auth providers
 - **Entry points**: main executable, API surface, exposed ports
 
+Use this standard table schema for `inventory.md`:
+
+| Repo | Language | Runtime | Framework | Database | Key Deps | Entry | Notes |
+|------|----------|---------|-----------|----------|----------|-------|-------|
+
+One row per repo. If a field is unknown, write `—`. Keep Notes short
+(one phrase max). The schema must be consistent across all repos in
+the inventory — do not add or remove columns.
+
 Invoke the appropriate language/framework specialist agents to help with unfamiliar stacks. Announce each agent before invoking.
 
 ## Produce deliverables in `docs/architecture/`
@@ -40,6 +49,26 @@ Invoke the appropriate language/framework specialist agents to help with unfamil
 - How the repos relate to each other
 - Key data flows
 - Tech stack summary table (repo | language | runtime | framework | database | external deps)
+
+### `tech-health.md`
+
+For each distinct runtime/framework version found in the inventory,
+use WebSearch and WebFetch to check:
+
+1. **EOL status**: Is this version still receiving security updates?
+   Search `<runtime> <version> end of life date`.
+2. **Known CVEs**: Search NVD (`nvd.nist.gov`) or OSV (`osv.dev`) for
+   CVEs affecting this version. Record CVE ID, CVSS score, and summary.
+
+Produce a table:
+
+| Repo | Component | Version | EOL Date | CVEs (High+) | Action |
+|------|-----------|---------|----------|--------------|--------|
+
+Action column values: `OK`, `Update available`, `EOL — upgrade required`,
+`CVE — patch required`.
+
+Append `tech-health.md` to the index in `overview.md`.
 
 ### `architecture.md`
 High-level system architecture diagram in Mermaid (`graph TD` or `C4Context`), showing:
