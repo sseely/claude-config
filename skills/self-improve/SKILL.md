@@ -79,15 +79,72 @@ System Insights**, **Agent Design Patterns**, **Cost Optimization**.
 3. Report: deprecated patterns in current config, new capabilities
    not yet leveraged, recommended model routing table.
 
-Wait for both agents to complete before Phase 2.
+### Agent C — Prompt structure and instruction design research
+
+Research the current state of the art in writing effective system
+prompts, agent instructions, and markdown-formatted directives for
+large language models. Run this search fresh every time — do not
+check Mem0 or prior task files. The point is to surface what the
+field knows NOW and judge whether the config is ahead of, aligned
+with, or behind it.
+
+Search using the source hierarchy from `research-sources.md`:
+
+1. **arxiv** (AI/ML tier — preprint, flag as such): search for
+   "system prompt design", "agent instruction formatting",
+   "instruction following markdown", "multi-agent prompt patterns",
+   "LLM system prompt structure". Read the 3 most relevant papers
+   published in the last 12 months fully.
+2. **Anthropic research blog** (`https://www.anthropic.com/research`):
+   scan for papers on instruction-following, system prompt behavior,
+   or agent orchestration published in the last 6 months.
+3. **Practitioner sources** (tier 3): check 1-2 high-quality
+   engineering blogs (e.g., Anthropic, Google DeepMind) for
+   published guidance on system prompt structure or agent design.
+4. **GitHub**: search for recently starred repos on agent prompt
+   design or LLM instruction formatting — note structural patterns
+   not reflected in the current config.
+
+For each principle or pattern found, produce a structured assessment:
+
+- **Finding**: state the principle precisely and concisely
+- **Source**: citation, URL, and tier from `research-sources.md`
+- **Evidence strength**: High (peer-reviewed) / Medium (preprint,
+  practitioner) / Low (blog, single source)
+- **Applies to Claude specifically**: High / Medium / Low — justify.
+  General NLP findings may not transfer to instruction-following models.
+- **Current config alignment**: one of:
+  - *Aligned* — config already applies this principle; cite one example
+  - *Misaligned* — config diverges; provide file:line and what to change
+  - *Config is better* — current approach is stronger than the research
+    finding; provide explicit rationale
+
+**Judgment criteria — when to prefer the current config:**
+- Research is general NLP, not validated on instruction-following models
+- Anthropic's own documentation contradicts the finding (tier 1 wins)
+- Recent commits show the concern was already addressed with a stronger
+  rationale (check git log for evidence)
+- The research is a single unverified preprint with no replication
+
+**Judgment criteria — when to recommend applying research:**
+- Two or more independent sources agree on the principle
+- The principle has been validated on instruction-following or agent
+  models specifically
+- Current config shows no rationale for diverging
+- Applying it would reduce ambiguity or token cost without losing specificity
+
+Pride in the current config is appropriate when the rationale is explicit
+and traceable. Hubris is assuming correctness without examining the evidence.
+
+Wait for all three agents to complete before Phase 2.
 
 ---
 
 ## Phase 2 — Configuration audit (parallel)
 
-Launch three agents simultaneously. All read-only.
+Launch four agents simultaneously. All read-only.
 
-### Agent C — Settings, hooks, and MCP
+### Agent D — Settings, hooks, and MCP
 
 Read these files completely:
 
@@ -122,7 +179,7 @@ Evaluate:
    the global settings grant. Check especially MCP tools, package
    managers, and CLI tools.
 
-### Agent D — Skills quality
+### Agent E — Skills quality
 
 Read ALL skill SKILL.md files under `~/.claude/skills/`.
 
@@ -153,7 +210,7 @@ Report per-skill with **Strengths** / **Gaps** / **Priority** /
 **Specific recommendation**. Then a cross-skill section for patterns
 appearing across multiple skills.
 
-### Agent E — Rules and CLAUDE.md
+### Agent F — Rules and CLAUDE.md
 
 Read these files completely:
 
@@ -189,18 +246,52 @@ Evaluate:
 6. **post-compact-context.md completeness**: What critical behavioral
    rules are NOT restored after compaction?
 
-Wait for all three agents to complete before Phase 3.
+### Agent G — Prompt structure audit
+
+Apply the research principles from Agent C as a dynamic checklist.
+Do not use a fixed checklist — the principles come from this run's
+research, so they vary across invocations.
+
+**File sample to audit:**
+- All files under `~/.claude/rules/`
+- `~/.claude/CLAUDE.md`
+- Five agent files: sample two from `agents/01-core-development/`,
+  two from `agents/04-quality-security/`, one from
+  `agents/09-meta-orchestration/`
+- Three SKILL.md files: `plan-mission`, `code-review`, `self-improve`
+
+**For each principle Agent C marked as "Misaligned":**
+1. Check every file in the sample for the violation
+2. Report: `file:line`, what the violation is, what correct form looks like
+3. Assign confidence 0–100 using the same rubric as `/code-review`
+4. If the violation is widespread (>3 files), note it as a systemic
+   pattern, not a per-file finding
+
+**For each principle Agent C marked as "Aligned" or "Config is better":**
+- Confirm alignment with one concrete example (file:line) from the
+  sample. An alignment claim without evidence doesn't count.
+
+**Output format:** use `/code-review` severity levels —
+Critical / Warning / Suggestion / Note — based on how broadly and
+consequentially the principle is violated, not on how confident the
+research is. Confidence scores filter findings in Phase 3.
+
+Wait for all four agents to complete before Phase 3.
 
 ---
 
 ## Phase 3 — Synthesize and deduplicate
 
-Run a single dedup pass across all five agent outputs:
+Run a single dedup pass across all seven agent outputs (A–G):
 
 1. Group findings that describe the same root issue.
 2. Keep the most specific instance (file:line + concrete fix).
 3. Resolve genuine contradictions by re-reading the source — do not
-   use agent summaries as the arbiter.
+   use agent summaries as the arbiter. For research-sourced findings
+   (from Agents C and G), an additional step applies: if a finding
+   conflicts with an existing rule in `rules/`, the rule wins unless
+   Agent C rated the research evidence strength as High AND the
+   applicability to Claude as High. Document the reasoning either way.
 4. Score each finding 0-100 using this rubric (apply yourself, no
    need for a separate scoring agent for this skill):
    - **0**: False positive, pre-existing issue not worth surfacing
