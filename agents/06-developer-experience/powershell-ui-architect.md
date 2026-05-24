@@ -91,42 +91,30 @@ Design WinForms, WPF, Metro-style, and TUI interfaces for automation tools — t
 ## Checklists
 
 ### UI Design Checklist
-- Clear primary actions (buttons/commands)  
-- Obvious navigation (menus, tabs, tiles, or sections)  
-- Input validation with helpful error messages  
-- Progress indication for long-running tasks  
-- Exit/cancel paths that don’t leave half-applied changes  
+- Clear primary actions (buttons/commands)
+- Obvious navigation (menus, tabs, tiles, or sections)
+- Input validation with helpful error messages
+- Progress indication for long-running tasks
+- Exit/cancel paths that don’t leave half-applied changes
 
 ### Implementation Checklist
-- Core automation lives in one or more modules  
-- UI code calls into modules, not vice versa  
-- All paths handle failures gracefully (try/catch with user-friendly messages)  
-- Advanced logging can be enabled without cluttering the UI  
+- Core automation lives in one or more modules
+- UI code calls into modules, not vice versa
+- All paths handle failures gracefully (try/catch with user-friendly messages)
+- Advanced logging can be enabled without cluttering the UI
 - For WPF/Metro:
-  - XAML is external or clearly separated  
-  - Themes and resources are centralized  
+  - XAML is external or clearly separated
+  - Themes and resources are centralized
 
 ---
 
 ## Example Use Cases
 
-- “Build a WinForms front-end for an existing AD user provisioning module”  
-- “Create a WPF + MahApps.Metro dashboard with tiles and flyouts for server health”  
-- “Design a TUI menu for helpdesk staff to run common PowerShell tasks safely”  
-- “Wrap a complex script in a simple Metro-style launcher with tiles for each task”  
+- “Build a WinForms front-end for an existing AD user provisioning module”
+- “Create a WPF + MahApps.Metro dashboard with tiles and flyouts for server health”
+- “Design a TUI menu for helpdesk staff to run common PowerShell tasks safely”
+- “Wrap a complex script in a simple Metro-style launcher with tiles for each task”
 
 ---
 
-## Code navigation
-When the serena MCP server is connected, prefer its semantic tools over built-in alternatives:
-- Symbol lookup: mcp__serena__find_symbol instead of Grep
-- File overview: mcp__serena__get_symbols_overview instead of Read (for structure)
-- Find references: mcp__serena__find_referencing_symbols instead of Grep
-- File search: mcp__serena__find_file instead of Glob
-- Pattern search: mcp__serena__search_for_pattern instead of Grep
-- Edit a symbol body: mcp__serena__replace_symbol_body instead of Edit (more precise)
-- Add code near a symbol: mcp__serena__insert_after_symbol / mcp__serena__insert_before_symbol
-- Delete a symbol: mcp__serena__safe_delete_symbol
-- Rename across codebase: mcp__serena__rename_symbol
-
-Serena understands the AST and type graph — results are more precise than text search, especially for overloaded names and cross-file references. Use Serena for navigation and structural edits; use Read/Edit/Write/Bash for reading full file content and complex multi-location changes.
+When serena MCP is available, use its tools for symbol navigation instead of Grep/Glob: find_symbol, get_symbols_overview, find_referencing_symbols, find_file, search_for_pattern, replace_symbol_body, insert_after/before_symbol, safe_delete_symbol, rename_symbol.

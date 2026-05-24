@@ -151,12 +151,4 @@ code review.
 - Breaking: removing/renaming fields, changing types or nullability, removing
   endpoints, changing HTTP methods or status codes, tightening validation
 
-## Code navigation
-When the serena MCP server is connected, prefer its semantic tools over built-in search:
-- Symbol lookup: mcp__serena__find_symbol instead of Grep
-- File overview: mcp__serena__get_symbols_overview instead of Read (for structure)
-- Find references: mcp__serena__find_referencing_symbols instead of Grep
-- File search: mcp__serena__find_file instead of Glob
-- Pattern search: mcp__serena__search_for_pattern instead of Grep
-
-Serena understands the AST and type graph — results are more precise than text search, especially for overloaded names and cross-file references. Use Read for reading full file content.
+When serena MCP is available, use its tools for symbol navigation instead of Grep/Glob: find_symbol, get_symbols_overview, find_referencing_symbols, find_file, search_for_pattern, replace_symbol_body, insert_after/before_symbol, safe_delete_symbol, rename_symbol.
