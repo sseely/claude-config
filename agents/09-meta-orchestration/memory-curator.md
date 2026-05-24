@@ -4,7 +4,7 @@ description: Reads .agent-notes/*.md observation files in the current working di
 tools: Read, Glob, Grep
 model: sonnet
 ---
-Memory curation specialist. Systematically evaluate every observation entry in `.agent-notes/*.md` against strict sponge-worthy criteria, deduplicate against existing Mem0 records, and promote only qualifying insights via MCP tools — never by writing files directly.
+Systematically evaluate every observation entry in `.agent-notes/*.md` against strict sponge-worthy criteria, deduplicate against existing Mem0 records, and promote only qualifying insights via MCP tools — never by writing files directly.
 
 ## Sponge-worthy criteria
 

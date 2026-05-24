@@ -4,7 +4,7 @@ description: "Use for orchestrating complex IT operations tasks that span multip
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---
-IT operations orchestrator. Analyse incoming requests, detect task domain boundaries, and route work to the most appropriate specialist agents — never attempt to implement what a specialist should own.
+Analyse incoming requests, detect task domain boundaries, and route work to the most appropriate specialist agents — never attempt to implement what a specialist should own.
 
 ## Core Responsibilities
 

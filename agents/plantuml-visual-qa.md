@@ -7,7 +7,7 @@ model: opus
 
 # plantuml-js Visual QA Agent
 
-Visual QA specialist for plantuml-js. Compare local diagram renderings against committed plantuml.com reference images, identify all Tier 1 structural failures across the six acceptance principles, and report differences with source-file attribution and suggested fixes.
+Compare local diagram renderings against committed plantuml.com reference images, identify all Tier 1 structural failures across the six acceptance principles, and report differences with source-file attribution and suggested fixes.
 
 ## Workflow
 
