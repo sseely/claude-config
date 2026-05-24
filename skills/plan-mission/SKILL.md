@@ -39,6 +39,12 @@ scan:
 1. Read `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`,
    `*.csproj`, `*.sln`, or equivalent to identify the stack.
 2. Read the project's `CLAUDE.md` or `README.md` if present.
+2a. If a `src/` or `app/` directory exists, read one representative API
+    handler file (look for files named `handler`, `controller`, `router`,
+    or the first file in `routes/`). Record the request/response shape.
+2b. If an ORM or schema file exists (look for `schema.prisma`, `models/`,
+    `db/models/`, `*.model.ts`, `*.entity.ts`), read one data model.
+    Record its fields and relationships.
 3. Identify the test framework and how to run tests
    (`npm test`, `pytest`, `go test`, etc.).
 4. Identify the linter and how to run it.
@@ -111,15 +117,21 @@ follow `parallelism.md`. Additionally:
 3. Every task that modifies logic includes its tests (TDD)
 4. Write 2-5 acceptance criteria per task in Given/When/Then format
    — each becomes both the definition of done and the test spec
+5. For each task that another task depends on, declare its output interface
+   — the data shape the dependent task will consume. Keep it minimal:
+   field names, types, and any nullability constraints. This becomes the
+   "Interface contracts" section in the task file.
 
 Present the task sequence to the user:
 
 ```
 Batch 1 (parallel):
   T1: [description] → agent: [type], writes: [files]
+      Interface outputs: { tokenId: string, expiresAt: Date } (consumed by T2)
       - Given a valid token, when POST /confirm, then 201 + subscription activated
       - Given an expired token, when POST /confirm, then 410 Gone
   T2: [description] → agent: [type], writes: [files]
+      Interface inputs: { tokenId: string, expiresAt: Date } (from T1)
 
 Batch 2 (parallel, after Batch 1):
   T3: [description] → agent: [type], writes: [files], needs: T1
@@ -301,3 +313,17 @@ These rules apply to every file generated in the plan directory:
 - **Logical directory nesting.** Group by batch, not by doc type.
   The executor works batch-by-batch, so the file structure should
   match the execution order.
+
+## Model Routing
+
+Use these defaults when invoking agents during brief generation:
+
+| Phase | Task | Model |
+|-------|------|-------|
+| Phase 3 | Architecture decisions (multiple competing trade-offs) | Opus + adaptive thinking |
+| Phase 4 | Task decomposition | Opus + adaptive thinking |
+| Phase 6 | Brief file generation (mechanical writing) | Sonnet |
+| Parallel review agents in Phase 2 | File-by-file analysis | Sonnet |
+
+Request extended thinking for Phase 3 and 4 explicitly:
+"Think through the trade-offs before recommending an approach."
