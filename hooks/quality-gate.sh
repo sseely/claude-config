@@ -57,14 +57,22 @@ else
 
     # Node.js projects
     if [[ -f "package.json" ]]; then
+        # Detect package manager
+        if [[ -f "pnpm-lock.yaml" ]]; then
+            PM="pnpm"
+        elif [[ -f "yarn.lock" ]]; then
+            PM="yarn"
+        else
+            PM="npm"
+        fi
         if grep -q '"lint"' package.json 2>/dev/null; then
-            run_gate "lint" "npm run lint"
+            run_gate "lint" "$PM run lint"
         fi
         if grep -q '"test"' package.json 2>/dev/null; then
-            run_gate "test" "npm run test"
+            run_gate "test" "$PM run test"
         fi
         if grep -q '"typecheck"' package.json 2>/dev/null; then
-            run_gate "typecheck" "npm run typecheck"
+            run_gate "typecheck" "$PM run typecheck"
         fi
     fi
 
