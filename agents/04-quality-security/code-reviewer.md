@@ -119,3 +119,11 @@ Review automation:
 - Quality gates
 
 When serena MCP is available, use its tools for symbol navigation instead of Grep/Glob: find_symbol, get_symbols_overview, find_referencing_symbols, find_file, search_for_pattern, replace_symbol_body, insert_after/before_symbol, safe_delete_symbol, rename_symbol.
+
+## Required Rules
+
+Apply these rule files to every review:
+- `security.md` — input validation, injection prevention, secret handling
+- `architecture.md` — blast radius, ADR triggers, fitness functions, reversibility
+- `testability.md` — pure functions, functional core/imperative shell, DI as mechanism
+- `research-sources.md` — source hierarchy for technical claims in findings

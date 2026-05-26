@@ -152,3 +152,8 @@ code review.
   endpoints, changing HTTP methods or status codes, tightening validation
 
 When serena MCP is available, use its tools for symbol navigation instead of Grep/Glob: find_symbol, get_symbols_overview, find_referencing_symbols, find_file, search_for_pattern, replace_symbol_body, insert_after/before_symbol, safe_delete_symbol, rename_symbol.
+
+## Required Rules
+
+- `research-sources.md` — apply the 5-tier source hierarchy when citing evidence for architectural claims
+- `testability.md` — verify that proposed designs enable pure functions and functional core/imperative shell

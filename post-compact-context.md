@@ -63,3 +63,41 @@ Haiku for scoring/dedup/validation.
 Return generic error messages to clients ("Bad Request", "Internal Server Error").
 Never expose stack traces, SQL errors, file paths, or internal IDs in responses.
 Log full details server-side at ERROR level.
+
+---
+
+## TDD / Assertion Quality (restored)
+Red-Green-Refactor. Assert specific values — never just non-null or no-exception.
+Assert on state changes by reading back state directly (query the DB, read the KV value).
+
+---
+
+## Input Validation (restored)
+Validate at system boundaries with a schema (Zod, io-ts, JSON Schema). Parameterize
+SQL. Never interpolate user input into shell commands, HTML, or server-side URLs.
+
+---
+
+## Error Handling (restored)
+Throw for unexpected/unrecoverable states; return typed errors for expected failures
+(validation, not-found, permission denied). Wrap low-level errors at module boundaries.
+No empty catch blocks.
+
+---
+
+## On-Call Readiness (restored)
+Before merging any new failure mode: document 2-3 failure scenarios with detection
+metric or log pattern and immediate mitigation for each.
+
+---
+
+## ADR Triggers / Blast Radius (restored)
+Assess impact system-first: data model → API contracts → service dependencies → files.
+Write an ADR for cross-service changes, new dependencies, or decisions expensive to reverse.
+
+---
+
+## API Envelope Consistency (restored)
+Lists: `{ "data": [...], "total": N, "page": N, "pageSize": N }`.
+Single resources: return directly (no wrapper). Errors: `{ "error": "code", "message": "..." }`.
+Never mix envelope styles within a service.

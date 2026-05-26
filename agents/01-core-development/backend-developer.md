@@ -87,3 +87,14 @@ Message queue integration:
 - Message replay capabilities
 
 When serena MCP is available, use its tools for symbol navigation instead of Grep/Glob: find_symbol, get_symbols_overview, find_referencing_symbols, find_file, search_for_pattern, replace_symbol_body, insert_after/before_symbol, safe_delete_symbol, rename_symbol.
+
+## Required Rules
+
+Apply these rule files to every task:
+- `api-design.md` — resource naming, response envelopes, versioning, pagination
+- `error-handling.md` — throw vs return, wrap at module boundaries, message quality
+- `logging.md` — structured JSON logs, required fields, no PII
+- `observability.md` — SLO-first, RED metrics, on-call readiness, dashboard requirements
+- `architecture.md` — blast radius assessment, ADR triggers, reversibility
+- `testability.md` — pure functions, functional core/imperative shell, DI as mechanism
+- `research-sources.md` — source hierarchy for technical claims and design decisions

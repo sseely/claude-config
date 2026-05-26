@@ -78,3 +78,16 @@ insufficient.
 
 Flag `XMLHttpRequest`, `require('http')`, or unnecessary HTTP
 libraries when native fetch would work.
+
+## Dead code policy
+
+When you encounter dead code (unused functions, unreachable branches, commented-out
+blocks, imports with no callers) while working on something else:
+
+- **In a file you are already modifying:** remove it in the same commit.
+- **In a file you are only reading for context:** log it in `.agent-notes/` for a
+  cleanup task; do not modify the file.
+- **Unsure if it's dead:** grep for references before removing. "Looks unused" is
+  not the same as "is unused."
+
+Do not accumulate dead code removals into feature or bug-fix PRs.

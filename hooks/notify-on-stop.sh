@@ -1,5 +1,7 @@
 #!/bin/bash
 set -e
+# set -u and set -o pipefail intentionally omitted — low risk for this async
+# notification hook; inconsistent with other hooks that use set -euo pipefail.
 # Chimes when Claude finishes, but only if the turn took longer than 30 seconds.
 THRESHOLD=30
 START_FILE="$HOME/.claude/.runtime/claude-turn-start"

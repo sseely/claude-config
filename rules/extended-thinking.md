@@ -36,6 +36,13 @@ Extended thinking consumes additional tokens. For most tasks the
 default budget is sufficient. For very complex decisions, explicitly
 signal that more time is acceptable: "Take as long as you need."
 
+> **API note (Opus 4.7+):** Prefer `type: "adaptive"` over manual `budget_tokens`.
+> Manual extended thinking is a legacy pattern; adaptive is forward-compatible.
+>
+> For Opus 4.7, control depth via the `effort` parameter:
+> `low` | `medium` | `high` | `max` | `xhigh`
+> Adaptive thinking auto-selects effort based on task complexity.
+
 Do not request extended thinking for tasks that are already well-scoped
 or have an obvious single solution — it adds latency without benefit.
 

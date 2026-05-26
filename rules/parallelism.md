@@ -41,7 +41,10 @@ must be self-contained:
 4. **Read-set** — which files to read for context before starting
    (e.g., "read `src/api/subscribe.js` for the existing pattern")
 5. **Architecture decisions** — any pre-made decisions relevant
-   to this task (e.g., "use KV not D1", "use vitest not jest")
+   to this task (e.g., "use KV not D1", "use vitest not jest").
+   Treat all decisions listed here as locked. If you discover a
+   conflicting constraint, stop and log it to the decision journal —
+   do not silently override the upstream decision.
 6. **Interface contracts** — types, function signatures, or data
    shapes this task must produce or consume
 7. **Quality bar** — "run `npm test` before finishing; all tests
@@ -60,11 +63,13 @@ without guessing, the prompt is too thin.
 
 Match model to task complexity and cost:
 
-| Role | Model | When |
-|------|-------|------|
-| Planning / architecture | Opus (adaptive thinking) | Phase 3 decisions, mission decomposition, threat modeling |
-| Implementation | Sonnet | Feature work, bug fixes, refactoring, code generation |
-| Scoring / dedup / validation | Haiku | Confidence scoring, dedup passes, format checking, simple grep tasks |
+| Role | Model | Context window | When |
+|------|-------|----------------|------|
+| Planning / architecture | Opus 4.7 (adaptive thinking) | 1M tokens | Phase 3 decisions, mission decomposition, threat modeling |
+| Implementation | Sonnet | 1M tokens | Feature work, bug fixes, refactoring, code generation |
+| Scoring / dedup / validation | Haiku | 200k tokens | Confidence scoring, dedup passes, format checking, simple grep tasks |
+
+> **Haiku context limit:** 200k tokens vs 1M for Sonnet/Opus. Do not pass >50 files to a Haiku agent in a single prompt.
 
 Default to Sonnet for implementation agents unless the task requires deep
 multi-path reasoning. Use Haiku aggressively for any agent whose job is to

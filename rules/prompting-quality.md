@@ -50,6 +50,15 @@ understanding the codebase. Prefer:
 Attaching 30+ files to a single prompt floods the context window, reduces
 cache hit rates, and makes it harder for the model to attend to what matters.
 
+## Agent context budget
+
+Research (arxiv:2509.21361) shows effective context degrades past ~20K tokens.
+Apply this limit when constructing agent prompts:
+
+- Cap file inventory at 20-30 files per agent; split larger inventories across multiple agents
+- Pass line ranges, not whole files: `src/api/subscribe.js:15-40` not the full file
+- If the read-set exceeds 30 files, that is a signal to split the task into two agents
+
 ## Constraint budget
 
 Per MOSAIC research (arxiv:2601.18554), the number of hard constraints per

@@ -175,3 +175,8 @@ After completing all steps, print a summary in this exact structure:
 ```
 
 If a section has no entries, omit it from the report. Do not print empty tables.
+
+## Required Rules
+
+- `research-sources.md` — apply source hierarchy when evaluating observation strength and evidence quality
+- `testability.md` — treat testability patterns (pure functions, functional core, DI) as candidates for promotion; they are reusable, non-obvious, and stable

@@ -79,19 +79,16 @@
       "Bash(ollama show:*)",
       "Bash(command -v:*)",
       "Bash(claude mcp:*)",
-      "Bash(open test-results/visual-qa/index.html)",
       "Bash(xargs kill:*)",
-      "Bash(node --input-type=module)",
+      "Bash(node --input-type=module:*)",
       "Bash(~/.claude/hooks/quality-gate.sh:*)",
       "Bash(~/.claude/hooks/setup-complexity.sh)",
       "Bash(python3 ~/.claude/hooks/check-complexity.py)",
       "Bash(~/.claude/hooks/autonomous-toggle.sh on:*)",
       "Bash(~/.claude/hooks/autonomous-toggle.sh off:*)",
       "Bash(~/.claude/hooks/project-init.sh:*)",
-      "Bash(curl -s https://raw.githubusercontent.com/sseely-experity/claude-config/main/*)",
-      "Bash(curl -sS https://raw.githubusercontent.com/sseely-experity/claude-config/main/*)",
-      "Bash(curl -s https://raw.githubusercontent.com/ComposioHQ/awesome-claude-skills/master/*)",
-      "Bash(curl -s \"https://api.github.com/repos/sseely-experity/claude-config/*\")",
+      "Bash(curl -s https://raw.githubusercontent.com/**:*)",
+      "Bash(curl -sS https://api.github.com/repos/**:*)",
       "Edit(~/git/**)",
       "Write(~/git/**)",
       "Read(~/git/**)",
@@ -143,6 +140,17 @@
     ]
   },
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/session-start.sh",
+            "async": true
+          }
+        ]
+      }
+    ],
     "UserPromptSubmit": [
       {
         "hooks": [
@@ -169,6 +177,16 @@
         ]
       }
     ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '-- COMPACTING: verify open TODOs are committed --'"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Write|Edit|MultiEdit",
@@ -191,6 +209,9 @@
         ]
       }
     ]
+  },
+  "env": {
+    "ENABLE_TOOL_SEARCH": "auto"
   },
   "enabledPlugins": {
     "typescript-lsp@claude-plugins-official": true,
