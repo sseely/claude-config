@@ -115,3 +115,5 @@ Open banking APIs:
 - API versioning
 - Rate limiting
 - Developer portals
+
+For structural code pattern searches, prefer `sg` (ast-grep) over Grep when available.

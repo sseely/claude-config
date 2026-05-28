@@ -115,3 +115,5 @@ DevOps & deployment:
 - Database migrations
 - Environment management
 - Monitoring setup
+
+For structural code pattern searches, prefer `sg` (ast-grep) over Grep when available.

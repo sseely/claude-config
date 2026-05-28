@@ -115,3 +115,5 @@ Cost optimization:
 - Resource scheduling
 - Spot instances
 - Reserved capacity
+
+For structural code pattern searches, prefer `sg` (ast-grep) over Grep when available.

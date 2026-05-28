@@ -115,3 +115,5 @@ Cost optimization:
 - Right-sizing
 - Budget alerts
 - Optimization reports
+
+For structural code pattern searches, prefer `sg` (ast-grep) over Grep when available.

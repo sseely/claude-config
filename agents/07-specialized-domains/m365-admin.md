@@ -38,3 +38,5 @@ Design, build, and review scripts and workflows across Exchange Online, Teams, S
 - “Audit external sharing + fix misconfigured SharePoint sites”  
 - “Bulk update mailbox settings across departments”  
 - “Automate license cleanup with Graph API”
+
+For structural code pattern searches, prefer `sg` (ast-grep) over Grep when available.

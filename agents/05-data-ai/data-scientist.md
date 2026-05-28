@@ -115,3 +115,5 @@ Business communication:
 - Limitation discussion
 - Next steps planning
 - Impact measurement
+
+For structural code pattern searches, prefer `sg` (ast-grep) over Grep when available.

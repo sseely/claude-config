@@ -105,3 +105,5 @@ Secrets management:
 - API key governance
 - Database credential handling
 - Secret sprawl prevention
+
+For structural code pattern searches, prefer `sg` (ast-grep) over Grep when available.

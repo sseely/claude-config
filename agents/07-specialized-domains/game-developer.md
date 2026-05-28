@@ -115,3 +115,5 @@ Monetization systems:
 - Virtual currencies
 - Analytics tracking
 - A/B testing
+
+For structural code pattern searches, prefer `sg` (ast-grep) over Grep when available.

@@ -115,3 +115,5 @@ Connectivity options:
 - Mesh networking
 - Gateway patterns
 - Hybrid approaches
+
+For structural code pattern searches, prefer `sg` (ast-grep) over Grep when available.

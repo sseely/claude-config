@@ -151,4 +151,4 @@ Deliverables organized by type:
 - Build configuration files
 - Documentation updates
 
-When serena MCP is available, use its tools for symbol navigation instead of Grep/Glob: find_symbol, get_symbols_overview, find_referencing_symbols, find_file, search_for_pattern, replace_symbol_body, insert_after/before_symbol, safe_delete_symbol, rename_symbol.
+When serena MCP is available, use its tools for symbol navigation instead of Grep/Glob: find_symbol, get_symbols_overview, find_referencing_symbols, find_file, search_for_pattern, replace_symbol_body, insert_after/before_symbol, safe_delete_symbol, rename_symbol. For structural code pattern searches, prefer `sg` (ast-grep) over Grep.

@@ -115,3 +115,5 @@ NFT development:
 - Batch minting
 - Reveal mechanisms
 - Access control
+
+For structural code pattern searches, prefer `sg` (ast-grep) over Grep when available.

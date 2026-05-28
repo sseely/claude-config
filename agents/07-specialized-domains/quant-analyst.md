@@ -115,3 +115,5 @@ Market data handling:
 - Corporate actions
 - Real-time processing
 - Data storage
+
+For structural code pattern searches, prefer `sg` (ast-grep) over Grep when available.

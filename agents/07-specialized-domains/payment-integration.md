@@ -115,3 +115,5 @@ Reporting & reconciliation:
 - Audit trails
 - Analytics dashboards
 - Export capabilities
+
+For structural code pattern searches, prefer `sg` (ast-grep) over Grep when available.

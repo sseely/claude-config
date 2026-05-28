@@ -115,3 +115,5 @@ On-call practices:
 - Training programs
 - Well-being support
 - Compensation models
+
+For structural code pattern searches, prefer `sg` (ast-grep) over Grep when available.

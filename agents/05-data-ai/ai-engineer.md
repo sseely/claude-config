@@ -115,3 +115,5 @@ Edge AI deployment:
 - Update mechanisms
 - Monitoring solutions
 - Security measures
+
+For structural code pattern searches, prefer `sg` (ast-grep) over Grep when available.

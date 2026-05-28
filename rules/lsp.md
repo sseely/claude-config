@@ -25,13 +25,42 @@ Use LSP for any task where you know the symbol name:
 | List all symbols in a file | symbol listing | Read + scan manually |
 | Trace a call chain | call hierarchy | Grep repeatedly |
 
-## When to use Grep/Glob (not LSP)
+## When to use ast-grep (not Grep)
 
-Use Grep/Glob only when you don't have a specific symbol to look up:
+`sg` (ast-grep) understands code structure via tree-sitter. Prefer it over
+Grep for any search that involves code shape rather than exact text:
 
-- Searching for a string literal or pattern in content
-- Discovering which files contain a topic or term
-- Finding config values, comments, or non-code text
+| Task | Use ast-grep | NOT Grep |
+|------|-------------|----------|
+| Find all `await` calls not inside `try/catch` | structural pattern | regex guess |
+| Find function calls with a specific argument shape | `sg run -p 'fn($A, null)'` | brittle regex |
+| Find all `if` statements missing an `else` | structural query | impossible cleanly |
+| Detect interpolated SQL / command injection patterns | AST pattern | regex false-positives |
+| Find deprecated API call patterns | pattern with wildcards | text search |
+| Locate all `catch` blocks that swallow errors silently | structural match | noisy regex |
+
+**Quick reference:**
+```bash
+# Search for a pattern in a language
+sg run -p 'console.log($$$)' --lang ts
+
+# Run a named rule file
+sg scan --rule rules/no-promise-all-settled.yaml
+
+# Rewrite: rename a function call
+sg run -p 'foo($A)' -r 'bar($A)' --lang ts
+```
+
+Wildcards: `$VAR` matches a single node; `$$$ARGS` matches zero-or-more nodes.
+
+## When to use Grep/Glob (not LSP or ast-grep)
+
+Use Grep/Glob only for non-code content or when ast-grep doesn't support
+the file type:
+
+- Searching for a string literal in comments, docs, or config files
+- Discovering which files contain a topic or term (initial orientation)
+- File types without tree-sitter grammar support in ast-grep
 - Initial discovery when you don't yet know the symbol name
 
 ## Diagnostics

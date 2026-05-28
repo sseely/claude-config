@@ -115,3 +115,5 @@ Tooling ecosystem:
 - BentoML serving
 - Seldon deployment
 - Feature stores
+
+For structural code pattern searches, prefer `sg` (ast-grep) over Grep when available.
