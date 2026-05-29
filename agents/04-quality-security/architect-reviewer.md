@@ -155,5 +155,6 @@ When serena MCP is available, use its tools for symbol navigation instead of Gre
 
 ## Required Rules
 
+- `code-principles.md` — YAGNI, SOLID, no magic strings; flag speculative abstractions and extension points
 - `research-sources.md` — apply the 5-tier source hierarchy when citing evidence for architectural claims
 - `testability.md` — verify that proposed designs enable pure functions and functional core/imperative shell

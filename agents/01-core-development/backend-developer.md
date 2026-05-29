@@ -55,6 +55,7 @@ When serena MCP is available, use its tools for symbol navigation instead of Gre
 ## Required Rules
 
 Apply these rule files to every task:
+- `code-principles.md` — YAGNI (design decisions only), SOLID, no magic strings
 - `api-design.md` — resource naming, response envelopes, versioning, pagination
 - `error-handling.md` — throw vs return, wrap at module boundaries, message quality
 - `logging.md` — structured JSON logs, required fields, no PII
