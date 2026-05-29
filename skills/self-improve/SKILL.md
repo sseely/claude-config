@@ -234,7 +234,7 @@ Wait for all three agents to complete before Phase 2.
 
 ## Phase 2 — Configuration audit (parallel)
 
-Launch four agents simultaneously. All read-only.
+Launch five agents simultaneously. All read-only.
 
 ### Agent D — Settings, hooks, and MCP
 
@@ -378,13 +378,128 @@ Critical / Warning / Suggestion / Note — based on how broadly and
 consequentially the principle is violated, not on how confident the
 research is. Confidence scores filter findings in Phase 3.
 
-Wait for all four agents to complete before Phase 3.
+### Agent H — Tightening audit
+
+Audit `~/.claude` for instruction bloat, cross-file redundancy, and verbose
+prose that consumes token budget without adding actionability. All read-only.
+
+**Files to read:**
+
+```bash
+cat ~/.claude/CLAUDE.md
+cat ~/.claude/post-compact-context.md
+ls ~/.claude/rules/ | while read f; do wc -l ~/.claude/rules/"$f"; done
+# Read every rule file:
+cat ~/.claude/rules/*.md
+# Sample agents (read these fully):
+cat ~/.claude/agents/01-core-development/backend-developer.md
+cat ~/.claude/agents/01-core-development/api-designer.md
+cat ~/.claude/agents/04-quality-security/architect-reviewer.md
+cat ~/.claude/agents/04-quality-security/code-reviewer.md
+cat ~/.claude/agents/09-meta-orchestration/memory-curator.md
+# Sample skills (read these fully):
+cat ~/.claude/skills/self-improve/SKILL.md
+cat ~/.claude/skills/plan-mission/SKILL.md
+cat ~/.claude/skills/code-review/SKILL.md
+```
+
+**Evaluate each dimension below. Report findings with file:line.**
+
+#### 1. File size vs. prompting-quality.md limits
+
+`prompting-quality.md` requires CLAUDE.md ≤ 4KB. Check:
+
+```bash
+wc -c ~/.claude/CLAUDE.md
+wc -l ~/.claude/post-compact-context.md
+wc -l ~/.claude/rules/*.md | sort -rn | head -10
+```
+
+Report any file that exceeds its natural utility ceiling:
+- CLAUDE.md > 4KB → flag
+- `post-compact-context.md` > 120 lines → flag (goal: condensed restoration, not full rules)
+- Any single rule file > 200 lines → flag as candidate for splitting
+- Any agent file > 300 lines → flag as candidate for trimming
+
+#### 2. Cross-file redundancy
+
+Identify content that appears in two or more files with substantial overlap.
+Common patterns to look for:
+
+- A rule stated in full in both `CLAUDE.md` and a `rules/` file (CLAUDE.md
+  should reference, not repeat)
+- The same behavioral rule in both `rules/X.md` and `post-compact-context.md`
+  at equal verbosity (post-compact should be a condensed version, not a copy)
+- An agent's body text that duplicates content in its `## Required Rules`
+  section references (the body should add agent-specific detail, not restate
+  the rule)
+- The same checklist item appearing in multiple skill files
+
+For each redundancy: quote both locations with file:line, estimate how many
+tokens the duplication costs per session (multiply by sessions-per-day if known),
+and state which location should be the single source of truth.
+
+#### 3. Verbose prose vs. tight bullets
+
+Identify sections where a long prose explanation could be replaced by a shorter
+form without losing actionability. Apply this test: *if a competent developer
+could act correctly after reading only the first sentence and a bullet list,
+the rest is bloat.*
+
+Look for:
+- Paragraphs of ≥ 4 sentences that precede a bullet list saying the same thing
+- "For example" blocks that illustrate an already-clear rule
+- Motivational context ("the reason we do this is...") that belongs in a commit
+  message, not a rule file — actionable rules don't need rationale unless the
+  rule is counterintuitive
+
+For each candidate: give the file:line range, current word count, and a
+rewritten version under 40 words that preserves the actionable constraint.
+Only suggest rewrites where compression > 50% and no behavioral nuance is lost.
+
+#### 4. Dead or stale content
+
+Flag:
+- `<!-- Code review: ... -->` comments that are still open (not yet addressed)
+- Sections referencing features, tools, or patterns that no longer exist in the
+  config (e.g., references to a model name that's been updated elsewhere)
+- "TODO" or "REVISIT" markers older than the current config generation
+- Rules that are fully subsumed by a more specific rule added later
+
+#### 5. post-compact-context.md calibration
+
+This file is injected after every compaction. Every line costs tokens on every
+compaction event. Check:
+
+- Does each section restore a genuine behavioral rule, or does it repeat
+  content that CLAUDE.md already restores verbatim?
+- Are any sections too verbose to serve as a "restore" — i.e., longer than
+  the corresponding rule file section they're meant to summarize?
+- Are there sections that could be merged (e.g., two adjacent 3-line sections
+  that are both about error handling)?
+
+Target: each restored rule should be ≤ 4 lines. Flag any section > 6 lines as
+a compression candidate.
+
+**Output format:**
+
+Group findings under:
+- **Bloat** — file is over the size limit
+- **Redundancy** — same content in two places; recommend single source
+- **Verbose prose** — can be compressed >50%; include rewritten version
+- **Dead content** — stale, unreferenced, or superseded
+- **post-compact calibration** — specific to that file
+
+For each finding: `file:line`, severity (Warning / Suggestion / Note), and
+concrete fix. No findings without a concrete fix.
+
+Wait for all five agents to complete before Phase 3.
 
 ---
 
 ## Phase 3 — Synthesize and deduplicate
 
-Run a single dedup pass across all seven agent outputs (A–G):
+Run a single dedup pass across all eight agent outputs (A–H):
 
 1. Group findings that describe the same root issue.
 2. Keep the most specific instance (file:line + concrete fix).
