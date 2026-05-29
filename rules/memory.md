@@ -16,10 +16,9 @@ proceeding.
 
 ## During Task Execution
 
-<!-- Code review: {task-id} naming is undefined for interactive sessions.
-     Revisit if note-writing should use a timestamp or topic slug as the
-     filename during non-autonomous sessions. -->
 Write a note to `.agent-notes/{task-id}.md` when you encounter:
+(Use the task ID from the mission brief in autonomous mode; use a short
+topic slug like `auth-bug-2026-05` in interactive sessions.)
 
 - Unexpected behavior in code, APIs, or infrastructure — including API usage that diverges from documentation
 - Undocumented conventions or implicit patterns in the codebase
@@ -70,15 +69,11 @@ different repo benefit?" → project. "Different project?" → org.
 
 ## Search Behavior
 
-<!-- Code review: search order checks org scope before project scope,
-     which may surface broader memories before more precise ones.
-     Revisit if project-scoped memories should be checked before org. -->
-Default search order before a task:
+Default search order before a task (narrowest scope first):
 1. `repo:{current-repo}` scope
-2. `org` scope
-3. Merge, deduplicate, inject into context
-
-If no relevant results, widen to `project:{name}`, then global.
+2. `project:{name}` scope
+3. `org` scope
+4. Merge, deduplicate, inject into context
 
 Always state what memories were found and from what scope. Flag
 cross-scope memories: "This was observed in {scope} — verify it

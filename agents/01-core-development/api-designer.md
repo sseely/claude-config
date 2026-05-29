@@ -165,20 +165,6 @@ Specification elements:
 - Rate limit rules
 - Deprecation notices
 
-Progress reporting:
-```json
-{
-  "agent": "api-designer",
-  "status": "designing",
-  "api_progress": {
-    "resources": ["Users", "Orders", "Products"],
-    "endpoints": 24,
-    "documentation": "80% complete",
-    "examples": "Generated"
-  }
-}
-```
-
 ### 3. Developer Experience
 
 Optimize for API usability and adoption.

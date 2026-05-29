@@ -118,8 +118,6 @@ path before the forward path.
 
 ## Evolutionary architecture
 
-Design for change, not for the current requirements:
-
 - **Encapsulate variation** — put the thing most likely to change behind
   an interface. Don't expose implementation details across module
   boundaries.

@@ -94,33 +94,17 @@ result acted on.
 
 ## Scale-aware brevity constraints
 
-Per arxiv:2604.00025 (Hakim, 2025 — preprint): explicit brevity constraints
-on larger models yield up to 26 percentage point accuracy improvements by
-suppressing "scale-dependent verbosity." Larger models are trained to
-elaborate; without explicit constraint they over-explain and introduce errors
-through overelaboration. Smaller models can match or exceed them on the same
-task when both are brevity-constrained.
+Per arxiv:2604.00025 (Hakim, 2025 — preprint): Opus-tier models over-elaborate
+without explicit constraint, yielding up to 26pp accuracy loss on planning tasks.
 
-**Apply this when writing Opus agent prompts:**
+- Every Opus agent prompt must include: "Return only the structured result —
+  no preamble, no trailing summary."
+- Specify output shape explicitly (bullet list, table, schema). "Report findings"
+  is weaker than "Report as a bullet list, one line per finding, no prose."
+- Replace "explain X" / "summarize Y" with "state X" / "list Y" in rules and phases.
 
-- Add a conciseness instruction to every Opus agent prompt: "Return only the
-  structured result — no preamble, no trailing summary, no step-by-step
-  narration of your reasoning unless the schema requests it."
-- Mathematical reasoning, scientific analysis, and planning tasks show the
-  sharpest reversal — these are exactly the tasks Opus is typically assigned.
-- Universal prompting (same instruction regardless of model tier) masks latent
-  capability. Tailor the length constraint to the model.
-
-**Apply when writing CLAUDE.md rules and skill phases:**
-
-- Rules that say "explain X" or "summarize Y" invoke verbose behavior —
-  replace with "state X" or "list Y" when conciseness is the goal.
-- Skill phases should specify output shape and length bound explicitly.
-  "Report findings" is weaker than "Report findings as a bullet list, one
-  line per finding, no prose."
-
-**Do not apply** when reasoning trace is the deliverable (e.g., extended
-thinking tasks, architecture proposals) — verbosity is useful there.
+**Exception:** when reasoning trace is the deliverable (architecture proposals,
+extended thinking tasks) — verbosity is appropriate there.
 
 ## Session work-type boundaries
 

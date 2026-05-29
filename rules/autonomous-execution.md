@@ -132,10 +132,8 @@ Quality Gates:
 
 - Any push-forward condition listed in the mission brief applies
 - The choice is purely stylistic and doesn't affect behavior
-<!-- Code review: "task is simpler than estimated" could mask missing
-     context. Revisit: require a decision-journal entry before applying
-     this rule. -->
 - A task is simpler than estimated and can be done in fewer steps
+  *(log a decision-journal entry explaining why before proceeding)*
 - An error message is self-explanatory and the fix is obvious
 - A dependency needs a minor/patch version bump
 

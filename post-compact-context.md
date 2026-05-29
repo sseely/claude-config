@@ -17,20 +17,8 @@ session start), you MUST do the following before continuing:
 4. Read the current batch's `overview.md`
 5. Resume from the first incomplete task
 
-Do NOT skip this sequence. Compaction erases nuance. The brief on
-disk is canonical.
-
 ---
 
-
-## Interaction Rules (restored)
-
-- Be direct. No filler phrases.
-- After completing a task, briefly summarize what was done and the
-  reasoning behind any non-obvious decisions.
-- One commit per completed task; Conventional Commits format.
-
----
 
 ## Coverage Rule (restored)
 
@@ -51,18 +39,8 @@ review step — log the execution plan to decision-journal.md instead.
 
 ## Agent Delegation (restored)
 
-Agents live in `~/.claude/agents/`. Delegate when the task clearly falls within
-a specialist's domain. Default to handling directly for tasks under ~30 min.
-Model routing: Opus for planning/architecture, Sonnet for implementation,
-Haiku for scoring/dedup/validation.
-
----
-
-## Security: Error Responses (restored)
-
-Return generic error messages to clients ("Bad Request", "Internal Server Error").
-Never expose stack traces, SQL errors, file paths, or internal IDs in responses.
-Log full details server-side at ERROR level.
+Default to handling directly for tasks under ~30 min; delegate when clearly in a specialist's domain.
+Model routing: Opus→planning, Sonnet→implementation, Haiku→scoring.
 
 ---
 
@@ -81,7 +59,8 @@ SQL. Never interpolate user input into shell commands, HTML, or server-side URLs
 ## Error Handling (restored)
 Throw for unexpected/unrecoverable states; return typed errors for expected failures
 (validation, not-found, permission denied). Wrap low-level errors at module boundaries.
-No empty catch blocks.
+No empty catch blocks. Return generic messages to clients — never expose stack traces,
+SQL errors, or internal IDs. Log full detail server-side at ERROR level.
 
 ---
 
