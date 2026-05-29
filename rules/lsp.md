@@ -2,7 +2,12 @@
 
 LSP plugins are installed: typescript-lsp, pyright-lsp, rust-analyzer-lsp.
 These provide semantic navigation that is faster and more precise than
-text search. Prefer them over Grep/Glob for all symbol-level tasks.
+text search.
+
+**Priority order for code search:**
+1. **LSP** — symbol is known; use go-to-definition, find-references, hover
+2. **ast-grep (`sg`)** — pattern is structural; use when shape matters, not just text
+3. **Grep/Glob** — last resort: non-code content, unknown symbol name, unsupported file type
 
 > **Scope:** This rule governs the orchestrator (main Claude Code session) only.
 > Subagents use **Serena MCP tools** (`mcp__serena__find_symbol`,
@@ -14,13 +19,13 @@ text search. Prefer them over Grep/Glob for all symbol-level tasks.
 
 Use LSP for any task where you know the symbol name:
 
-| Task | Use LSP | NOT Grep |
-|------|---------|----------|
-| Find where a function is defined | go to definition | Grep for function name |
-| Find all callers of a function | find references | Grep for function name |
-| Find where a variable is declared | go to definition | Grep for var name |
-| Find all usages of a variable | find references | Grep for var name |
-| Find all implementations of an interface | find implementations | Grep |
+| Task | Use LSP | Avoid |
+|------|---------|-------|
+| Find where a function is defined | go to definition | Grep or sg for function name |
+| Find all callers of a function | find references | Grep or sg for function name |
+| Find where a variable is declared | go to definition | Grep or sg for var name |
+| Find all usages of a variable | find references | Grep or sg for var name |
+| Find all implementations of an interface | find implementations | Grep or sg |
 | Get type signature of a symbol | hover info | Read the file |
 | List all symbols in a file | symbol listing | Read + scan manually |
 | Trace a call chain | call hierarchy | Grep repeatedly |
