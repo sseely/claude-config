@@ -86,13 +86,15 @@ applies here before relying on it." Never silently apply them.
 
 ## Curator Criteria (sponge-worthy evaluation)
 
-Store in Mem0 if the observation is:
+### Store in Mem0 if the observation is
+
 - **Reusable** — another agent on a different task would benefit
 - **Non-obvious** — not discoverable in 60 seconds of reading docs
 - **Stable** — unlikely to change in the next sprint/release
 - **Actionable** — knowing this changes how you approach the work
 
-Do not store if:
+### Do not store if
+
 - Task-specific context with no future relevance
 - Duplicates something already in Mem0 (search first)
 - Temporary state (build broken, service down, PR pending)

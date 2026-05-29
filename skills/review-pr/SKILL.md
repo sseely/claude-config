@@ -14,6 +14,16 @@ disable-model-invocation: false
 Run a full code review on a GitHub PR and post the findings as inline
 comments, ready for the human to review and submit.
 
+## Model Routing
+
+Delegates to `/code-review` for the review phase — see that skill's model routing table.
+Phase 4 (diff position mapping) runs inline. Phase 5 (posting comments) uses `gh` CLI.
+
+| Phase | Task | Model |
+|-------|------|-------|
+| Phase 3 — Code review | Delegates to `/code-review` | Sonnet + Haiku per that skill |
+| Phase 4 — Position mapping | Mechanical mapping | Inline (no sub-agent) |
+
 **Input:** `$ARGUMENTS` — a GitHub PR URL (e.g.
 `https://github.com/org/repo/pull/123`) or a bare PR number.
 If empty, run `gh pr view --json url` on the current branch and use

@@ -141,11 +141,11 @@ Quality Gates:
 
 ### Consecutive-fix stop rule
 
-If you have attempted the same failing fix 3 or more consecutive times and the
-problem persists, **stop**. Three consecutive failures on the same issue signal
-an architectural or design problem that cannot be resolved by iterating on the
-same approach. Document the failure in the decision journal with the full error
-output and wait for human input.
+If the same code location or approach has been changed 3 or more times
+consecutively without resolving the same failing check, **stop**. Three
+consecutive failures signal an architectural or design problem that cannot be
+resolved by iterating on the same approach. Document the failure in the
+decision journal with the full error output and wait for human input.
 
 ### Always log the decision either way
 
@@ -163,6 +163,9 @@ differently, log it.
 - If a quality gate fix requires changes to an already-committed
   task, create a `fix` commit referencing the task:
   `fix(T3): resolve lint errors in confirm endpoint`
+- Mission-brief branches use **merge commits** (not squash) when
+  merging to main — squash destroys per-task commit IDs referenced
+  throughout the decision journal and brief.
 
 ## Progress Tracking
 

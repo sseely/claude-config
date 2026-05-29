@@ -11,6 +11,14 @@ disable-model-invocation: false
 
 # Code Review
 
+## Model Routing
+
+| Step | Agent role | Model |
+|------|-----------|-------|
+| Step 2 — 11 parallel reviewers | Code analysis | `sonnet` |
+| Step 4 — Confidence scoring | Pass/fail evaluation | `haiku` |
+| Step 3 — Deduplication pass | Dedup + grouping | `haiku` |
+
 ## Determine scope
 
 - If $ARGUMENTS is empty or not provided: review staged changes only.

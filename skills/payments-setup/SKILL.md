@@ -349,8 +349,16 @@ STRIPE_BASE_URL=http://localhost:12111 npx wrangler dev
 
 ---
 
+## Step 15b — Write tests
+
+Write at minimum:
+- **Happy-path test**: simulate a `checkout.session.completed` webhook — assert `session_packs` row created.
+- **Idempotency test**: send the same webhook event twice — assert only one `session_packs` row exists (ON CONFLICT DO NOTHING).
+- **Auth rejection test**: call a payment endpoint without a session — assert 401.
+
 ## Step 16 — Verify
 
+0. Run `npx tsc --noEmit` — fix any type errors before proceeding.
 1. **Buy flow**: Navigate to the buy section → click a pack → confirm redirect
    to Stripe Checkout → complete payment → confirm redirect to success URL →
    verify `session_packs` row created in DB.

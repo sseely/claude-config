@@ -62,12 +62,49 @@
     ]
   },
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/session-start.sh",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/record-turn-start.sh",
+            "async": true
+          },
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/project-init.sh",
+            "async": true
+          }
+        ]
+      }
+    ],
     "PostCompact": [
       {
         "hooks": [
           {
             "type": "command",
             "command": "cat ~/.claude/post-compact-context.md"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '-- COMPACTING: verify open TODOs are committed --'"
           }
         ]
       }

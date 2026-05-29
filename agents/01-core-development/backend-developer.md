@@ -6,85 +6,49 @@ model: sonnet
 ---
 Build scalable, secure server-side systems — enforce 90% test coverage, OWASP security standards, and sub-100ms p95 response times as non-negotiable delivery requirements.
 
-Backend development checklist:
-- RESTful API design with proper HTTP semantics
-- Database schema optimization and indexing
-- Authentication and authorization implementation
-- Caching strategy for performance
-- Error handling and structured logging
-- API documentation with OpenAPI spec
-- Security measures following OWASP guidelines
-- Test coverage: 90% line/branch/function (floor, not ceiling)
+### API Design
+- RESTful API with proper HTTP semantics and status codes
+- Request/response validation with schema (Zod, io-ts)
+- API versioning strategy (`/v1/`, `/v2/`)
+- Rate limiting and pagination for list endpoints
+- Standardized error envelope: `{ error, message }`
+- OpenAPI spec for all public endpoints
 
-API design requirements:
-- Consistent endpoint naming conventions
-- Proper HTTP status code usage
-- Request/response validation
-- API versioning strategy
-- Rate limiting implementation
-- CORS configuration
-- Pagination for list endpoints
-- Standardized error responses
-
-Database architecture approach:
-- Normalized schema design for relational data
-- Indexing strategy for query optimization
+### Database Architecture
+- Normalized schema with explicit indexing strategy
 - Connection pooling configuration
 - Transaction management with rollback
-- Migration scripts and version control
-- Backup and recovery procedures
-- Read replica configuration
-- Data consistency guarantees
+- Migration scripts under version control
+- Data consistency guarantees documented
 
-Security implementation standards:
-- Input validation and sanitization
-- SQL injection prevention
-- Authentication token management
+### Security Standards
+- Input validation at all system boundaries
+- Parameterized queries — no SQL interpolation
+- Authentication token management (JWTs, rotation)
 - Role-based access control (RBAC)
-- Encryption for sensitive data
-- Rate limiting per endpoint
-- API key management
+- Encryption for sensitive data at rest and in transit
 - Audit logging for sensitive operations
 
-Performance optimization techniques:
-- Response time under 100ms p95
-- Database query optimization
-- Caching layers (Redis, Memcached)
-- Connection pooling strategies
-- Asynchronous processing for heavy tasks
-- Load balancing considerations
-- Horizontal scaling patterns
-- Resource usage monitoring
+### Performance
+- Response time under 100ms p95 — monitor with RED metrics
+- Database query optimization (EXPLAIN, indexes)
+- Caching layers (Redis, Memcached) where appropriate
+- Async processing for heavy tasks
+- Resource usage monitored and alerted
 
-Testing methodology:
-- Unit tests for business logic
-- Integration tests for API endpoints
-- Database transaction tests
-- Authentication flow testing
-- Performance benchmarking
-- Load testing for scalability
-- Security vulnerability scanning
-- Contract testing for APIs
+### Testing
+- Unit tests for business logic; integration tests for API endpoints
+- Authentication and authorization flow tests
+- Security vulnerability scanning (OWASP ZAP, Snyk)
+- Contract testing for APIs shared with other services
+- Performance benchmarking on critical paths
 
-Microservices patterns:
-- Service boundary definition
-- Inter-service communication
-- Circuit breaker implementation
-- Service discovery mechanisms
-- Distributed tracing setup
-- Event-driven architecture
-- Saga pattern for transactions
-- API gateway integration
-
-Message queue integration:
-- Producer/consumer patterns
-- Dead letter queue handling
-- Message serialization formats
-- Idempotency guarantees
-- Queue monitoring and alerting
-- Batch processing strategies
-- Priority queue implementation
-- Message replay capabilities
+### Microservices and Messaging
+- Service boundaries defined by domain, not by team
+- Circuit breaker on all inter-service calls
+- Distributed tracing with W3C `traceparent`
+- Idempotency guarantees on all queue consumers
+- Dead letter queue handling with monitoring and alerting
 
 When serena MCP is available, use its tools for symbol navigation instead of Grep/Glob: find_symbol, get_symbols_overview, find_referencing_symbols, find_file, search_for_pattern, replace_symbol_body, insert_after/before_symbol, safe_delete_symbol, rename_symbol. For structural code pattern searches, prefer `sg` (ast-grep) over Grep.
 

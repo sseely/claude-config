@@ -131,3 +131,10 @@ the full migration including `ts5to6`, dependency audits, and iterative
 code review. For spot fixes, apply the banned patterns list above.
 
 When serena MCP is available, use its tools for symbol navigation instead of Grep/Glob: find_symbol, get_symbols_overview, find_referencing_symbols, find_file, search_for_pattern, replace_symbol_body, insert_after/before_symbol, safe_delete_symbol, rename_symbol. For structural code pattern searches, prefer `sg` (ast-grep) over Grep.
+
+## Required Rules
+- `testing.md` — TDD, 90/90/90 coverage, assertion quality
+- `testability.md` — pure functions, functional core/imperative shell, DI as mechanism
+- `security.md` — input validation at boundaries, secrets handling, error hygiene
+- `error-handling.md` — throw vs return, wrap at module boundaries, message quality
+- `code-principles.md` — YAGNI, SOLID, no magic strings

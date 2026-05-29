@@ -10,6 +10,15 @@ description: >
 
 # Changelog Generator
 
+## Model Routing
+
+| Phase | Task | Model |
+|-------|------|-------|
+| Phase 3 — Categorize and translate | User-facing writing | `sonnet` |
+| Phase 4 — Format output | Mechanical formatting | `sonnet` |
+
+This skill runs inline (no sub-agents); routing applies if agents are spawned for large commit volumes.
+
 ## Phase 1 — Determine scope
 
 If `$ARGUMENTS` specifies a tag (e.g. `v2.4.0`) or date range (e.g.

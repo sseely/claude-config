@@ -292,8 +292,16 @@ build time, not a secret.
 
 ---
 
+## Step 13b — Write tests
+
+Write at minimum:
+- **Event emission test**: call the core action API — assert the backend analytics event is queued/sent.
+- **No-consent test**: if compliance-setup is in place, assert events do NOT fire when consent is absent.
+- **Identify test**: call login endpoint — assert `identify()` fires with the user ID.
+
 ## Step 14 — Verify
 
+0. Run `npx tsc --noEmit` — fix any type errors before proceeding.
 1. Open the app locally and perform the core action (create → start → complete
    an item). Check PostHog Live Events — confirm events arrive with the
    expected properties.

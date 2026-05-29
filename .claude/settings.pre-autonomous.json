@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Edit(~/.claude/skills/code-review/**)",
+      "Edit(~/.claude/skills/explore/**)",
+      "Edit(~/.claude/skills/plan-mission/**)",
+      "Bash(mkdir -p /Users/scottseely/.claude/skills/self-improve)",
+      "Edit(~/.claude/skills/self-improve/**)"
+    ],
+    "additionalDirectories": [
+      "/Users/scottseely/.claude/skills"
+    ]
+  }
+}

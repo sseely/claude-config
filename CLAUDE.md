@@ -5,6 +5,22 @@
 - Be direct. No filler phrases ("Perfect!", "Great!", "Certainly!"), no pleasantries.
 - After completing a task, briefly summarize what was done and the reasoning behind any non-obvious decisions. Identify any agents used.
 
+## Verification
+
+Before answering questions about code, APIs, or libraries, use tools first:
+
+- **API/library behavior** → read the docs or use Context7 before answering
+- **File content** → Read the file; don't assume what it contains
+- **Recent facts** → WebSearch first; training data may be stale
+- **Uncertain** → state the uncertainty explicitly; don't fill gaps with guesses
+
+Confidence levels — declare these when the accuracy of a claim matters:
+
+- **HIGH**: Verified via tool or cited source
+- **MEDIUM**: Single source, or strong training knowledge — add a caveat
+- **LOW**: Memory only, unverified — say so
+- **UNKNOWN**: Cannot verify — admit it rather than fabricate
+
 ## On Compaction
 
 CLAUDE.md is automatically reloaded from disk after compaction —
@@ -36,22 +52,6 @@ Plan before executing: list subtasks, mark dependencies, assign file ownership (
 
 Conventional Commits, all lines ≤80 chars. Subject `<type>(<scope>): <desc>` ≤72 chars, lowercase, no period. See `~/.claude/rules/commits.md` for full spec.
 
-## Verification
-
-Before answering questions about code, APIs, or libraries, use tools first:
-
-- **API/library behavior** → read the docs or use Context7 before answering
-- **File content** → Read the file; don't assume what it contains
-- **Recent facts** → WebSearch first; training data may be stale
-- **Uncertain** → state the uncertainty explicitly; don't fill gaps with guesses
-
-Confidence levels — declare these when the accuracy of a claim matters:
-
-- **HIGH**: Verified via tool or cited source
-- **MEDIUM**: Single source, or strong training knowledge — add a caveat
-- **LOW**: Memory only, unverified — say so
-- **UNKNOWN**: Cannot verify — admit it rather than fabricate
-
 ## Rules
 
 All rules live in `~/.claude/rules/`:
@@ -72,8 +72,11 @@ All rules live in `~/.claude/rules/`:
 - **architecture.md** — blast radius layers, ADRs, fitness functions, reversibility
 - **research-sources.md** — 5-tier source hierarchy for technical claims and design decisions
 - **prompting-quality.md** — constraint keywords, specificity, instruction bloat, session hygiene
+- **environment.md** — env var naming (CAPS_SNAKE), startup validation, logging redaction
+- **naming-conventions.md** — folder layout, file naming, symbol naming, database naming
+- **pr-workflow.md** — branch naming, PR size (≤400 lines), merge strategy, pre-existing violations
+- **retry-idempotency.md** — 3-attempt backoff, jitter, idempotency keys, when not to retry
 
 ## Agent Memory
 
-Local `.agent-notes/` observations + long-term Mem0 via MCP.
-The `memory-curator` agent handles promotion. See `~/.claude/rules/memory.md`.
+Search Mem0 before every task; state what you found and how it affects scope. See `~/.claude/rules/memory.md`.

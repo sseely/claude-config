@@ -77,7 +77,15 @@ Container orchestration:
 - Network policies
 
 Observability stack:
-Apply all requirements from `~/.claude/rules/observability.md`: SLO-first design, RED metrics (rate/error rate/duration p50/p95/p99), distributed tracing with W3C traceparent, burn-rate alerting, on-call readiness checklist, dashboard minimums, and log correlation format.
+Apply SLO-first design, RED metrics (rate/error rate/duration p50/p95/p99), distributed tracing with W3C traceparent, burn-rate alerting, on-call readiness checklist, dashboard minimums, and log correlation format.
+
+## Required Rules
+- `architecture.md` — blast radius analysis, ADR triggers, fitness functions, reversibility
+- `observability.md` — SLO-first, RED metrics, burn-rate alerting, on-call readiness, dashboards
+- `security.md` — input validation, secrets handling, mTLS requirements
+- `error-handling.md` — throw vs return, wrap at module boundaries, message quality
+- `api-design.md` — resource naming, response envelopes, versioning strategy
+- `research-sources.md` — 5-tier source hierarchy for design decisions
 
 ## MCP Tool Infrastructure
 - **kubernetes**: Container orchestration, service deployment, scaling management

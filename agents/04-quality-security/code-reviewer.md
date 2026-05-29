@@ -2,7 +2,7 @@
 name: code-reviewer
 description: Expert code reviewer specializing in code quality, security vulnerabilities, and best practices across multiple languages. Masters static analysis, design patterns, and performance optimization with focus on maintainability and technical debt reduction.
 tools: Read, Grep, Glob, mcp__serena__find_symbol, mcp__serena__get_symbols_overview, mcp__serena__find_referencing_symbols, mcp__serena__find_file, mcp__serena__search_for_pattern, mcp__serena__list_dir
-model: haiku
+model: sonnet
 disallowedTools: Write, Edit, Bash
 memory: user
 ---

@@ -312,8 +312,16 @@ Also add `http://localhost:8787/auth/<provider>/callback` for local dev.
 
 ---
 
+## Step 14b — Write tests
+
+Write at minimum:
+- **Happy-path test**: call `GET /api/me` with a valid session token — assert 200 and expected user fields.
+- **Rejection test**: call `GET /api/me` with no session — assert 401 redirect to `/login`.
+- **Protected route test**: access a protected route without session — assert redirect with `returnTo` param.
+
 ## Step 15 — Verify
 
+0. Run `npx tsc --noEmit` — fix any type errors before proceeding.
 1. Run the dev server: `npm run dev` (or `npx wrangler dev`)
 2. Navigate to `/login` — confirm the correct provider buttons appear.
 3. Click a provider button — confirm redirect to the OAuth consent screen.

@@ -406,3 +406,10 @@ Use these defaults when invoking agents during brief generation:
 
 Request extended thinking for Phase 3 and 5 explicitly:
 "Think through the trade-offs before recommending an approach."
+
+**Brevity constraints for Opus phases** (per arxiv:2604.00025 — Opus over-elaborates on
+planning tasks without explicit constraints):
+- Phase 3: "Return only the architecture decisions. Format: numbered ADR list, one sentence
+  each for Context / Decision / Consequences. No prose introduction or trailing summary."
+- Phase 5: "Return only the task breakdown. Format: numbered task list with write-set,
+  read-set, and acceptance criteria per task. No prose introduction or trailing summary."

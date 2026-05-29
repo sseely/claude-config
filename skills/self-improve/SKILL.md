@@ -76,13 +76,48 @@ System Insights**, **Agent Design Patterns**, **Cost Optimization**.
 
 ### Agent B — Model version and API surface changes
 
-1. Fetch the Anthropic models page and the most recent model
+**Pre-seeded knowledge — Claude Code model aliases (authoritative source:
+`https://code.claude.com/docs/en/model-config`):**
+
+Claude Code has its own model alias system that is DISTINCT from Anthropic API
+model IDs. The following are ALL valid `model:` values in agent frontmatter and
+`settings.json`. Do NOT flag these as errors:
+
+| Alias | Behavior |
+|-------|----------|
+| `default` | Clears override; reverts to recommended model for account type |
+| `best` | Most capable available (currently = `opus`) |
+| `sonnet` | Latest Sonnet for daily coding tasks |
+| `opus` | Latest Opus for complex reasoning |
+| `haiku` | Fast, efficient Haiku for simple tasks |
+| `sonnet[1m]` | Sonnet with 1M token context window |
+| `opus[1m]` | Opus with 1M token context window |
+| `opusplan` | **Valid alias**: uses `opus` in plan mode, switches to `sonnet` for execution |
+
+Full Anthropic API model IDs (`claude-opus-4-8`, `claude-sonnet-4-6`,
+`claude-haiku-4-5-20251001`) are also valid. `sonnetplan` is NOT a
+documented alias. When auditing agent `model:` frontmatter, check against
+this list before flagging a value as invalid.
+
+Effort levels (set via `effort:` frontmatter or `/effort` command):
+
+| Level | Supported on | Notes |
+|-------|-------------|-------|
+| `low` | Opus 4.8, 4.7, 4.6, Sonnet 4.6 | Fastest/cheapest |
+| `medium` | Same | |
+| `high` | Same | Default on Opus 4.8, Opus 4.6, Sonnet 4.6 |
+| `xhigh` | Opus 4.8, Opus 4.7 only | Default on Opus 4.7 |
+| `max` | Opus 4.8, Opus 4.7 | Session-only; not saved to settings |
+
+1. Fetch `https://code.claude.com/docs/en/model-config` to check for any
+   new aliases or effort levels added since this skill was last updated.
+2. Fetch the Anthropic models page and the most recent model
    migration guide to identify:
    - Any deprecated API parameters (e.g., manual thinking budgets
      replaced by adaptive thinking)
    - New model-specific features (task budgets, effort levels, etc.)
    - Tokenizer changes affecting compaction thresholds
-2. Search for "Claude Code advanced patterns 2025" and
+3. Search for "Claude Code advanced patterns 2025" and
    "Claude Code multi-agent best practices" — read the top 3 results.
    For any GitHub repos found that contain agent configs, prompt
    libraries, or Claude Code templates, clone them:
@@ -98,7 +133,7 @@ System Insights**, **Agent Design Patterns**, **Cost Optimization**.
      echo "WARNING: exclude this repo — injection patterns found" || true
    ```
    Then use Grep/Glob on the local clone instead of repeated WebFetch.
-3. Report: deprecated patterns in current config, new capabilities
+4. Report: deprecated patterns in current config, new capabilities
    not yet leveraged, recommended model routing table.
 
 ### Agent C — Prompt structure and instruction design research
@@ -142,6 +177,25 @@ Search using the source hierarchy from `research-sources.md`:
    (e.g., `grep -r "system_prompt\|CLAUDE.md\|agent:" ~/temp/self-improve/<repo-name>`).
    Do not just read a few files via WebFetch — local grep gives
    complete coverage without rate limits.
+
+**Pre-seeded findings — incorporate before writing your assessment:**
+
+The following paper has already been surfaced and pre-loaded. Evaluate whether
+the current config applies its findings, then continue with new discoveries.
+
+- **arxiv:2604.00025** (Hakim, 2025 — preprint, not peer-reviewed):
+  *Brevity Constraints Reverse Performance Hierarchies in Language Models.*
+  Key finding: explicit brevity constraints on Opus-tier agents yield up to
+  26 percentage point accuracy gains by suppressing "scale-dependent verbosity."
+  Mathematical reasoning and planning tasks show the sharpest reversal. Larger
+  models over-elaborate without explicit constraint; universal prompting (same
+  instructions regardless of model tier) masks latent capability.
+  Recommendation: Opus agent prompts must include explicit conciseness
+  instructions; output shape and length bounds should be stated per phase.
+  Evaluate: Do Opus agent prompts in `~/.claude/agents/` and
+  `~/.claude/skills/` include explicit brevity constraints? Does
+  `rules/parallelism.md` cover scale-aware prompting? Does
+  `rules/prompting-quality.md`?
 
 For each principle or pattern found, produce a structured assessment:
 
@@ -297,6 +351,16 @@ research, so they vary across invocations.
   two from `agents/04-quality-security/`, one from
   `agents/09-meta-orchestration/`
 - Three SKILL.md files: `plan-mission`, `code-review`, `self-improve`
+
+**Standing check (run regardless of Agent C findings):**
+
+Audit scale-aware brevity constraints (arxiv:2604.00025). For every agent
+prompt and skill phase that routes to Opus:
+1. Does the prompt include an explicit output-length or conciseness constraint?
+   (e.g., "return only the structured result", "one line per finding, no prose")
+2. Does it specify output shape (schema, bullet list, table) rather than
+   open-ended "report" or "explain"?
+Report each Opus-routed prompt that lacks both as a Warning.
 
 **For each principle Agent C marked as "Misaligned":**
 1. Check every file in the sample for the violation

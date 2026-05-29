@@ -6,7 +6,8 @@ YAGNI governs **design decisions you make**, not requirements handed
 to you. It prevents scope creep during greenfield work; it does not
 license dropping items from a spec, port, or translation task.
 
-**YAGNI applies when you are making design choices:**
+### YAGNI applies when you are making design choices
+
 - No speculative abstractions, hooks, or extension points for
   requirements that haven't been asked for
 - No configuration knobs that have only one caller
@@ -14,7 +15,8 @@ license dropping items from a spec, port, or translation task.
   yet exist
 - Three similar lines of code is better than a premature abstraction
 
-**YAGNI does NOT apply when a source defines completeness:**
+### YAGNI does NOT apply when a source defines completeness
+
 - Porting or translating code to another language — implement
   everything in the source; omissions are bugs
 - Implementing against a spec file — the spec is the complete
@@ -23,7 +25,8 @@ license dropping items from a spec, port, or translation task.
 
 If a future requirement arrives, refactor then. Not now.
 
-**YAGNI also applies to defensive code:**
+### YAGNI also applies to defensive code
+
 - No error handling or fallbacks for states that cannot occur given
   surrounding invariants — trust internal code and framework guarantees
 - No null checks on values the type system or caller contract guarantees

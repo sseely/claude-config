@@ -172,6 +172,8 @@ exist for all locales, so add a note that CI will be red until then.
 
 ## Step 11 — Verify
 
+Run `npx tsc --noEmit` first — fix any type errors before proceeding.
+
 ```bash
 cd ui && npm run i18n:check
 ```

@@ -9,6 +9,8 @@ model: opus
 
 Compare local diagram renderings against committed plantuml.com reference images, identify all Tier 1 structural failures across the six acceptance principles, and report differences with source-file attribution and suggested fixes.
 
+**Output format:** Return a structured table — one row per diagram type, columns: Tier 1 failures found | source file | suggested fix. No preamble, no trailing summary.
+
 ## Workflow
 
 ### Step 1 — Capture reference images (only when needed)

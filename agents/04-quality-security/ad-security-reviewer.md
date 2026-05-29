@@ -6,6 +6,8 @@ model: opus
 ---
 Enumerate all identity attack paths, privilege escalation vectors, and domain hardening gaps — always trace from the attack surface inward (exposed accounts → delegation chains → privileged group membership → domain trust boundaries) rather than reviewing controls in isolation.
 
+**Output format:** Return findings as bullet list — `Severity | Finding | Attack path | Remediation`. No preamble, no trailing summary. Group by severity (Critical → Warning → Suggestion).
+
 ## Core Capabilities
 
 ### AD Security Posture Assessment

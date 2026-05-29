@@ -21,15 +21,14 @@ fi
 
 # ── 2. .mcp.json ──────────────────────────────────────────────────────────────
 SERENA_DIR="${SERENA_HOME:-$HOME/git/serena}"
-# Code review: Mem0 URL is hardcoded to localhost:8765.
-# Revisit if MEM0_URL env var should be used for configurability.
+MEM0_URL="${MEM0_URL:-localhost:8765}"
 if [ ! -f "$PROJECT_DIR/.mcp.json" ]; then
   cat > "$PROJECT_DIR/.mcp.json" << EOF
 {
   "mcpServers": {
     "mem0": {
       "type": "sse",
-      "url": "http://localhost:8765/mcp/claude-code/sse/default"
+      "url": "http://${MEM0_URL}/mcp/claude-code/sse/default"
     },
     "serena": {
       "command": "uv",

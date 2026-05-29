@@ -8,14 +8,14 @@ tier has no answer.
 
 Use for: CVEs, vulnerability data, runtime behavior, standards.
 
+### Vulnerability and security data
 - **NVD** (`nvd.nist.gov`) — CVE database with CVSS scores
 - **OSV** (`osv.dev`) — open-source vulnerability database
-- **CISA** (`cisa.gov/known-exploited-vulnerabilities`) — actively
-  exploited vulnerabilities
-- **Vendor security advisories** — GitHub Security Advisories, AWS
-  Security Bulletins, etc.
-- **Official language/framework documentation** — MDN, Python docs,
-  Rust reference, Go spec
+- **CISA** (`cisa.gov/known-exploited-vulnerabilities`) — actively exploited
+- **Vendor security advisories** — GitHub Security Advisories, AWS Bulletins
+
+### Standards and official documentation
+- **Official language/framework documentation** — MDN, Python docs, Rust reference, Go spec
 - **RFCs** — IETF RFCs for protocol behavior (`rfc-editor.org`)
 - **W3C specifications** — web platform standards
 

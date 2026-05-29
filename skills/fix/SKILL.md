@@ -12,6 +12,14 @@ disable-model-invocation: false
 
 Drive a failing test, build error, or runtime error to green.
 
+## Model Routing
+
+| Phase | Agent role | Model |
+|-------|-----------|-------|
+| Phase 2 — Diagnose | Root cause analysis | `sonnet` |
+| Phase 3 — Fix loop | Code changes | `sonnet` |
+| Debugger agent | Step-through analysis | `sonnet` |
+
 **Input:** `$ARGUMENTS` — one of:
 - A failing test name or pattern (e.g. `test_user_login`, `auth.test.ts`)
 - An error message or stack trace (paste directly)

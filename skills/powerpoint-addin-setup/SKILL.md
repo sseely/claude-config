@@ -267,6 +267,7 @@ this is a PowerPoint quirk, not a bug in the sync.
 
 ## Step 12 — Verify
 
+0. Run `npx tsc --noEmit` — fix any type errors before proceeding.
 1. `npm run dev` starts on `https://localhost:<port>` (not http).
 2. PowerPoint ribbon shows the button after sideloading.
 3. Clicking the button opens the task pane showing "Task pane loaded."

@@ -263,9 +263,17 @@ For the i18n-audit job:
 
 ---
 
+## Step 6b — Write tests
+
+Write at minimum:
+- **Consent gate test**: call a data endpoint without consent cookie — assert the appropriate gate response.
+- **Data export test**: call `GET /api/me/export` — assert the response contains expected user fields.
+- **Account deletion test**: call `DELETE /api/me` — assert the account is marked inactive and data is cleared.
+
 ## Step 7 — Verify
 
-1. Run `npm run build` (or equivalent) and confirm TypeScript compiles cleanly.
+1. Run `npx tsc --noEmit` — fix any type errors before proceeding.
+2. Run `npm run build` (or equivalent) and confirm TypeScript compiles cleanly.
 2. If compliance test files exist (`test/me.test.ts`, `test/feedback.test.ts`,
    `test/sbom.test.ts`), run them.
 3. Summarise:

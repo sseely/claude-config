@@ -259,6 +259,7 @@ other 17 locales.
 
 ## Step 16 — Verify
 
+0. Run `npx tsc --noEmit` — fix any type errors before proceeding.
 1. Run `npm run dev` — the app should load with the warm cream background and
    dark charcoal sidebar.
 2. Toggle OS dark mode — theme should switch immediately.

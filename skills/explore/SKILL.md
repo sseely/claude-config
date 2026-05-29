@@ -7,6 +7,14 @@ context: fork
 
 Perform a full architecture exploration of the current project and its related repositories within the same GitHub organization.
 
+## Model Routing
+
+| Step | Agent role | Model |
+|------|-----------|-------|
+| Per-repo analysis agents | Code/architecture reading | `sonnet` |
+| Diagram generation | Mermaid/doc writing | `sonnet` |
+| Dedup / inventory passes | Pass/fail, counting | `haiku` |
+
 ## Setup
 
 1. Create `docs/architecture/` in the current working directory if it doesn't exist.

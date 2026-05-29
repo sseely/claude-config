@@ -63,13 +63,18 @@ without guessing, the prompt is too thin.
 
 Match model to task complexity and cost:
 
-| Role | Model | Context window | When |
-|------|-------|----------------|------|
-| Planning / architecture | Opus 4.7 (adaptive thinking) | 1M tokens | Phase 3 decisions, mission decomposition, threat modeling |
-| Implementation | Sonnet | 1M tokens | Feature work, bug fixes, refactoring, code generation |
-| Scoring / dedup / validation | Haiku | 200k tokens | Confidence scoring, dedup passes, format checking, simple grep tasks |
+| Role | Model alias | Effort | Context | When |
+|------|-------------|--------|---------|------|
+| Planning / architecture | `opus` (`claude-opus-4-8`) | `high` default; `xhigh` for deep multi-path decisions | 1M tokens | Phase 3 decisions, mission decomposition, threat modeling |
+| Implementation | `sonnet` (`claude-sonnet-4-6`) | `high` default; lower to `medium` if token-sensitive | 1M tokens | Feature work, bug fixes, refactoring, code generation |
+| Scoring / dedup / validation | `haiku` (`claude-haiku-4-5-20251001`) | n/a | 200k tokens | Confidence scoring, dedup passes, format checking, simple grep tasks |
 
 > **Haiku context limit:** 200k tokens vs 1M for Sonnet/Opus. Do not pass >50 files to a Haiku agent in a single prompt.
+
+> **Effort:** Set via `effort:` frontmatter in agent/skill files, `--effort` flag, or `/effort` command.
+> Extended thinking is **deprecated on Sonnet 4.6 and removed on `claude-opus-4-8`**.
+> Use `type: "adaptive"` with the effort parameter; `budget_tokens` is a legacy pattern.
+> `opusplan` is a valid Claude Code alias: uses `opus` in plan mode, `sonnet` in execution.
 
 Default to Sonnet for implementation agents unless the task requires deep
 multi-path reasoning. Use Haiku aggressively for any agent whose job is to
