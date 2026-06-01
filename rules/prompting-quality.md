@@ -2,16 +2,11 @@
 
 ## Constraint keywords
 
-Prompts without explicit constraints produce lower-quality output. Every
-non-trivial request should include at least one constraint keyword:
-
-- **Scope limiters**: "only", "limit to", "restrict to", "just"
-- **Prohibitions**: "do not", "avoid", "never", "without"
-- **Requirements**: "must", "always", "ensure", "require"
-- **Format controls**: "in under N lines", "as a table", "no prose"
-
-Constraint-free prompts invite scope creep, unnecessary refactoring, and
-outputs that are technically correct but not what was wanted.
+Use at least one constraint keyword per non-trivial request:
+- Scope: "only", "limit to", "restrict to", "just"
+- Prohibitions: "do not", "avoid", "never", "without"
+- Requirements: "must", "always", "ensure", "require"
+- Format: "in under N lines", "as a table", "no prose"
 
 Examples:
 - Weak: "Update the auth handler"
