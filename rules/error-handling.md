@@ -53,7 +53,9 @@ swallow errors.
 ## External calls
 
 Every call to an external service (HTTP, DB, queue, cache) must have:
-- A timeout configured
+- A timeout configured (reasonable defaults: 5s for synchronous API calls,
+  30s for batch/long-running operations, 1s for cache reads; make the
+  timeout configurable via env var or options object)
 - An error handler that logs the failure and re-throws or returns
   an error type
 
