@@ -2,9 +2,7 @@
 
 ## YAGNI — You Aren't Gonna Need It
 
-YAGNI governs **design decisions you make**, not requirements handed
-to you. It prevents scope creep during greenfield work; it does not
-license dropping items from a spec, port, or translation task.
+YAGNI governs design decisions, not handed requirements (spec fidelity, ports, translations).
 
 ### YAGNI applies when you are making design choices
 
