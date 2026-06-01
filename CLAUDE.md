@@ -21,6 +21,10 @@ Confidence levels — declare these when the accuracy of a claim matters:
 - **LOW**: Memory only, unverified — say so
 - **UNKNOWN**: Cannot verify — admit it rather than fabricate
 
+## Agent Memory
+
+Search Mem0 before every task; state what you found and how it affects scope. See `~/.claude/rules/memory.md`.
+
 ## On Compaction
 
 CLAUDE.md is automatically reloaded from disk after compaction —
@@ -42,7 +46,7 @@ For features requiring 1-4 hours of autonomous work, use `/plan-mission` to gene
 
 ## Agents
 
-Agents live in `~/.claude/agents/`. Invoke via the Agent tool with `subagent_type` matching the agent's `name`. Default to handling tasks directly for tasks under ~30 min; delegate when the task clearly falls within a specialist's domain. Agent descriptions are loaded automatically. Always announce which agent you are invoking and why before calling it.
+Agents live in `~/.claude/agents/`. Invoke via the Agent tool with `subagent_type` matching the agent's `name`. Default to handling tasks directly for tasks under ~30 min; delegate when the task clearly falls within a specialist's domain. Agent descriptions are loaded automatically. Always announce which agent you are invoking and why before calling it. Use Workflow (via `Workflow` tool) for multi-step parallel orchestration with deterministic control flow. Prefer Agent tool for individual specialist delegation. Workflow is user-opt-in only — never invoke unless the user explicitly requests it or a skill instructs it.
 
 ## Multi-Agent Parallelism
 
@@ -76,7 +80,3 @@ All rules live in `~/.claude/rules/`:
 - **naming-conventions.md** — folder layout, file naming, symbol naming, database naming
 - **pr-workflow.md** — branch naming, PR size (≤400 lines), merge strategy, pre-existing violations
 - **retry-idempotency.md** — 3-attempt backoff, jitter, idempotency keys, when not to retry
-
-## Agent Memory
-
-Search Mem0 before every task; state what you found and how it affects scope. See `~/.claude/rules/memory.md`.
