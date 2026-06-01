@@ -5,6 +5,8 @@ disable-model-invocation: false
 context: fork
 ---
 
+Model routing: Sonnet for implementation; Haiku for verification/scoring; Opus only for explicit architectural decisions.
+
 Perform a full architecture exploration of the current project and its related repositories within the same GitHub organization.
 
 ## Model Routing

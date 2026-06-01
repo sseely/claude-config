@@ -1,5 +1,7 @@
 # /powerpoint-addin-setup
 
+Model routing: Sonnet for implementation; Haiku for verification/scoring; Opus only for explicit architectural decisions.
+
 Scaffold a PowerPoint Office Add-in into an existing Vite + React project.
 Covers the HTTPS dev cert (the step everyone forgets), manifest, HTML entry
 points, React entrypoints, Vite config adaptation, dev environment wef sync,

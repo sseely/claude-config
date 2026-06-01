@@ -1,5 +1,7 @@
 # /analytics-setup
 
+Model routing: Sonnet for implementation; Haiku for verification/scoring; Opus only for explicit architectural decisions.
+
 Figure out what to instrument in PostHog for a Cloudflare Workers + Neon +
 React/Vite project, then wire up the infrastructure and implement the events.
 

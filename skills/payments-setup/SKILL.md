@@ -1,5 +1,7 @@
 # /payments-setup
 
+Model routing: Sonnet for implementation; Haiku for verification/scoring; Opus only for explicit architectural decisions.
+
 Scaffold Stripe Checkout + coupon system into a Cloudflare Workers + Neon
 PostgreSQL + React/Vite project. Implements: session packs (pre-paid credits),
 idempotent Stripe webhook, multi-use coupon codes with expiry and email

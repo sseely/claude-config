@@ -5,6 +5,8 @@ user-invocable: true
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
+Model routing: Sonnet for implementation; Haiku for verification/scoring; Opus only for explicit architectural decisions.
+
 Scaffold full GDPR + CRA compliance features into this project. Templates live at
 `~/.claude/skills/compliance-setup/`. Work through each step in order.
 
