@@ -1,10 +1,5 @@
 # Extended Thinking
 
-> **Deprecation notice:** Extended thinking (fixed `budget_tokens`) is **deprecated
-> on Sonnet 4.6** and **removed on `claude-opus-4-8`**. Use the `effort` parameter
-> with adaptive thinking instead (`effort: high`, `xhigh`, etc.). The `budget_tokens`
-> API field causes a 400 error on current Opus models.
-
 Extended thinking gives Claude time to reason before responding.
 Use it when decision quality matters more than latency.
 
