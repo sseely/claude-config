@@ -59,6 +59,17 @@ See `templates/` for examples.
 
 **`~/.claude/.mcp.json`** — MCP server config (paths are machine-specific).
 
+### Auto-install tools
+
+The session-start hook checks for `sg` (ast-grep) on every start.
+To enable automatic installation:
+
+```sh
+export CLAUDE_AUTO_INSTALL_TOOLS=true
+```
+
+Without this flag, missing tools are reported but not installed.
+
 ## What's included
 
 ### `CLAUDE.md`
