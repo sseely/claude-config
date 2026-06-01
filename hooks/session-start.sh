@@ -21,16 +21,20 @@ else
     echo "  lizard: NOT FOUND (venv)"
 fi
 
-# Auto-install ast-grep if missing
+# Auto-install ast-grep if missing (opt-in: set CLAUDE_AUTO_INSTALL_TOOLS=true)
 if ! command -v sg >/dev/null 2>&1; then
-    echo ""
-    echo "Installing ast-grep (sg)..."
-    if command -v brew >/dev/null 2>&1; then
-        brew install ast-grep
-    elif command -v apt-get >/dev/null 2>&1; then
-        sudo apt-get install -y ast-grep
+    if [[ "${CLAUDE_AUTO_INSTALL_TOOLS:-false}" == "true" ]]; then
+        echo ""
+        echo "Installing ast-grep (sg)..."
+        if command -v brew >/dev/null 2>&1; then
+            brew install ast-grep
+        elif command -v apt-get >/dev/null 2>&1; then
+            sudo apt-get install -y ast-grep
+        else
+            echo "  WARNING: cannot install ast-grep — no brew or apt-get found"
+        fi
     else
-        echo "  WARNING: cannot install ast-grep — no brew or apt-get found"
+        echo "  sg: NOT FOUND (set CLAUDE_AUTO_INSTALL_TOOLS=true to auto-install)"
     fi
 fi
 

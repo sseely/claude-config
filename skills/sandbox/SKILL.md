@@ -10,6 +10,8 @@ disable-model-invocation: false
 allowed-tools: Bash, Read, Write, Glob
 ---
 
+Model routing: Sonnet for implementation; Haiku for verification/scoring; Opus only for explicit architectural decisions.
+
 # Sandbox
 
 Run a task or mission brief in an isolated Docker container with full Claude Code autonomy.

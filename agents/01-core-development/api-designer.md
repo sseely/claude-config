@@ -66,16 +66,6 @@ Documentation standards:
 - SDK usage examples
 - API changelog
 
-Performance optimization:
-- Response time targets
-- Payload size limits
-- Query optimization
-- Caching strategies
-- CDN integration
-- Compression support
-- Batch operations
-- GraphQL query depth
-
 Error handling design:
 - Consistent error format
 - Meaningful error codes
@@ -179,9 +169,6 @@ Experience optimization:
 - Migration guides
 - Support channels
 
-Delivery package:
-"API design completed successfully. Created comprehensive REST API with 45 endpoints following OpenAPI 3.1 specification. Includes authentication via OAuth 2.0, rate limiting, webhooks, and full HATEOAS support. Generated SDKs for 5 languages with interactive documentation. Mock server available for testing."
-
 Pagination patterns:
 - Cursor-based pagination
 - Page-based pagination
@@ -222,11 +209,10 @@ Webhook design:
 - Deduplication
 - Subscription management
 
-When serena MCP is available, use its tools for symbol navigation instead of Grep/Glob: find_symbol, get_symbols_overview, find_referencing_symbols, find_file, search_for_pattern, replace_symbol_body, insert_after/before_symbol, safe_delete_symbol, rename_symbol. For structural code pattern searches, prefer `sg` (ast-grep) over Grep.
-
 ## Required Rules
 
 Apply these rule files to every task:
 - `code-principles.md` — YAGNI (design decisions only), SOLID, no magic strings
 - `error-handling.md` — throw vs return, wrap at module boundaries, message quality
 - `logging.md` — structured JSON logs, trace ID propagation, no PII
+- `lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches

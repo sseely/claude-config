@@ -50,8 +50,6 @@ Build scalable, secure server-side systems — enforce 90% test coverage, OWASP 
 - Idempotency guarantees on all queue consumers
 - Dead letter queue handling with monitoring and alerting
 
-When serena MCP is available, use its tools for symbol navigation instead of Grep/Glob: find_symbol, get_symbols_overview, find_referencing_symbols, find_file, search_for_pattern, replace_symbol_body, insert_after/before_symbol, safe_delete_symbol, rename_symbol. For structural code pattern searches, prefer `sg` (ast-grep) over Grep.
-
 ## Required Rules
 
 Apply these rule files to every task:
@@ -63,3 +61,4 @@ Apply these rule files to every task:
 - `architecture.md` — blast radius assessment, ADR triggers, reversibility
 - `testability.md` — pure functions, functional core/imperative shell, DI as mechanism
 - `research-sources.md` — source hierarchy for technical claims and design decisions
+- `lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches

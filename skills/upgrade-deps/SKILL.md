@@ -11,6 +11,8 @@ description: >
 disable-model-invocation: false
 ---
 
+Model routing: Sonnet for implementation; Haiku for verification/scoring; Opus only for explicit architectural decisions.
+
 # Upgrade Dependencies
 
 Audit and upgrade all dependencies for the current project.

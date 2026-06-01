@@ -26,6 +26,9 @@ builders) to `test/helpers/`.
 Target at least 90% line coverage, 90% branch coverage, and 90%
 function coverage. Treat these as a floor, not a ceiling.
 
+Exclude from coverage: generated code, schema migrations, one-off scripts,
+pure config files, and test helper files in `test/helpers/`.
+
 ## Assertion quality
 
 Every test must assert on specific output values or state changes —
