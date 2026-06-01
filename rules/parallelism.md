@@ -1,5 +1,10 @@
 # Multi-Agent Parallelism
 
+Multi-agent orchestration costs ~15× more tokens than single-agent dispatch.
+Justify multi-agent when: (1) parallel bottleneck demonstrated,
+(2) domain/compliance isolation required, (3) cognitive boundary needed.
+Default to single-agent; split only when a specific bottleneck is demonstrated.
+
 Before executing any task that involves multiple agents or multiple independent workstreams, always produce an execution plan and present it for review before proceeding:
 
 **Exception — autonomous mode:** When a mission brief is active (`plans/` directory referenced
@@ -46,10 +51,15 @@ must be self-contained:
    conflicting constraint, stop and log it to the decision journal —
    do not silently override the upstream decision.
 6. **Interface contracts** — types, function signatures, or data
-   shapes this task must produce or consume
+   shapes this task must produce or consume. If subagent output is
+   consumed by a downstream agent, specify a JSON schema.
+   If output is human-facing, prose is appropriate.
 7. **Quality bar** — "run `npm test` before finishing; all tests
    must pass"
-8. **Commit format** — One commit per completed task. Message format per
+8. **Boundaries** — three tiers: *Always do* (non-negotiables), *Ask first*
+   (actions requiring approval), *Never do* (hard stops). Omit if all three
+   tiers are empty.
+9. **Commit format** — One commit per completed task. Message format per
    `~/.claude/rules/commits.md`: `type(scope): description` ≤72 chars, lowercase,
    no period. Body explains why if >3 files change.
 
@@ -99,3 +109,4 @@ known Opus tendencies (validated in production):
 | Max thinking for routine tasks | 2–4× token multiplier | Adaptive thinking only when 3+ significantly different approaches exist (see `extended-thinking.md`) |
 | Haiku for code generation | Under-powered; produces more errors requiring fix loops | Sonnet minimum for any task that writes or modifies code |
 | Sonnet for simple scoring/grep | Wasted cost | Haiku for pass/fail checks, dedup, format validation |
+| Tool list >8 per agent | Decision paralysis; wasted token selection | Scope to 3–5 tools per agent; delegate to narrower specialists |
