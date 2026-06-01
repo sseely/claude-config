@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 /**
  * Translate English locale JSON files into all 17 target languages using
- * Claude claude-opus-4-6 (context-aware, nuance-preserving).
+ * Claude (model: ANTHROPIC_MODEL env var, default claude-opus-4-8).
  *
  * Usage:
  *   ANTHROPIC_API_KEY=sk-... npx tsx scripts/translate.ts
@@ -135,7 +135,7 @@ Return a JSON object with the same keys and translated values. No markdown, no e
   console.log(`  Translating ${lang}/${ns}.json (${entries.length} strings)…`);
 
   const message = await client.messages.create({
-    model: 'claude-opus-4-6',
+    model: process.env.ANTHROPIC_MODEL ?? 'claude-opus-4-8',
     max_tokens: 4096,
     system: systemPrompt,
     messages: [{ role: 'user', content: userPrompt }],
