@@ -78,3 +78,14 @@ before moving on.
 In subagent context (when dispatched via the Agent tool), rely on Serena for
 symbol lookup rather than LSP diagnostics. After edits, run the project's
 typecheck command (`tsc --noEmit`, `mypy`, etc.) as the quality bar instead.
+
+## Subagent note
+
+When dispatched via the Agent tool, use Serena MCP tools for all symbol
+navigation — not the LSP tool (agents do not have it in their frontmatter):
+`find_symbol`, `get_symbols_overview`, `find_referencing_symbols`,
+`find_file`, `search_for_pattern`, `replace_symbol_body`,
+`insert_after/before_symbol`, `safe_delete_symbol`, `rename_symbol`.
+For structural code pattern searches, prefer `sg` (ast-grep) over Grep.
+After edits, run the project's typecheck command (`tsc --noEmit`, `mypy`,
+etc.) as the quality bar instead of reading LSP diagnostics.
