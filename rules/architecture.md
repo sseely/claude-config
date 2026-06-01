@@ -50,21 +50,10 @@ not to write a design doc.
 
 ## Fitness functions
 
-Fitness functions are automated tests that verify architectural properties
-— invariants that must hold as the codebase evolves.
-
-Examples:
-- "No module in `api/` may import from `api/` (no cross-handler imports)"
-- "All HTTP handlers must be registered through the auth middleware"
-- "No direct DB access outside the `repository/` layer"
-- "Package dependency graph must be acyclic"
-
-Fitness functions belong in CI, not in code review. If an architectural
-rule matters, automate its enforcement. Relying on humans to catch
-violations in review is unreliable.
-
-When you introduce an architectural constraint, ask: can this be expressed
-as a lint rule, import check, or test? If yes, write it.
+Fitness functions: automated tests verifying architectural invariants in CI.
+Examples: 'no cross-handler imports', 'auth middleware on all handlers', 'no direct
+DB access outside repository/'.
+Express every architectural constraint as a lint/import check/test — not code review.
 
 ## Reversibility
 
