@@ -2,16 +2,10 @@
 
 ## SLO-first design
 
-Before writing the implementation, define what "working" means measurably.
-For each key operation, specify:
-
-- **SLI** — the metric that measures correctness or health (e.g., error rate,
-  latency p95, queue depth)
-- **SLO** — the threshold that triggers a page (e.g., error rate < 0.1%,
-  p95 latency < 200ms over 5 minutes)
-
-If you can't define an SLI, the feature isn't ready to instrument. Stop and
-define it first.
+Before implementation: define 'working' as measurable SLI + SLO for each operation.
+- SLI: metric (error rate, latency p95, queue depth)
+- SLO: threshold triggering page (e.g., error rate < 0.1%, p95 < 200ms)
+Cannot define SLI? Feature not ready to build — stop.
 
 ## Metrics — RED method
 
