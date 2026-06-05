@@ -43,6 +43,25 @@ Before doing any new work, check what's already known:
    Any git repos cloned during research go here so local tools
    (grep, find, Glob) can run against them without network
    round-trips.
+5. **Read the URL registry**: Load
+   `~/.claude/skills/self-improve/research-urls.md`. This file is the
+   single source of truth for which URLs Agents A, B, and C fetch. Check
+   for any entries with `status: unreachable` or `status: deprecated` —
+   flag these at the top of Phase 4 output as existing known gaps, not
+   new findings.
+6. **Prior-change regression gate**: If `code-review-tasks.md` exists with
+   checked-off (`[x]`) items from a prior run, verify those changes landed
+   cleanly:
+   ```bash
+   git log --oneline --since="180 days ago" -- ~/.claude/ | head -30
+   ```
+   For each commit that appears to implement a self-improve finding, read its
+   diff (`git show <sha> --stat`) and confirm: (a) the change is still present
+   in the config, (b) the area it touched has no new contradictions apparent
+   from a quick grep. State the result explicitly — "Prior run implemented N
+   changes; spot-checked M: [result]." If the prior run produced findings but
+   zero commits followed, name that gap — it is itself a signal worth surfacing
+   in Phase 4.
 
 ---
 
@@ -52,18 +71,24 @@ Launch two agents simultaneously. Both are read-only research.
 
 ### Agent A — What's new in the Claude ecosystem
 
-Fetch and read the following. Extract **concrete, actionable findings**
-only — not summaries:
+Fetch and read the URLs listed under **Agent A** in
+`~/.claude/skills/self-improve/research-urls.md`. Extract **concrete,
+actionable findings** only — not summaries. The blog URL should surface
+posts from the last 90 days about Claude Code, agents, or model
+capabilities; read the 3 most relevant fully.
 
-1. `https://www.anthropic.com/blog` — scan for posts published in
-   the last 90 days about Claude Code, agents, or model capabilities.
-   Read the 3 most relevant fully.
-2. `https://docs.anthropic.com/en/docs/claude-code/overview`
-3. `https://docs.anthropic.com/en/docs/claude-code/hooks`
-4. `https://docs.anthropic.com/en/docs/claude-code/settings`
-5. `https://docs.anthropic.com/en/docs/claude-code/memory`
-6. `https://docs.anthropic.com/en/docs/claude-code/mcp`
-7. `https://docs.anthropic.com/en/docs/claude-code/sub-agents`
+When new documentation pages are discovered during research that aren't
+already in `research-urls.md`, add them to the **Candidate URLs** section
+at the bottom of that file with your name and today's date as `Suggested by`
+and `Date Added`. Do not add them to the active sections — that requires a
+successful fetch on a future run.
+
+**Fetch guard:** For each URL above, if the response is non-200, redirects to
+an unexpected domain, or returns fewer than 1000 characters, do NOT silently
+skip it. Record it as a Warning finding: `Research source unreachable or thin:
+[URL] — returned [N] chars`. A page that returns nothing is not "no new
+findings"; it is a blind spot. Continue with whatever content was received, but
+flag the gap.
 
 For each finding, record:
 - What the feature/capability is
@@ -109,9 +134,16 @@ Effort levels (set via `effort:` frontmatter or `/effort` command):
 | `xhigh` | Opus 4.8, Opus 4.7 only | Default on Opus 4.7 |
 | `max` | Opus 4.8, Opus 4.7 | Session-only; not saved to settings |
 
-1. Fetch `https://code.claude.com/docs/en/model-config` to check for any
-   new aliases or effort levels added since this skill was last updated.
-2. Fetch the Anthropic models page and the most recent model
+**Fetch guard:** For every URL you fetch, if the response is non-200, redirects
+to an unexpected domain, or returns fewer than 500 characters, record it as a
+Warning finding: `Research source unreachable or thin: [URL]`. Do not silently
+treat a bad fetch as "no changes found."
+
+Fetch the URLs listed under **Agent B** in
+`~/.claude/skills/self-improve/research-urls.md`. This currently includes:
+
+1. The model-config doc — check for any new aliases or effort levels.
+2. The Anthropic models overview page and the most recent model
    migration guide to identify:
    - Any deprecated API parameters (e.g., manual thinking budgets
      replaced by adaptive thinking)
@@ -228,7 +260,72 @@ For each principle or pattern found, produce a structured assessment:
 Pride in the current config is appropriate when the rationale is explicit
 and traceable. Hubris is assuming correctness without examining the evidence.
 
-Wait for all three agents to complete before Phase 2.
+### Agent X (Discovery) — Source discovery across all themes
+
+This agent's job is to find research and practitioner sources not yet in
+the URL registry. Speed is not a criterion for this skill — breadth is.
+Run all queries. Fetch promising results. Be thorough.
+
+**Input:** Read the `## Discovery Queries` section of
+`~/.claude/skills/self-improve/research-urls.md`. Run every query listed.
+
+**Process:**
+
+1. For each theme, run all listed queries via WebSearch.
+
+2. For each result returned, evaluate against `research-sources.md` tier:
+   - Tier 1 (official docs, standards, CVEs): always investigate further
+   - Tier 2 (peer-reviewed research): always investigate further
+   - Tier 3 (high-quality practitioner): investigate if published within
+     18 months and from a named org with a track record
+   - Tier 4 (arxiv): only for AI/ML topics; flag as preprint
+   - Tier 5 (general web): use only to locate tier 1–4 sources; do not
+     add tier-5 sources themselves as candidates
+
+3. For every result that passes the tier filter, fetch the page and assess:
+   - **Relevance** (0–100): How directly does this content improve the
+     ability to configure or use a Claude-based coding agent? This is the
+     primary filter. A general Python tutorial scores near 0. A study on
+     how constraint density affects instruction-following scores near 100.
+   - **Novelty**: Is this perspective or source type already represented
+     in the current active URL list? If yes, only add if it's
+     substantially more authoritative or recent.
+   - **Actionability**: Could a finding from this source plausibly change
+     a rule, agent prompt, or skill? If the content is descriptive but
+     not actionable, skip it.
+
+4. Keep candidates with relevance ≥ 65 and tier ≤ 3 (or tier 4 for AI/ML).
+
+5. Deduplicate against current active and candidate entries in
+   `research-urls.md`. Do not add a URL already present under any status.
+
+6. For each qualifying candidate, write it to the **Candidate URLs** section
+   of `~/.claude/skills/self-improve/research-urls.md`:
+
+   ```
+   | [URL] | [one-line purpose] | Discovery agent | [date] |
+   ```
+
+7. Also produce a short **Discovery Summary** (≤10 lines) for Phase 3:
+   - How many queries were run
+   - How many results were evaluated
+   - How many candidates were added (with their themes)
+   - Any themes where search returned nothing useful — that absence is
+     itself a signal worth noting
+
+**Output:** The written Candidate URL entries + the Discovery Summary.
+Do not deep-read candidates — that happens in future runs after promotion.
+The goal is to surface the frontier, not to analyze it today.
+
+---
+
+**Phase 1 barrier:** Phase 2 may begin once any two of Agents A, B, and C
+have completed. Agent X (Discovery) runs fully in parallel and does not
+block Phase 2 — its output joins the Phase 3 dedup queue whenever it
+completes. If Agent A is delayed by sequential doc fetches, it may report
+partial findings — note which pages were fully read vs. skimmed. Agent A
+should fetch in this priority order so partial output is still high-signal:
+(1) new blog posts, (2) hooks and settings doc pages, (3) remaining doc pages.
 
 ---
 
@@ -499,16 +596,25 @@ Wait for all five agents to complete before Phase 3.
 
 ## Phase 3 — Synthesize and deduplicate
 
-Run a single dedup pass across all eight agent outputs (A–H):
+Run a single dedup pass across all agent outputs (A through H, plus
+Agent X's Discovery Summary):
 
 1. Group findings that describe the same root issue.
 2. Keep the most specific instance (file:line + concrete fix).
 3. Resolve genuine contradictions by re-reading the source — do not
    use agent summaries as the arbiter. For research-sourced findings
-   (from Agents C and G), an additional step applies: if a finding
-   conflicts with an existing rule in `rules/`, the rule wins unless
-   Agent C rated the research evidence strength as High AND the
-   applicability to Claude as High. Document the reasoning either way.
+   (from Agents C and G), if a finding conflicts with an existing rule
+   in `rules/`, apply this three-tier resolution:
+   - **High evidence + High applicability** → research overrides the rule.
+     Include the specific rule change recommended.
+   - **Medium evidence + High applicability** (e.g., recent unreplicated
+     preprints, ahead-of-consensus findings) → rule holds, but surface
+     the finding as a Suggestion labeled `[frontier-lag]`. Include the
+     existing rule text, the conflicting finding, and a one-sentence case
+     for why it merits conscious re-evaluation rather than silent
+     suppression. This makes the frontier-lag explicit and auditable.
+   - **Low evidence OR Low applicability** → rule wins, finding dropped.
+   Document the reasoning in all three cases.
 4. Score each finding 0-100 using this rubric (apply yourself, no
    need for a separate scoring agent for this skill):
    - **0**: False positive, pre-existing issue not worth surfacing
@@ -540,6 +646,22 @@ For Notes: include the full comment text ready to paste.
 (APPROVE if Critical=0; NITS if Critical=0 and Warning<3;
 REQUEST CHANGES if Critical>0 or Warning≥3)
 
+**Convergence alarm — required when verdict is APPROVE or APPROVE WITH NITS:**
+The loop's characteristic failure mode is quietly converging on "you're fine"
+while drifting in a direction no single run detects. A clean verdict requires
+explicit evidence, not just the absence of new findings. State:
+
+1. The 3 most recent findings from the prior run (from checked-off `[x]` items
+   in `code-review-tasks.md` or from the git log regression gate in Phase 0).
+2. For each: (a) confirmed implemented — cite the commit SHA, or (b) confirmed
+   not regressed — describe what you checked, or (c) still pending — explain
+   why it wasn't addressed.
+
+If you cannot complete this check (no prior findings, no git history, no
+task file), say so explicitly: "No prior run data found — convergence check
+not possible." Silence at this point is not acceptable; an unverified APPROVE
+is the failure mode the loop exists to prevent.
+
 ---
 
 ## Phase 5 — Task file
@@ -570,13 +692,42 @@ Format:
 
 Omit empty sections. Do not include Positives in the task file.
 
+For any URL the fetch guard marked unreachable or thin this run, add an entry
+under "Must fix" or "Should fix" (depending on which agent depended on it):
+
+```
+- [ ] `skills/self-improve/research-urls.md` — URL unreachable: [URL].
+  Fix: find replacement URL (check Anthropic docs index, sitemap, or
+  search for the page title); update the registry entry or remove if
+  content is no longer published.
+```
+
 ---
 
-## Phase 6 — Offer next step
+## Phase 6 — Update URL registry and offer next step
 
-After writing the task file, tell the user:
+**Update `~/.claude/skills/self-improve/research-urls.md`:**
+
+1. For every URL that returned valid content this run (>threshold chars, 200 status):
+   set `last-verified` to today's date and `status` to `active`.
+2. For every URL the fetch guard flagged as unreachable or thin:
+   set `status` to `unreachable`. Do not remove the entry — the task file
+   records the recommendation to find a replacement.
+3. If Agent A or Agent B discovered new documentation pages worth tracking,
+   they will have added entries to the **Candidate URLs** section already.
+   Confirm those entries are present; do not promote them to active sections
+   this run.
+4. Update `Last full verification:` at the top of the file to today's date
+   only if all entries were actually checked. If Agent A ran partial (Phase 1
+   barrier), note "Partial verification — Agent A incomplete."
+
+This file is operational metadata, not a config file — updating it during the
+run is correct behavior, unlike source files which are read-only during review.
+
+**Then tell the user:**
 
 > Task file written to `~/.claude/code-review-tasks.md`.
+> URL registry updated at `~/.claude/skills/self-improve/research-urls.md`.
 > Run `/plan-mission implement the tasks in code-review-tasks.md`
 > to generate a mission brief for autonomous execution.
 
