@@ -80,8 +80,9 @@ capabilities; read the 3 most relevant fully.
 When new documentation pages are discovered during research that aren't
 already in `research-urls.md`, add them to the **Candidate URLs** section
 at the bottom of that file with your name and today's date as `Suggested by`
-and `Date Added`. Do not add them to the active sections — that requires a
-successful fetch on a future run.
+and `Date Added`. Do not add them to the active sections — promotion requires
+a future run where the URL passes the thin-content bar (≥1000 chars for Agent
+A, ≥500 chars for Agent B/C; 200 status alone is not sufficient).
 
 **Fetch guard:** For each URL above, if the response is non-200, redirects to
 an unexpected domain, or returns fewer than 1000 characters, do NOT silently
@@ -708,16 +709,26 @@ under "Must fix" or "Should fix" (depending on which agent depended on it):
 
 **Update `~/.claude/skills/self-improve/research-urls.md`:**
 
-1. For every URL that returned valid content this run (>threshold chars, 200 status):
-   set `last-verified` to today's date and `status` to `active`.
-2. For every URL the fetch guard flagged as unreachable or thin:
+1. For every URL (active or candidate) that was fetched this run and passed
+   the thin-content bar (≥1000 chars for Agent A context, ≥500 chars for
+   Agent B/C context, no redirect stub / login wall / paywall teaser):
+   - If the URL is already in an active section: set `last-verified` to today
+     and confirm `status: active`.
+   - If the URL was in the **Candidate URLs** section: move the row to the
+     appropriate active section (Agent A, B, or C) and remove it from
+     Candidate URLs. A 200 status alone does not qualify for promotion.
+2. **Staleness decay:** for every `status: active` entry whose `last-verified`
+   date is older than 90 days from today, change `status` to `unknown`. Do not
+   remove the entry. An `unknown` URL will be re-verified on the next run before
+   being used as a source.
+3. For every URL the fetch guard flagged as unreachable or thin:
    set `status` to `unreachable`. Do not remove the entry — the task file
    records the recommendation to find a replacement.
-3. If Agent A or Agent B discovered new documentation pages worth tracking,
+4. If Agent A or Agent B discovered new documentation pages worth tracking,
    they will have added entries to the **Candidate URLs** section already.
    Confirm those entries are present; do not promote them to active sections
-   this run.
-4. Update `Last full verification:` at the top of the file to today's date
+   this run (they have not yet been fetched and verified against the thin-content bar).
+5. Update `Last full verification:` at the top of the file to today's date
    only if all entries were actually checked. If Agent A ran partial (Phase 1
    barrier), note "Partial verification — Agent A incomplete."
 

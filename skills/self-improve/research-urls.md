@@ -10,6 +10,16 @@ replacement recommendation. Do not remove entries mid-run — set status to
 
 **Status values:** `active` | `unreachable` | `deprecated` | `unknown`
 
+**Thin-content bar (applies to both active retention AND candidate promotion):**
+- Agent A URLs: response ≥ 1000 chars, not a redirect stub / login wall / paywall teaser
+- Agent B / C URLs: response ≥ 500 chars, same exclusions
+A 200 status alone is not sufficient for either retention or promotion.
+
+**Staleness threshold:** `active` entries with `last-verified` older than 90 days
+decay to `unknown` on the next run. An `unknown` entry is re-verified before use;
+it is not removed. This prevents the trusted set from silently accumulating sources
+that were valid once and have since rotted.
+
 Last full verification: 2026-06-05
 
 ---
@@ -45,7 +55,7 @@ Last full verification: 2026-06-05
 
 ---
 
-## Candidate URLs (not yet verified — promote to a section above after one successful fetch)
+## Candidate URLs (not yet promoted — promote to an active section after one fetch that passes the thin-content bar above; 200 status alone is not sufficient)
 
 | URL | Purpose | Suggested by | Date Added |
 |-----|---------|-------------|------------|
