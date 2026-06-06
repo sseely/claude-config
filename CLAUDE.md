@@ -59,24 +59,9 @@ Conventional Commits, all lines ≤80 chars. Subject `<type>(<scope>): <desc>` �
 ## Rules
 
 All rules live in `~/.claude/rules/`:
-- **code-principles.md** — YAGNI (design decisions, not spec fidelity), SOLID, no magic strings, native fetch
-- **security.md** — input validation, secrets handling, error hygiene
-- **testing.md** — TDD, 90/90/90 coverage, assertion quality
-- **testability.md** — pure functions, functional core/imperative shell, DI as mechanism
-- **commits.md** — Conventional Commits format and full spec
-- **parallelism.md** — multi-agent execution, file ownership, batching rules
-- **autonomous-execution.md** — mission briefs, quality gates, compaction recovery
-- **memory.md** — Mem0 usage, scoping, curator criteria
-- **lsp.md** — code navigation with typescript-lsp, pyright-lsp, rust-analyzer-lsp
-- **extended-thinking.md** — when to use extended thinking and how to request it
-- **logging.md** — structured JSON logs, log levels, required fields, no PII
-- **error-handling.md** — throw vs return, wrap at boundaries, message quality
-- **api-design.md** — resource naming, standard envelopes, versioning strategy
-- **observability.md** — SLO-first design, RED metrics, distributed tracing, alerting
-- **architecture.md** — blast radius layers, ADRs, fitness functions, reversibility
-- **research-sources.md** — 5-tier source hierarchy for technical claims and design decisions
-- **prompting-quality.md** — constraint keywords, specificity, instruction bloat, session hygiene
-- **environment.md** — env var naming (CAPS_SNAKE), startup validation, logging redaction
-- **naming-conventions.md** — folder layout, file naming, symbol naming, database naming
-- **pr-workflow.md** — branch naming, PR size (≤400 lines), merge strategy, pre-existing violations
-- **retry-idempotency.md** — 3-attempt backoff, jitter, idempotency keys, when not to retry
+- **code-principles.md, security.md, testing.md, testability.md** — code quality
+- **parallelism.md, autonomous-execution.md, memory.md** — agent execution
+- **lsp.md, extended-thinking.md, prompting-quality.md** — tooling and prompting
+- **logging.md, error-handling.md, api-design.md, observability.md** — quality standards
+- **architecture.md, research-sources.md, environment.md** — design and environment
+- **naming-conventions.md, pr-workflow.md, commits.md, retry-idempotency.md** — workflow
