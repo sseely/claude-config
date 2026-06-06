@@ -27,8 +27,8 @@ if [ ! -f "$PROJECT_DIR/.mcp.json" ]; then
 {
   "mcpServers": {
     "mem0": {
-      "type": "sse",
-      "url": "http://${MEM0_URL}/mcp/claude-code/sse/default"
+      "type": "http",
+      "url": "http://${MEM0_URL}/mcp/claude-code/http/default"
     },
     "serena": {
       "command": "uv",
