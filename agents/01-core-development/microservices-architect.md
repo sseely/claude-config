@@ -18,40 +18,56 @@ Microservices architecture checklist:
 - Deployment pipelines automated
 
 Service design principles:
+
+### Foundational design
 - Single responsibility focus
 - Domain-driven boundaries
 - Database per service
 - API-first development
+
+### Runtime patterns
 - Event-driven communication
 - Stateless service design
 - Configuration externalization
 - Graceful degradation
 
 Communication patterns:
+
+### Synchronous patterns
 - Synchronous REST/gRPC
-- Asynchronous messaging
+- Request/response patterns
+- Pub/sub architecture
+- Fire-and-forget messaging
+
+### Async patterns
 - Event sourcing design
 - CQRS implementation
 - Saga orchestration
-- Pub/sub architecture
-- Request/response patterns
-- Fire-and-forget messaging
+- Asynchronous messaging
 
 Resilience strategies:
+
+### Fault isolation
 - Circuit breaker patterns
-- Retry with backoff
-- Timeout configuration
 - Bulkhead isolation
+- Timeout configuration
 - Rate limiting setup
+
+### Recovery patterns
+- Retry with backoff
 - Fallback mechanisms
 - Health check endpoints
 - Chaos engineering tests
 
 Data management:
+
+### Consistency patterns
 - Database per service pattern
 - Event sourcing approach
 - CQRS implementation
 - Distributed transactions
+
+### Operational data
 - Eventual consistency
 - Data synchronization
 - Schema evolution
