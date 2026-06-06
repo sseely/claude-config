@@ -37,13 +37,9 @@ state (DB/KV) to verify side effects.
 Validate at system boundaries with a schema (Zod, io-ts, JSON Schema). Parameterize
 SQL. Never interpolate user input into shell commands, HTML, or server-side URLs.
 ---
-## Error Handling — Throw vs Return (restored)
-Throw for unexpected/unrecoverable states. Return typed errors for expected
-failures (validation, not-found, permission denied). Wrap at module boundaries.
-
-## Error Handling — Messages (restored)
-No empty catch blocks. Return generic messages to clients — never expose stack
-traces, SQL errors, or internal IDs. Log full detail server-side at ERROR level.
+## Error Handling (restored)
+Throw for unexpected/unrecoverable states; return typed errors for expected failures.
+Wrap at boundaries. No empty catch blocks. Generic client messages; full details logged server-side.
 ---
 ## On-Call Readiness (restored)
 Before merging any new failure mode: document 2-3 failure scenarios with detection
@@ -93,12 +89,9 @@ Define SLI + SLO before implementation. Instrument every external call with RED 
 (rate, error rate, duration p95/p99). Propagate W3C `traceparent` across all service calls.
 Do NOT merge a feature that introduces a new critical path without updating the dashboard.
 ---
-## Prompting Quality — Constraint Keywords (restored)
-Every non-trivial prompt needs ≥1 constraint keyword: only/must/never/avoid.
-
-## Prompting Quality — Constraint Budget (restored)
-Keep each section to ≤6 hard prescriptive constraints (MOSAIC — compliance
-degrades above 6). Use Tier 1 verbs (`audit`, `verify`) when thoroughness required.
+## Prompting Quality (restored)
+Every prompt needs ≥1 constraint keyword (only/must/never/avoid).
+Keep sections ≤6 hard constraints; use Tier 1 verbs (`audit`, `verify`) for thoroughness.
 ---
 ## Testability (restored)
 Extract logic into pure functions (data in, data out). Functional core computes what should
@@ -109,3 +102,12 @@ Inject clocks, random, and UUIDs — never call them directly.
 5-tier hierarchy: (1) NVD/CISA/official docs, (2) peer-reviewed papers, (3) Google SRE/
 Netflix/Cloudflare blogs, (4) arxiv AI/ML only — flag as preprint, (5) general web —
 background only. Never use tier 5 as sole source for a design decision.
+---
+## Extended Thinking (restored)
+Use when choosing between 3+ significantly different approaches where the decision
+is expensive to reverse (affects data model, API contract, or multiple services).
+Do NOT use for routine tasks. Invoke via `/effort xhigh` or "Take as long as you need."
+---
+## External Call Timeouts (restored)
+Defaults: 5s for synchronous API calls, 30s for batch/long-running, 1s for cache reads.
+Configurable via `<SERVICE>_<OPERATION>_TIMEOUT_MS`. Every external call must have a timeout.
