@@ -31,6 +31,8 @@ When you encounter violations (dead code, style issues, lint warnings) in files
 you're editing for a different reason:
 
 - Fix violations **in the same file** if the fix is 1-3 lines; include it in your commit
+- Exception: security vulnerabilities (injection, auth bypass, secrets exposure) must be
+  fixed regardless of line count — open a dedicated fix PR if it exceeds 3 lines.
 - For **dead code** in a file you are modifying: remove it in the same commit; first grep for references — "looks unused" is not the same as "is unused"
 - Log violations **in other files** to `.agent-notes/` for a dedicated cleanup PR
 - Never accumulate unrelated fixes into a feature or bug-fix PR — it muddies

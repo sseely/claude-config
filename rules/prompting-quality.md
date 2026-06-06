@@ -15,10 +15,6 @@ Examples:
 
 ## Specificity
 
-Prompts under ~40 characters almost never contain enough information for
-non-trivial work. Before sending a short prompt, ask: does the AI have
-enough context to make the right trade-offs without guessing?
-
 Include in the prompt:
 - The file or symbol being changed (if known)
 - The reason for the change (the "why")

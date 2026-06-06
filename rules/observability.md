@@ -3,6 +3,8 @@
 ## SLO-first design
 
 Before implementation: define 'working' as measurable SLI + SLO for each operation.
+Scope: every externally-accessed operation — API endpoints, scheduled jobs, and queue
+consumers. Internal helper functions don't require SLIs.
 - SLI: metric (error rate, latency p95, queue depth)
 - SLO: threshold triggering page (e.g., error rate < 0.1%, p95 < 200ms)
 Cannot define SLI? Feature not ready to build — stop.

@@ -67,6 +67,7 @@ Omit sections that don't apply, but never omit context, task, or
 write-set. If the agent lacks enough information to do the work
 without guessing, the prompt is too thin.
 
+**Within a multi-agent task** (after deciding to use parallel execution):
 **Default rule:** If subtasks don't share write targets and don't depend on each other's output, run them in parallel. Don't serialize work that can be parallelized.
 
 ## Model Selection
@@ -80,6 +81,8 @@ Match model to task complexity and cost:
 | Scoring / dedup / validation | `haiku` (`claude-haiku-4-5-20251001`) | n/a | 200k tokens | Confidence scoring, dedup passes, format checking, simple grep tasks |
 
 > **Haiku context limit:** 200k tokens vs 1M for Sonnet/Opus. Do not pass >50 files to a Haiku agent in a single prompt.
+
+Note: Haiku 4.5 does not support adaptive thinking or extended thinking; effort levels are ignored.
 
 > **Effort:** Set via `effort:` frontmatter in agent/skill files, `--effort` flag, or `/effort` command.
 > Extended thinking is **deprecated on Sonnet 4.6 and removed on `claude-opus-4-8`**.
