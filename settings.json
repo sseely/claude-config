@@ -63,6 +63,14 @@
       "Bash(pnpm lint:*)",
       "Bash(pnpm run:*)",
       "Bash(volta install:*)",
+      "Bash(cargo:*)",
+      "Bash(git tag:*)",
+      "Bash(npm ci:*)",
+      "Bash(npx:*)",
+      "Bash(pip:*)",
+      "Bash(pytest:*)",
+      "Bash(python:*)",
+      "Bash(uv:*)",
       "Bash(uv run:*)",
       "Bash(pip install:*)",
       "Bash(mkdocs build:*)",
@@ -183,6 +191,17 @@
         ]
       }
     ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"\nimport sys, json, re\ndata = json.load(sys.stdin)\ncmd = data.get('tool_input', {}).get('command', '')\nif re.search(r'(?:^|\\n|[;&|])\\s*rm\\s+-rf\\s+/', cmd):\n    print('BLOCKED: rm -rf / is not allowed', file=sys.stderr)\n    sys.exit(2)\nif cmd.strip().startswith('sudo '):\n    print('BLOCKED: sudo requires project opt-in', file=sys.stderr)\n    sys.exit(2)\n\""
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Write|Edit|MultiEdit",
@@ -190,6 +209,17 @@
           {
             "type": "command",
             "command": "python3 ~/.claude/hooks/check-complexity.py"
+          }
+        ]
+      }
+    ],
+    "InstructionsLoaded": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"[$(date -u +%Y-%m-%dT%H:%M:%SZ)] InstructionsLoaded\" >> ~/.claude/logs/instructions-loaded.log 2>/dev/null || true",
+            "async": true
           }
         ]
       }
@@ -225,5 +255,6 @@
       }
     }
   },
-  "agentPushNotifEnabled": true
+  "agentPushNotifEnabled": true,
+  "autoMemoryEnabled": true
 }
