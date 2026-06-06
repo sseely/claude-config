@@ -316,6 +316,22 @@ Write at minimum:
 
 ---
 
+## Operational Readiness
+
+**SLI examples:**
+- Event ingestion rate: PostHog events captured per minute
+- Identify call success rate: % of `identify()` calls that return 2xx
+- Page/screen event error rate: % of analytics calls that fail or time out
+
+**Key failure modes:**
+- PostHog capture blocked by ad blocker → detected by near-zero event rate in PostHog dashboard; mitigation: use PostHog reverse proxy
+- Consent gate misconfigured → analytics fires before consent; detected by comparing event timestamps to consent_granted events; mitigation: audit consent gate logic
+- Missing `identify()` calls → anonymous events not tied to users; detected by high anonymous event % in PostHog; mitigation: check auth middleware ordering
+
+**Rollback classification:** Reversible — removing PostHog calls and reverting event handlers restores prior state with no data migration needed.
+
+---
+
 ## Summary output
 
 ```

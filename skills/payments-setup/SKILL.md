@@ -379,6 +379,22 @@ Write at minimum:
 
 ---
 
+## Operational Readiness
+
+**SLI examples:**
+- Checkout session creation rate and error rate (Stripe API calls per minute, % failures)
+- Webhook processing success rate: % of Stripe webhook events acknowledged with 200
+- Pack activation latency: p95 time from webhook receipt to DB row confirmed
+
+**Key failure modes:**
+- Stripe webhook delivery fails → packs never activated; detected by webhook error rate in Stripe dashboard; mitigation: check webhook endpoint health, verify signing secret
+- Duplicate webhook → double-activation; detected by duplicate session_packs rows; mitigation: ON CONFLICT DO NOTHING already implemented — check idempotency key scope
+- DB write fails after Stripe charge → user charged but no pack; detected by mismatched Stripe payments vs session_packs count; mitigation: replay webhook from Stripe dashboard
+
+**Rollback classification:** Reversible with migration — removing Stripe integration requires disabling payment routes; existing session_packs rows are inert but harmless if left.
+
+---
+
 ## Summary output
 
 After completing all steps, output:

@@ -98,6 +98,11 @@ Apply substitutions:
 
 ### 3e. Register routes
 
+// IRREVERSIBLE: the DELETE /api/me route triggers permanent account deletion.
+// Once executed, user data cannot be recovered (recovery window: 30 days via backup).
+// Require explicit user acknowledgement in the UI before calling this endpoint.
+// Log deletion events with timestamp and hashed user ID for audit trail.
+
 Add these entries to the fetch handler in `src/index.ts` (adapt to the project's
 routing pattern):
 
@@ -283,3 +288,19 @@ Write at minimum:
    - What ADAPT comments remain and need manual attention
    - What env vars / secrets need to be set before the feature is live
    - Whether the i18n:check script is missing (action required)
+
+---
+
+## Operational Readiness
+
+**SLI examples:**
+- Consent endpoint success rate: % of POST /api/me/consent calls returning 2xx
+- Data export delivery rate: % of export requests where R2 URL is returned within 60s
+- Account deletion processing rate: % of scheduled cleanup jobs completing without error
+
+**Key failure modes:**
+- R2 presigned URL generation fails → export hangs; detected by export request timeout rate; mitigation: check R2 bucket permissions and CORS config
+- SBOM generation cron fails → requests never fulfilled; detected by sbom_requests rows stuck in pending state > 24h; mitigation: check cron binding in wrangler.toml
+- Consent flag not persisted → users re-prompted on every session; detected by repeated consent events per user; mitigation: verify DB write in handlePostConsent
+
+**Rollback classification:** Mixed — consent/export/feedback routes are reversible. Account deletion (Step 3f) is irreversible once executed — deleted user data cannot be recovered. See IRREVERSIBLE note at Step 3e.
