@@ -54,6 +54,7 @@ Build scalable, secure server-side systems — enforce 90% test coverage, OWASP 
 
 Apply these rule files to every task:
 - `code-principles.md` — YAGNI (design decisions only), SOLID, no magic strings
+- `testing.md` — TDD, 90/90/90 coverage floor, assertion quality
 - `api-design.md` — resource naming, response envelopes, versioning, pagination
 - `error-handling.md` — throw vs return, wrap at module boundaries, message quality
 - `logging.md` — structured JSON logs, required fields, no PII
