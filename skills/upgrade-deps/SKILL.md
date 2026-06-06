@@ -4,7 +4,7 @@ description: >
   Audit and upgrade all dependencies in a project. Detects languages
   and frameworks, runs parallel research and security agents, spins up
   the appropriate language-pro agents for changes, then runs an
-  iterative review loop until the code-reviewer approves or 6
+  iterative review loop until the code-reviewer approves or 4
   iterations are exhausted. For complex upgrades (breaking changes or
   multiple languages), integrates with /plan-mission to generate a
   mission brief instead of executing directly.
@@ -117,6 +117,19 @@ add a **Suggestion** to the final report:
 > Consider adding `npx tsgo --noEmit` as a non-blocking CI job and
 > `--stableTypeOrdering` to your test script to detect TS7
 > incompatibilities before they become hard errors.
+
+### Monorepo conflict resolution
+
+If a workspace layout is detected (presence of `pnpm-workspace.yaml`, `lerna.json`,
+`nx.json`, or `workspaces` field in root `package.json`):
+
+1. Check for incompatible shared dependency versions across packages:
+   `pnpm ls --recursive --json 2>/dev/null | jq '[.[] | {name, version}]'` or equivalent
+2. If two packages require incompatible versions of the same dependency:
+   - Pin the shared dependency at the root `package.json` with a version satisfying both
+   - Document the pin in the PR description: "Pinned <package>@<version> at root to resolve
+     cross-workspace conflict between <pkg-a>@<req-a> and <pkg-b>@<req-b>"
+3. If no compatible version exists, flag the conflict and stop — do not auto-resolve
 
 ## Phase 2 — Research (parallel)
 
@@ -257,7 +270,7 @@ to the user before continuing.
 Run `code-reviewer` with a prompt scoped to the changed files:
 
 ```
-Context: Dependency upgrade review, iteration [N] of 6
+Context: Dependency upgrade review, iteration [N] of 4
 Changed files: [list from agent reports]
 Prior review findings: [findings from iteration N-1, if any]
 
@@ -272,6 +285,7 @@ Focus on:
 
 Output: APPROVE or a list of required changes with file:line.
 Mark each finding as NEW or RECURRING (appeared in a prior iteration).
+If a RECURRING finding has appeared 3+ times without resolution, stop and report it.
 ```
 
 **Loop logic:**
@@ -280,10 +294,10 @@ Mark each finding as NEW or RECURRING (appeared in a prior iteration).
   - Extract the list of required changes
   - Pass them back to the relevant language agent(s) for fixes
   - Re-run `code-reviewer` (increment N)
-- After 6 iterations without APPROVE:
+- After 4 iterations without APPROVE:
   - Identify any RECURRING findings (same issue appeared 2+ times)
   - Present to user: "The following items could not be resolved after
-    6 iterations. Please advise: [list with file:line and description]"
+    4 iterations. Please advise: [list with file:line and description]"
   - Stop and wait for user input
 
 ## Phase 7 — Summary
