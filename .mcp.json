@@ -1,8 +1,13 @@
 {
   "mcpServers": {
-    "mem0": {
-      "type": "http",
-      "url": "http://localhost:8765/mcp/claude-code/http/default"
+    "serena": {
+      "command": "uv",
+      "args": [
+        "--directory", "/Users/scottseely/git/serena",
+        "run", "serena", "start-mcp-server",
+        "--context", "claude-code",
+        "--project", "/Users/scottseely/.claude"
+      ]
     }
   }
 }

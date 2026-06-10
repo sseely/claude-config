@@ -43,10 +43,9 @@
 - [x] `skills/auth-setup/SKILL.md` — Operational Readiness section added.
 - [x] `skills/plan-mission/SKILL.md` — Fable 5 executor recommendation added.
 
-- [ ] `.mcp.json` — mem0 orphaned: working tree is serena-only but `.claude/settings.local.json`
-  still has `enabledMcpjsonServers: ["mem0"]` and `templates/autonomous-settings.json` still
-  has 5 `mcp__mem0__*` permissions. **Needs decision:** keep mem0 (restore it to `.mcp.json`)
-  or finish removal (drop the settings.local.json entry and template permissions).
+- [x] `.mcp.json` — mem0 removal complete: `.mcp.json` is serena-only, `enabledMcpjsonServers`
+  dropped from `.claude/settings.local.json`. `templates/autonomous-settings.json` had no
+  `mcp__mem0__*` entries.
 
 - [x] `skills/self-improve/research-urls.md` — 7 dead platform.claude.com URLs marked
   unreachable; 8 code.claude.com replacements verified (≥1000 chars) and promoted to active.
