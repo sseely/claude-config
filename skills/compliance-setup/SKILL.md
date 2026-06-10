@@ -12,6 +12,23 @@ Scaffold full GDPR + CRA compliance features into this project. Templates live a
 
 ---
 
+## Step 0 — Resume check
+
+Before doing anything else, check whether `.compliance-setup-progress.md` exists
+in the working directory.
+
+**If it exists:**
+1. Read it.
+2. If `collected_inputs: true` is present, extract the stored inputs — do not
+   re-ask any question whose answer is already recorded.
+3. Find the first step checkbox that is still `[ ]` (unchecked).
+4. Print: `Resuming from [step name].`
+5. Skip Steps 1–2 entirely and jump directly to the first unchecked step.
+
+**If it does not exist:** continue to Step 1 as normal.
+
+---
+
 ## Step 1 — Gather inputs
 
 Ask the user for all of the following before writing any files:
@@ -27,6 +44,26 @@ Ask the user for all of the following before writing any files:
 | `CANNY_APP_ID` | Canny app ID (optional — skip if not using Canny) | `abc123` or blank |
 | `CANNY_URL` | Canny public board URL (optional) | `https://feedback.myapp.com` |
 | `R2_SBOM_PREFIX` | R2 path prefix for SBOM files | `sbom/latest` |
+
+After all inputs are collected, write `.compliance-setup-progress.md` in the
+working directory before doing any further work:
+
+```
+# Compliance-Setup Progress
+collected_inputs: true
+
+## Inputs
+<record each collected input as a key: value line>
+
+## Steps
+- [ ] migrations
+- [ ] backend-routes
+- [ ] frontend-components
+- [ ] i18n-keys
+- [ ] ci-jobs
+- [ ] write-tests
+- [ ] verify
+```
 
 ---
 
@@ -50,6 +87,8 @@ the correct prefix. Do not modify the SQL — it is already idempotent.
 
 If these columns/tables already exist in `src/db/schema.sql`, skip the corresponding
 migration and note it.
+
+On success, mark `- [x] migrations` in `.compliance-setup-progress.md`.
 
 ---
 
@@ -130,6 +169,8 @@ WHERE deleted_at IS NOT NULL
 ```
 
 Also delete the R2 backup object for each expired user before removing the row.
+
+On success, mark `- [x] backend-routes` in `.compliance-setup-progress.md`.
 
 ---
 
@@ -233,6 +274,8 @@ bucket_name = "your-user-backups-bucket"
 Also add the `consent_required` flag to the `/api/me` response — return
 `consent_required: user.terms_accepted_at === null` alongside the existing user fields.
 
+On success, mark `- [x] frontend-components` in `.compliance-setup-progress.md`.
+
 ---
 
 ## Step 5 — i18n keys
@@ -248,6 +291,8 @@ Read `~/.claude/skills/compliance-setup/i18n/en_auth_consent.json` and
    - For RTL languages (Arabic `ar`, Urdu `ur`), check the existing file's
      encoding style (some store non-ASCII as `\uXXXX`) and match it.
 3. Do not overwrite existing keys — only add the missing ones.
+
+On success, mark `- [x] i18n-keys` in `.compliance-setup-progress.md`.
 
 ---
 
@@ -268,6 +313,8 @@ For the i18n-audit job:
 - Confirm `npm run i18n:check` exists in `ui/package.json`. If it doesn't, note
   this to the user and skip that job — they'll need to add the script first.
 
+On success, mark `- [x] ci-jobs` in `.compliance-setup-progress.md`.
+
 ---
 
 ## Step 6b — Write tests
@@ -277,7 +324,13 @@ Write at minimum:
 - **Data export test**: call `GET /api/me/export` — assert the response contains expected user fields.
 - **Account deletion test**: call `DELETE /api/me` — assert the account is marked inactive and data is cleared.
 
+On success, mark `- [x] write-tests` in `.compliance-setup-progress.md`.
+
 ## Step 7 — Verify
+
+**Failure policy: if `npx tsc --noEmit` or `npm run build` fails, stop immediately
+and report the full error output. Do not continue. The user must resolve the issue
+and re-run (Step 0 will resume from this step).**
 
 1. Run `npx tsc --noEmit` — fix any type errors before proceeding.
 2. Run `npm run build` (or equivalent) and confirm TypeScript compiles cleanly.
@@ -288,6 +341,8 @@ Write at minimum:
    - What ADAPT comments remain and need manual attention
    - What env vars / secrets need to be set before the feature is live
    - Whether the i18n:check script is missing (action required)
+
+On success, mark `- [x] verify` in `.compliance-setup-progress.md`.
 
 ---
 

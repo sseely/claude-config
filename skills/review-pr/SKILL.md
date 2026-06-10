@@ -33,6 +33,22 @@ that PR.
 
 ---
 
+## Phase 0 — Resume check
+
+Before doing anything else, check whether `/tmp/review-pr-findings.md`
+exists.
+
+**If it exists:**
+1. Read it.
+2. Print: `Resuming: Phase 3 findings loaded from /tmp/review-pr-findings.md`
+3. Skip Phases 1, 2, and 3 entirely. Use the findings in that file as
+   the input to Phase 4 (position mapping). The file must also contain
+   `owner`, `repo`, `number`, and `head_sha` values — read those too.
+
+**If it does not exist:** continue to Phase 1 as normal.
+
+---
+
 ## Phase 1 — Resolve the PR
 
 1. If `$ARGUMENTS` is a full URL, extract `owner/repo` and the PR
@@ -86,6 +102,23 @@ Two modifications apply when running from this skill:
    PR-level issue comment (not a review comment) at the end, so they
    appear in the conversation thread without creating resolvable
    threads. If there are no Positive findings, skip this comment.
+
+---
+
+## Save findings checkpoint (after Phase 3 completes)
+
+Before position mapping, save all findings plus the PR identifiers to
+`/tmp/review-pr-findings.md`. This allows a resumed run (Phase 0) to
+skip Phases 1–3 without re-running the code review.
+
+```
+owner: <value>
+repo: <value>
+number: <value>
+head_sha: <value>
+
+<all Phase 3 findings>
+```
 
 ---
 

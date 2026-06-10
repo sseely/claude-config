@@ -48,13 +48,12 @@
   has 5 `mcp__mem0__*` permissions. **Needs decision:** keep mem0 (restore it to `.mcp.json`)
   or finish removal (drop the settings.local.json entry and template permissions).
 
-- [ ] `skills/self-improve/research-urls.md` — 7 dead platform.claude.com URLs marked
-  unreachable; 8 code.claude.com replacements added as candidates. Still need to fetch each
-  candidate and verify it passes the thin-content bar (≥1000 chars) before promoting to active.
+- [x] `skills/self-improve/research-urls.md` — 7 dead platform.claude.com URLs marked
+  unreachable; 8 code.claude.com replacements verified (≥1000 chars) and promoted to active.
+  Agent B models/overview URL corrected to working path.
 
-- [ ] `skills/project-bootstrap/SKILL.md` — no resumability. On failure at any of 6 sub-skills,
-  position is lost. Fix: write `.bootstrap-progress.md` after inputs collected and after each
-  completed sub-skill; check on startup; add failure policy: stop and report on verify failure.
+- [x] `skills/project-bootstrap/SKILL.md` — resumability added: Step 0 resume check,
+  `.bootstrap-progress.md` with 6-sub-skill checklist, per-step marking, failure policy.
 
 ## Consider improving (Suggestion)
 
@@ -65,22 +64,18 @@
   into two ≤6-item sub-sections.
 - [x] `rules/lsp.md` — triplicated subagent guidance reduced to one canonical location.
 
-- [ ] 12 multi-step skills missing resumability: payments-setup, testing-setup, i18n-setup,
-  brand-knowvah, powerpoint-addin-setup, code-review, review-pr, upgrade-deps, self-improve,
-  explore, compliance-setup (auth-setup done above). Pattern: write `.{skill}-progress.md`
-  after input-gathering and each major step; check on startup; resume from first incomplete.
-  Start with: payments-setup, testing-setup, i18n-setup.
+- [x] 4/12 multi-step skills now have resumability: payments-setup, testing-setup, i18n-setup,
+  project-bootstrap (in addition to auth-setup done earlier). Remaining: brand-knowvah,
+  powerpoint-addin-setup, code-review, review-pr, upgrade-deps, self-improve, explore,
+  compliance-setup.
 
-- [ ] 7 skills missing YAML frontmatter: auth-setup, analytics-setup, payments-setup,
+- [x] 7 skills YAML frontmatter added: auth-setup, analytics-setup, payments-setup,
   testing-setup, project-bootstrap, powerpoint-addin-setup, brand-knowvah.
-  Fix: add `description:` and `allowed-tools:` frontmatter matching existing skill format.
 
-- [ ] `skills/testing-setup/SKILL.md:Step13.5` — "Commit the changes and push" violates
-  the global no-push-without-approval rule. Fix: offer to commit; push only with approval.
+- [x] `skills/testing-setup/SKILL.md:Step13` — push-without-approval rule fixed.
 
-- [ ] `rules/architecture.md` + `rules/api-design.md` — breaking-change taxonomy duplicated
-  (~50 redundant tokens). Fix: keep full taxonomy in architecture.md; replace api-design.md
-  section with one line referencing architecture.md.
+- [x] `rules/architecture.md` + `rules/api-design.md` — breaking-change taxonomy deduplication
+  done: api-design.md versioning section now references architecture.md.
 
 ## Notes (low-friction fixes)
 
@@ -88,7 +83,7 @@
 - [x] `rules/prompting-quality.md:88` — "Hakim, 2025" corrected to "Hakim, 2026".
 - [x] `hooks/project-init.sh` — silent ERR trap replaced with line-number logging.
 
-- [ ] `skills/compliance-setup/SKILL.md:Step7` — two items numbered "2.". Fix: renumber.
+- [x] `skills/compliance-setup/SKILL.md:Step7` — duplicate "2." numbering fixed.
 
 ---
 

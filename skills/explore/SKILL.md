@@ -17,6 +17,25 @@ Perform a full architecture exploration of the current project and its related r
 | Diagram generation | Mermaid/doc writing | `sonnet` |
 | Dedup / inventory passes | Pass/fail, counting | `haiku` |
 
+## Step 0 — Resume check
+
+Before doing anything else, check whether `docs/architecture/overview.md`
+exists in the current working directory.
+
+**If it exists:**
+1. List all files present under `docs/architecture/`.
+2. Print: `Existing architecture docs found: [list files]`
+3. Ask the user: "Architecture docs already exist. Supplement (add missing
+   sections) or regenerate from scratch?"
+   - **Supplement**: skip Setup and re-run only the deliverable sections
+     for files that are missing or stale.
+   - **Regenerate**: proceed normally from Setup, overwriting all existing
+     docs.
+
+**If it does not exist:** continue to Setup as normal.
+
+---
+
 ## Setup
 
 1. Create `docs/architecture/` in the current working directory if it doesn't exist.

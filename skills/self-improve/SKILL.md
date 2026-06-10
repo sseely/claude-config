@@ -26,6 +26,19 @@ consistent, and continuously improving.
 
 ## Phase 0 — Recall prior findings
 
+**Resume check**: Before doing anything, check `~/.claude/.self-improve-progress.md`.
+
+If it exists:
+- If `phase-1: done` is set, skip Phase 1 agents — load their outputs from
+  `.agent-notes/self-improve-phase1-A.md`, `-phase1-B.md`, `-phase1-C.md`, `-phase1-X.md`.
+- If `phase-2: done` is set, skip Phase 2 agents — load their outputs from
+  `.agent-notes/self-improve-phase2-D.md` through `-phase2-H.md`.
+- If `phase-3: done` is set, skip Phase 3 — load deduplicated findings from
+  `.agent-notes/self-improve-phase3.md`.
+- Resume from the first incomplete phase.
+
+Continue with Phase 0 steps 1–5 regardless — they are fast and idempotent.
+
 Before doing any new work, check what's already known:
 
 1. Read `.agent-notes/` in the current working directory for
@@ -325,6 +338,10 @@ partial findings — note which pages were fully read vs. skimmed. Agent A
 should fetch in this priority order so partial output is still high-signal:
 (1) new blog posts, (2) hooks and settings doc pages, (3) remaining doc pages.
 
+**Phase 1 completion:** Each agent writes its full output to
+`.agent-notes/self-improve-phase1-[A|B|C|X].md` before returning. Once all
+four have completed, append `phase-1: done` to `~/.claude/.self-improve-progress.md`.
+
 ---
 
 ## Phase 2 — Configuration audit (parallel)
@@ -590,6 +607,10 @@ concrete fix. No findings without a concrete fix.
 
 Wait for all five agents to complete before Phase 3.
 
+**Phase 2 completion:** Each agent writes its full output to
+`.agent-notes/self-improve-phase2-[D|E|F|G|H].md` before returning. Once all
+five have completed, append `phase-2: done` to `~/.claude/.self-improve-progress.md`.
+
 ---
 
 ## Phase 3 — Synthesize and deduplicate
@@ -622,6 +643,10 @@ Agent X's Discovery Summary):
    - **100**: Confirmed, happens frequently, direct evidence
 5. Filter: drop score 0-24; classify 25-49 as Note or Suggestion;
    cap 50-74 at Suggestion; keep 75+ as-is.
+
+**Phase 3 completion:** Write the deduplicated, scored, filtered findings to
+`.agent-notes/self-improve-phase3.md`. Append `phase-3: done` to
+`~/.claude/.self-improve-progress.md`.
 
 ---
 
@@ -660,6 +685,8 @@ task file), say so explicitly: "No prior run data found — convergence check
 not possible." Silence at this point is not acceptable; an unverified APPROVE
 is the failure mode the loop exists to prevent.
 
+Append `phase-4: done` to `~/.claude/.self-improve-progress.md`.
+
 ---
 
 ## Phase 5 — Task file
@@ -689,6 +716,8 @@ Format:
 ```
 
 Omit empty sections. Do not include Positives in the task file.
+
+Append `phase-5: done` to `~/.claude/.self-improve-progress.md`.
 
 For any URL the fetch guard marked unreachable or thin this run, add an entry
 under "Must fix" or "Should fix" (depending on which agent depended on it):
@@ -741,6 +770,10 @@ run is correct behavior, unlike source files which are read-only during review.
 
 If the total task count is fewer than 5, the changes are small enough
 to implement directly — offer to do so without a mission brief.
+
+Append `phase-6: done` to `~/.claude/.self-improve-progress.md`.
+Delete `~/.claude/.self-improve-progress.md` — the run is complete and
+a fresh run should start from Phase 0.
 
 ---
 

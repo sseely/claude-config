@@ -19,6 +19,23 @@ same dev server and build output as the main app.
 
 ---
 
+## Step 0 — Resume check
+
+Before doing anything else, check whether `.powerpoint-addin-setup-progress.md` exists
+in the working directory.
+
+**If it exists:**
+1. Read it.
+2. If `collected_inputs: true` is present, extract the stored inputs — do not
+   re-ask any question whose answer is already recorded.
+3. Find the first step checkbox that is still `[ ]` (unchecked).
+4. Print: `Resuming from [step name].`
+5. Skip Steps 1–2 entirely and jump directly to the first unchecked step.
+
+**If it does not exist:** continue to Step 1 as normal.
+
+---
+
 ## Step 1 — Gather inputs
 
 Ask these before doing any work:
@@ -41,6 +58,29 @@ Ask these before doing any work:
 10. **Does the project already have an `onebox.sh` or equivalent dev startup
     script?** — determines whether to create one or add the wef sync snippet.
 
+After all questions are answered, write `.powerpoint-addin-setup-progress.md` in the
+working directory before doing any further work:
+
+```
+# PowerPoint-Addin-Setup Progress
+collected_inputs: true
+
+## Inputs
+<record each collected input as a key: value line>
+
+## Steps
+- [ ] install-dependencies
+- [ ] install-dev-cert
+- [ ] create-directory-structure
+- [ ] write-manifest
+- [ ] write-html-entry-points
+- [ ] write-react-entry-points
+- [ ] update-vite-config
+- [ ] add-typescript-types
+- [ ] wire-wef-sync
+- [ ] verify
+```
+
 ---
 
 ## Step 2 — Install dependencies
@@ -54,6 +94,8 @@ npm install office-addin-dev-certs @types/office-js --save-dev
 `@types/office-js` provides TypeScript types for the `Office` global.
 
 Check `package.json` first — skip packages already installed.
+
+On success, mark `- [x] install-dependencies` in `.powerpoint-addin-setup-progress.md`.
 
 ---
 
@@ -89,6 +131,8 @@ npx office-addin-dev-certs install
 refuse to load the add-in with no useful error message. This is the most
 common cause of "my add-in won't load" during initial setup.
 
+On success, mark `- [x] install-dev-cert` in `.powerpoint-addin-setup-progress.md`.
+
 ---
 
 ## Step 4 — Create the directory structure
@@ -110,6 +154,8 @@ ui/
         main.tsx          ← Office.onReady → React root
         App.tsx           ← your content surface UI (placeholder)
 ```
+
+On success, mark `- [x] create-directory-structure` in `.powerpoint-addin-setup-progress.md`.
 
 ---
 
@@ -137,6 +183,8 @@ If step 1 Q6 = Task pane only:
 
 Write to `ui/addin/manifest.xml`.
 
+On success, mark `- [x] write-manifest` in `.powerpoint-addin-setup-progress.md`.
+
 ---
 
 ## Step 6 — Write the HTML entry points
@@ -151,6 +199,8 @@ Write to `ui/addin/manifest.xml`.
 
 **Critical:** `office.js` must be loaded from Microsoft's CDN in each HTML
 file. Do not bundle it — bundling breaks the add-in runtime.
+
+On success, mark `- [x] write-html-entry-points` in `.powerpoint-addin-setup-progress.md`.
 
 ---
 
@@ -177,6 +227,8 @@ file. Do not bundle it — bundling breaks the add-in runtime.
 **Critical:** Always use `Office.onReady()` — never call `createRoot` before
 it fires. `document.settings` and all Office APIs are unavailable until then.
 
+On success, mark `- [x] write-react-entry-points` in `.powerpoint-addin-setup-progress.md`.
+
 ---
 
 ## Step 8 — Update Vite config
@@ -194,6 +246,8 @@ If the project already has a `vite.config.ts` (step 1 Q9 = Yes):
 - Merge the add-in entry points into the existing `rollupOptions.input`.
 - Do not replace the file — add only what's missing.
 
+On success, mark `- [x] update-vite-config` in `.powerpoint-addin-setup-progress.md`.
+
 ---
 
 ## Step 9 — Add TypeScript types for Office
@@ -210,6 +264,8 @@ Add to `tsconfig.json` (or `tsconfig.app.json`) in the `compilerOptions.types` a
 
 If `types` doesn't exist yet, add it. This gives you the `Office` global
 without needing an explicit import in every file.
+
+On success, mark `- [x] add-typescript-types` in `.powerpoint-addin-setup-progress.md`.
 
 ---
 
@@ -253,6 +309,8 @@ wait "$VITE_PID"
 and relaunched to pick up changes. A simple window close is not enough —
 this is a PowerPoint quirk, not a bug in the sync.
 
+On success, mark `- [x] wire-wef-sync` in `.powerpoint-addin-setup-progress.md`.
+
 ---
 
 ## Step 11 — Sideload the add-in in PowerPoint
@@ -276,12 +334,18 @@ this is a PowerPoint quirk, not a bug in the sync.
 
 ## Step 12 — Verify
 
+**Failure policy: if `npx tsc --noEmit` fails, stop immediately and report the
+full error output. Do not continue. The user must resolve type errors and
+re-run (Step 0 will resume from this step).**
+
 0. Run `npx tsc --noEmit` — fix any type errors before proceeding.
 1. `npm run dev` starts on `https://localhost:<port>` (not http).
 2. PowerPoint ribbon shows the button after sideloading.
 3. Clicking the button opens the task pane showing "Task pane loaded."
 4. If using the content surface: inserting it via the add-in shows "Content surface loaded."
 5. `npm run build` compiles without errors (both entry points included in output).
+
+On success, mark `- [x] verify` in `.powerpoint-addin-setup-progress.md`.
 
 ---
 
