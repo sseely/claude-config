@@ -9,11 +9,7 @@ text search.
 2. **ast-grep (`sg`)** — pattern is structural; use when shape matters, not just text
 3. **Grep/Glob** — last resort: non-code content, unknown symbol name, unsupported file type
 
-> **Scope:** This rule governs the orchestrator (main Claude Code session) only.
-> Subagents use **Serena MCP tools** (`mcp__serena__find_symbol`,
-> `mcp__serena__find_referencing_symbols`, etc.) as the equivalent for code
-> navigation. Agents do not have the `LSP` tool in their frontmatter and should
-> not attempt to use it.
+> **Subagent scope:** This rule governs the orchestrator only. Subagents use Serena MCP tools — see the Subagent note section below.
 
 ## When to use LSP (not Grep)
 
@@ -74,10 +70,6 @@ After every file edit, LSP automatically reports type errors and
 warnings. Do not run a separate build step to check for type errors —
 read the diagnostics that LSP already pushed. Fix all reported errors
 before moving on.
-
-In subagent context (when dispatched via the Agent tool), rely on Serena for
-symbol lookup rather than LSP diagnostics. After edits, run the project's
-typecheck command (`tsc --noEmit`, `mypy`, etc.) as the quality bar instead.
 
 ## Subagent note
 

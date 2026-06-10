@@ -62,4 +62,6 @@ Apply these rule files to every task:
 - `architecture.md` — blast radius assessment, ADR triggers, reversibility
 - `testability.md` — pure functions, functional core/imperative shell, DI as mechanism
 - `research-sources.md` — source hierarchy for technical claims and design decisions
+- `security.md` — OWASP compliance: input validation, secrets handling, injection prevention
+- `retry-idempotency.md` — retry policy, idempotency keys, queue consumer guarantees
 - `lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches

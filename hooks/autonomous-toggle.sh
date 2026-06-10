@@ -39,6 +39,12 @@ case "$ACTION" in
             exit 1
         fi
 
+        # Guard: if settings already match the source, toggle is already on
+        if cmp -s "$SETTINGS_FILE" "$SOURCE"; then
+            echo "Already in autonomous mode"
+            exit 0
+        fi
+
         mkdir -p "$SETTINGS_DIR"
 
         # Backup existing settings if present

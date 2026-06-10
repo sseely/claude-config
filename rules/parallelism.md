@@ -35,8 +35,8 @@ Subagents start with a blank slate — no conversation history, no
 CLAUDE.md, no awareness of prior decisions. Every agent prompt
 must be self-contained:
 
-0. **Relevant memories** — If the orchestrator found Mem0 memories relevant to this
-   task, they are injected verbatim here. Do not rely on the agent to self-recall;
+0. **Prior observations** — If `.agent-notes/` contains relevant findings for this
+   task, inject them verbatim here. Do not rely on the agent to discover them;
    the orchestrator's job is to pre-load this context.
 1. **Context** — what the project is, what stack it uses, and
    what conventions to follow (test framework, naming, patterns)
@@ -77,12 +77,13 @@ Match model to task complexity and cost:
 | Role | Model alias | Effort | Context | When |
 |------|-------------|--------|---------|------|
 | Planning / architecture | `opus` (`claude-opus-4-8`) | `high` default; `xhigh` for deep multi-path decisions | 1M tokens | Phase 3 decisions, mission decomposition, threat modeling |
+| Long-horizon autonomous execution | `fable` (`claude-fable-5`) | `high` default; `xhigh` for agentic runs | 1M | Mission-brief execution, autonomous sessions, multi-hour/multi-day work |
 | Implementation | `sonnet` (`claude-sonnet-4-6`) | `high` default; lower to `medium` if token-sensitive | 1M tokens | Feature work, bug fixes, refactoring, code generation |
 | Scoring / dedup / validation | `haiku` (`claude-haiku-4-5-20251001`) | n/a | 200k tokens | Confidence scoring, dedup passes, format checking, simple grep tasks |
 
 > **Haiku context limit:** 200k tokens vs 1M for Sonnet/Opus. Do not pass >50 files to a Haiku agent in a single prompt.
 
-Note: Haiku 4.5 does not support adaptive thinking or extended thinking; effort levels are ignored.
+Note: Haiku 4.5 supports fixed-budget extended thinking (`budget_tokens`) but not adaptive thinking; the `effort` parameter returns 400 on Haiku — do not set it.
 
 > **Effort:** Set via `effort:` frontmatter in agent/skill files, `--effort` flag, or `/effort` command.
 > Extended thinking is **deprecated on Sonnet 4.6 and removed on `claude-opus-4-8`**.
@@ -104,6 +105,15 @@ known Opus tendencies (validated in production):
 - If scope is ambiguous, implement the minimal interpretation and note the
   ambiguity; do not silently expand
 
+**Fable 5 behavioral notes:**
+
+When routing a task to Fable 5, omit Opus-style constraints — Fable 5's design is the inverse:
+
+- Describe the outcome, not the steps — Fable 5 derives the approach from the goal
+- Omit verification reminders — Fable 5 self-checks without prompting
+- Subagent dispatch is encouraged, not discouraged — Fable 5 benefits from parallelism
+- Too-prescriptive skill instructions constrain Fable 5 output below baseline quality
+
 **Anti-patterns to avoid:**
 
 | Anti-pattern | Why it hurts | Fix |
@@ -112,4 +122,4 @@ known Opus tendencies (validated in production):
 | Max thinking for routine tasks | 2–4× token multiplier | Adaptive thinking only when 3+ significantly different approaches exist (see `extended-thinking.md`) |
 | Haiku for code generation | Under-powered; produces more errors requiring fix loops | Sonnet minimum for any task that writes or modifies code |
 | Sonnet for simple scoring/grep | Wasted cost | Haiku for pass/fail checks, dedup, format validation |
-| Tool list >8 per agent | Decision paralysis; wasted token selection | Scope to 3–5 tools per agent; delegate to narrower specialists |
+| Tool list >8 per agent | Decision paralysis; wasted token selection | Scope to 3–5 tools per agent; delegate to narrower specialists (Exception: Serena MCP navigation tools — all 8 entries count as one navigation capability for this limit.) |

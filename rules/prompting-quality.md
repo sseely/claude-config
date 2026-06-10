@@ -13,6 +13,8 @@ Examples:
 - Strong: "Update the auth handler to accept Bearer tokens — do not change
   the session logic or touch any other handler"
 
+> **On Claude 4.6+/Fable 5:** Prefer scoping keywords (`only`, `limit to`, `do not`) over intensity escalation (`CRITICAL`, `MUST`, `ALWAYS`). Blanket intensity words can overtrigger on these models and reduce output quality. Scoping keywords remain effective on all model tiers.
+
 ## Specificity
 
 Include in the prompt:
@@ -43,8 +45,8 @@ cache hit rates, and makes it harder for the model to attend to what matters.
 
 ## Agent context budget
 
-Research (arxiv:2509.21361) shows effective context degrades past ~20K tokens.
-Apply this limit when constructing agent prompts:
+Research (arxiv:2509.21361) demonstrates attention dilution as a general principle
+with added context. Apply this when constructing agent prompts:
 
 - Cap file inventory at 20-30 files per agent; split larger inventories across multiple agents
 - Pass line ranges, not whole files: `src/api/subscribe.js:15-40` not the full file
@@ -85,8 +87,10 @@ result acted on.
 
 ## Scale-aware brevity constraints
 
-Per arxiv:2604.00025 (Hakim, 2025 — preprint): Opus-tier models over-elaborate
-without explicit constraint, yielding up to 26pp accuracy loss on planning tasks.
+Per arxiv:2604.00025 (Hakim, 2026 — preprint): brevity constraints yield up to
+26pp accuracy gain on math/science benchmarks across 31 general LLMs (preprint,
+not validated on planning tasks or Opus-tier agents specifically). Opus-tier
+models over-elaborate without explicit constraint.
 
 - Every Opus agent prompt must include: "Return only the structured result —
   no preamble, no trailing summary."

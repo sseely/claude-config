@@ -335,6 +335,23 @@ Write at minimum:
 
 ---
 
+## Operational Readiness
+
+**SLIs to define before going live:**
+- Login success rate: % of OAuth callback attempts that result in a valid session (target: >99%)
+- Session validation latency p95: time for `requireAuth` to resolve from KV (target: <50ms)
+- OAuth callback error rate: % of `/auth/<provider>/callback` requests that return an error (target: <0.1%)
+- Token refresh failure rate: % of token refresh attempts that fail (target: <0.5%)
+
+**Key failure modes:**
+- KV/session store unavailable → all authenticated requests fail; detected by session validation error rate spike; mitigation: circuit-breaker to a read-only degraded state, surface a login-unavailable page rather than a 500
+- OAuth provider outage → login flow broken; detected by OAuth callback error rate exceeding 1%; mitigation: show "Login temporarily unavailable, try again shortly" — do not expose provider error details to the user
+- Token signing key misconfiguration → all JWTs rejected immediately after deploy; detected by auth failure rate spiking post-deploy; mitigation: validate key presence and format in the startup health check before accepting traffic
+
+**Rollback classification:** Reversible — auth config changes (secrets, KV bindings, provider toggles) can be reverted; session data is not migrated by auth-setup, so no data migration is required to roll back.
+
+---
+
 ## Summary output
 
 After completing all steps, output:

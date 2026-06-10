@@ -36,21 +36,24 @@ Every tsconfig you generate or review must explicitly set:
 
 These are removed or deprecated in TS6 and will be hard errors in TS7:
 
+### Compiler & type system bans
+
 - `target: "es5"` or `target: "es3"`
 - `--baseUrl` for path aliasing (use `#/` subpath imports instead)
-- `--moduleResolution node` (aka node10)
-- `--moduleResolution classic`
-- `--outFile`
+- `--moduleResolution node` (aka node10) or `--moduleResolution classic`
 - `--downlevelIteration` (setting it at all, even false, is an error)
-- `--esModuleInterop false` (must be true or omitted — TS6 default)
-- `--allowSyntheticDefaultImports false` (must be true or omitted)
+- `--esModuleInterop false` (must be true or omitted) or `--allowSyntheticDefaultImports false` (must be true or omitted)
+- `tsc foo.ts` in a directory with tsconfig.json (use `--ignoreConfig`
+  or run via tsconfig)
+
+### Module & runtime bans
+
+- `--outFile`
 - `module: "amd"`, `module: "umd"`, `module: "systemjs"`, `module: "none"`
 - `module Foo {}` syntax (must use `namespace Foo {}`)
 - Import assertions (`assert {}`) — use import attributes (`with {}`) instead
 - `/// <reference no-default-lib="true"/>` directive — removed
 - `const enum` in declaration files (use regular enums or as-const objects)
-- `tsc foo.ts` in a directory with tsconfig.json (use `--ignoreConfig`
-  or run via tsconfig)
 
 If you encounter any of these in existing code, flag them and provide
 the TS6-forward replacement.

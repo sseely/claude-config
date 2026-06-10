@@ -28,28 +28,25 @@ consistent, and continuously improving.
 
 Before doing any new work, check what's already known:
 
-1. Search Mem0 for memories tagged `repo:claude-config` or
-   `org` scope related to Claude Code configuration, agent
-   design, or hook patterns.
-2. Read `.agent-notes/` in the current working directory for
+1. Read `.agent-notes/` in the current working directory for
    any session observations from prior runs of this skill.
-3. State what was found and how it affects scope. If a prior
+2. State what was found and how it affects scope. If a prior
    self-improve run produced findings that are already in
    `code-review-tasks.md`, skip re-deriving them.
-4. Ensure the clone workspace exists:
+3. Ensure the clone workspace exists:
    ```bash
    mkdir -p ~/temp/self-improve
    ```
    Any git repos cloned during research go here so local tools
    (grep, find, Glob) can run against them without network
    round-trips.
-5. **Read the URL registry**: Load
+4. **Read the URL registry**: Load
    `~/.claude/skills/self-improve/research-urls.md`. This file is the
    single source of truth for which URLs Agents A, B, and C fetch. Check
    for any entries with `status: unreachable` or `status: deprecated` —
    flag these at the top of Phase 4 output as existing known gaps, not
    new findings.
-6. **Prior-change regression gate**: If `code-review-tasks.md` exists with
+5. **Prior-change regression gate**: If `code-review-tasks.md` exists with
    checked-off (`[x]`) items from a prior run, verify those changes landed
    cleanly:
    ```bash
@@ -174,7 +171,7 @@ Fetch the URLs listed under **Agent B** in
 Research the current state of the art in writing effective system
 prompts, agent instructions, and markdown-formatted directives for
 large language models. Run this search fresh every time — do not
-check Mem0 or prior task files. The point is to surface what the
+check prior task files. The point is to surface what the
 field knows NOW and judge whether the config is ahead of, aligned
 with, or behind it.
 
@@ -415,7 +412,7 @@ Sample these agent definitions for rule propagation:
 - `~/.claude/agents/02-language-specialists/typescript-pro.md`
 - `~/.claude/agents/04-quality-security/architect-reviewer.md`
 - `~/.claude/agents/04-quality-security/code-reviewer.md`
-- `~/.claude/agents/09-meta-orchestration/memory-curator.md`
+- `~/.claude/agents/09-meta-orchestration/it-ops-orchestrator.md`
 
 Evaluate:
 1. **Contradictions**: Pairs of rules or rule vs. agent that conflict
@@ -494,7 +491,7 @@ cat ~/.claude/agents/01-core-development/backend-developer.md
 cat ~/.claude/agents/01-core-development/api-designer.md
 cat ~/.claude/agents/04-quality-security/architect-reviewer.md
 cat ~/.claude/agents/04-quality-security/code-reviewer.md
-cat ~/.claude/agents/09-meta-orchestration/memory-curator.md
+cat ~/.claude/agents/09-meta-orchestration/it-ops-orchestrator.md
 # Sample skills (read these fully):
 cat ~/.claude/skills/self-improve/SKILL.md
 cat ~/.claude/skills/plan-mission/SKILL.md

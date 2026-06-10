@@ -9,7 +9,7 @@
 
 Before answering questions about code, APIs, or libraries, use tools first:
 
-- **API/library behavior** → read the docs or use Context7 before answering
+- **API/library behavior** → fetch the official docs (WebFetch) before answering
 - **File content** → Read the file; don't assume what it contains
 - **Recent facts** → WebSearch first; training data may be stale
 - **Uncertain** → state the uncertainty explicitly; don't fill gaps with guesses
@@ -21,9 +21,9 @@ Confidence levels — declare these when the accuracy of a claim matters:
 - **LOW**: Memory only, unverified — say so
 - **UNKNOWN**: Cannot verify — admit it rather than fabricate
 
-## Agent Memory
+## Session Notes
 
-Search Mem0 before every task; state what you found and how it affects scope. See `~/.claude/rules/memory.md`.
+Check `.agent-notes/` in the working directory before any task. Write observations during execution. See `~/.claude/rules/memory.md`.
 
 ## On Compaction
 

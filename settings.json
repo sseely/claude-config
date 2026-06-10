@@ -1,10 +1,18 @@
 {
+  "env": {
+    "ENABLE_TOOL_SEARCH": "auto"
+  },
   "permissions": {
     "allow": [
       "Bash(ls:*)",
       "Bash(chmod:*)",
       "Bash(mkdir *:*)",
       "Bash(find:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(diff:*)",
       "Bash(grep:*)",
       "Bash(rg:*)",
       "Bash(openssl rand:*)",
@@ -45,19 +53,10 @@
       "Bash(npm test:*)",
       "Bash(npm --version)",
       "Bash(npm info:*)",
-      "Bash(npx eslint:*)",
-      "Bash(npx vitest:*)",
-      "Bash(npx prettier:*)",
-      "Bash(npx tsc:*)",
-      "Bash(npx playwright:*)",
-      "Bash(npx tsx:*)",
-      "Bash(npx jiti:*)",
-      "Bash(npx wrangler:*)",
       "Bash(pnpm install:*)",
       "Bash(pnpm --version)",
       "Bash(pnpm add:*)",
       "Bash(pnpm remove:*)",
-      "Bash(pnpm vitest:*)",
       "Bash(pnpm test:*)",
       "Bash(pnpm typecheck:*)",
       "Bash(pnpm lint:*)",
@@ -71,8 +70,6 @@
       "Bash(pytest:*)",
       "Bash(python:*)",
       "Bash(uv:*)",
-      "Bash(uv run:*)",
-      "Bash(pip install:*)",
       "Bash(mkdocs build:*)",
       "Bash(docker compose:*)",
       "Bash(docker exec:*)",
@@ -110,13 +107,12 @@
       "Read(~/church/**)",
       "Glob(~/church/**)",
       "Grep(~/church/**)",
-      "WebFetch(*)",
+      "WebFetch",
       "WebSearch",
+      "Agent(*)",
       "Skill(update-config:*)",
       "Skill(plan-mission:*)",
       "Edit(~/.claude/skills/code-review/**)",
-      "mcp__mem0__search_memory",
-      "mcp__mem0__add_memories",
       "mcp__serena__list_dir",
       "mcp__serena__find_file",
       "mcp__serena__find_symbol",
@@ -125,6 +121,9 @@
       "mcp__serena__replace_symbol_body",
       "mcp__serena__insert_after_symbol",
       "mcp__serena__insert_before_symbol",
+      "mcp__serena__find_referencing_symbols",
+      "mcp__serena__safe_delete_symbol",
+      "mcp__serena__rename_symbol",
       "mcp__playwright__browser_navigate",
       "mcp__playwright__browser_snapshot",
       "mcp__playwright__browser_click",
@@ -236,16 +235,14 @@
       }
     ]
   },
-  "env": {
-    "ENABLE_TOOL_SEARCH": "auto"
-  },
   "enabledPlugins": {
     "typescript-lsp@claude-plugins-official": true,
     "pyright-lsp@claude-plugins-official": true,
     "rust-analyzer-lsp@claude-plugins-official": true,
     "csharp-lsp@claude-plugins-official": true,
     "jdtls-lsp@claude-plugins-official": true,
-    "claude-code-setup@claude-plugins-official": true
+    "claude-code-setup@claude-plugins-official": true,
+    "clangd-lsp@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
@@ -255,6 +252,7 @@
       }
     }
   },
+  "autoMemoryEnabled": true,
   "agentPushNotifEnabled": true,
-  "autoMemoryEnabled": true
+  "model": "claude-fable-5"
 }

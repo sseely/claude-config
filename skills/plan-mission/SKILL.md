@@ -348,6 +348,7 @@ Print the path to the generated brief and tell the user:
 > To start autonomous execution:
 > 1. `~/.claude/hooks/autonomous-toggle.sh on .`
 > 2. "Execute the mission brief at plans/[name]/README.md"
+> Recommended execution model: `claude-fable-5` (long-horizon, native 1M context). Enable with `~/.claude/hooks/autonomous-toggle.sh on`.
 
 ## Rules
 
@@ -398,6 +399,7 @@ Use these defaults when invoking agents during brief generation:
 
 | Phase | Task | Model |
 |-------|------|-------|
+| Brief execution (autonomous) | Long-horizon autonomous execution (this brief) | `claude-fable-5` — native 1M context; use via autonomous-toggle |
 | Phase 3 | Architecture decisions (multiple competing trade-offs) | Opus + adaptive thinking |
 | Phase 4 | Operational readiness questions | Sonnet |
 | Phase 5 | Task decomposition | Opus + adaptive thinking |

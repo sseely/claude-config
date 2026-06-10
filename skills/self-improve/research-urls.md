@@ -20,8 +20,9 @@ decay to `unknown` on the next run. An `unknown` entry is re-verified before use
 it is not removed. This prevents the trusted set from silently accumulating sources
 that were valid once and have since rotted.
 
-Last full verification: 2026-06-05
-Note: URLs migrated from docs.anthropic.com to platform.claude.com base (2026-06-05).
+Last full verification: 2026-06-09
+Note: platform.claude.com/docs/en/docs/claude-code/* URLs verified 404 on 2026-06-09.
+Claude Code docs now live at code.claude.com/docs/en/.
 
 ---
 
@@ -30,12 +31,12 @@ Note: URLs migrated from docs.anthropic.com to platform.claude.com base (2026-06
 | URL                                                       | Purpose                                          | Last Verified | Status |
 | --------------------------------------------------------- | ------------------------------------------------ | ------------- | ------ |
 | https://www.anthropic.com/blog                            | Scan for recent Claude Code posts (last 90 days) | 2026-06-05    | active |
-| https://platform.claude.com/docs/en/docs/claude-code/overview   | Core feature overview                            | 2026-06-05    | active |
-| https://platform.claude.com/docs/en/docs/claude-code/hooks      | Hook events and configuration                    | 2026-06-05    | active |
-| https://platform.claude.com/docs/en/docs/claude-code/settings   | Settings reference                               | 2026-06-05    | active |
-| https://platform.claude.com/docs/en/docs/claude-code/memory     | Memory system docs                               | 2026-06-05    | active |
-| https://platform.claude.com/docs/en/docs/claude-code/mcp        | MCP integration docs                             | 2026-06-05    | active |
-| https://platform.claude.com/docs/en/docs/claude-code/sub-agents | Sub-agent docs                                   | 2026-06-05    | active |
+| https://platform.claude.com/docs/en/docs/claude-code/overview   | Core feature overview                            | 2026-06-09    | unreachable |
+| https://platform.claude.com/docs/en/docs/claude-code/hooks      | Hook events and configuration                    | 2026-06-09    | unreachable |
+| https://platform.claude.com/docs/en/docs/claude-code/settings   | Settings reference                               | 2026-06-09    | unreachable |
+| https://platform.claude.com/docs/en/docs/claude-code/memory     | Memory system docs                               | 2026-06-09    | unreachable |
+| https://platform.claude.com/docs/en/docs/claude-code/mcp        | MCP integration docs                             | 2026-06-09    | unreachable |
+| https://platform.claude.com/docs/en/docs/claude-code/sub-agents | Sub-agent docs                                   | 2026-06-09    | unreachable |
 
 ---
 
@@ -44,7 +45,7 @@ Note: URLs migrated from docs.anthropic.com to platform.claude.com base (2026-06
 | URL                                                             | Purpose                            | Last Verified | Status |
 | --------------------------------------------------------------- | ---------------------------------- | ------------- | ------ |
 | https://code.claude.com/docs/en/model-config                    | Model aliases and effort levels    | 2026-06-05    | active |
-| https://platform.claude.com/docs/en/docs/about-claude/models/overview | Current model IDs and deprecations | 2026-06-05    | active |
+| https://platform.claude.com/docs/en/docs/about-claude/models/overview | Current model IDs and deprecations | 2026-06-09    | unreachable |
 
 ---
 
@@ -67,7 +68,15 @@ Note: URLs migrated from docs.anthropic.com to platform.claude.com base (2026-06
 | https://stryker-mutator.io/docs                                                           | Mutation testing (JS/TS/Python) — tells LLM which tests are structurally weak              | human           | 2026-06-05 |
 | https://hypothesis.readthedocs.io/en/latest                                               | Property-based testing for Python — offloads edge-case discovery                           | human           | 2026-06-05 |
 | https://fast-check.dev                                                                    | Property-based testing for JS/TS — offloads edge-case discovery                            | human           | 2026-06-05 |
-| https://platform.claude.com/docs/en/docs/claude-code/tutorials                                  | Claude Code tutorials — may surface patterns not in the overview docs                      | human           | 2026-06-05 |
+| https://platform.claude.com/docs/en/docs/claude-code/tutorials                                  | Claude Code tutorials — unreachable 2026-06-09; find replacement at code.claude.com/docs/en/ | human           | 2026-06-05 |
+| https://code.claude.com/docs/en/overview                                                  | Claude Code overview — replacement for unreachable platform.claude.com overview URL        | Agent A         | 2026-06-09 |
+| https://code.claude.com/docs/en/hooks                                                     | Hook events and configuration — replacement for unreachable platform.claude.com URL        | Agent A         | 2026-06-09 |
+| https://code.claude.com/docs/en/settings                                                  | Settings reference — replacement for unreachable platform.claude.com URL                   | Agent A         | 2026-06-09 |
+| https://code.claude.com/docs/en/memory                                                    | Memory system docs — replacement for unreachable platform.claude.com URL                   | Agent A         | 2026-06-09 |
+| https://code.claude.com/docs/en/mcp                                                       | MCP integration docs — replacement for unreachable platform.claude.com URL                 | Agent A         | 2026-06-09 |
+| https://code.claude.com/docs/en/sub-agents                                                | Sub-agent docs — replacement for unreachable platform.claude.com URL                       | Agent A         | 2026-06-09 |
+| https://code.claude.com/docs/en/tutorials                                                 | Claude Code tutorials — replacement for unreachable platform.claude.com URL                | Agent A         | 2026-06-09 |
+| https://platform.claude.com/docs/en/models/overview                                       | Current model IDs and deprecations — corrected URL (no double /docs/ segment)             | Agent A         | 2026-06-09 |
 | https://code.claude.com/docs/en/changelog                                                 | Claude Code official changelog — feature tracking and deprecation notices                  | Discovery agent | 2026-06-05 |
 | https://github.com/anthropics/claude-code                                                 | Official Claude Code GitHub repo — issues, discussions, example configs                    | Discovery agent | 2026-06-05 |
 | https://registry.modelcontextprotocol.io/                                                 | Official MCP Registry for server discovery by category                                     | Discovery agent | 2026-06-05 |

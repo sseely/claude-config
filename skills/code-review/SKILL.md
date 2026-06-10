@@ -110,6 +110,8 @@ qa-expert, dependency-manager, or performance-engineer as appropriate.
 Use WebSearch and WebFetch to look up CVEs on NVD / OSV for the
 exact versions declared.
 
+#### Auth coverage
+
 - **Authentication coverage:** read the router / entry-point file in
   full. For every endpoint that writes state or returns private data,
   verify auth is applied — either at the dispatch layer or, if applied
@@ -127,28 +129,37 @@ exact versions declared.
 - **Deleted/soft-deleted user bypass:** if the system supports soft
   deletion, verify that every auth path (session token, JWT, OAuth)
   rejects users where `deleted_at IS NOT NULL`.
+- OWASP Top 10 (broken access control, injection, security
+  misconfiguration, vulnerable components, SSRF, etc.)
+- Timing-safe comparisons: check any HMAC/token comparison. A length
+  check that returns before the constant-time loop is a timing leak.
+
+#### Injection & input
+
 - Input validation at system boundaries (user input, external APIs).
   Check that `request.json()` failures (malformed body) are caught and
   return 400, not 500.
 - SQL injection, XSS, command injection vectors
+- Insecure deserialization: `eval`/`exec` on external input,
+  JSON.parse result used without type narrowing
+- Unsigned presigned URLs: any URL returned to clients for accessing
+  stored objects must be cryptographically signed
+
+#### Secrets & data exposure
+
 - Hardcoded secrets, credentials, or API keys in source
 - Sensitive data in error responses (stack traces, raw upstream errors,
   internal IDs, live OAuth tokens returned to browsers)
-- Insecure deserialization: `eval`/`exec` on external input,
-  JSON.parse result used without type narrowing
-- CORS: check the fallback value when the environment variable is
-  missing — wildcard (`*`) is a Critical finding
-- Unsigned presigned URLs: any URL returned to clients for accessing
-  stored objects must be cryptographically signed
-- Timing-safe comparisons: check any HMAC/token comparison. A length
-  check that returns before the constant-time loop is a timing leak.
-- OWASP Top 10 (broken access control, injection, security
-  misconfiguration, vulnerable components, SSRF, etc.)
-- CSP headers: set? avoids `unsafe-inline`/`unsafe-eval`?
-- SRI on third-party scripts loaded from CDNs
 - Environment-gated overrides: check any flag that redirects traffic
   to a non-production endpoint (e.g. `STRIPE_BASE_URL`) — it must be
   rejected in production environments
+
+#### Transport & headers
+
+- CORS: check the fallback value when the environment variable is
+  missing — wildcard (`*`) is a Critical finding
+- CSP headers: set? avoids `unsafe-inline`/`unsafe-eval`?
+- SRI on third-party scripts loaded from CDNs
 
 ---
 
