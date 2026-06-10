@@ -67,14 +67,7 @@
       "mcp__playwright__browser_fill_form",
       "mcp__playwright__browser_wait_for",
       "mcp__playwright__browser_evaluate",
-      "mcp__playwright__browser_close",
-      "Bash(bash -n ~/.claude/hooks/quality-gate.sh)",
-      "Bash(bash -n ~/.claude/hooks/notify-on-stop.sh)",
-      "Edit(~/.claude/skills/plan-mission/**)",
-      "Edit(~/.claude/skills/explore/**)",
-      "Edit(~/.claude/skills/code-review/**)",
-      "Bash(bash -n ~/.claude/hooks/project-init.sh)",
-      "Edit(~/.claude/skills/self-improve/**)"
+      "mcp__playwright__browser_close"
     ]
   }
 }

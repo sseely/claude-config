@@ -1,3 +1,10 @@
+---
+name: analytics-setup
+description: Plan and instrument PostHog analytics into a Cloudflare Workers + Neon + React/Vite project — produces a reviewed event plan, then wires backend captureEvent calls and a consent-gated frontend AnalyticsContext.
+user-invocable: true
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+---
+
 # /analytics-setup
 
 Model routing: Sonnet for implementation; Haiku for verification/scoring; Opus only for explicit architectural decisions.

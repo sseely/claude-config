@@ -1,3 +1,10 @@
+---
+name: payments-setup
+description: Scaffold Stripe Checkout, session pack credits, idempotent webhook handling, and an admin coupon management system into a Cloudflare Workers + Neon PostgreSQL + React/Vite project.
+user-invocable: true
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+---
+
 # /payments-setup
 
 Model routing: Sonnet for implementation; Haiku for verification/scoring; Opus only for explicit architectural decisions.
@@ -9,6 +16,30 @@ restriction, and admin coupon management UI.
 
 The billing unit is the **pack**, not the individual session. Packs are
 purchased upfront and never expire.
+
+---
+
+## Step 0 — Resume check
+
+Before doing anything else, check whether `.payments-setup-progress.md` exists
+in the working directory.
+
+**If it exists:**
+1. Read it.
+2. If `collected_inputs: true` is present, extract the stored inputs — do not
+   re-ask any question whose answer is already recorded.
+3. Find the first step checkbox that is still `[ ]` (unchecked).
+4. Print: `Resuming from [step name].`
+5. Skip Steps 1 entirely and jump directly to the first unchecked step.
+
+**If it does not exist:** continue to Step 1 as normal.
+
+**Step execution policy (applies to Steps 2–16):**
+After completing each step, mark its checkbox `[x]` in
+`.payments-setup-progress.md`. If a step's verify check fails, stop and report
+the full error — do not continue to the next step. The user must resolve the
+issue and resume (Step 0 will pick up from the first unchecked step on the next
+run).
 
 ---
 
@@ -34,6 +65,35 @@ Ask all of the following before doing any work:
    `handleBuyPack` can be omitted.
 7. **`APP_URL` env var** — already set by `/auth-setup` if that skill was run.
    Confirm it exists or note it needs to be added.
+
+After all questions are answered, write `.payments-setup-progress.md` in the
+working directory before doing any implementation work:
+
+```
+# Payments Setup Progress
+collected_inputs: true
+
+## Inputs
+<record each collected input as a key: value line>
+
+## Steps
+- [ ] install-stripe-sdk
+- [ ] read-templates
+- [ ] database-migrations
+- [ ] constants
+- [ ] types
+- [ ] code-generation-utility
+- [ ] payment-routes
+- [ ] coupon-routes
+- [ ] register-routes
+- [ ] api-client
+- [ ] frontend-buy-redeem
+- [ ] frontend-admin-coupon-pages
+- [ ] i18n-keys
+- [ ] env-vars-wrangler
+- [ ] write-tests
+- [ ] verify
+```
 
 ---
 

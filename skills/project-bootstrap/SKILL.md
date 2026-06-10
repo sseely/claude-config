@@ -1,3 +1,10 @@
+---
+name: project-bootstrap
+description: Meta-skill that layers production concerns (testing, i18n, auth, payments, compliance, analytics) onto an existing Cloudflare Workers + Neon + React/Vite prototype by collecting all inputs upfront and executing the selected sub-skills in dependency order.
+user-invocable: true
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+---
+
 # /project-bootstrap
 
 Model routing: Sonnet for implementation; Haiku for verification/scoring; Opus only for explicit architectural decisions.
@@ -8,6 +15,24 @@ to run, then executes them in the correct dependency order.
 
 Philosophy: **idea → prototype → productify**. Run this after you have a
 working prototype and want to add production infrastructure in one swoop.
+
+---
+
+## Step 0 — Resume check
+
+Before doing anything else, check whether `.bootstrap-progress.md` exists in
+the working directory.
+
+**If it exists:**
+1. Read it.
+2. If `collected_inputs: true` is present, extract the stored inputs — do not
+   re-ask any question whose answer is already recorded.
+3. Find the first sub-skill checkbox that is still `[ ]` (unchecked).
+4. Print: `Resuming from [step name].`
+5. Skip Steps 1–4 entirely and jump directly to Step 5, running only the
+   unchecked sub-skills in order.
+
+**If it does not exist:** continue to Step 1 as normal.
 
 ---
 
@@ -86,6 +111,27 @@ Reference each skill's "Step 1 — Gather inputs" section for the exact
 questions. Do not repeat questions that have the same answer across skills
 (e.g. `APP_URL` is asked once, used by multiple skills).
 
+After the user answers all questions, write `.bootstrap-progress.md` in the
+working directory before running any sub-skill:
+
+```
+# Bootstrap Progress
+collected_inputs: true
+
+## Inputs
+<record each collected input as a key: value line>
+
+## Sub-skills
+- [ ] testing-setup
+- [ ] i18n-setup
+- [ ] auth-setup
+- [ ] payments-setup
+- [ ] compliance-setup
+- [ ] analytics-setup
+```
+
+Include only the sub-skills the user selected (in execution order).
+
 ---
 
 ## Step 5 — Execute skills in order
@@ -96,7 +142,12 @@ next. For each skill:
 1. Announce: `## Running /skill-name`
 2. Execute all steps of that skill's SKILL.md using the inputs collected
    in step 4.
-3. Output that skill's summary block before moving to the next.
+3. Run that skill's verify step. **If verification fails, stop immediately
+   and report the failure in full. Do not continue to the next sub-skill.
+   The user must resolve the issue and resume (Step 0 will pick up from
+   this sub-skill on the next run).**
+4. On success: update `.bootstrap-progress.md` to mark that sub-skill `[x]`.
+5. Output that skill's summary block before moving to the next.
 
 Do not interleave steps from different skills.
 

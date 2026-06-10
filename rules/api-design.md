@@ -40,11 +40,8 @@ convention.
 ## Versioning
 
 Version in the URL path: `/v1/users`, `/v2/users`.
-Increment the major version when:
-- Removing or renaming a field in a response
-- Changing the type or nullability of a field
-- Removing or renaming an endpoint
-- Changing HTTP method or status codes for an existing operation
+Increment the major version on any breaking change per
+`~/.claude/rules/architecture.md` breaking-change taxonomy.
 
 Minor/patch changes (adding optional fields, new endpoints) do not
 require a version bump.

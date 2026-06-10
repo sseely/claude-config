@@ -50,6 +50,11 @@ try:
     if not file_path or not os.path.isfile(file_path):
         sys.exit(0)
 
+    # Skip files outside the current working directory (e.g. third-party repos)
+    cwd = os.path.realpath(os.getcwd())
+    if not os.path.realpath(file_path).startswith(cwd + os.sep):
+        sys.exit(0)
+
     if os.path.splitext(file_path)[1].lower() not in CHECKABLE_EXTS:
         sys.exit(0)
 

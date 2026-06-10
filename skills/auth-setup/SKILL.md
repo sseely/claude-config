@@ -1,3 +1,10 @@
+---
+name: auth-setup
+description: Scaffold OAuth authentication (LinkedIn, Google, Microsoft) into a Cloudflare Workers + Neon PostgreSQL + React/Vite project using KV-backed sessions and HMAC-signed stateless OAuth state.
+user-invocable: true
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+---
+
 # /auth-setup
 
 Model routing: Sonnet for implementation; Haiku for verification/scoring; Opus only for explicit architectural decisions.

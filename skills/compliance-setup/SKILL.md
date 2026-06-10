@@ -281,9 +281,9 @@ Write at minimum:
 
 1. Run `npx tsc --noEmit` — fix any type errors before proceeding.
 2. Run `npm run build` (or equivalent) and confirm TypeScript compiles cleanly.
-2. If compliance test files exist (`test/me.test.ts`, `test/feedback.test.ts`,
+3. If compliance test files exist (`test/me.test.ts`, `test/feedback.test.ts`,
    `test/sbom.test.ts`), run them.
-3. Summarise:
+4. Summarise:
    - What was created
    - What ADAPT comments remain and need manual attention
    - What env vars / secrets need to be set before the feature is live

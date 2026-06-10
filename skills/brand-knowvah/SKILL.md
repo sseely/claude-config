@@ -1,3 +1,10 @@
+---
+name: brand-knowvah
+description: Apply the Knowvah "Warm Studio" visual identity (CSS tokens, ThemeContext, sidebar layout, App.tsx skeleton) to a new React/Vite project on a *.knowvah.com subdomain.
+user-invocable: true
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+---
+
 # brand-knowvah
 
 Apply the Knowvah "Warm Studio" visual identity and app shell to a new
