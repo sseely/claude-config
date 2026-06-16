@@ -13,7 +13,7 @@ Examples:
 - Strong: "Update the auth handler to accept Bearer tokens — do not change
   the session logic or touch any other handler"
 
-> **On Claude 4.6+/Fable 5:** Prefer scoping keywords (`only`, `limit to`, `do not`) over intensity escalation (`CRITICAL`, `MUST`, `ALWAYS`). Blanket intensity words can overtrigger on these models and reduce output quality. Scoping keywords remain effective on all model tiers.
+> **On Claude 4.6+/Opus 4.8:** Prefer scoping keywords (`only`, `limit to`, `do not`) over intensity escalation (`CRITICAL`, `MUST`, `ALWAYS`). Blanket intensity words can overtrigger on these models and reduce output quality. Scoping keywords remain effective on all model tiers.
 
 ## Specificity
 

@@ -77,7 +77,7 @@ Match model to task complexity and cost:
 | Role | Model alias | Effort | Context | When |
 |------|-------------|--------|---------|------|
 | Planning / architecture | `opus` (`claude-opus-4-8`) | `high` default; `xhigh` for deep multi-path decisions | 1M tokens | Phase 3 decisions, mission decomposition, threat modeling |
-| Long-horizon autonomous execution | `fable` (`claude-fable-5`) | `high` default; `xhigh` for agentic runs | 1M | Mission-brief execution, autonomous sessions, multi-hour/multi-day work |
+| Long-horizon autonomous execution | `opus` (`claude-opus-4-8`) | `high` default; `xhigh` for agentic runs | 1M | Mission-brief execution, autonomous sessions, multi-hour/multi-day work |
 | Implementation | `sonnet` (`claude-sonnet-4-6`) | `high` default; lower to `medium` if token-sensitive | 1M tokens | Feature work, bug fixes, refactoring, code generation |
 | Scoring / dedup / validation | `haiku` (`claude-haiku-4-5-20251001`) | n/a | 200k tokens | Confidence scoring, dedup passes, format checking, simple grep tasks |
 
@@ -104,15 +104,6 @@ known Opus tendencies (validated in production):
 - Do NOT spawn subagents unless the task explicitly requires it
 - If scope is ambiguous, implement the minimal interpretation and note the
   ambiguity; do not silently expand
-
-**Fable 5 behavioral notes:**
-
-When routing a task to Fable 5, omit Opus-style constraints — Fable 5's design is the inverse:
-
-- Describe the outcome, not the steps — Fable 5 derives the approach from the goal
-- Omit verification reminders — Fable 5 self-checks without prompting
-- Subagent dispatch is encouraged, not discouraged — Fable 5 benefits from parallelism
-- Too-prescriptive skill instructions constrain Fable 5 output below baseline quality
 
 **Anti-patterns to avoid:**
 
