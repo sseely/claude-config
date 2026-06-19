@@ -21,7 +21,7 @@ Code review checklist:
 ## Required Rules
 
 Apply these rule files to every review:
-- `code-principles.md` — SOLID, no magic strings
+- `code-principles.md` — SOLID, no magic strings; flag scope mismatches (spec/source items missing, or code added beyond the defined scope)
 - `security.md` — input validation, injection prevention, secret handling
 - `architecture.md` — blast radius, ADR triggers, fitness functions, reversibility
 - `testability.md` — pure functions, functional core/imperative shell, DI as mechanism

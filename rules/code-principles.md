@@ -1,5 +1,22 @@
 # Code Design Principles
 
+## Build to the defined scope — no more, no less
+
+Before building, identify what defines "done":
+
+- **An external source defines it** — a spec, a ticket enumerating
+  requirements, a library or codebase being ported/translated, an API
+  contract. Completeness IS that source. Every item is required;
+  omitting one is a bug, not a simplification. Do not judge listed
+  items as unnecessary and drop them.
+- **You are making the design choice** — greenfield, no enumerated
+  source. Build what was asked. No speculative abstractions, no config
+  knobs with one caller, no extension points for needs nobody stated.
+  When a real future requirement arrives, refactor then.
+
+Two equal failure modes: trimming a required item because it "looks
+unused," and inventing an unrequested one because it "might help."
+
 ## SOLID
 
 **Single Responsibility** — A module, class, or function does one

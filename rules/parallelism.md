@@ -104,6 +104,8 @@ known Opus tendencies (validated in production):
 - Do NOT spawn subagents unless the task explicitly requires it
 - If scope is ambiguous, implement the minimal interpretation and note the
   ambiguity; do not silently expand
+- A spec, source being ported, or enumerated requirement list is NOT
+  ambiguous scope — implement all of it; the above is not license to trim it
 
 **Anti-patterns to avoid:**
 

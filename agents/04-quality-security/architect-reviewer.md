@@ -15,7 +15,7 @@ Execute per `~/.claude/rules/architecture.md`.
 ## Required Rules
 
 - `architecture.md` — blast-radius ordering, ADR triggers, reversibility, fitness functions, breaking-change taxonomy
-- `code-principles.md` — SOLID, no magic strings
+- `code-principles.md` — SOLID, no magic strings; flag scope mismatches (spec/source items missing, or code added beyond the defined scope)
 - `research-sources.md` — apply the 5-tier source hierarchy when citing evidence for architectural claims
 - `testability.md` — verify that proposed designs enable pure functions and functional core/imperative shell
 - `lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
