@@ -1,38 +1,5 @@
 # Code Design Principles
 
-## YAGNI — You Aren't Gonna Need It
-
-YAGNI governs design decisions, not handed requirements (spec fidelity, ports, translations).
-
-### YAGNI applies when you are making design choices
-
-- No speculative abstractions, hooks, or extension points for
-  requirements that haven't been asked for
-- No configuration knobs that have only one caller
-- No helper functions written in anticipation of reuse that doesn't
-  yet exist
-- Three similar lines of code is better than a premature abstraction
-
-### YAGNI does NOT apply when a source defines completeness
-
-- Porting or translating code to another language — implement
-  everything in the source; omissions are bugs
-- Implementing against a spec file — the spec is the complete
-  requirement; "this looks unused" is not a reason to skip it
-- Replicating existing behavior — match the original, then refactor
-
-If a future requirement arrives, refactor then. Not now.
-
-### YAGNI also applies to defensive code
-
-- No error handling or fallbacks for states that cannot occur given
-  surrounding invariants — trust internal code and framework guarantees
-- No null checks on values the type system or caller contract guarantees
-  are non-null
-- No validation at internal call sites — validate at system boundaries
-  (user input, external APIs) only; don't re-validate between layers
-  that share the same invariants
-
 ## SOLID
 
 **Single Responsibility** — A module, class, or function does one
@@ -49,6 +16,19 @@ fat ones. Callers shouldn't depend on methods they don't use.
 
 **Dependency Inversion** — Depend on abstractions, not concretions.
 High-level modules shouldn't import low-level implementation details.
+
+## Defensive code
+
+Don't write guards for states that genuinely cannot occur — but
+"cannot occur" means provably so, not merely "shouldn't."
+
+- No error handling or fallbacks for states that cannot occur given
+  surrounding invariants — trust internal code and framework guarantees
+- No null checks on values the type system or caller contract guarantees
+  are non-null
+- No validation at internal call sites — validate at system boundaries
+  (user input, external APIs) only; don't re-validate between layers
+  that share the same invariants
 
 ## No magic strings or literals in production code
 

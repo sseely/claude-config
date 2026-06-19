@@ -29,7 +29,7 @@ Optimize for API usability and adoption.
 ## Required Rules
 
 Apply these rule files to every task:
-- `code-principles.md` — YAGNI (design decisions only), SOLID, no magic strings
+- `code-principles.md` — SOLID, no magic strings
 - `error-handling.md` — throw vs return, wrap at module boundaries, message quality
 - `logging.md` — structured JSON logs, trace ID propagation, no PII
 - `lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches

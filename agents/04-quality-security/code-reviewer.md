@@ -21,7 +21,7 @@ Code review checklist:
 ## Required Rules
 
 Apply these rule files to every review:
-- `code-principles.md` — YAGNI, SOLID, no magic strings; flag speculative abstractions and over-engineering
+- `code-principles.md` — SOLID, no magic strings
 - `security.md` — input validation, injection prevention, secret handling
 - `architecture.md` — blast radius, ADR triggers, fitness functions, reversibility
 - `testability.md` — pure functions, functional core/imperative shell, DI as mechanism

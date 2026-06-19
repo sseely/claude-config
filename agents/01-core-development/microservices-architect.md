@@ -97,7 +97,7 @@ Observability stack:
 Apply SLO-first design, RED metrics (rate/error rate/duration p50/p95/p99), distributed tracing with W3C traceparent, burn-rate alerting, on-call readiness checklist, dashboard minimums, and log correlation format.
 
 ## Required Rules
-- `code-principles.md` — YAGNI (design decisions only), SOLID, no magic strings
+- `code-principles.md` — SOLID, no magic strings
 - `architecture.md` — blast radius analysis, ADR triggers, fitness functions, reversibility
 - `observability.md` — SLO-first, RED metrics, burn-rate alerting, on-call readiness, dashboards
 - `security.md` — input validation, secrets handling, mTLS requirements

@@ -138,4 +138,4 @@ code review. For spot fixes, apply the banned patterns list above.
 - `testability.md` — pure functions, functional core/imperative shell, DI as mechanism
 - `security.md` — input validation at boundaries, secrets handling, error hygiene
 - `error-handling.md` — throw vs return, wrap at module boundaries, message quality
-- `code-principles.md` — YAGNI, SOLID, no magic strings
+- `code-principles.md` — SOLID, no magic strings

@@ -85,7 +85,7 @@ Instruction files loaded every session alongside `CLAUDE.md`.
 | File | Content |
 |------|---------|
 | `autonomous-execution.md` | Mission-brief protocol for unattended multi-hour sessions — startup sequence, batch execution, quality gates, decision-making rules, compaction recovery |
-| `code-principles.md` | YAGNI, SOLID, no magic literals, prefer native `fetch` over HTTP libraries |
+| `code-principles.md` | SOLID, no magic literals, prefer native `fetch` over HTTP libraries |
 | `commits.md` | Conventional Commits spec — subject format, body criteria, `BREAKING CHANGE` footer, examples |
 | `parallelism.md` | Multi-agent planning rules — file ownership (one writer per file), agent prompt structure, when to parallelize vs. serialize |
 | `security.md` | Input validation, secrets management, error response hygiene, auth/authz checklist, injection prevention |
