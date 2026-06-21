@@ -31,6 +31,8 @@ Ask explicitly for deeper reasoning before acting:
 
 Set via the `effort` parameter in agent frontmatter or the `/effort` command.
 Default is `high` on Opus 4.8 and Sonnet 4.6; `xhigh` on Opus 4.7.
+Opus 4.8 also supports `xhigh` and `max` (they are just not its default) —
+raise to them for the hardest multi-path decisions.
 For one-off requests, say "Take as long as you need" to invoke deeper reasoning.
 Do NOT use `budget_tokens` — deprecated on Sonnet 4.6, removed on Opus 4.8.
 See `parallelism.md` for the effort level table.
