@@ -41,7 +41,7 @@
       "Edit(*)",
       "Glob(*)",
       "Grep(*)",
-      "WebFetch(*)",
+      "WebFetch",
       "WebSearch",
       "mcp__mem0__search_memory",
       "mcp__mem0__add_memories",
