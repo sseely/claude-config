@@ -22,3 +22,9 @@ Opus→planning/architecture decisions + long-horizon autonomous execution
 `type(scope): description` ≤72 chars, lowercase, no period.
 Body (separated by blank line) explains why, not what. Required for >3-file changes.
 Types: feat, fix, chore, refactor, test, docs, style, perf, ci.
+---
+## Autonomous Restraint (restored)
+STOP brake: if the same location/approach fails the same check 3x
+consecutively, stop and log to the decision journal — do not keep iterating.
+Opus restraint: implement the simplest interpretation; no speculative
+abstractions; if scope is ambiguous, do the minimal reading and note it.
