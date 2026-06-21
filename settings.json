@@ -253,6 +253,5 @@
     }
   },
   "autoMemoryEnabled": true,
-  "agentPushNotifEnabled": true,
-  "model": "claude-fable-5"
+  "agentPushNotifEnabled": true
 }

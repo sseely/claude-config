@@ -20,7 +20,8 @@ decay to `unknown` on the next run. An `unknown` entry is re-verified before use
 it is not removed. This prevents the trusted set from silently accumulating sources
 that were valid once and have since rotted.
 
-Last full verification: 2026-06-10
+Last full verification: 2026-06-20 (Partial — Agent X Discovery skipped this run,
+user-interrupted; Agent A/B/C sources re-verified)
 Note: platform.claude.com/docs/en/docs/claude-code/* URLs verified 404 on 2026-06-09.
 Claude Code docs now live at code.claude.com/docs/en/.
 Note: platform.claude.com/docs/en/models/overview verified 404 on 2026-06-10.
@@ -31,20 +32,20 @@ Note: platform.claude.com/docs/en/models/overview verified 404 on 2026-06-10.
 
 | URL                                                       | Purpose                                          | Last Verified | Status |
 | --------------------------------------------------------- | ------------------------------------------------ | ------------- | ------ |
-| https://www.anthropic.com/blog                            | Scan for recent Claude Code posts (last 90 days) | 2026-06-05    | active |
+| https://www.anthropic.com/blog                            | Scan for recent Claude Code posts (last 90 days) — NOTE: thin for CC (press newsroom); see task file re: switch to code.claude.com/docs/en/changelog | 2026-06-20    | active |
 | https://platform.claude.com/docs/en/docs/claude-code/overview   | Core feature overview                            | 2026-06-10    | unreachable |
 | https://platform.claude.com/docs/en/docs/claude-code/hooks      | Hook events and configuration                    | 2026-06-10    | unreachable |
 | https://platform.claude.com/docs/en/docs/claude-code/settings   | Settings reference                               | 2026-06-10    | unreachable |
 | https://platform.claude.com/docs/en/docs/claude-code/memory     | Memory system docs                               | 2026-06-10    | unreachable |
 | https://platform.claude.com/docs/en/docs/claude-code/mcp        | MCP integration docs                             | 2026-06-10    | unreachable |
 | https://platform.claude.com/docs/en/docs/claude-code/sub-agents | Sub-agent docs                                   | 2026-06-10    | unreachable |
-| https://code.claude.com/docs/en/overview                  | Core feature overview — replaces unreachable platform.claude.com URL | 2026-06-10 | active |
-| https://code.claude.com/docs/en/hooks                     | Hook events and configuration — replaces unreachable platform.claude.com URL | 2026-06-10 | active |
-| https://code.claude.com/docs/en/settings                  | Settings reference — replaces unreachable platform.claude.com URL | 2026-06-10 | active |
-| https://code.claude.com/docs/en/memory                    | Memory system docs — replaces unreachable platform.claude.com URL | 2026-06-10 | active |
-| https://code.claude.com/docs/en/mcp                       | MCP integration docs — replaces unreachable platform.claude.com URL | 2026-06-10 | active |
-| https://code.claude.com/docs/en/sub-agents                | Sub-agent docs — replaces unreachable platform.claude.com URL | 2026-06-10 | active |
-| https://code.claude.com/docs/en/tutorials                 | Common workflows / tutorials — replaces unreachable platform.claude.com URL | 2026-06-10 | active |
+| https://code.claude.com/docs/en/overview                  | Core feature overview — replaces unreachable platform.claude.com URL | 2026-06-20 | active |
+| https://code.claude.com/docs/en/hooks                     | Hook events and configuration — replaces unreachable platform.claude.com URL | 2026-06-20 | active |
+| https://code.claude.com/docs/en/settings                  | Settings reference — replaces unreachable platform.claude.com URL | 2026-06-20 | active |
+| https://code.claude.com/docs/en/memory                    | Memory system docs — replaces unreachable platform.claude.com URL | 2026-06-20 | active |
+| https://code.claude.com/docs/en/mcp                       | MCP integration docs — replaces unreachable platform.claude.com URL | 2026-06-20 | active |
+| https://code.claude.com/docs/en/sub-agents                | Sub-agent docs — replaces unreachable platform.claude.com URL | 2026-06-20 | active |
+| https://code.claude.com/docs/en/tutorials                 | Common workflows / tutorials — replaces unreachable platform.claude.com URL | 2026-06-20 | active |
 
 ---
 
@@ -52,8 +53,8 @@ Note: platform.claude.com/docs/en/models/overview verified 404 on 2026-06-10.
 
 | URL                                                             | Purpose                            | Last Verified | Status |
 | --------------------------------------------------------------- | ---------------------------------- | ------------- | ------ |
-| https://code.claude.com/docs/en/model-config                    | Model aliases and effort levels    | 2026-06-05    | active |
-| https://platform.claude.com/docs/en/about-claude/models/overview | Current model IDs and deprecations | 2026-06-10    | active |
+| https://code.claude.com/docs/en/model-config                    | Model aliases and effort levels    | 2026-06-20    | active |
+| https://platform.claude.com/docs/en/about-claude/models/overview | Current model IDs and deprecations | 2026-06-20    | active |
 
 ---
 
@@ -61,7 +62,7 @@ Note: platform.claude.com/docs/en/models/overview verified 404 on 2026-06-10.
 
 | URL                                | Purpose                                                                  | Last Verified | Status |
 | ---------------------------------- | ------------------------------------------------------------------------ | ------------- | ------ |
-| https://www.anthropic.com/research | Recent Anthropic papers on instruction-following and agent orchestration | 2026-06-05    | active |
+| https://www.anthropic.com/research | Recent Anthropic papers on instruction-following and agent orchestration | 2026-06-20    | active |
 
 ---
 
@@ -100,6 +101,11 @@ Note: platform.claude.com/docs/en/models/overview verified 404 on 2026-06-10.
 | https://arxiv.org/abs/2510.05748                                                          | Communication enables cooperation in LLM multi-agent systems                               | Discovery agent | 2026-06-05 |
 | https://arxiv.org/pdf/2506.02943                                                          | Multi-agent LLMs for JUnit test generation — hallucination to consensus                    | Discovery agent | 2026-06-05 |
 | https://arxiv.org/pdf/2603.15911                                                          | Human-AI synergy in agentic code review — collaboration patterns                           | Discovery agent | 2026-06-05 |
+| https://code.claude.com/docs/en/agent-teams                                               | Agent teams: parallel teammates with independent context, SendMessage coordination          | Agent A         | 2026-06-20 |
+| https://code.claude.com/docs/en/agent-view                                                | Background agents: run/monitor many parallel full sessions from one screen                  | Agent A         | 2026-06-20 |
+| https://code.claude.com/docs/en/routines                                                  | Routines: Anthropic-hosted scheduled/cron + GitHub-event-triggered Claude Code runs         | Agent A         | 2026-06-20 |
+| https://code.claude.com/docs/en/worktrees                                                 | Worktree isolation for subagents (isolation: worktree) and base-branch selection            | Agent A         | 2026-06-20 |
+| https://code.claude.com/docs/en/skills                                                    | Skills config: context: fork, run-in-subagent, disable-model-invocation, frontmatter        | Agent A         | 2026-06-20 |
 
 ---
 
