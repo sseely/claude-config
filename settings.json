@@ -63,6 +63,8 @@
       "Bash(pnpm run:*)",
       "Bash(volta install:*)",
       "Bash(cargo:*)",
+      "Bash(go:*)",
+      "Bash(dotnet:*)",
       "Bash(git tag:*)",
       "Bash(npm ci:*)",
       "Bash(npx:*)",
@@ -123,12 +125,7 @@
       "mcp__serena__insert_before_symbol",
       "mcp__serena__find_referencing_symbols",
       "mcp__serena__safe_delete_symbol",
-      "mcp__serena__rename_symbol",
-      "mcp__playwright__browser_navigate",
-      "mcp__playwright__browser_snapshot",
-      "mcp__playwright__browser_click",
-      "mcp__playwright__browser_take_screenshot",
-      "mcp__playwright__browser_evaluate"
+      "mcp__serena__rename_symbol"
     ],
     "additionalDirectories": [
       "/tmp",
