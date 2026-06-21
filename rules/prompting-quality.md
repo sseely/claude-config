@@ -32,6 +32,12 @@ Audit periodically: remove instructions that are no longer relevant,
 consolidate duplicates, and move project-specific rules to project-level
 CLAUDE.md files rather than the global one.
 
+Per-file caps bound each file, but nothing caps the **aggregate resident
+footprint** of `rules/` (~62KB). Rules are referenced by pointer from
+CLAUDE.md, not `@`-imported, so they are not all resident — keep it that
+way: prefer task-scoped reading of the one or two relevant rule files over
+loading the set, and dedup cross-file repetition rather than restating it.
+
 ## File context discipline
 
 Attaching large numbers of files to a prompt is a lazy substitute for
