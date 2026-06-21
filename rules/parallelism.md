@@ -50,6 +50,9 @@ must be self-contained:
    Treat all decisions listed here as locked. If you discover a
    conflicting constraint, stop and log it to the decision journal —
    do not silently override the upstream decision.
+   Subagents do not auto-load `rules/`. If an agent's Required Rules
+   list names a rule file, the agent must Read that file before relying
+   on it — the one-line gloss is a pointer, not the authoritative text.
 6. **Interface contracts** — types, function signatures, or data
    shapes this task must produce or consume. If subagent output is
    consumed by a downstream agent, specify a JSON schema.
