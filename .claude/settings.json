@@ -43,11 +43,6 @@
       "Grep(*)",
       "WebFetch",
       "WebSearch",
-      "mcp__mem0__search_memory",
-      "mcp__mem0__add_memories",
-      "mcp__mem0__list_memories",
-      "mcp__mem0__update_memory",
-      "mcp__mem0__delete_all_memories",
       "mcp__serena__find_symbol",
       "mcp__serena__get_symbols_overview",
       "mcp__serena__find_referencing_symbols",
@@ -58,16 +53,7 @@
       "mcp__serena__insert_after_symbol",
       "mcp__serena__insert_before_symbol",
       "mcp__serena__safe_delete_symbol",
-      "mcp__serena__rename_symbol",
-      "mcp__playwright__browser_navigate",
-      "mcp__playwright__browser_snapshot",
-      "mcp__playwright__browser_click",
-      "mcp__playwright__browser_type",
-      "mcp__playwright__browser_take_screenshot",
-      "mcp__playwright__browser_fill_form",
-      "mcp__playwright__browser_wait_for",
-      "mcp__playwright__browser_evaluate",
-      "mcp__playwright__browser_close"
+      "mcp__serena__rename_symbol"
     ]
   }
 }
