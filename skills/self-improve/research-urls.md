@@ -32,7 +32,8 @@ Note: platform.claude.com/docs/en/models/overview verified 404 on 2026-06-10.
 
 | URL                                                       | Purpose                                          | Last Verified | Status |
 | --------------------------------------------------------- | ------------------------------------------------ | ------------- | ------ |
-| https://www.anthropic.com/blog                            | Scan for recent Claude Code posts (last 90 days) — NOTE: thin for CC (press newsroom); see task file re: switch to code.claude.com/docs/en/changelog | 2026-06-20    | active |
+| https://code.claude.com/docs/en/changelog                 | PRIMARY: scan for new/changed/deprecated Claude Code features (last 90 days) | 2026-06-21    | active |
+| https://www.anthropic.com/blog                            | SECONDARY/optional: occasional Claude Code launch posts; thin (press newsroom) — use only if the changelog misses a topic | 2026-06-20    | active |
 | https://platform.claude.com/docs/en/docs/claude-code/overview   | Core feature overview                            | 2026-06-10    | unreachable |
 | https://platform.claude.com/docs/en/docs/claude-code/hooks      | Hook events and configuration                    | 2026-06-10    | unreachable |
 | https://platform.claude.com/docs/en/docs/claude-code/settings   | Settings reference                               | 2026-06-10    | unreachable |
@@ -79,7 +80,7 @@ Note: platform.claude.com/docs/en/models/overview verified 404 on 2026-06-10.
 | https://fast-check.dev                                                                    | Property-based testing for JS/TS — offloads edge-case discovery                            | human           | 2026-06-05 |
 | https://platform.claude.com/docs/en/docs/claude-code/tutorials                                  | Claude Code tutorials — unreachable 2026-06-09; replaced by code.claude.com/docs/en/tutorials (promoted 2026-06-10) | human           | 2026-06-05 |
 | https://platform.claude.com/docs/en/models/overview                                       | FAIL: 404 on 2026-06-10 — corrected URL candidate still unreachable; find replacement for model IDs at platform.claude.com or docs.anthropic.com | Agent A         | 2026-06-09 |
-| https://code.claude.com/docs/en/changelog                                                 | Claude Code official changelog — feature tracking and deprecation notices                  | Discovery agent | 2026-06-05 |
+| https://code.claude.com/docs/en/changelog                                                 | PROMOTED 2026-06-21 to Agent A primary (passed thin-content bar) — see Agent A section      | Discovery agent | 2026-06-05 |
 | https://github.com/anthropics/claude-code                                                 | Official Claude Code GitHub repo — issues, discussions, example configs                    | Discovery agent | 2026-06-05 |
 | https://registry.modelcontextprotocol.io/                                                 | Official MCP Registry for server discovery by category                                     | Discovery agent | 2026-06-05 |
 | https://blog.modelcontextprotocol.io/posts/2025-11-25-first-mcp-anniversary/              | MCP 1-year anniversary: spec maturity, tool patterns, protocol evolution                   | Discovery agent | 2026-06-05 |

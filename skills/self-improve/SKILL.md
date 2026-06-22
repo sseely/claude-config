@@ -145,6 +145,10 @@ Effort levels (set via `effort:` frontmatter or `/effort` command):
 | `xhigh` | Opus 4.8, Opus 4.7 only | Default on Opus 4.7 |
 | `max` | Opus 4.8, Opus 4.7 | Session-only; not saved to settings |
 
+Note: `ultracode` is **not** an effort level — it is a Workflow opt-in keyword
+(standing authorization to author/run multi-agent workflows). Do not list it as
+an effort value; it composes with, but is orthogonal to, the levels above.
+
 **Fetch guard:** For every URL you fetch, if the response is non-200, redirects
 to an unexpected domain, or returns fewer than 500 characters, record it as a
 Warning finding: `Research source unreachable or thin: [URL]`. Do not silently
@@ -790,7 +794,9 @@ a fresh run should start from Phase 0.
   over theoretical concerns.
 - Model routing for this skill: use Opus (adaptive thinking) for
   Phase 3 synthesis if there are >20 raw findings; Sonnet is
-  sufficient for smaller sets.
+  sufficient for smaller sets. When routing Phase 3 to Opus, instruct:
+  "Return only the deduplicated, scored findings list — no preamble, no
+  trailing summary." (per arxiv:2604.00025 — Opus over-elaborates without it).
 - Cloned repos live in `~/temp/self-improve/`. Clone with
   `--depth 1 --single-branch` (default branch only, minimal history). Do not delete the directory
   after the run — subsequent runs reuse existing clones (pull to

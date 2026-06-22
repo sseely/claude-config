@@ -7,7 +7,8 @@ Scope: every externally-accessed operation — API endpoints, scheduled jobs, an
 consumers. Internal helper functions don't require SLIs.
 - SLI: metric (error rate, latency p95, queue depth)
 - SLO: threshold triggering page (e.g., error rate < 0.1%, p95 < 200ms)
-Cannot define SLI? Feature not ready to build — stop.
+If a key operation has no definable SLI, treat that as a design smell —
+clarify that operation's success criteria before building it.
 
 ## Metrics — RED method
 

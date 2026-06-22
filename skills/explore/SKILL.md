@@ -48,6 +48,7 @@ exists in the current working directory.
 6. Determine the parent directory of the current project: `PARENT=$(git rev-parse --show-toplevel | xargs dirname)`.
 7. For each related repo that isn't already cloned as a sibling of the current project:
    - Clone it into `$PARENT/<repo-name>` using `gh repo clone $ORG/<repo-name> $PARENT/<repo-name>`
+   - On a transient `gh`/clone/network failure (5xx, connection refused, read timeout), retry per `~/.claude/rules/retry-idempotency.md` (max 3 attempts, exponential backoff) before skipping that repo. Do not retry on 4xx (e.g. 404 repo not found) except 429.
 
 ## Analyze each repository (current + cloned)
 

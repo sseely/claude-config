@@ -64,6 +64,7 @@ collected_inputs: true
 - [ ] language-switcher
 - [ ] scripts
 - [ ] backend-language-route
+- [ ] language-route-test
 - [ ] wire-into-app
 - [ ] generate-translations
 ```
@@ -200,6 +201,28 @@ On success, mark `- [x] backend-language-route` in `.i18n-setup-progress.md`.
 
 ---
 
+## Step 8b — Test the language endpoint (if server-side persistence is yes)
+
+Write a test for `handlePatchLanguage` using the project's existing test
+framework (e.g. Vitest with the Workers pool). Cover at minimum:
+
+- **Valid update → 200 + persisted**: `PATCH /api/me/language` with a supported
+  locale (e.g. `{ "language": "es" }`) for an authenticated user returns 200,
+  and `preferred_language` is `es` when read back from the DB (assert the
+  persisted value, not just the response).
+- **Invalid locale → 400**: an unsupported/malformed locale (e.g.
+  `{ "language": "zz" }` or a non-string) returns 400 and does **not** change
+  the stored value.
+- **Unauthenticated → 401**: no session returns 401 (no write).
+
+Validate the locale against the manifest's supported-locale list, not an
+ad-hoc check, so the test and the route share one source of truth.
+
+On success, mark `- [x] language-route-test` in `.i18n-setup-progress.md`.
+(Skip this mark if server-side persistence is no — the step was intentionally skipped.)
+
+---
+
 ## Step 9 — Wire into the app
 
 In `ui/src/main.tsx` (or `App.tsx`), add:
@@ -248,6 +271,28 @@ Should print: `✓ All 17 locales × N namespaces are in sync with English.`
 
 If it fails with `MISSING FILE` errors, translations haven't been generated yet
 (Step 10 was skipped). That's expected — note it for the user.
+
+---
+
+## Operational Readiness — `PATCH /api/me/language`
+
+Applies only when server-side persistence (Step 8) was wired.
+
+**SLIs:**
+- Error rate: % of `PATCH /api/me/language` requests returning ≥500 (target: <0.1%).
+- Latency p95: time to validate + persist `preferred_language` (target: <100ms).
+
+**Key failure modes:**
+- DB unavailable / write fails → preference not saved; detected by the endpoint's
+  5xx rate; mitigation: the frontend already falls back to the localStorage value,
+  so the UI language is unaffected — retry the write on next change.
+- Unvalidated locale persisted → frontend loads a missing locale bundle and shows
+  keys; detected by a spike in 400s (if validation is correct) or client-side
+  missing-key errors (if not); mitigation: validate against the manifest list.
+
+**Rollback:** Reversible — revert the deploy. The `preferred_language` column is
+additive with a default of `'en'`, so leaving it in place is harmless if the
+route is removed.
 
 ---
 

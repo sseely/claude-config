@@ -231,5 +231,9 @@ publish it.
 - If the PR has no changed files or the diff is empty, stop and report.
 - If `gh` is not authenticated, stop and tell the user to run
   `gh auth login`.
+- On a transient `gh`/network failure (5xx, connection refused, read
+  timeout), retry per `~/.claude/rules/retry-idempotency.md` (max 3
+  attempts, exponential backoff) before aborting. Do **not** retry on
+  4xx (404 missing PR, 403 auth) except 429 — honor `Retry-After`.
 - Post all inline comments in a **single** review API call (not one
   call per comment) to avoid spamming the PR timeline.

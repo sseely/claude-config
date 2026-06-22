@@ -28,10 +28,12 @@ if ! command -v sg >/dev/null 2>&1; then
         echo "Installing ast-grep (sg)..."
         if command -v brew >/dev/null 2>&1; then
             brew install ast-grep
-        elif command -v apt-get >/dev/null 2>&1; then
-            sudo apt-get install -y ast-grep
+        elif command -v cargo >/dev/null 2>&1; then
+            cargo install ast-grep --locked
         else
-            echo "  WARNING: cannot install ast-grep — no brew or apt-get found"
+            echo "  WARNING: cannot auto-install ast-grep without sudo."
+            echo "  Install manually: 'apt-get install ast-grep' (needs root),"
+            echo "  'brew install ast-grep', or 'cargo install ast-grep --locked'."
         fi
     else
         echo "  sg: NOT FOUND (set CLAUDE_AUTO_INSTALL_TOOLS=true to auto-install)"

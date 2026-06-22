@@ -42,17 +42,9 @@ load the entire plan directory into context at once.
 
 ## After Every Compaction
 
-Context compaction erases nuance. After compaction:
-
-1. Re-read `README.md` from the brief directory (do not trust
-   summarized context)
-2. Re-read `decision-journal.md`
-3. Check which tasks are marked `[x]` vs `[ ]`
-4. Read the current batch's `overview.md`
-5. Resume from the first incomplete task
-
-This is non-negotiable. The brief on disk is the source of truth,
-not the compacted summary.
+Same as the Startup Sequence above, but re-read every file from disk —
+do not trust the compacted summary. This is non-negotiable: the brief on
+disk is the source of truth.
 
 ## Executing a Batch
 
@@ -153,6 +145,8 @@ differently, log it.
 
 ## Commit Discipline
 
+- Commit message format: see `~/.claude/rules/commits.md`. The conventions
+  below are the autonomous-specific additions to that spec.
 - One commit per completed task (not per file, not per batch)
 - Commit message references the task ID: `feat(T3): add confirm
   endpoint`

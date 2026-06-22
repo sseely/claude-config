@@ -1,4 +1,5 @@
 {
+  "fallbackModel": "sonnet",
   "permissions": {
     "allow": [
       "Bash(npm *:*)",
@@ -16,6 +17,7 @@
       "Bash(uv run:*)",
       "Bash(uv pip install:*)",
       "Bash(pip install *:*)",
+      "Bash(pytest:*)",
       "Bash(gh *:*)",
       "Bash(shellcheck:*)",
       "Bash(rg:*)",
@@ -41,7 +43,7 @@
       "Edit(**)",
       "Glob(**)",
       "Grep(**)",
-      "WebFetch(*)",
+      "WebFetch",
       "WebSearch",
       "mcp__serena__list_dir",
       "mcp__serena__find_file",

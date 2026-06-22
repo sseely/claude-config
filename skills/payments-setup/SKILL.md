@@ -2,7 +2,7 @@
 name: payments-setup
 description: Scaffold Stripe Checkout, session pack credits, idempotent webhook handling, and an admin coupon management system into a Cloudflare Workers + Neon PostgreSQL + React/Vite project.
 user-invocable: true
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch, WebSearch
 ---
 
 # /payments-setup
@@ -78,6 +78,7 @@ collected_inputs: true
 
 ## Steps
 - [ ] install-stripe-sdk
+- [ ] verify-stripe-docs
 - [ ] read-templates
 - [ ] database-migrations
 - [ ] constants
@@ -105,6 +106,24 @@ npm install stripe
 
 Verify the installed version and update `STRIPE_API_VERSION` in constants
 to match (check `node_modules/stripe/package.json` → `"apiVersion"`).
+
+---
+
+## Step 2b — Verify the Stripe API surface against current docs
+
+Before relying on the templated Stripe surface, confirm it has not drifted.
+WebFetch the current Stripe docs and check the shapes the templates depend on:
+
+- Checkout Sessions create params and the `success_url`/`cancel_url` behavior
+  — https://docs.stripe.com/api/checkout/sessions/create
+- The `checkout.session.completed` event payload the webhook parses
+  — https://docs.stripe.com/api/events/types#event_types-checkout.session.completed
+- The pinned `STRIPE_API_VERSION` is still current/supported
+  — https://docs.stripe.com/api/versioning
+
+If any field name, event name, or required param the templates use has changed,
+adapt the templated code (and note the change) before continuing. Do not edit
+the resume/idempotency logic.
 
 ---
 

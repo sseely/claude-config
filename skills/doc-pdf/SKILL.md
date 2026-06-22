@@ -27,6 +27,42 @@ for page in reader.pages:
     text += page.extract_text()
 ```
 
+## Preflight and verification (do this around every operation)
+
+**Preflight — confirm external tools before invoking them.** The OCR/image
+paths shell out to system binaries (poppler, tesseract); a missing binary
+otherwise surfaces as an opaque traceback. Check first and fail with a clear
+message:
+
+```bash
+command -v pdftoppm >/dev/null || { echo "ERROR: poppler-utils not installed (pdf2image/pdfimages need it)"; exit 1; }
+command -v tesseract >/dev/null || { echo "ERROR: tesseract not installed (OCR step needs it)"; exit 1; }
+```
+
+**Timeout — bound external conversions.** `convert_from_path`, `pdfimages`, and
+OCR can hang on a huge or corrupt PDF. Always pass a timeout (per
+error-handling.md's external-call rule):
+
+```python
+from pdf2image import convert_from_path
+# poppler is invoked as a subprocess; cap it so a bad file cannot hang the run
+images = convert_from_path("scanned.pdf", timeout=120)
+```
+For raw CLI calls, wrap with `timeout`, e.g. `timeout 120 pdfimages -j in.pdf out`.
+
+**Post-operation verification — never declare success blind.** After creating or
+transforming a PDF, reopen the output and assert it is non-empty before reporting
+done:
+
+```python
+from pypdf import PdfReader
+out = PdfReader("output.pdf")
+assert len(out.pages) > 0, "output.pdf has no pages — operation failed"
+```
+For text extraction, assert the extracted text is non-empty (or explicitly report
+"no extractable text — likely scanned, use OCR"). For split/merge, verify the
+output page count matches the expected total.
+
 ## Python Libraries
 
 ### pypdf - Basic Operations
