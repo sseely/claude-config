@@ -38,14 +38,22 @@ Drive a failing test, build error, or runtime error to green.
 
 Invoke `debugger` agent. Prompt per `parallelism.md` structure with:
 - **Context:** project name, stack, test framework
-- **Task:** Diagnose root cause (not symptom). Identify files/lines
-  to change, describe the fix, flag whether test or implementation
+- **Task:** Diagnose root cause (not symptom) per
+  `~/.claude/rules/diagnosis.md`. Return the root-cause artifact:
+  **Mechanism** (1-2 sentences), **Origin** (`file:line`), **Causal
+  chain** (why the symptom follows), **Ruled out** (what was
+  eliminated + evidence). Then flag whether test or implementation
   bug. Do NOT make changes.
 - **Read-set:** files in stack trace + their imports one level deep
 - **Write-set:** none
 
-Present the diagnosis to the user. If flagged as a test bug, confirm
+Present the artifact to the user. If flagged as a test bug, confirm
 before modifying tests.
+
+**Gate:** do not enter Phase 3 on a guessed cause. If the artifact is
+incomplete — no `file:line` origin, or an empty "ruled out" on a
+non-trivial defect — send it back to the debugger to instrument
+further rather than proceeding to a fix.
 
 ## Phase 3 — Fix loop (max 5 iterations)
 

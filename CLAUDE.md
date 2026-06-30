@@ -56,6 +56,10 @@ Plan before executing: list subtasks, mark dependencies, assign file ownership (
 
 Conventional Commits, all lines ≤80 chars. Subject `<type>(<scope>): <desc>` ≤72 chars, lowercase, no period. See `~/.claude/rules/commits.md` for full spec.
 
+## Diagnosis
+
+When an observed discrepancy appears (failing test, oracle mismatch, symptom contradicting intent), enter diagnosis mode per `~/.claude/rules/diagnosis.md`: state the mechanism — cause, `file:line` origin, causal chain, what you ruled out — before proposing any fix. Symptom gone ≠ done. Does not apply to greenfield work with no observed defect.
+
 ## Rules
 
 All rules live in `~/.claude/rules/`:
@@ -63,5 +67,6 @@ All rules live in `~/.claude/rules/`:
 - **parallelism.md, autonomous-execution.md, memory.md** — agent execution
 - **lsp.md, extended-thinking.md, prompting-quality.md** — tooling and prompting
 - **logging.md, error-handling.md, api-design.md, observability.md** — quality standards
+- **diagnosis.md** — root-cause discipline for observed defects
 - **architecture.md, research-sources.md, environment.md** — design and environment
 - **naming-conventions.md, pr-workflow.md, commits.md, retry-idempotency.md** — workflow
