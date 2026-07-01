@@ -24,6 +24,18 @@ todos/
 # Hook runtime state (turn timestamps, etc.)
 .runtime/
 
+# Daemon / background-agent runtime state (contains secrets — control.key,
+# auth/ — and PII in telemetry; must never be committed)
+daemon/
+daemon.lock
+daemon.log
+daemon.status.json
+jobs/
+logs/
+telemetry/
+chrome/
+.last-update-result.json
+
 # MCP config has machine-specific paths
 .mcp.json
 

@@ -133,6 +133,11 @@ design is the opposite:
 - Thinking is always-on: omit the `thinking` param (`{type:"disabled"}` and
   `budget_tokens` both 400)
 
+Fable 5 auto-falls back to Opus 4.8 when its cybersecurity/biology safety
+classifiers trigger. Autonomous runs on security-adjacent repos (e.g. the
+security/PowerShell-hardening agents) will see frequent silent reroutes — expect
+Opus behavior mid-run and don't mistake it for a routing bug.
+
 **Anti-patterns to avoid:**
 
 | Anti-pattern | Why it hurts | Fix |

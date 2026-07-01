@@ -49,6 +49,12 @@ understanding the codebase. Prefer:
 Attaching 30+ files to a single prompt floods the context window, reduces
 cache hit rates, and makes it harder for the model to attend to what matters.
 
+<!-- Code review (2026-07-01): `paths:`-scoped rule loading (load a domain rule
+only when matching files are open) would cut per-session token load, but is not
+yet confirmed as a Claude Code feature. Verify support against
+code.claude.com/docs/en/settings before adding `paths:` frontmatter to rules. -->
+
+
 ## Agent context budget
 
 Research (arxiv:2509.21361) demonstrates attention dilution as a general principle

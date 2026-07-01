@@ -58,7 +58,7 @@ Conventional Commits, all lines ≤80 chars. Subject `<type>(<scope>): <desc>` �
 
 ## Diagnosis
 
-When an observed discrepancy appears (failing test, oracle mismatch, symptom contradicting intent), enter diagnosis mode per `~/.claude/rules/diagnosis.md`: state the mechanism — cause, `file:line` origin, causal chain, what you ruled out — before proposing any fix. Symptom gone ≠ done. Does not apply to greenfield work with no observed defect.
+On an observed discrepancy (failing test, oracle mismatch, symptom vs. intent), enter diagnosis mode per `~/.claude/rules/diagnosis.md`: state the mechanism — cause, `file:line`, causal chain, what you ruled out — before any fix. Symptom gone ≠ done; not for greenfield.
 
 ## Rules
 

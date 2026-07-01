@@ -22,6 +22,8 @@ that were valid once and have since rotted.
 
 Last full verification: 2026-06-20 (Partial — Agent X Discovery skipped this run,
 user-interrupted; Agent A/B/C sources re-verified)
+2026-07-01 scoped delta run: re-verified changelog, model-config, models/overview,
+and the new Fable 5 doc (all 200, rich); other Agent A doc pages NOT re-fetched.
 Note: platform.claude.com/docs/en/docs/claude-code/* URLs verified 404 on 2026-06-09.
 Claude Code docs now live at code.claude.com/docs/en/.
 Note: platform.claude.com/docs/en/models/overview verified 404 on 2026-06-10.
@@ -32,7 +34,7 @@ Note: platform.claude.com/docs/en/models/overview verified 404 on 2026-06-10.
 
 | URL                                                       | Purpose                                          | Last Verified | Status |
 | --------------------------------------------------------- | ------------------------------------------------ | ------------- | ------ |
-| https://code.claude.com/docs/en/changelog                 | PRIMARY: scan for new/changed/deprecated Claude Code features (last 90 days) | 2026-06-21    | active |
+| https://code.claude.com/docs/en/changelog                 | PRIMARY: scan for new/changed/deprecated Claude Code features (last 90 days) | 2026-07-01    | active |
 | https://www.anthropic.com/blog                            | SECONDARY/optional: occasional Claude Code launch posts; thin (press newsroom) — use only if the changelog misses a topic | 2026-06-20    | active |
 | https://platform.claude.com/docs/en/docs/claude-code/overview   | Core feature overview                            | 2026-06-10    | unreachable |
 | https://platform.claude.com/docs/en/docs/claude-code/hooks      | Hook events and configuration                    | 2026-06-10    | unreachable |
@@ -54,8 +56,9 @@ Note: platform.claude.com/docs/en/models/overview verified 404 on 2026-06-10.
 
 | URL                                                             | Purpose                            | Last Verified | Status |
 | --------------------------------------------------------------- | ---------------------------------- | ------------- | ------ |
-| https://code.claude.com/docs/en/model-config                    | Model aliases and effort levels    | 2026-06-20    | active |
-| https://platform.claude.com/docs/en/about-claude/models/overview | Current model IDs and deprecations | 2026-06-20    | active |
+| https://code.claude.com/docs/en/model-config                    | Model aliases and effort levels    | 2026-07-01    | active |
+| https://platform.claude.com/docs/en/about-claude/models/overview | Current model IDs and deprecations | 2026-07-01    | active |
+| https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5 | Fable 5 / Mythos 5 facts: retention, thinking, positioning | 2026-07-01 | active |
 
 ---
 

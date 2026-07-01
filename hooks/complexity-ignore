@@ -1,0 +1,14 @@
+# Vendored / reference code we port but do not own — exempt from the
+# complexity, file-length, and function-length checks. Their structure is
+# upstream's choice and must be preserved (faithful-port discipline), so our
+# quality bar does not apply. One path-prefix or glob per line; `~` and
+# `$VARS` expand; lines starting with `#` are comments.
+
+# PlantUML fork — upstream Java; we maintain only a tiny dot-output delta.
+~/git/plantuml
+
+# Graphviz C source — authoritative layout-algorithm reference.
+~/git/graphviz
+
+# Graphviz TypeScript port — consumed as a dependency, not owned here.
+~/git/graphviz-ts

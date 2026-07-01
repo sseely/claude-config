@@ -3,6 +3,7 @@
 PostToolUse hook: check code complexity after Write/Edit/MultiEdit.
 Fail-open: any exception exits 0 to never block writes due to hook bugs.
 """
+import fnmatch
 import json
 import os
 import subprocess
@@ -11,6 +12,10 @@ import sys
 HOOKS_DIR = os.path.dirname(os.path.abspath(__file__))
 LIZARD_BIN = os.path.join(HOOKS_DIR, ".venv", "bin", "lizard")
 SETUP_SCRIPT = os.path.join(HOOKS_DIR, "setup-complexity.sh")
+# Roots/globs for vendored or reference code we port but do not own (the
+# PlantUML fork, the graphviz C source, etc.). One path-prefix or glob per
+# line; `~` and `$VARS` expand; `#` comments. Quality limits don't apply here.
+IGNORE_FILE = os.path.join(HOOKS_DIR, "complexity-ignore")
 
 SKIP_DIRS = frozenset([
     "node_modules", "__pycache__", ".git", "dist", "build", ".next",
@@ -25,7 +30,11 @@ CHECKABLE_EXTS = frozenset([
 ])
 
 MAX_FILE_LINES = 500
-MAX_FUNC_LINES = 30
+# Gate on NLOC (lines of *code*) rather than lizard's raw `length` (line span).
+# NLOC excludes the JSDoc/comment header, blank lines, and any inter-function
+# comments or interfaces that lizard otherwise attributes to the preceding
+# function's span — so documenting a function never pushes it over the limit.
+MAX_FUNC_NLOC = 30
 MAX_CCN = 10
 MAX_PARAMS = 5
 
@@ -43,6 +52,24 @@ def lizard_available() -> bool:
     return os.path.isfile(LIZARD_BIN) and os.access(LIZARD_BIN, os.X_OK)
 
 
+def is_unowned(file_path: str) -> bool:
+    """True if file_path is under a vendored/reference root listed in IGNORE_FILE."""
+    try:
+        with open(IGNORE_FILE, encoding="utf-8") as fh:
+            lines = fh.readlines()
+    except FileNotFoundError:
+        return False
+    target = os.path.realpath(file_path)
+    for raw in lines:
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        pat = os.path.realpath(os.path.expanduser(os.path.expandvars(line)))
+        if target == pat or target.startswith(pat.rstrip("/") + os.sep) or fnmatch.fnmatch(target, pat):
+            return True
+    return False
+
+
 try:
     data = json.loads(sys.stdin.read())
     file_path = data.get("tool_input", {}).get("file_path", "")
@@ -53,6 +80,11 @@ try:
     # Skip files outside the current working directory (e.g. third-party repos)
     cwd = os.path.realpath(os.getcwd())
     if not os.path.realpath(file_path).startswith(cwd + os.sep):
+        sys.exit(0)
+
+    # Skip vendored/reference code we port but do not own. Unlike the cwd check
+    # above, this holds even when we cd into the vendored repo to work on it.
+    if is_unowned(file_path):
         sys.exit(0)
 
     if os.path.splitext(file_path)[1].lower() not in CHECKABLE_EXTS:
@@ -83,8 +115,8 @@ try:
 
     result = subprocess.run(
         [LIZARD_BIN, file_path,
+         "-T", f"nloc={MAX_FUNC_NLOC}",
          "-C", str(MAX_CCN),
-         "-L", str(MAX_FUNC_LINES),
          "-a", str(MAX_PARAMS),
          "-w"],
         capture_output=True,

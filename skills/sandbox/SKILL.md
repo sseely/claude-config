@@ -196,3 +196,10 @@ Based on `EXIT_CODE`:
 - Full log: `docker run --rm -v claude-sandbox-SESSION_NAME-meta:/m alpine cat /m/sandbox.log`
 - Secrets are never written to disk or baked into the image — they are injected
   at `docker run` time only.
+- Consider setting `sandbox.credentials` in the sandboxed run's settings.json
+  (Claude Code v2.1.187+): it blocks the agent from reading credential files,
+  reinforcing security.md's secret-handling stance. Injected env-var secrets stay
+  available; on-disk credential files (e.g. `~/.aws/credentials`, `~/.claude.json`)
+  become unreadable — defense-in-depth for `--dangerously-skip-permissions` runs.
+  Verify the exact key name/shape against `code.claude.com/docs/en/settings`
+  before wiring it, since this skill mounts `~/.claude/` read-only.

@@ -122,19 +122,23 @@ model IDs. The following are ALL valid `model:` values in agent frontmatter and
 | Alias | Behavior |
 |-------|----------|
 | `default` | Clears override; reverts to recommended model for account type |
-| `best` | Most capable available (currently = `opus`) |
+| `best` | Most capable available (Fable 5 where the account has access, else `opus`) |
 | `sonnet` | Latest Sonnet for daily coding tasks |
 | `opus` | Latest Opus for complex reasoning |
 | `haiku` | Fast, efficient Haiku for simple tasks |
+| `fable` | **Valid alias**: latest Fable for long-horizon agentic/autonomous work (access-gated) |
 | `sonnet[1m]` | Sonnet with 1M token context window |
 | `opus[1m]` | Opus with 1M token context window |
 | `opusplan` | **Valid alias**: uses `opus` in plan mode, switches to `sonnet` for execution |
+| `opusplan[1m]` | **Valid variant**: `opusplan` with 1M token context window |
 
 Full Anthropic API model IDs (`claude-opus-4-8`, `claude-sonnet-5`,
-`claude-haiku-4-5-20251001`) are also valid (the `sonnet` alias now resolves to
-Sonnet 5; `claude-sonnet-4-6` remains a valid pinned ID). `sonnetplan` is NOT a
-documented alias. When auditing agent `model:` frontmatter, check against
-this list before flagging a value as invalid.
+`claude-haiku-4-5-20251001`, `claude-fable-5`) are also valid (the `sonnet`
+alias now resolves to Sonnet 5; `claude-sonnet-4-6` remains a valid pinned ID).
+Note: Fable 5 runs 1M context natively — there is NO `fable[1m]` variant, so
+`claude-fable-5[1m]` is invalid; use plain `fable` / `claude-fable-5`.
+`sonnetplan` is NOT a documented alias. When auditing agent `model:`
+frontmatter, check against this list before flagging a value as invalid.
 
 Effort levels (set via `effort:` frontmatter or `/effort` command):
 

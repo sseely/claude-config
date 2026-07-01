@@ -139,6 +139,7 @@
       "/Users/scottseely/git/plantuml-js/.claude"
     ]
   },
+  "model": "claude-fable-5",
   "hooks": {
     "SessionStart": [
       {
@@ -249,8 +250,7 @@
       }
     }
   },
+  "tui": "fullscreen",
   "autoMemoryEnabled": true,
-  "agentPushNotifEnabled": true,
-  "model": "claude-fable-5",
-  "tui": "fullscreen"
+  "agentPushNotifEnabled": true
 }
