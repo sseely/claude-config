@@ -57,6 +57,8 @@ with added context. Apply this when constructing agent prompts:
 - Cap file inventory at 20-30 files per agent; split larger inventories across multiple agents
 - Pass line ranges, not whole files: `src/api/subscribe.js:15-40` not the full file
 - If the read-set exceeds 30 files, that is a signal to split the task into two agents
+- The Sonnet 5 tokenizer emits ~1.3× the tokens of Sonnet 4.6 for the same text, so
+  effective context fills faster — the file-count caps hold, but budget tokens accordingly
 
 ## Constraint budget
 

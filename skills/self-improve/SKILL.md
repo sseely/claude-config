@@ -130,8 +130,9 @@ model IDs. The following are ALL valid `model:` values in agent frontmatter and
 | `opus[1m]` | Opus with 1M token context window |
 | `opusplan` | **Valid alias**: uses `opus` in plan mode, switches to `sonnet` for execution |
 
-Full Anthropic API model IDs (`claude-opus-4-8`, `claude-sonnet-4-6`,
-`claude-haiku-4-5-20251001`) are also valid. `sonnetplan` is NOT a
+Full Anthropic API model IDs (`claude-opus-4-8`, `claude-sonnet-5`,
+`claude-haiku-4-5-20251001`) are also valid (the `sonnet` alias now resolves to
+Sonnet 5; `claude-sonnet-4-6` remains a valid pinned ID). `sonnetplan` is NOT a
 documented alias. When auditing agent `model:` frontmatter, check against
 this list before flagging a value as invalid.
 
@@ -139,11 +140,11 @@ Effort levels (set via `effort:` frontmatter or `/effort` command):
 
 | Level | Supported on | Notes |
 |-------|-------------|-------|
-| `low` | Opus 4.8, 4.7, 4.6, Sonnet 4.6 | Fastest/cheapest |
+| `low` | Opus 4.8, 4.7, 4.6, Sonnet 5, Sonnet 4.6 | Fastest/cheapest |
 | `medium` | Same | |
-| `high` | Same | Default on Opus 4.8, Opus 4.6, Sonnet 4.6 |
-| `xhigh` | Opus 4.8, Opus 4.7 only | Default on Opus 4.7 |
-| `max` | Opus 4.8, Opus 4.7 | Session-only; not saved to settings |
+| `high` | Same | Default on Opus 4.8, Opus 4.6, Sonnet 5, Sonnet 4.6 |
+| `xhigh` | Opus 4.8, Opus 4.7, Sonnet 5 | Default on Opus 4.7 |
+| `max` | Opus 4.8, Opus 4.7, Sonnet 5 | Session-only; not saved to settings |
 
 Note: `ultracode` is **not** an effort level — it is a Workflow opt-in keyword
 (standing authorization to author/run multi-agent workflows). Do not list it as

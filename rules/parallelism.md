@@ -81,7 +81,7 @@ Match model to task complexity and cost:
 |------|-------------|--------|---------|------|
 | Planning / architecture | `opus` (`claude-opus-4-8`) | `high` default; `xhigh` for deep multi-path decisions | 1M tokens | Phase 3 decisions, mission decomposition, threat modeling |
 | Long-horizon autonomous execution | `opus` (`claude-opus-4-8`) | `high` default; `xhigh` for agentic runs | 1M | Mission-brief execution, autonomous sessions, multi-hour/multi-day work |
-| Implementation | `sonnet` (`claude-sonnet-4-6`) | `high` default; lower to `medium` if token-sensitive | 1M tokens | Feature work, bug fixes, refactoring, code generation |
+| Implementation | `sonnet` (`claude-sonnet-5`) | `high` default; `xhigh` for hard tasks; lower to `medium` if token-sensitive | 1M tokens | Feature work, bug fixes, refactoring, code generation |
 | Scoring / dedup / validation | `haiku` (`claude-haiku-4-5-20251001`) | n/a | 200k tokens | Confidence scoring, dedup passes, format checking, simple grep tasks |
 
 > **Haiku context limit:** 200k tokens vs 1M for Sonnet/Opus. Do not pass >50 files to a Haiku agent in a single prompt.
@@ -89,13 +89,19 @@ Match model to task complexity and cost:
 Note: Haiku 4.5 supports fixed-budget extended thinking (`budget_tokens`) but not adaptive thinking; the `effort` parameter returns 400 on Haiku — do not set it.
 
 > **Effort:** Set via `effort:` frontmatter in agent/skill files, `--effort` flag, or `/effort` command.
-> Extended thinking is **deprecated on Sonnet 4.6 and removed on `claude-opus-4-8`**.
+> Extended thinking (`budget_tokens`) is **removed on `claude-opus-4-8` and Sonnet 5 (400)**; deprecated on Opus 4.6 / Sonnet 4.6.
 > Use `type: "adaptive"` with the effort parameter; `budget_tokens` is a legacy pattern.
 > `opusplan` is a valid Claude Code alias: uses `opus` in plan mode, `sonnet` in execution.
 
 Default to Sonnet for implementation agents unless the task requires deep
 multi-path reasoning. Use Haiku aggressively for any agent whose job is to
 evaluate, score, or format — not to create.
+
+> **Sonnet 5 shifts the routing economics.** Sonnet 5 reaches near-Opus-4.8
+> quality on coding and agentic work at ~60% of Opus token cost, so it now
+> covers most implementation *and* routine agentic work — the default-to-Sonnet
+> rule is stronger, not weaker. Reserve Opus for the deepest multi-path
+> reasoning and the longest-horizon autonomous runs.
 
 **Opus behavioral compensation:**
 
