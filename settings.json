@@ -250,5 +250,7 @@
     }
   },
   "autoMemoryEnabled": true,
-  "agentPushNotifEnabled": true
+  "agentPushNotifEnabled": true,
+  "model": "claude-fable-5",
+  "tui": "fullscreen"
 }

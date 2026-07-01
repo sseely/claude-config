@@ -80,7 +80,7 @@ Match model to task complexity and cost:
 | Role | Model alias | Effort | Context | When |
 |------|-------------|--------|---------|------|
 | Planning / architecture | `opus` (`claude-opus-4-8`) | `high` default; `xhigh` for deep multi-path decisions | 1M tokens | Phase 3 decisions, mission decomposition, threat modeling |
-| Long-horizon autonomous execution | `opus` (`claude-opus-4-8`) | `high` default; `xhigh` for agentic runs | 1M | Mission-brief execution, autonomous sessions, multi-hour/multi-day work |
+| Long-horizon autonomous execution | `fable` (`claude-fable-5`) | `high` default; `xhigh` for agentic runs | 1M | Mission-brief execution, autonomous sessions, multi-hour/multi-day work |
 | Implementation | `sonnet` (`claude-sonnet-5`) | `high` default; `xhigh` for hard tasks; lower to `medium` if token-sensitive | 1M tokens | Feature work, bug fixes, refactoring, code generation |
 | Scoring / dedup / validation | `haiku` (`claude-haiku-4-5-20251001`) | n/a | 200k tokens | Confidence scoring, dedup passes, format checking, simple grep tasks |
 
@@ -115,6 +115,23 @@ known Opus tendencies (validated in production):
   ambiguity; do not silently expand
 - A spec, source being ported, or enumerated requirement list is NOT
   ambiguous scope — implement all of it; the above is not license to trim it
+
+**Fable behavioral compensation:**
+
+When routing to Fable (`claude-fable-5`), invert the Opus constraints — Fable's
+design is the opposite:
+
+- Describe the outcome, not the steps — Fable derives the approach; over-
+  prescriptive prompts/skills reduce output quality
+- Encourage subagents — prefer async sub-agents that keep context over
+  spawn-and-block
+- Require progress claims be audited against tool results (suppresses fabricated
+  status on long runs); state boundaries explicitly (assessment vs. action)
+- Give it a memory surface (a `.md` scratchpad, one lesson per file)
+- Turns run minutes at higher effort — plan async check-ins; sweep effort
+  including low/medium for routine work
+- Thinking is always-on: omit the `thinking` param (`{type:"disabled"}` and
+  `budget_tokens` both 400)
 
 **Anti-patterns to avoid:**
 
