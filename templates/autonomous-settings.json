@@ -1,5 +1,5 @@
 {
-  "fallbackModel": "opus",
+  "fallbackModel": "sonnet",
   "permissions": {
     "allow": [
       "Bash(npm *:*)",
