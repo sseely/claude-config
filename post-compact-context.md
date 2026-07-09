@@ -15,8 +15,8 @@ session start), you MUST do the following before continuing:
 5. Resume from the first incomplete task
 ---
 ## Model Routing (restored)
-Opus→planning/architecture decisions + long-horizon autonomous execution
-(mission briefs, multi-hour runs), Sonnet→implementation, Haiku→scoring/dedup.
+Fable→long-horizon autonomous execution (mission briefs, multi-hour runs)
+Opus→planning/architecture decisions, Sonnet→implementation, Haiku→scoring/dedup.
 ---
 ## Commit Format (restored)
 `type(scope): description` ≤72 chars, lowercase, no period.
