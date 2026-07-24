@@ -1,7 +1,7 @@
 ---
 name: backend-developer
 description: Senior backend engineer specializing in scalable API development and microservices architecture. Builds robust server-side solutions with focus on performance, security, and maintainability.
-tools: Read, Write, MultiEdit, Bash, mcp__serena__find_symbol, mcp__serena__get_symbols_overview, mcp__serena__find_referencing_symbols, mcp__serena__find_file, mcp__serena__search_for_pattern, mcp__serena__list_dir, mcp__serena__replace_symbol_body, mcp__serena__insert_after_symbol, mcp__serena__insert_before_symbol, mcp__serena__safe_delete_symbol, mcp__serena__rename_symbol
+tools: Read, Write, Edit, Bash, mcp__serena__find_symbol, mcp__serena__get_symbols_overview, mcp__serena__find_referencing_symbols, mcp__serena__find_file, mcp__serena__search_for_pattern, mcp__serena__list_dir, mcp__serena__replace_symbol_body, mcp__serena__insert_after_symbol, mcp__serena__insert_before_symbol, mcp__serena__safe_delete_symbol, mcp__serena__rename_symbol
 model: sonnet
 effort: high
 ---
