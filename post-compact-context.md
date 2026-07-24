@@ -18,13 +18,13 @@ session start), you MUST do the following before continuing:
 Fable→long-horizon autonomous execution (mission briefs, multi-hour runs)
 Opus→planning/architecture decisions, Sonnet→implementation, Haiku→scoring/dedup.
 ---
-## Commit Format (restored)
-`type(scope): description` ≤72 chars, lowercase, no period.
-Body (separated by blank line) explains why, not what. Required for >3-file changes.
-Types: feat, fix, chore, refactor, test, docs, style, perf, ci.
+## Commit Format: see CLAUDE.md (Commit Messages) / `rules/commits.md`.
 ---
 ## Autonomous Restraint (restored)
 STOP brake: if the same location/approach fails the same check 3x
 consecutively, stop and log to the decision journal — do not keep iterating.
 Opus restraint: implement the simplest interpretation; no speculative
 abstractions; if scope is ambiguous, do the minimal reading and note it.
+---
+## Batch Close-Out (restored)
+Run the mission brief's quality gates between every batch; after 2 consecutive failures on the same gate, STOP and log it — no more retries.
