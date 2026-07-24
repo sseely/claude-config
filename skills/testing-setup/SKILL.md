@@ -7,8 +7,6 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 # /testing-setup
 
-Model routing: Sonnet for implementation; Haiku for verification/scoring; Opus only for explicit architectural decisions.
-
 Scaffold testing infrastructure into a Cloudflare Workers + Neon PostgreSQL +
 React/Vite project. Installs Vitest with the Workers pool, 80/80/80 coverage
 thresholds, Istanbul coverage (v8 is incompatible with Workerd), ESLint with

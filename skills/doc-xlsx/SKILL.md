@@ -4,8 +4,6 @@ description: "Comprehensive spreadsheet creation, editing, and analysis with sup
 license: Proprietary. LICENSE.txt has complete terms
 ---
 
-Model routing: Sonnet for implementation; Haiku for verification/scoring; Opus only for explicit architectural decisions.
-
 # Requirements for Outputs
 
 ## All Excel files

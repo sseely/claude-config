@@ -4,8 +4,6 @@ description: Comprehensive PDF manipulation toolkit for extracting text and tabl
 license: Proprietary. LICENSE.txt has complete terms
 ---
 
-Model routing: Sonnet for implementation; Haiku for verification/scoring; Opus only for explicit architectural decisions.
-
 # PDF Processing Guide
 
 ## Overview
