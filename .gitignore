@@ -30,6 +30,7 @@ daemon/
 daemon.lock
 daemon.log
 daemon.status.json
+daemon-auth-*
 jobs/
 logs/
 telemetry/

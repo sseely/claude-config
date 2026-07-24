@@ -1,183 +1,259 @@
-# Self-Improve Phase 2 — Agent H (Tightening Audit)
+# Self-Improve Phase 2 — Agent H: Tightening Audit
+Generated 2026-07-24. Read-only audit of `~/.claude` for instruction bloat,
+cross-file redundancy, and verbose prose. Scope: CLAUDE.md,
+post-compact-context.md, all rules/*.md, 5 sampled agents, 3 sampled skills.
 
-Read-only audit of `~/.claude` for instruction bloat, cross-file redundancy,
-verbose prose, dead content, and post-compact calibration. All findings have a
-concrete fix. No files were modified.
-
-## Size baseline (none breach hard limits)
-
-| File | Measure | Limit | Status |
-|------|---------|-------|--------|
-| CLAUDE.md | 3432 bytes | 4KB | OK (568 B headroom) |
-| post-compact-context.md | 24 lines | 120 | OK |
-| autonomous-execution.md | 185 lines | 200 (split) | OK, near ceiling |
-| architecture.md | 129 lines | 200 | OK |
-| parallelism.md | 118 lines | 200 | OK |
-| sampled agents | ≤67 lines | 300 (trim) | OK |
-
-No hard size violations. All bloat findings below are about *redundant content*
-and *compressible prose*, not raw file size.
-
----
+**Regression check against the prior Agent-H run found in this file:** the
+prior run's file (CLAUDE.md at 3432B, `autonomous-execution.md` at 185
+lines — both now different) flagged R1 ("After Every Compaction" in
+`rules/autonomous-execution.md` near-verbatim repeating "Startup Sequence")
+and R2 (commit format restated in `autonomous-execution.md`'s Commit
+Discipline section). Both are confirmed fixed in the current file:
+- `rules/autonomous-execution.md:43-47` now reads "Same as the Startup
+  Sequence above, but re-read every file from disk..." (pointer, not a
+  repeat) — R1 resolved.
+- `rules/autonomous-execution.md:146-150` now reads "Commit message format:
+  see `~/.claude/rules/commits.md`. The conventions below are the
+  autonomous-specific additions to that spec." — R2 resolved for this file.
+- R2 is only *partially* resolved elsewhere — see Redundancy #7 below,
+  a small residual in `rules/parallelism.md:65-67`.
 
 ## Bloat
 
-**B1 — `rules/parallelism.md:32-71` Agent prompt structure (10 numbered items +
-prose).** Severity: Note. The 0–9 numbered agent-prompt template is the single
-source of truth and is correctly referenced by `plan-mission.md:178-179,286`, so
-it is not redundant — but the section runs ~40 lines where the constraint budget
-in `prompting-quality.md` caps prescriptive lists at ≤6. It is exempt as an
-ordered procedure, so leave as-is. Concrete fix: none required; recorded so a
-future run does not re-flag it as a budget violation.
+- **CLAUDE.md** — 3790B against the 4096B (4KB) cap in
+  `rules/prompting-quality.md:27-29`. Headroom: **306 bytes (~7.5%)**
+  remaining. Severity: Note. No violation — reporting headroom only, per
+  task instructions not to manufacture one.
+- **post-compact-context.md** — 30 lines against the 120-line ceiling.
+  Severity: Note. No violation.
+- **rules/*.md** — largest is `rules/autonomous-execution.md` at 179 lines,
+  under the 200-line split-candidate threshold (next: `rules/parallelism.md`
+  149, `rules/architecture.md` 129, `rules/prompting-quality.md` 125).
+  Severity: Note. No violation.
+- **agents sampled** — largest is `backend-developer.md` at 69 lines, far
+  under the 300-line trim threshold. Severity: Note. No violation.
 
-**B2 — `rules/autonomous-execution.md` is at 185/200 lines and overlaps
-post-compact + parallelism.** Severity: Suggestion. After applying R1 and R3
-below (removing the duplicated compaction sequence and commit spec), the file
-drops well under 160 lines with no split needed. Concrete fix: apply R1+R3;
-no structural split required.
-
----
+No Bloat findings require action this run.
 
 ## Redundancy
 
-**R1 — Compaction/startup recovery sequence triplicated.** Severity: Warning.
-- `rules/autonomous-execution.md:32-41` (Startup Sequence, 6 steps)
-- `rules/autonomous-execution.md:43-55` (After Every Compaction — steps 1-5 are
-  a near-verbatim repeat of Startup steps 1-5, minus the announce step)
-- `post-compact-context.md:6-15` (Autonomous Execution Recovery — same 5 steps
-  again, third copy)
+1. **[Suggestion]** `skills/self-improve/SKILL.md:646-654` (Phase 3, steps
+   4-5: scoring rubric + filter table) duplicates
+   `skills/code-review/SKILL.md:390-412` (Step 4 scoring rubric + filtering
+   rules) instead of referencing it.
+   - self-improve:648-652 — `**0**: False positive, pre-existing issue not
+     worth surfacing` … `**100**: Confirmed, happens frequently, direct
+     evidence`
+   - code-review:392-400 — `**0** — False positive that doesn't stand up to
+     light scrutiny, or describes a pre-existing issue not introduced by the
+     current change.` … `**100** — Confirmed real, happens frequently,
+     evidence is direct.`
+   - The two rubrics have already drifted: code-review's version adds a
+     CLAUDE.md-relevance clause at line 395 ("If stylistic, not explicitly
+     called out in CLAUDE.md") that self-improve's copy lacks.
+   - self-improve's own Agent G section already uses the correct pattern —
+     `skills/self-improve/SKILL.md:489`: "Assign confidence 0–100 using the
+     same rubric as `/code-review`." Phase 3 (same file) should follow that
+     same pattern instead of re-deriving its own copy.
+   - Cost: ~150 words (~200 tokens) duplicated once per full self-improve
+     run (Phase 3 synthesis), plus ongoing drift risk on every edit to
+     either rubric.
+   - Fix: replace `skills/self-improve/SKILL.md:648-654` with: "Score each
+     finding 0-100 using the same rubric and filtering rules as
+     `/code-review` Step 4 (`skills/code-review/SKILL.md`)." Single source
+     of truth: `skills/code-review/SKILL.md:390-412`.
 
-The "After Every Compaction" block inside autonomous-execution.md duplicates its
-own "Startup Sequence" almost line-for-line, and post-compact-context.md carries
-a third copy. Per-session cost: the post-compact copy is re-injected on *every*
-compaction event (~10 lines each time). Single source of truth: keep
-`post-compact-context.md:6-15` as the injected restore copy (that is its job),
-and in `autonomous-execution.md` collapse "After Every Compaction" to a one-line
-pointer. Concrete fix: replace `autonomous-execution.md:43-55` body with:
-"After compaction, follow the recovery sequence in `post-compact-context.md`
-(re-read README.md + decision-journal.md, check `[x]`/`[ ]`, resume). The brief
-on disk is source of truth, not the summary." Saves ~10 lines, removes a
-self-duplication.
+2. **[Suggestion]** `skills/self-improve/SKILL.md:678` condenses the
+   verdict logic from `skills/code-review/SKILL.md:482-486` and **loses
+   precision** — a genuine ambiguity, not just duplicated tokens.
+   - self-improve:677-679: `(APPROVE if Critical=0; NITS if Critical=0 and
+     Warning<3; REQUEST CHANGES if Critical>0 or Warning≥3)`
+   - code-review:482-486 (table): `APPROVE` → `Critical = 0 AND Warning =
+     0`; `APPROVE WITH NITS` → `Critical = 0 AND Warning < 3`.
+   - When Critical=0 and Warning=0, self-improve's prose satisfies *both*
+     the APPROVE clause and the NITS clause (0 < 3) — the verdict is
+     undefined at that boundary. code-review's table avoids this because
+     APPROVE requires `Warning = 0` exactly, making the branches
+     mutually exclusive.
+   - Fix: replace `skills/self-improve/SKILL.md:678` with the same
+     mutually-exclusive table form used in code-review, or state `NITS if
+     Critical=0 and 1<=Warning<3` to close the gap.
 
-**R2 — Commit format stated in full in 4 locations.** Severity: Warning.
-- `rules/commits.md:1-37` — full spec (correct SoT)
-- `CLAUDE.md` "Commit Messages" — already a pointer (`See rules/commits.md`) ✓
-- `post-compact-context.md:21-24` — restored copy (subject/body/types) — keep,
-  it is the post-compact restore
-- `rules/parallelism.md:62-64` — restates "`type(scope): description` ≤72 chars,
-  lowercase, no period. Body explains why if >3 files change"
-- `rules/autonomous-execution.md:156-166` — Commit Discipline restates format +
-  examples (`feat(T3): ...`, `fix(T3): ...`)
+3. **[Note]** `agents/01-core-development/backend-developer.md:25-31`
+   ("Security Standards") restates content already covered by
+   `rules/security.md`, which the same agent file already references at
+   `backend-developer.md:66`.
+   - backend-developer.md:26-29 — "Input validation at all system
+     boundaries" / "Parameterized queries — no SQL interpolation" /
+     "Authentication token management (JWTs, rotation)" / "Role-based
+     access control (RBAC)"
+   - rules/security.md:5-7, 39, 29-35 — same four items near-verbatim.
+   - Lines 30-31 (encryption at rest/in transit, audit logging) are *not*
+     covered by security.md — legitimate agent-specific additions, keep.
+   - Cost: ~35 words duplicated in every backend-developer subagent
+     context.
+   - Fix: trim `backend-developer.md:26-29` to the two items security.md
+     doesn't cover; let the Required Rules pointer at line 66 carry the
+     rest.
 
-SoT: `rules/commits.md`. Concrete fix: in `parallelism.md:62-64` replace the
-inline spec with "Message format per `commits.md`." (drop the duplicated rule
-text, keep the one-commit-per-task constraint). In `autonomous-execution.md:156-166`
-the task-ID examples are autonomous-specific and worth keeping, but the generic
-"≤72 chars, lowercase" wording is redundant — trim to the task-ID-specific
-guidance and reference commits.md for format. Per-session cost: low individually,
-but four copies drift independently (maintenance hazard).
+4. **[Note]** `agents/01-core-development/backend-developer.md:10-16`
+   ("API Design") partially duplicates `rules/api-design.md`, referenced
+   at `backend-developer.md:59`.
+   - backend-developer.md:13 — "API versioning strategy (`/v1/`, `/v2/`)"
+     ↔ `rules/api-design.md:40-47`.
+   - backend-developer.md:14 — "Rate limiting and pagination for list
+     endpoints" ↔ `rules/api-design.md:49-52`.
+   - backend-developer.md:15 — "Standardized error envelope: `{ error,
+     message }`" ↔ `rules/api-design.md:32-35` — and these have drifted:
+     api-design.md requires `{ "error": "short_code", "message": ... }`
+     (with `short_code`); the agent's version omits it.
+   - Fix: drop the versioning/pagination/error-envelope bullets from
+     `backend-developer.md:13-15` (covered via the Required Rules pointer);
+     correct or remove the drifted error-envelope example if kept.
 
-**R3 — Model routing table duplicated across 4 files.** Severity: Suggestion.
-- `rules/parallelism.md:77-95` — full routing table (SoT, most detailed)
-- `post-compact-context.md:17-19` — condensed restore (keep)
-- `skills/plan-mission/SKILL.md:396-407` — per-phase routing table
-- `CLAUDE.md` references the parallelism table ✓
+5. **[Note]** `CLAUDE.md:34-36` mischaracterizes what
+   `post-compact-context.md` restores, and is stale relative to the file's
+   current content.
+   - CLAUDE.md:34-36 — "A `PostCompact` hook injects
+     `~/.claude/post-compact-context.md` for content that isn't in any
+     instruction file: the autonomous execution recovery sequence."
+   - `post-compact-context.md` has 4 sections: Autonomous Execution
+     Recovery (6-16), Model Routing (17-19), Commit Format (21-24),
+     Autonomous Restraint (26-30). CLAUDE.md names only the first.
+   - "Content that isn't in any instruction file" is also inaccurate for 3
+     of 4 sections: Model Routing condenses `rules/parallelism.md`'s Model
+     Selection table, Commit Format condenses `rules/commits.md`, and
+     Autonomous Restraint condenses `rules/autonomous-execution.md` +
+     `rules/parallelism.md` — all in rules/ files, just not auto-loaded.
+   - Fix: reword `CLAUDE.md:34-36` to: "A `PostCompact` hook injects
+     `~/.claude/post-compact-context.md` — condensed restores of rules/
+     content not auto-loaded after compaction (autonomous execution
+     recovery, model routing, commit format, autonomous restraint)."
 
-The plan-mission table is phase-specific (adds value), and the post-compact copy
-is a legitimate restore. No action required beyond noting that any change to the
-Opus/Sonnet/Haiku role split must be propagated to all three. Concrete fix:
-add a comment in `parallelism.md` marking it as the canonical table so editors
-know to propagate. No deletion.
+6. **[Note]** `post-compact-context.md:22` repeats a fragment already in
+   `CLAUDE.md:57`, which auto-reloads verbatim after compaction per
+   CLAUDE.md's own claim (`CLAUDE.md:30-32`).
+   - CLAUDE.md:57 — "Conventional Commits, all lines ≤80 chars. Subject
+     `<type>(<scope>): <desc>` ≤72 chars, lowercase, no period."
+   - post-compact-context.md:22 — `` `type(scope): description` ≤72
+     chars, lowercase, no period. ``
+   - Only the Body-requirement and Types-list lines (23-24) are genuinely
+     new relative to CLAUDE.md.
+   - Cost: ~1 line / ~15 tokens per compaction event, compounding across a
+     long autonomous session with many compactions.
+   - Fix: trim `post-compact-context.md:21-24` to:
+     ```
+     ## Commit Format (restored)
+     Body (blank-line separated) explains why; required for >3-file changes.
+     Types: feat, fix, chore, refactor, test, docs, style, perf, ci.
+     ```
 
-**R4 — `opusplan` alias defined in 3 places.** Severity: Note.
-`rules/parallelism.md:91`, `skills/self-improve/SKILL.md:131`, and the model
-table. Consistent, so harmless. Concrete fix: none; recorded for awareness.
+7. **[Note]** `rules/parallelism.md:65-67` still carries a small residual
+   of the commit-format duplication a prior Agent-H run flagged (see
+   Regression check above; the `autonomous-execution.md` instances of this
+   were fixed, this one was not).
+   - parallelism.md:65-67 — "**Commit format** — One commit per completed
+     task. Message format per `~/.claude/rules/commits.md`:
+     `type(scope): description` ≤72 chars, lowercase, no period. Body
+     explains why if >3 files change."
+   - Already has the pointer ("per `~/.claude/rules/commits.md`") but then
+     restates the format string anyway.
+   - Fix: "Message format per `~/.claude/rules/commits.md`. One commit per
+     completed task; body explains why if >3 files change." (drop the
+     restated `type(scope): description ≤72 chars...` fragment).
 
----
+## Verbose prose
 
-## Verbose prose (compression >50%, no nuance lost)
+No qualifying findings. Scanned all rules/*.md, CLAUDE.md,
+post-compact-context.md, and the 5 sampled agents/3 sampled skills for
+paragraphs of ≥4 sentences preceding a duplicate bullet list, "for
+example" blocks illustrating an already-clear rule, and unnecessary
+motivational rationale. The config is table/bullet-driven throughout.
+Candidates considered and rejected:
+- `plan-mission/SKILL.md:114-118` and `:191-205` — example blocks, but
+  they demonstrate exact output *formatting* (blockquote/table syntax) not
+  otherwise specified in the preceding bullets; removing them loses
+  nuance. Not proposed.
+- `code-review/SKILL.md:440-444` — inline-comment example; the template
+  at line 437 is already fully specified, but savings (~20 words) are
+  marginal and the one-shot example plausibly improves output calibration.
+  Not proposed.
+- `CLAUDE.md:49` ("Agents" section) — a single unstructured paragraph
+  carrying ~8 distinct constraints (location, invocation, default/delegate
+  threshold, auto-loaded descriptions, announce-before-invoking, Workflow
+  scope, Workflow opt-in). This brushes against the constraint-budget rule
+  in `rules/prompting-quality.md:69-81` (>6 parallel constraints per
+  section risks "unpredictable compliance"), but no bullet rewrite
+  achieves the required >50% word-count compression without dropping a
+  constraint (best attempt: 95 words → ~50 words, ~47%). Per the task's
+  compression bar, not proposed as a Verbose Prose finding — noted only as
+  an observation for a future constraint-density pass, outside this
+  agent's mandate.
 
-**V1 — `rules/autonomous-execution.md:43-55`** (After Every Compaction).
-Current: ~80 words of prose + 5 steps that repeat Startup Sequence. Rewrite
-(<40 words): "After compaction, re-run the startup sequence above (steps 1-5):
-re-read README.md and decision-journal.md from disk, check `[x]`/`[ ]`, resume
-from the first incomplete task. The brief on disk is source of truth." Saves the
-duplicate numbered list. (Pairs with R1.)
-
-**V2 — `skills/plan-mission/SKILL.md:230-235`** (Phase 7 preamble).
-Current (~55 words): "The brief is a **directory of focused documents**, not a
-single monolithic file. This keeps each doc within a healthy context window and
-avoids burying critical information deep in a long file." Rewrite (<25 words):
-"The brief is a directory of focused docs, not one monolithic file — keeps each
-doc within a healthy context window." Compression ~55%, rationale preserved.
-
-**V3 — `rules/parallelism.md:1-6`** (Multi-agent justification).
-Current (~60 words across opening + 3-item list + "Default to single-agent"
-sentence). The "~15× cost" figure and the default-to-single-agent rule are the
-load-bearing parts; the 3 numbered justification triggers restate what the
-"Justify multi-agent when" sentence already says. Rewrite (<35 words):
-"Multi-agent costs ~15× the tokens of single-agent dispatch. Default to
-single-agent; split only for a demonstrated parallel bottleneck, required
-domain/compliance isolation, or a needed cognitive boundary." Compression ~45%
-— below the 50% bar, so Suggestion only, not a required rewrite.
-
-**V4 — `rules/code-principles.md` "Build to the defined scope" intro** (lines
-~3-12 of that section). The two-failure-modes framing is good and counterintuitive
-(keep), but the closing restatement at the section end ("Two equal failure
-modes: trimming a required item...and inventing an unrequested one") duplicates
-the bullet content above it. Severity: Note. Concrete fix: the closing sentence
-is a deliberate summary — keep; flagged only to confirm it is not accidental
-duplication.
-
----
+This is a valid outcome: the config is already tight in this dimension.
 
 ## Dead content
 
-**None found.** Severity: N/A.
-- No lingering `Fable` references in CLAUDE.md, rules/, post-compact, or the
-  sampled agents/skills (deliberate removal confirmed clean via grep).
-- No stale model names — `claude-opus-4-8` / `claude-sonnet-4-6` /
-  `claude-haiku-4-5-20251001` are current; no `claude-3`/`gpt-4`/`opus-4-[0-7]`.
-- No open `<!-- Code review: ... -->` comments (the matches in
-  `self-improve/SKILL.md:575` and code-review/SKILL.md are template text in the
-  audit instructions themselves, not actual stale review comments).
-- No TODO/REVISIT/FIXME/TBD markers in CLAUDE.md, rules/, or post-compact.
+1. **[Warning]** `rules/prompting-quality.md:52-55` — an open, unresolved
+   `<!-- Code review (2026-07-01): ... -->` comment, 23 days old as of
+   today (2026-07-24). Not present in the prior Agent-H run's file (which
+   reported zero open review comments) — added since, and still
+   unresolved:
+   ```
+   <!-- Code review (2026-07-01): `paths:`-scoped rule loading (load a
+   domain rule only when matching files are open) would cut per-session
+   token load, but is not yet confirmed as a Claude Code feature. Verify
+   support against code.claude.com/docs/en/settings before adding `paths:`
+   frontmatter to rules. -->
+   ```
+   No `paths:` frontmatter appears anywhere in the rules/ files read this
+   run, confirming the comment's premise was never acted on.
+   Fix: verify `paths:`-scoped rule loading against
+   `code.claude.com/docs/en/settings` (Tier 1 source per
+   `rules/research-sources.md`). If unsupported, delete the comment (dead
+   speculation with no path to resolution). If supported, implement
+   `paths:` scoping for the largest rule files and remove the comment.
+   Requires a WebFetch step outside this read-only agent's scope — log to
+   the task file for follow-up.
 
----
+No other open code-review comments, stale TODO/REVISIT markers, dangling
+tool/model references, or rules fully subsumed by a later, more specific
+rule were found in the files read this run.
 
 ## post-compact calibration
 
-**P1 — `post-compact-context.md` is well-calibrated.** Severity: Note (positive).
-All four sections (header, Autonomous Recovery, Model Routing, Commit Format) are
-≤9 lines; the only one approaching the >6-line flag is Autonomous Recovery
-(6-15 = 10 lines incl. the 5 numbered steps). It restores a genuine behavioral
-rule (the disk-is-source-of-truth recovery) NOT present verbatim in CLAUDE.md —
-CLAUDE.md only says "A PostCompact hook injects..." without the steps. Keep.
+`post-compact-context.md` is well calibrated overall (30/120 lines; no
+section exceeds the 6-line flag threshold).
 
-**P2 — `post-compact-context.md:6-15` slightly over the ≤4-line target.**
-Severity: Suggestion. 10 lines incl. numbered steps. The steps are load-bearing
-and CLAUDE.md does not carry them, so full removal would lose behavior. Concrete
-fix (optional): compress the 5 steps to 2 lines: "Re-read README.md +
-decision-journal.md from the brief dir (not the summary), check `[x]`/`[ ]`
-markers and the current batch overview.md, resume from first incomplete task."
-Drops ~4 lines per compaction injection while keeping every action.
+- **Autonomous Execution Recovery** (lines 6-16, 5 numbered steps, ~2
+  lines/step) — restores `rules/autonomous-execution.md`'s Startup
+  Sequence (`rules/autonomous-execution.md:32-47`) at reasonable
+  compression (16 source lines → 10 restored lines). No finding —
+  necessary since `rules/autonomous-execution.md` is not auto-loaded
+  after compaction.
+- **Model Routing** (lines 17-19, 2 content lines) — compresses
+  `rules/parallelism.md`'s 74-line Model Selection table to 2 lines.
+  Excellent compression, no finding.
+- **Commit Format** (lines 21-24, 4 content lines) — see Redundancy
+  finding #6: 1 of 4 lines duplicates content CLAUDE.md already
+  auto-restores. Fix given there.
+- **Autonomous Restraint** (lines 26-30, 4 content lines) — compresses
+  two distinct rules (`rules/autonomous-execution.md:132-138` and
+  `rules/parallelism.md:111-117`) into 2 lines each under one heading.
+  No finding — under the 6-line cap, and the shared "restraint" framing
+  is a reasonable merge.
+- **CLAUDE.md's own description of this file** (`CLAUDE.md:34-36`) is
+  stale relative to its actual 4-section content — see Redundancy #5.
+- No adjacent sections warrant merging; the 4 sections cover distinct,
+  non-overlapping concerns.
 
-**P3 — No section duplicates CLAUDE.md verbatim.** Severity: Note. Model Routing
-(17-19) and Commit Format (21-24) restore content that CLAUDE.md only *points to*
-(rules/parallelism.md, rules/commits.md) — those rule files are NOT auto-reloaded
-into a compacted subagent context, so the restore is justified, not redundant.
-Calibration is correct.
+## Summary
 
----
-
-## Summary of concrete fixes (priority order)
-
-1. (Warning) R1/V1 — collapse `autonomous-execution.md:43-55` to a pointer at
-   `post-compact-context.md`; removes a self-duplicated compaction sequence.
-2. (Warning) R2 — replace inline commit-format text in `parallelism.md:62-64`
-   and trim generic format wording in `autonomous-execution.md:156-166`;
-   reference `commits.md` as SoT.
-3. (Suggestion) R3 — mark `parallelism.md` model table canonical; ensure
-   plan-mission + post-compact stay in sync.
-4. (Suggestion) V2 — compress `plan-mission.md:230-235` directory-rationale.
-5. (Suggestion) P2 — optionally compress post-compact recovery steps to 2 lines.
+Already-tightened configuration; a prior Agent-H pass's Warning-level
+findings (autonomous-execution.md self-duplication) are confirmed fixed.
+Remaining: 7 Redundancy items (2 Suggestion, 5 Note — one a genuine logic
+ambiguity, not just token cost), 1 Warning (stale open code-review
+comment), 0 Bloat violations, 0 qualifying Verbose Prose findings.
+Highest-value fix: close the APPROVE/NITS ambiguity in
+`skills/self-improve/SKILL.md:678` (Redundancy #2) — a correctness gap,
+not just a token-cost issue.

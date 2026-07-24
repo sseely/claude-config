@@ -1,25 +1,26 @@
 {
+  "fallbackModel": ["opus", "sonnet"],
   "permissions": {
     "allow": [
       "Bash(npm *:*)",
       "Bash(npx *:*)",
-      "Bash(pnpm *:*)",
-      "Bash(yarn *:*)",
       "Bash(node *:*)",
       "Bash(git *:*)",
-      "Bash(gh *:*)",
       "Bash(docker *:*)",
       "Bash(docker-compose *:*)",
       "Bash(python3 *:*)",
-      "Bash(uv run:*)",
-      "Bash(uv pip install:*)",
       "Bash(psql *:*)",
       "Bash(cargo *:*)",
       "Bash(go *:*)",
       "Bash(dotnet *:*)",
-      "Bash(shellcheck *:*)",
-      "Bash(rg *:*)",
-      "Bash(bash -n *:*)",
+      "Bash(pnpm *:*)",
+      "Bash(uv run:*)",
+      "Bash(uv pip install:*)",
+      "Bash(pip install *:*)",
+      "Bash(pytest:*)",
+      "Bash(gh *:*)",
+      "Bash(shellcheck:*)",
+      "Bash(rg:*)",
       "Bash(ls:*)",
       "Bash(cat:*)",
       "Bash(mkdir *:*)",
@@ -34,26 +35,22 @@
       "Bash(tail *:*)",
       "Bash(diff *:*)",
       "Bash(openssl *:*)",
-      "Bash(test *:*)",
-      "Bash(python3 -c *:*)",
-      "Read(*)",
-      "Write(*)",
-      "Edit(*)",
-      "Glob(*)",
-      "Grep(*)",
-      "WebFetch(*)",
+      "Bash(command -v:*)",
+      "Bash(curl -s https://raw.githubusercontent.com/**:*)",
+      "Bash(~/.claude/hooks/quality-gate.sh:*)",
+      "Read(**)",
+      "Write(**)",
+      "Edit(**)",
+      "Glob(**)",
+      "Grep(**)",
+      "WebFetch",
       "WebSearch",
-      "mcp__mem0__search_memory",
-      "mcp__mem0__add_memories",
-      "mcp__mem0__list_memories",
-      "mcp__mem0__update_memory",
-      "mcp__mem0__delete_all_memories",
+      "mcp__serena__list_dir",
+      "mcp__serena__find_file",
       "mcp__serena__find_symbol",
+      "mcp__serena__search_for_pattern",
       "mcp__serena__get_symbols_overview",
       "mcp__serena__find_referencing_symbols",
-      "mcp__serena__find_file",
-      "mcp__serena__search_for_pattern",
-      "mcp__serena__list_dir",
       "mcp__serena__replace_symbol_body",
       "mcp__serena__insert_after_symbol",
       "mcp__serena__insert_before_symbol",
@@ -62,12 +59,79 @@
       "mcp__playwright__browser_navigate",
       "mcp__playwright__browser_snapshot",
       "mcp__playwright__browser_click",
-      "mcp__playwright__browser_type",
       "mcp__playwright__browser_take_screenshot",
-      "mcp__playwright__browser_fill_form",
-      "mcp__playwright__browser_wait_for",
-      "mcp__playwright__browser_evaluate",
-      "mcp__playwright__browser_close"
+      "mcp__playwright__browser_evaluate"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/session-start.sh",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/record-turn-start.sh",
+            "async": true
+          },
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/project-init.sh",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cat ~/.claude/post-compact-context.md"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '-- COMPACTING: verify open TODOs are committed --'"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/check-complexity.py"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/notify-on-stop.sh",
+            "async": true
+          }
+        ]
+      }
     ]
   }
 }

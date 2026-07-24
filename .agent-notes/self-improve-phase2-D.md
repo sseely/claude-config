@@ -1,280 +1,266 @@
-# Phase 2 Audit — Agent D: Settings, Hooks, MCP
+# Self-Improve Phase 2 — Agent D Findings (2026-07-24)
 
-Read-only audit of `~/.claude` config. Scope: settings.json (global), nested
-.claude/settings.json + settings.local.json, .mcp.json, autonomous template,
-all hook scripts, post-compact-context.md.
+Scope: settings.json (global), .claude/settings.json + settings.local.json
+(nested project-local for ~/.claude), .mcp.json, templates/autonomous-settings.json,
+hooks/*, post-compact-context.md. Read-only audit.
 
-Key environment facts established during audit:
-- `claude mcp list` shows playwright **Connected**, serena **Pending approval**.
-- playwright MCP server is defined in `~/.claude.json` (user CLI scope), **NOT**
-  in the repo `.mcp.json`. The repo `.mcp.json` only defines serena.
-- mem0 is fully removed from `.mcp.json` and global settings.json (still
-  referenced in nested `.claude/settings.json` — see F-3).
+Note: this file previously held a phase-2-D audit dated ~2026-06-20. Several
+of its findings are now fixed in the current file state (e.g. `go:*`/
+`dotnet:*` are now in global `settings.json:66-67`; `session-start.sh` no
+longer contains a `sudo apt-get` branch; WebFetch is bare-form everywhere).
+This is a full re-audit against current disk state, overwriting that file.
 
-Severity legend: Critical / Warning / Suggestion / Note.
+## 1. Hook events not wired
 
----
+Wired: SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, PreCompact,
+PostCompact, InstructionsLoaded, Stop.
+Missing: Notification, SubagentStop, Elicitation, CwdChanged.
 
-## 1. Hook events — present vs missing
+- **settings.json (no `Notification` block)** — Severity: Warning. A blocked
+  permission prompt does not fire `Stop` (the turn hasn't ended, it's paused
+  waiting on the user); `notify-on-stop.sh` never fires for it, so a stalled
+  autonomous/background run gives no audible signal that it's waiting on
+  approval — exactly the failure mode this audit's brief calls out. Fix: add
+  a `Notification` hook that runs
+  `osascript -e 'display notification ... sound name "Sosumi"'` (a different
+  sound than Stop's "Glass" so the user can distinguish "finished" from
+  "blocked, needs you").
+- **settings.json (no `SubagentStop` block)** — Severity: Suggestion. Given
+  heavy Agent-tool/background-agent use (`parallelism.md`'s 15x cost warning;
+  this very audit is running as 4+ parallel agents), nothing currently
+  records when a subagent finishes or how long it ran. Fix: append a JSONL
+  line (agent name, ISO timestamp) to
+  `~/.claude/logs/subagent-completions.log` on `SubagentStop`, giving the
+  decision-journal/cost-tracking discipline in `parallelism.md` something to
+  audit against instead of nothing.
+- **settings.json (no `CwdChanged` block)** — Severity: Suggestion.
+  `project-init.sh` only runs on `UserPromptSubmit`, checked against
+  whatever `pwd` is at that moment. The `EnterWorktree`/`ExitWorktree` tools
+  change the effective project directory mid-session; until the next prompt,
+  a new worktree has no `.agent-notes/`, `.mcp.json`, or
+  `.serena/project.yml`. Fix: wire `CwdChanged` →
+  `~/.claude/hooks/project-init.sh` so worktree entry provisions
+  immediately instead of waiting for the next prompt.
+- **Elicitation — no concrete trigger found.** The only configured MCP
+  server (`serena`, per `.mcp.json:3-12`) does not use elicitation. Not
+  recommending wiring this — no current use case justifies it.
 
-Configured in global `settings.json`: SessionStart, UserPromptSubmit,
-PostCompact, PreCompact, PreToolUse(Bash), PostToolUse(Write|Edit|MultiEdit),
-InstructionsLoaded, Stop.
+## 2. Permission noise (stale one-off entries, global settings.json)
 
-### F-1 — `SubagentStop` hook missing (Suggestion)
-- **Where:** settings.json hooks block (no SubagentStop key; would sit ~line 226).
-- **Issue:** The config delegates heavily to subagents (parallelism.md,
-  Agent(*) permissioned). There is a `Stop` hook (notify-on-stop.sh) for the
-  main turn but nothing fires when a subagent finishes. For long parallel
-  batches you get no per-agent completion signal, and no place to run a
-  per-subagent quality gate.
-- **Fix:** Add a `SubagentStop` hook that appends a structured line to
-  `~/.claude/logs/subagent-stops.log` (agent id + duration) and optionally
-  chimes only for runs >60s. Mirror the notify-on-stop.sh pattern but guard
-  against notification spam (parallel agents finishing together).
+- `settings.json:18` — `Bash(openssl rand:*)`: narrow one-off; local/template
+  both grant the general `Bash(openssl *:*)`. Fix: replace with
+  `Bash(openssl:*)` to match sibling settings files.
+- `settings.json:19` — `Bash(node -e:*)`: single command-string variant.
+- `settings.json:88` — `Bash(node --input-type=module:*)`: near-duplicate of
+  the line above, looks like a one-off from a specific inline-ESM task.
+  Fix: drop; a broader `Bash(node:*)` covers this without a second bespoke
+  entry.
+- `settings.json:87` — `Bash(xargs kill:*)`: single-purpose leftover from a
+  process-cleanup task. Fix: remove; re-add only if a recurring need
+  appears.
+- `settings.json:91` — `Bash(python3 ~/.claude/hooks/check-complexity.py)`:
+  literal, no-args permission to manually run a hook that's already
+  auto-invoked via `PostToolUse` (`settings.json:202-211`). Stale
+  development/testing leftover. Fix: remove unless manual reruns are a real
+  workflow.
+- `settings.json:95` — `Bash(curl -s https://raw.githubusercontent.com/**:*)`:
+  scoped one-off; `WebFetch` is already unconditionally allowed
+  (`settings.json:112`) and is the tool `code-principles.md` says to prefer
+  over raw `curl`. Fix: remove; use WebFetch instead.
+- `settings.json:96` — `Bash(curl -sS https://api.github.com/repos/**:*)`:
+  scoped one-off, redundant with `Bash(gh api:*)` (`settings.json:45`), the
+  structured equivalent for the same host. Fix: remove.
+- `settings.json:117` — `Edit(~/.claude/skills/code-review/**)`: fully
+  subsumed by `Edit(~/.claude/**)` at `settings.json:102`. Fix: remove as
+  dead duplicate.
 
-### F-2 — `Notification` hook missing (Suggestion)
-- **Where:** settings.json hooks block.
-- **Issue:** No `Notification` hook. Claude Code fires Notification events on
-  permission prompts and idle-input waits. With heavy autonomous use, capturing
-  these would let you detect "stuck waiting for approval" states (relevant to
-  autonomous-execution.md STOP conditions).
-- **Fix:** Add a `Notification` hook logging to
-  `~/.claude/logs/notifications.log`; optionally forward permission-required
-  events to the macOS notifier so autonomous stalls are visible.
+## 3. Permission gaps (present in local/template, missing from global)
 
-### Events intentionally/acceptably absent (Note)
-- `Elicitation` and `CwdChanged` are newer/optional; no existing rule requires
-  them. `CwdChanged` could re-run project-init.sh on directory switches (today
-  it only runs on UserPromptSubmit), which would be a minor improvement but is
-  not a gap worth fixing now. Note only.
+- **`Bash(cp *:*)` / `Bash(mv *:*)`** — present in
+  `.claude/settings.local.json:26-27` and
+  `templates/autonomous-settings.json:27-28`; **absent from global
+  `settings.json` entirely.** Basic file copy/move is trusted enough to be
+  in every other settings file in this repo but prompts every time in a
+  normal interactive global session. Fix: add `Bash(cp *:*)` /
+  `Bash(mv *:*)` to `settings.json`'s `permissions.allow`.
+- **`Bash(psql *:*)`** — present in `settings.local.json:16` and
+  `templates/autonomous-settings.json:12`; absent from global
+  `settings.json`. Given how many skills in this config target a
+  Cloudflare Workers + Neon Postgres stack (`payments-setup`, `auth-setup`,
+  `testing-setup`, `compliance-setup`, `analytics-setup`), lacking `psql`
+  in the global permission set forces a prompt on essentially every project
+  this config is built for. Fix: add `Bash(psql *:*)`.
+- **`Bash(yarn *:*)`** — present in `settings.local.json:7` only (not even
+  in the autonomous template); global has zero yarn permissions despite
+  full npm/pnpm coverage. Fix: add `Bash(yarn *:*)` to `settings.json` for
+  parity with npm/pnpm.
+- **`Bash(docker-compose *:*)`** (hyphenated v1 binary) — present in
+  `settings.local.json:12` and `templates/autonomous-settings.json:10`;
+  global only has `Bash(docker compose:*)` (v2 subcommand form,
+  `settings.json:76`). Fix: add `Bash(docker-compose *:*)` for projects
+  still on the standalone binary.
+- **`Bash(sort *:*)` / `Bash(bash -n *:*)`** — present in
+  `settings.local.json:32,22`; absent from global. Lower impact than above
+  but same category. Fix: add if noticed causing prompts.
+- **Note (not a gap, opposite direction):** `settings.local.json:39-43`
+  grants unscoped `Read(*)/Write(*)/Edit(*)/Glob(*)/Grep(*)` for the
+  `~/.claude` project context — broader than global's directory-scoped
+  equivalents (`settings.json:97-111`, limited to `~/git/**`,
+  `~/.claude/**`, `~/church/**`). Worth a deliberate look: is unrestricted
+  filesystem access intended when working *inside* the config repo, or
+  should it be scoped the same way global is? Fix if unintended: narrow to
+  `Read(~/.claude/**)` etc. matching global's pattern.
+- **Note:** `settings.local.json:37-39` sets
+  `"disabledMcpjsonServers": ["serena"]` — this makes every
+  `mcp__serena__*` permission grant in that same file (lines 46-56) dead/
+  unreachable in this project context. Not clearly a bug (may be an
+  intentional local override), but flagging since it silently defeats 11
+  permission entries; confirm intentional or remove the disable.
 
-### F-3 — `PostToolUse` doesn't gate Bash, only file writes (Suggestion)
-- **Where:** settings.json:204-214 — matcher is `Write|Edit|MultiEdit`.
-- **Issue:** check-complexity.py runs after writes (good), but there is no
-  PostToolUse coverage of Bash output. Not strictly a missing-event gap, noted
-  for completeness; no action required unless you want post-command linting.
+## 4. WebSearch/WebFetch syntax
 
----
+Verified via grep across all three settings files:
+`settings.json:112-113`, `.claude/settings.json:44-45`,
+`templates/autonomous-settings.json:46-47` — all three use the bare form
+(`"WebFetch"`, `"WebSearch"`), no `(*)` suffix anywhere. Consistent.
+`settings.local.json` has no WebFetch/WebSearch entries (doesn't need any).
 
-## 2. Permission noise / stale one-off permissions (global settings.json)
+Commit `65ec9a8` ("normalize WebFetch to bare form in nested settings")
+held — no regression found. WebSearch was already bare-form everywhere and
+matches WebFetch's convention. **Confidence: MEDIUM** — this session did
+not re-fetch Claude Code's permission-syntax docs to confirm bare form is
+the only valid syntax for these two tools (some other tools support
+`Tool(scope:...)` forms); the internal-consistency finding is HIGH
+confidence, the claim about which syntax Claude Code requires carries over
+from the prior audit's fix rather than being independently re-verified
+here.
 
-### F-4 — `echo` literal-string PreCompact hook, not a real check (Warning)
-- **Where:** settings.json:183-192 (PreCompact `echo '-- COMPACTING...'`).
-- **Issue:** The PreCompact hook just echoes a reminder string; it performs no
-  verification. It cannot "verify open TODOs are committed" as the text claims —
-  this is decorative output, easy to mistake for an actual gate.
-- **Fix:** Either replace with a real check
-  (`git -C "$PWD" status --porcelain | grep -q . && echo "WARNING: uncommitted
-  changes before compaction"`) or reword the string to "reminder only" so it is
-  not mistaken for a gate.
+## 5. MCP gaps
 
-### F-5 — Stale literal one-off Bash permissions (Suggestion)
-Each of these is a single-purpose literal that has broader coverage elsewhere or
-is a narrow echo/version variant; consolidate to reduce the 125-entry allowlist:
-- settings.json:54 `Bash(npm --version)` — covered by adding `Bash(npm:*)`
-  (note: global currently lists granular `npm install/run/test/ci` but no bare
-  `npm:*`; consider one `Bash(npm:*)`).
-- settings.json:57 `Bash(pnpm --version)` — same; subsumed by `Bash(pnpm:*)`.
-- settings.json:88 `Bash(~/.claude/hooks/setup-complexity.sh)` (no `:*`) — exact
-  string match only; harmless but inconsistent with the `:*` siblings.
-- settings.json:89 `Bash(python3 ~/.claude/hooks/check-complexity.py)` — this is
-  invoked by the hook runner, not by Claude; a manual-invocation permission is
-  rarely needed. Candidate for removal.
-- settings.json:85 `Bash(xargs kill:*)` — very narrow; verify it is still used.
-- **Fix:** Collapse version-probe entries into the corresponding `tool:*` rule
-  and drop hook-internal invocation entries that the hook runner executes
-  directly (hooks do not go through the permission system).
+Only one MCP server is configured in the repo's `.mcp.json`: `serena`
+(`.mcp.json:3-12`, code navigation/refactoring). No MCP server backs any of
+the `gh`, `curl`, or filesystem shell usage in this repo's tracked config.
 
-### F-6 — Two near-duplicate curl allow rules (Suggestion)
-- **Where:** settings.json:93-94 (`curl -s https://raw.githubusercontent.com/**`
-  and `curl -sS https://api.github.com/repos/**`).
-- **Issue:** Two literal curl variants differing only by flag/host. These are GH
-  API/raw fetches that an MCP server would replace (see §5). Until then they are
-  fine but represent the kind of host-pinned literal that accretes.
-- **Fix:** Keep for now; revisit after adding a GitHub MCP server, then remove.
+- **`gh api/repo/workflow/run/auth`** (`settings.json:45-49`, broadened to
+  `Bash(gh *:*)` in local/template) is used purely as raw CLI + text
+  parsing. A GitHub MCP server would give structured, typed responses
+  (PR/issue/run objects) instead of parsing `gh` CLI stdout, and would let
+  permission scoping happen at the operation level instead of "any `gh`
+  subcommand". **Suggestion, not verified against the
+  `claude-plugins-official` marketplace this session** — check
+  `Bash(claude mcp:*)` output (already permitted at `settings.json:86`,
+  though missing from the autonomous template, see §7) for an available
+  GitHub MCP server before adding a new dependency.
+- **`curl` to `raw.githubusercontent.com` / `api.github.com`**
+  (`settings.json:95-96`) — no MCP server needed; both are already better
+  served by the built-in `WebFetch` tool (already unconditionally allowed,
+  §2). This is a "remove the permission, use the existing tool" fix, not an
+  MCP gap.
+- **Filesystem (`ls`, `find`, `cat`, `grep`, `wc`, `diff`)** — no MCP gap;
+  these are already superseded by the native Read/Glob/Grep/Write/Edit
+  tools per `lsp.md`'s stated priority order. No action needed.
+- **Note:** if a `playwright` MCP server is defined in user-scope
+  `~/.claude.json` (outside this repo), it would explain why
+  `templates/autonomous-settings.json:58-62` permissions `mcp__playwright__*`
+  tools despite the repo's own `.mcp.json` only declaring `serena` — not
+  independently re-verified this session (would require reading
+  `~/.claude.json`, outside the file list given for this audit). If true,
+  flag as a portability gap: the config repo's checked-in `.mcp.json`
+  doesn't fully describe what a fresh clone needs.
 
----
+## 6. Hook quality
 
-## 3. Permission gaps — local/template commands absent from global
+All 7 scripts (`autonomous-toggle.sh`, `notify-on-stop.sh`,
+`project-init.sh`, `quality-gate.sh`, `record-turn-start.sh`,
+`session-start.sh`, `setup-complexity.sh`) **do** start with
+`set -euo pipefail` — verified by grep, no exceptions. No platform-guard
+gaps found for scripts that need one (only `notify-on-stop.sh` branches on
+OS, and it does so correctly, `notify-on-stop.sh:25-28`).
 
-### F-7 — `go` and `dotnet` permissioned in template/nested but absent globally (Warning)
-- **Where:** autonomous-settings.json:11-12 (`go *`, `dotnet *`); nested
-  .claude/settings.json:17-18 (`go *`, `dotnet *`). Global settings.json has
-  cargo (65) but **no** `go` or `dotnet` allow entry.
-- **Issue:** project-init.sh detects Go and C#/.NET projects and the csharp/jdtls
-  LSP plugins are enabled, but the global allowlist never permits `go`/`dotnet`.
-  In a Go or .NET repo every build/test command prompts.
-- **Fix:** Add `Bash(go:*)` and `Bash(dotnet:*)` to global settings.json allow
-  list (matching the cargo precedent).
+- **`hooks/notify-on-stop.sh:26-28`** — Severity: Warning. The `osascript`/
+  `notify-send` call is not wrapped; if it fails (e.g., notification
+  permission revoked, PATH missing `osascript`), the script exits non-zero
+  with zero logging — silent failure in a fire-and-forget async hook, which
+  `error-handling.md`/`logging.md` both flag as a real risk. Fix:
+  `osascript ... || echo "[notify-on-stop] failed" >> ~/.claude/logs/hook-errors.log`.
+- **`hooks/check-complexity.py:136-138`** — Severity: Note (fail-open is
+  intentional per the file's own docstring). The bare
+  `except Exception: sys.exit(0)` swallows the exception with no record of
+  what happened, so a genuine bug (e.g. `lizard` subprocess timeout,
+  malformed JSON) is invisible forever, not just non-blocking. Fix while
+  preserving fail-open behavior:
+  `except Exception as e: print(f"[check-complexity] {e}", file=sys.stderr); sys.exit(0)`
+  — stderr from a hook doesn't block the tool call, only stdout with
+  `"decision":"block"` does.
+- **`hooks/session-start.sh:29-37`** — Severity: Note. The
+  `CLAUDE_AUTO_INSTALL_TOOLS=true` path runs `brew install ast-grep` or
+  `cargo install ast-grep --locked` with no timeout, inside an `async: true`
+  `SessionStart` hook. A hung `brew`/`cargo` (network stall, lock
+  contention) hangs silently with no error surfaced back to the session.
+  Fix: wrap with
+  `timeout 120 brew install ast-grep || echo "[session-start] ast-grep install timed out/failed" >> ~/.claude/logs/session-start.err`.
+  (Note: this script no longer contains a `sudo` branch — that was fixed
+  since the prior audit; only a printed instruction mentioning
+  `apt-get install ast-grep` remains, which is inert text, not an
+  executed command.)
+- **Good patterns worth noting (no fix needed):**
+  `hooks/project-init.sh:8` uses an `ERR` trap that logs to
+  `~/.claude/logs/project-init.err` and always exits 0 (fail-safe, matches
+  `error-handling.md`); `hooks/quality-gate.sh:18` uses an `ERR` trap that
+  fails *closed* (correct, since this hook's job is to report failure);
+  `hooks/autonomous-toggle.sh:43` is properly idempotent (`cmp -s` guard
+  before overwriting).
 
-### F-8 — `psql` permissioned in template/nested but not global (Suggestion)
-- **Where:** autonomous-settings.json:13 (`psql *`), nested:13. Not in global.
-- **Issue:** Neon/Postgres skills exist (testing-setup, auth-setup reference
-  Neon). DB work prompts in interactive sessions.
-- **Fix:** Add `Bash(psql:*)` to global allow if you do Postgres work outside
-  autonomous mode; otherwise leave template-only by design (note the choice).
+## 7. Autonomous template completeness (global grants, template lacks)
 
-### F-9 — `yarn` only in nested settings, not global or template (Note)
-- **Where:** nested .claude/settings.json:7 (`yarn *`).
-- **Issue:** quality-gate.sh detects yarn.lock and runs `yarn run ...`, but yarn
-  is not permissioned globally or in the autonomous template — a yarn project in
-  autonomous mode would stall on the gate command.
-- **Fix:** Add `Bash(yarn:*)` to autonomous-settings.json (and global if you
-  intend to support yarn projects).
+Cross-referenced `settings.json`'s full allow-list against
+`templates/autonomous-settings.json`. These are permissions an autonomous
+run (no human present) would stall on if it needed them:
 
----
+- **`mcp__serena__find_referencing_symbols`** — Severity: **Critical**.
+  Present in global (`settings.json:126`) but **missing** from
+  `templates/autonomous-settings.json:48-57` (which has the other 10
+  Serena tools, including the write-capable `rename_symbol` and
+  `safe_delete_symbol`). An autonomous agent renaming or deleting a symbol
+  — exactly what `rename_symbol`/`safe_delete_symbol` are for — would
+  normally check references first via `find_referencing_symbols`; that
+  call would hit a permission prompt with no human present to answer it.
+  This is the single most concrete instance of the stall failure-mode this
+  audit was asked to hunt for. Fix: add
+  `"mcp__serena__find_referencing_symbols"` to the template's permission
+  list (verified via direct grep diff, not just visual read).
+- **`Bash(uv:*)`** (`settings.json:74`, bare/general) vs template's
+  `Bash(uv run:*)` + `Bash(uv pip install:*)` only
+  (`templates/autonomous-settings.json:17-18`) — Severity: Critical. An
+  autonomous run doing `uv sync`, `uv add`, `uv venv`, `uv lock`, or
+  `uv tool install` (all common in Python project setup/dependency work)
+  would stall. Fix: replace the two narrow entries with `Bash(uv:*)`.
+- **`Bash(pip3 install:*)`** (`settings.json:21`) — missing from template
+  (which only has `Bash(pip install *:*)`,
+  `templates/autonomous-settings.json:19`). These are different literal
+  command prefixes for permission matching; on a macOS/Homebrew setup
+  where only `pip3` resolves (this environment is darwin), a
+  `pip3 install X` call in an autonomous run stalls. Fix: add
+  `Bash(pip3 install:*)` to the template.
+- **`Bash(volta install:*)`** (`settings.json:64`) — entirely absent from
+  the template. A Node-version-pinning step (`volta install node@20`) in
+  an autonomous setup task stalls. Fix: add.
+- **`Bash(mkdocs build:*)`** (`settings.json:75`) — absent from template.
+  Any autonomous docs-build task stalls. Fix: add.
+- **`Bash(ollama list:*)` / `Bash(ollama show:*)`** (`settings.json:83-84`)
+  — absent from template. Local-model-related autonomous work stalls.
+  Fix: add both.
+- **`Bash(claude mcp:*)`** (`settings.json:86`) — absent from template. An
+  autonomous task that needs to inspect/manage MCP server config (e.g.
+  diagnosing an unavailable tool) stalls. Fix: add.
 
-## 4. WebSearch syntax consistency
-
-### F-10 — `WebSearch` vs `WebFetch(*)` / `WebSearch(*)` inconsistency (Suggestion)
-- **Where:** global settings.json:110-111 `"WebFetch"`, `"WebSearch"` (no
-  parens); nested .claude/settings.json:44-45 `"WebFetch(*)"`, `"WebSearch"`;
-  autonomous-settings.json:44-45 `"WebFetch(*)"`, `"WebSearch"`.
-- **Finding:** Claude Code accepts both the bare tool name (`WebFetch`,
-  `WebSearch`) and the parenthesized rule form (`WebFetch(*)`). For tools that
-  take no rule content the bare name is the canonical/idiomatic form; `(*)` is
-  accepted and equivalent. So **all three files currently work**, but they are
-  stylistically inconsistent: WebFetch is bare in global and `(*)` in the other
-  two; WebSearch is bare in all three.
-- **Fix:** Standardize on the bare form for both — `"WebFetch"` and
-  `"WebSearch"` — across all three files (matches global settings.json). No
-  functional change; removes the appearance that `(*)` is required.
-
----
-
-## 5. MCP gaps — structured servers to replace shell calls
-
-### F-11 — playwright MCP defined in `~/.claude.json`, not repo `.mcp.json` (Warning)
-- **Where:** repo `.mcp.json` defines only serena. playwright is permissioned in
-  global settings.json:127-131 and is live (`claude mcp list` → Connected) but
-  its server definition lives in user-scope `~/.claude.json`
-  (`mcpServers.playwright = npx @playwright/mcp@latest`).
-- **Issue:** The prior agent's flag was half-right: the permissions are NOT dead
-  (the server is connected), but the server is invisible to anyone auditing the
-  repo and is not version-controlled with the rest of `~/.claude`. If the config
-  repo is cloned to a new machine, playwright permissions reference a server that
-  isn't defined in-repo.
-- **Fix:** Add the playwright server block to repo `.mcp.json` so the definition
-  travels with the versioned config:
-  `"playwright": { "command": "npx", "args": ["@playwright/mcp@latest"] }`.
-  Then the settings.json playwright permissions are self-consistent in-repo.
-
-### F-12 — No GitHub MCP server; gh/curl shelled instead (Suggestion)
-- **Where:** global settings.json:45-49 (`gh api`, `gh repo`, `gh run`, etc.),
-  93-94 (curl to api.github.com / raw.githubusercontent.com).
-- **Issue:** PR review skills (review-pr, changelog-generator) and the curl
-  GH-API allow rules do structured GitHub work through unstructured shell. A
-  GitHub MCP server (e.g. `github-mcp-server`) would give typed PR/issue/run
-  access and let you drop the two curl literals (F-6).
-- **Fix:** Add a GitHub MCP server to `.mcp.json`; migrate review-pr/changelog
-  flows; then remove the api.github.com curl allow rule.
-
-### F-13 — No filesystem MCP; relies on broad Read/Write/Edit globs (Note)
-- **Where:** Read/Write/Edit scoped to `~/git`, `~/.claude`, `~/church` plus
-  additionalDirectories.
-- **Finding:** A filesystem MCP server is **not** needed here — native
-  Read/Write/Edit with path-scoped permissions is the idiomatic approach and is
-  finer-grained than a filesystem MCP would be. No action. (Recorded because the
-  task asked to consider it.)
-
----
-
-## 6. Hook quality review
-
-| Hook | set -euo pipefail | platform guard | idempotent | error logging |
-|------|-------------------|----------------|------------|---------------|
-| autonomous-toggle.sh | yes (l.2) | n/a | yes (cmp guard l.43) | exits w/ msgs, no log file |
-| notify-on-stop.sh | yes (l.2) | yes (darwin/notify-send l.25-28) | yes (read-only) | none (best-effort) |
-| project-init.sh | yes (l.5) | n/a | yes (all guarded) | yes (trap→logs/project-init.err l.8) |
-| quality-gate.sh | yes (l.2) | n/a | yes (read-only) | trap fail-closed l.18 |
-| record-turn-start.sh | yes (l.2) | n/a | yes | none (trivial) |
-| session-start.sh | yes (l.2) | partial — see F-15 | yes | none |
-| check-complexity.py | n/a (py) | yes (path/skip logic) | yes | fail-open (l.104) |
-| setup-complexity.sh | yes (l.2) | n/a | yes (venv reuse) | exits on error |
-
-### F-14 — `set -euo pipefail` + `async:true` risk in record-turn-start/session-start (Suggestion)
-- **Where:** record-turn-start.sh:2, session-start.sh:2; both wired as
-  `async:true` (settings.json:152,162,221).
-- **Issue:** With `set -e`, any single failing command aborts the hook. For
-  async logging hooks (record-turn-start writes the timestamp; InstructionsLoaded
-  log) a transient failure (e.g. read-only `~/.claude/.runtime`) kills the hook
-  silently with no fallback. record-turn-start.sh has no trap, so a failed
-  `date`/`mkdir` leaves notify-on-stop.sh reading a stale/missing start file
-  (it does handle that case, l.15-17, so impact is low).
-- **Fix:** Low priority. Add `|| true` to the terminal write in
-  record-turn-start.sh, or a `trap '... exit 0' ERR` as project-init.sh does, so
-  the recorder degrades gracefully.
-
-### F-15 — session-start.sh contains `sudo apt-get` despite PreToolUse sudo block (Warning)
-- **Where:** session-start.sh:33 (`sudo apt-get install -y ast-grep`).
-- **Issue:** Two problems. (1) The global PreToolUse hook (settings.json:199)
-  blocks any Bash command starting with `sudo ` — but hooks run their own
-  commands outside that interception, so this `sudo` would actually execute,
-  contradicting the stated "sudo requires project opt-in" policy. (2) It only
-  runs when `CLAUDE_AUTO_INSTALL_TOOLS=true`, so it is gated, but a non-interactive
-  SessionStart hook invoking sudo can hang waiting for a password prompt.
-- **Fix:** Remove the `sudo apt-get` branch (or replace with a printed
-  instruction to install manually). Tool auto-install in a SessionStart hook
-  should never escalate privileges; print guidance instead.
-
-### F-16 — notify-on-stop.sh has no error logging on notifier failure (Note)
-- **Where:** notify-on-stop.sh:25-29.
-- **Issue:** If `osascript`/`notify-send` fails, the failure is swallowed (and
-  with `set -e` the script aborts at that line, but it is the last block so no
-  harm). Acceptable for a best-effort chime. Note only.
-
----
-
-## 7. Autonomous template completeness vs global settings
-
-autonomous-settings.json is the fallback permission set copied in by
-autonomous-toggle.sh. Compared against global settings.json allow list:
-
-### F-17 — Template missing several CLI tools present globally (Warning)
-Tools permissioned in global settings.json but **absent** from
-autonomous-settings.json (so an autonomous run in such a project stalls):
-- `pip3 install` (global:21) / `pip` (global:69) — template has only
-  `pip install *` (l.18) and `uv pip install` (l.17); bare `pip:*` missing.
-- `pytest` (global:70) — **missing** from template. A Python project's test
-  gate (`pytest`) would prompt in autonomous mode. **High impact** given
-  testing.md mandates pytest gates.
-- `pnpm test/run/typecheck/lint` granular forms — template uses `pnpm *:*`
-  (l.15) which covers them, OK.
-- `cargo` — template has `cargo *:*` (l.14), OK.
-- `volta install` (global:64) — missing from template (low impact).
-- `mkdocs build` (global:73) — missing (low impact).
-- `ollama`/`docker model` (global:77,81-82) — missing (low impact, model-routing
-  only).
-- `claude mcp` (global:84) — missing (low impact).
-- **Fix:** Add to autonomous-settings.json at minimum: `Bash(pytest:*)`,
-  `Bash(pip:*)`, `Bash(yarn:*)` (F-9), `Bash(go:*)` and `Bash(dotnet:*)` are
-  already present in the template (l.11-12) — note they are present in template
-  but missing GLOBALLY per F-7, the inverse gap.
-
-### F-18 — Template missing serena MCP write tools? No — present (Note)
-- autonomous-settings.json:46-55 includes all serena navigation + edit tools and
-  playwright (56-60). MCP coverage matches global. No gap. Note only.
-
-### F-19 — Template lacks `Bash(test *:*)` and `command -v` parity (Suggestion)
-- **Where:** global has `Bash(command -v:*)` (l.83); template has it (l.36) OK.
-  Nested settings has `Bash(test *:*)` (l.37) but template does not. Minor:
-  autonomous scripts using `test`/`[` builtins are unaffected (shell builtin,
-  not a permissioned external), so impact is negligible.
-- **Fix:** None required; recorded for completeness.
-
----
-
-## Priority summary (action order)
-
-1. **F-7** (Warning): add `Bash(go:*)`, `Bash(dotnet:*)` to global settings.
-2. **F-17** (Warning): add `Bash(pytest:*)`, `Bash(pip:*)`, `Bash(yarn:*)` to
-   autonomous template — pytest gap breaks Python autonomous test gates.
-3. **F-15** (Warning): remove `sudo apt-get` from session-start.sh.
-4. **F-11** (Warning): add playwright server block to repo `.mcp.json`.
-5. **F-4** (Warning): make PreCompact hook a real git check or reword.
-6. **F-1/F-2** (Suggestion): add SubagentStop + Notification logging hooks.
-7. **F-10** (Suggestion): standardize WebFetch/WebSearch to bare form.
-8. **F-12** (Suggestion): add GitHub MCP server; later drop curl GH literals.
-9. **F-5/F-6** (Suggestion): collapse version-probe + hook-internal + curl
-   literals to shrink the allowlist.
+No gaps found in the reverse-critical direction for core package managers
+already covered broadly by the template (`npm *:*`, `pnpm *:*`,
+`git *:*`, `docker *:*`, `gh *:*`, `cargo *:*`, `go *:*`, `dotnet *:*` in
+template are all *broader* than global's enumerated subsets, so those are
+fine). `python:*`/`python3:*` are fully covered by global's bare forms
+(`settings.json:20,73`) and by template's `python3 *:*`
+(`templates/autonomous-settings.json:11`) — no gap. `command -v:*` is
+present in both global (`settings.json:85`) and template
+(`templates/autonomous-settings.json:38`) — no gap (corrects an
+overclaim I initially drafted before re-verifying line-by-line).

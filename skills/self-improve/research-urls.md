@@ -20,8 +20,14 @@ decay to `unknown` on the next run. An `unknown` entry is re-verified before use
 it is not removed. This prevents the trusted set from silently accumulating sources
 that were valid once and have since rotted.
 
-Last full verification: 2026-06-20 (Partial — Agent X Discovery skipped this run,
-user-interrupted; Agent A/B/C sources re-verified)
+Last full verification: 2026-07-24 (Full run — all 4 Phase-1 agents completed;
+Agent A fetched all 13 Agent-A doc URLs at 200/rich, Agent B its 3, Agent C
+anthropic.com/research, Agent X ran 84 discovery queries → 26 candidates added).
+CAVEAT: on 2026-07-24 the Agent-B models/overview + model-config pages returned
+200/rich but STALE content — they did NOT reflect the same-day Claude Opus 5
+launch (confirmed live via WebSearch). The fetch-guard cannot detect same-day
+staleness; on model-launch days, cross-check the "current model" list against a
+fresh WebSearch before trusting these pages.
 2026-07-01 scoped delta run: re-verified changelog, model-config, models/overview,
 and the new Fable 5 doc (all 200, rich); other Agent A doc pages NOT re-fetched.
 Note: platform.claude.com/docs/en/docs/claude-code/* URLs verified 404 on 2026-06-09.
@@ -34,7 +40,7 @@ Note: platform.claude.com/docs/en/models/overview verified 404 on 2026-06-10.
 
 | URL                                                       | Purpose                                          | Last Verified | Status |
 | --------------------------------------------------------- | ------------------------------------------------ | ------------- | ------ |
-| https://code.claude.com/docs/en/changelog                 | PRIMARY: scan for new/changed/deprecated Claude Code features (last 90 days) | 2026-07-01    | active |
+| https://code.claude.com/docs/en/changelog                 | PRIMARY: scan for new/changed/deprecated Claude Code features (last 90 days) | 2026-07-24    | active |
 | https://www.anthropic.com/blog                            | SECONDARY/optional: occasional Claude Code launch posts; thin (press newsroom) — use only if the changelog misses a topic | 2026-06-20    | active |
 | https://platform.claude.com/docs/en/docs/claude-code/overview   | Core feature overview                            | 2026-06-10    | unreachable |
 | https://platform.claude.com/docs/en/docs/claude-code/hooks      | Hook events and configuration                    | 2026-06-10    | unreachable |
@@ -42,13 +48,18 @@ Note: platform.claude.com/docs/en/models/overview verified 404 on 2026-06-10.
 | https://platform.claude.com/docs/en/docs/claude-code/memory     | Memory system docs                               | 2026-06-10    | unreachable |
 | https://platform.claude.com/docs/en/docs/claude-code/mcp        | MCP integration docs                             | 2026-06-10    | unreachable |
 | https://platform.claude.com/docs/en/docs/claude-code/sub-agents | Sub-agent docs                                   | 2026-06-10    | unreachable |
-| https://code.claude.com/docs/en/overview                  | Core feature overview — replaces unreachable platform.claude.com URL | 2026-06-20 | active |
-| https://code.claude.com/docs/en/hooks                     | Hook events and configuration — replaces unreachable platform.claude.com URL | 2026-06-20 | active |
-| https://code.claude.com/docs/en/settings                  | Settings reference — replaces unreachable platform.claude.com URL | 2026-06-20 | active |
-| https://code.claude.com/docs/en/memory                    | Memory system docs — replaces unreachable platform.claude.com URL | 2026-06-20 | active |
-| https://code.claude.com/docs/en/mcp                       | MCP integration docs — replaces unreachable platform.claude.com URL | 2026-06-20 | active |
-| https://code.claude.com/docs/en/sub-agents                | Sub-agent docs — replaces unreachable platform.claude.com URL | 2026-06-20 | active |
-| https://code.claude.com/docs/en/tutorials                 | Common workflows / tutorials — replaces unreachable platform.claude.com URL | 2026-06-20 | active |
+| https://code.claude.com/docs/en/overview                  | Core feature overview — replaces unreachable platform.claude.com URL | 2026-07-24 | active |
+| https://code.claude.com/docs/en/hooks                     | Hook events and configuration — replaces unreachable platform.claude.com URL | 2026-07-24 | active |
+| https://code.claude.com/docs/en/settings                  | Settings reference — replaces unreachable platform.claude.com URL | 2026-07-24 | active |
+| https://code.claude.com/docs/en/memory                    | Memory system docs — replaces unreachable platform.claude.com URL | 2026-07-24 | active |
+| https://code.claude.com/docs/en/mcp                       | MCP integration docs — replaces unreachable platform.claude.com URL | 2026-07-24 | active |
+| https://code.claude.com/docs/en/sub-agents                | Sub-agent docs — replaces unreachable platform.claude.com URL | 2026-07-24 | active |
+| https://code.claude.com/docs/en/tutorials                 | Common workflows / tutorials — replaces unreachable platform.claude.com URL | 2026-07-24 | active |
+| https://code.claude.com/docs/en/skills                    | Skills config: context: fork, run-in-subagent, disable-model-invocation, frontmatter — PROMOTED 2026-07-24 (Agent A fetched 200/rich) | 2026-07-24 | active |
+| https://code.claude.com/docs/en/agent-teams               | Agent teams: parallel teammates, independent context, SendMessage — PROMOTED 2026-07-24 | 2026-07-24 | active |
+| https://code.claude.com/docs/en/agent-view                | Background agents: run/monitor many parallel sessions — PROMOTED 2026-07-24 | 2026-07-24 | active |
+| https://code.claude.com/docs/en/routines                  | Routines: hosted scheduled/cron + GitHub-event-triggered runs — PROMOTED 2026-07-24 | 2026-07-24 | active |
+| https://code.claude.com/docs/en/worktrees                 | Worktree isolation for subagents (isolation: worktree), base-branch selection — PROMOTED 2026-07-24 | 2026-07-24 | active |
 
 ---
 
@@ -56,9 +67,9 @@ Note: platform.claude.com/docs/en/models/overview verified 404 on 2026-06-10.
 
 | URL                                                             | Purpose                            | Last Verified | Status |
 | --------------------------------------------------------------- | ---------------------------------- | ------------- | ------ |
-| https://code.claude.com/docs/en/model-config                    | Model aliases and effort levels    | 2026-07-01    | active |
-| https://platform.claude.com/docs/en/about-claude/models/overview | Current model IDs and deprecations | 2026-07-01    | active |
-| https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5 | Fable 5 / Mythos 5 facts: retention, thinking, positioning | 2026-07-01 | active |
+| https://code.claude.com/docs/en/model-config                    | Model aliases and effort levels    | 2026-07-24    | active |
+| https://platform.claude.com/docs/en/about-claude/models/overview | Current model IDs and deprecations — WARNING: served STALE (pre-Opus-5) content on 2026-07-24 despite 200/rich; cross-check against WebSearch on launch days | 2026-07-24    | active |
+| https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5 | Fable 5 / Mythos 5 facts: retention, thinking, positioning | 2026-07-24 | active |
 
 ---
 
@@ -66,7 +77,7 @@ Note: platform.claude.com/docs/en/models/overview verified 404 on 2026-06-10.
 
 | URL                                | Purpose                                                                  | Last Verified | Status |
 | ---------------------------------- | ------------------------------------------------------------------------ | ------------- | ------ |
-| https://www.anthropic.com/research | Recent Anthropic papers on instruction-following and agent orchestration | 2026-06-20    | active |
+| https://www.anthropic.com/research | Recent Anthropic papers on instruction-following and agent orchestration | 2026-07-24    | active |
 
 ---
 
@@ -105,11 +116,32 @@ Note: platform.claude.com/docs/en/models/overview verified 404 on 2026-06-10.
 | https://arxiv.org/abs/2510.05748                                                          | Communication enables cooperation in LLM multi-agent systems                               | Discovery agent | 2026-06-05 |
 | https://arxiv.org/pdf/2506.02943                                                          | Multi-agent LLMs for JUnit test generation — hallucination to consensus                    | Discovery agent | 2026-06-05 |
 | https://arxiv.org/pdf/2603.15911                                                          | Human-AI synergy in agentic code review — collaboration patterns                           | Discovery agent | 2026-06-05 |
-| https://code.claude.com/docs/en/agent-teams                                               | Agent teams: parallel teammates with independent context, SendMessage coordination          | Agent A         | 2026-06-20 |
-| https://code.claude.com/docs/en/agent-view                                                | Background agents: run/monitor many parallel full sessions from one screen                  | Agent A         | 2026-06-20 |
-| https://code.claude.com/docs/en/routines                                                  | Routines: Anthropic-hosted scheduled/cron + GitHub-event-triggered Claude Code runs         | Agent A         | 2026-06-20 |
-| https://code.claude.com/docs/en/worktrees                                                 | Worktree isolation for subagents (isolation: worktree) and base-branch selection            | Agent A         | 2026-06-20 |
-| https://code.claude.com/docs/en/skills                                                    | Skills config: context: fork, run-in-subagent, disable-model-invocation, frontmatter        | Agent A         | 2026-06-20 |
+| https://www.anthropic.com/research/building-effective-agents                              | Anthropic: foundational agent design patterns — workflows vs autonomous agents, ACI design | Discovery agent | 2026-07-24 |
+| https://www.anthropic.com/engineering/writing-tools-for-agents                            | Anthropic: designing/evaluating tools for agents — prototyping, eval-driven tool description quality | Discovery agent | 2026-07-24 |
+| https://www.anthropic.com/research/long-running-Claude                                    | Anthropic: CLAUDE.md special-file handling for long-running autonomous science agents      | Discovery agent | 2026-07-24 |
+| https://code.claude.com/docs/en/hooks-guide                                               | Official Claude Code hooks how-to guide (companion to /hooks reference)                    | Discovery agent | 2026-07-24 |
+| https://claude.com/blog/steering-claude-code-skills-hooks-rules-subagents-and-more         | Anthropic blog: when to use CLAUDE.md vs rules vs skills vs hooks vs subagents              | Discovery agent | 2026-07-24 |
+| https://martinfowler.com/articles/reliable-llm-bayer.html                                 | Martin Fowler/Thoughtworks (Jun 2026): context + harness engineering for production multi-agent reliability | Discovery agent | 2026-07-24 |
+| https://blog.jetbrains.com/research/2025/12/efficient-context-management/                 | JetBrains research: observation masking beats LLM summarization for agent context management | Discovery agent | 2026-07-24 |
+| https://semgrep.dev/blog/2026/comparing-open-source-ai-code-security-harnesses/            | Semgrep (Jul 2026): comparing LLM-led vs SAST-hybrid open-source AI security scanning approaches | Discovery agent | 2026-07-24 |
+| https://zenity.io/blog/security/hard-boundaries-agentic-ai                                | Zenity: case for deterministic code-level "hard boundaries" over probabilistic guardrails in agentic AI | Discovery agent | 2026-07-24 |
+| https://partnershiponai.org/wp-content/uploads/2025/09/agents-real-time-failure-detection.pdf | Partnership on AI (Sep 2025): framework for real-time AI agent failure detection           | Discovery agent | 2026-07-24 |
+| https://arxiv.org/abs/2605.10039                                                          | PREPRINT: factorial study of coding agent config file structure (CLAUDE.md/AGENTS.md) vs instruction adherence | Discovery agent | 2026-07-24 |
+| https://arxiv.org/abs/2601.20404                                                          | PREPRINT: AGENTS.md files cut agent runtime 28.6% and token use 16.6% without hurting task success | Discovery agent | 2026-07-24 |
+| https://arxiv.org/abs/2606.25257                                                          | PREPRINT: empirical study of how developers maintain/evolve agent context files (CLAUDE.md-style) | Discovery agent | 2026-07-24 |
+| https://arxiv.org/html/2606.22528                                                         | PREPRINT: context compaction silently erases in-context safety constraints ("governance decay") | Discovery agent | 2026-07-24 |
+| https://arxiv.org/abs/2605.23574                                                          | PREPRINT: PushBench — agents complete plausible steps but fail to persist to verified completion | Discovery agent | 2026-07-24 |
+| https://arxiv.org/html/2604.09443v3                                                       | PREPRINT: ManyIH — frontier models manage only ~40% accuracy resolving many-tier instruction hierarchies | Discovery agent | 2026-07-24 |
+| https://arxiv.org/abs/2507.13334                                                          | PREPRINT: survey systematizing context engineering (retrieval, processing, management) for LLMs | Discovery agent | 2026-07-24 |
+| https://arxiv.org/abs/2502.04295                                                          | PREPRINT: CFPO — joint content+format prompt optimization beats content-only optimization   | Discovery agent | 2026-07-24 |
+| https://arxiv.org/abs/2502.12197                                                          | PREPRINT: current techniques fall short of ensuring system prompt robustness under adversarial input | Discovery agent | 2026-07-24 |
+| https://arxiv.org/html/2605.10481                                                         | PREPRINT: "constraint drift" in multi-agent systems — proposes signed, verifiable constraint state | Discovery agent | 2026-07-24 |
+| https://arxiv.org/abs/2510.18892                                                          | PREPRINT: 20-prompt framework testing instruction adherence across 256 LLMs, common failure modes | Discovery agent | 2026-07-24 |
+| https://arxiv.org/abs/2509.25370                                                          | PREPRINT: AgentDebug — root-cause isolation framework for cascading LLM agent failures      | Discovery agent | 2026-07-24 |
+| https://arxiv.org/abs/2601.06112                                                          | PREPRINT: ReliabilityBench — consistency/robustness/fault-tolerance benchmark; rate limiting most damaging fault | Discovery agent | 2026-07-24 |
+| https://arxiv.org/html/2606.11672v1                                                       | PREPRINT: open-source LLM agents underperform Bandit SAST tool (recall <0.25, high false-positive) | Discovery agent | 2026-07-24 |
+| https://arxiv.org/abs/2508.14419                                                          | PREPRINT: iterative static-analysis feedback (Bandit/Pylint) cuts LLM code security issues 40%->13% | Discovery agent | 2026-07-24 |
+| https://arxiv.org/abs/2607.01903                                                          | PREPRINT: HECATE — complexity metrics spanning prompt layer + code layer for LLM-integrated apps | Discovery agent | 2026-07-24 |
 
 ---
 
