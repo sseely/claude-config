@@ -33,10 +33,12 @@ consolidate duplicates, and move project-specific rules to project-level
 CLAUDE.md files rather than the global one.
 
 Per-file caps bound each file, but nothing caps the **aggregate resident
-footprint** of `rules/` (~62KB). Rules are referenced by pointer from
-CLAUDE.md, not `@`-imported, so they are not all resident — keep it that
-way: prefer task-scoped reading of the one or two relevant rule files over
-loading the set, and dedup cross-file repetition rather than restating it.
+footprint** of `rules/` (~62KB). All rule files are injected verbatim every
+session — confirmed by direct inspection (22 files, ~10.3k words / ~14k
+tokens) — so this is a real, recurring per-session context cost, not a
+theoretical one. Manage it: prefer task-scoped reading of the one or two
+relevant rule files over loading the set, and dedup cross-file repetition
+rather than restating it.
 
 ## File context discipline
 
@@ -49,11 +51,8 @@ understanding the codebase. Prefer:
 Attaching 30+ files to a single prompt floods the context window, reduces
 cache hit rates, and makes it harder for the model to attend to what matters.
 
-<!-- Code review (2026-07-01): `paths:`-scoped rule loading (load a domain rule
-only when matching files are open) would cut per-session token load, but is not
-yet confirmed as a Claude Code feature. Verify support against
-code.claude.com/docs/en/settings before adding `paths:` frontmatter to rules. -->
-
+Domain-specific rules should use `paths:` frontmatter to load only when
+matching files are in play, rather than resident every session.
 
 ## Agent context budget
 
@@ -103,10 +102,12 @@ result acted on.
 
 Per arxiv:2604.00025 (Hakim, 2026 — preprint): brevity constraints yield up to
 26pp accuracy gain on math/science benchmarks across 31 general LLMs (preprint,
-not validated on planning tasks or Opus-tier agents specifically). Opus-tier
-models over-elaborate without explicit constraint.
+tested only on open models, not validated on planning tasks or Opus-tier
+agents specifically). Opus-tier models have been observed in practice to
+over-elaborate without explicit constraint — treat this as an operational
+heuristic, not an established finding.
 
-- Every Opus agent prompt must include: "Return only the structured result —
+- Every Opus agent prompt should include: "Return only the structured result —
   no preamble, no trailing summary."
 - Specify output shape explicitly (bullet list, table, schema). "Report findings"
   is weaker than "Report as a bullet list, one line per finding, no prose."
