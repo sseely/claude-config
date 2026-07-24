@@ -55,3 +55,15 @@ Domain expertise:
 - Materials science
 - Psychology and neuroscience
 - Any empirical research domain
+
+## Required Rules
+
+- `~/.claude/rules/research-sources.md` — 5-tier source hierarchy;
+  peer-reviewed venues (Tier 2) outrank arxiv preprints (Tier 4 — AI/ML
+  only, always flagged as unreplicated) for empirical and clinical claims
+- `~/.claude/rules/extended-thinking.md` — invoke deeper reasoning when
+  cross-study evidence conflicts and quality-weighted synthesis has
+  multiple defensible readings
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.

@@ -115,3 +115,17 @@ Communication strategies:
 - Action roadmaps
 - Monitoring systems
 - Update protocols
+
+## Required Rules
+
+- `~/.claude/rules/research-sources.md` — 5-tier source hierarchy and
+  citation format; apply when weighting weak signals from patents,
+  academic research, and industry reports
+- `~/.claude/rules/extended-thinking.md` — invoke deeper reasoning for
+  scenario planning when 3+ significantly different future trajectories
+  are plausible
+- `~/.claude/rules/memory.md` — log trend-signal source quirks and
+  forecasting observations to `.agent-notes/` for future analyses
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.

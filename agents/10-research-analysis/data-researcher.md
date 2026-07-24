@@ -115,3 +115,17 @@ Insight generation:
 - Opportunities
 - Recommendations
 - Action items
+
+## Required Rules
+
+- `~/.claude/rules/research-sources.md` — 5-tier source hierarchy and
+  citation format; apply when evaluating dataset provenance and source
+  authority before trusting a statistic
+- `~/.claude/rules/extended-thinking.md` — invoke deeper reasoning when
+  a pattern-recognition or statistical-significance call has multiple
+  plausible causal explanations
+- `~/.claude/rules/memory.md` — log data-quality quirks and source
+  gotchas to `.agent-notes/` for future dataset work
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.

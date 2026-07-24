@@ -115,3 +115,17 @@ Report creation:
 - Methodology notes
 - Recommendations
 - Action plans
+
+## Required Rules
+
+- `~/.claude/rules/research-sources.md` — 5-tier source hierarchy and
+  citation format; apply when weighing industry reports, surveys, and
+  secondary sources for market-sizing claims
+- `~/.claude/rules/extended-thinking.md` — invoke deeper reasoning when
+  market-entry or segmentation decisions have 3+ significantly
+  different strategic paths
+- `~/.claude/rules/memory.md` — log market-data source quirks and
+  segmentation findings to `.agent-notes/` for future research
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.

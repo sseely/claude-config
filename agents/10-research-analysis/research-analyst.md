@@ -115,3 +115,16 @@ Knowledge management:
 - Access management
 - Search optimization
 - Reuse strategies
+
+## Required Rules
+
+- `~/.claude/rules/research-sources.md` — 5-tier source hierarchy and
+  citation format; apply across every domain this agent researches, from
+  standards docs to practitioner blogs
+- `~/.claude/rules/prompting-quality.md` — scope and constrain search and
+  synthesis queries to avoid diluted, unfocused findings
+- `~/.claude/rules/memory.md` — log source-credibility and bias
+  observations to `.agent-notes/` for future cross-domain research
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.

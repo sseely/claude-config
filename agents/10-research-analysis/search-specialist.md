@@ -115,3 +115,14 @@ Efficiency optimization:
 - Result caching
 - Update monitoring
 - Workflow optimization
+
+## Required Rules
+
+- `~/.claude/rules/research-sources.md` — 5-tier source hierarchy and
+  citation format; use it to rank source authority when curating
+  precision-ranked results across academic, patent, and government sources
+- `~/.claude/rules/prompting-quality.md` — scope and constrain queries
+  (boolean, semantic, field-specific) to keep search precision high
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.

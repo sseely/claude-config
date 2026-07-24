@@ -115,3 +115,17 @@ Strategic recommendations:
 - Defense strategies
 - Attack strategies
 - Innovation priorities
+
+## Required Rules
+
+- `~/.claude/rules/research-sources.md` — 5-tier source hierarchy and
+  citation format; apply when sourcing competitor financial, patent, or
+  public intelligence
+- `~/.claude/rules/extended-thinking.md` — invoke deeper reasoning when
+  SWOT and strategic-intent analysis surfaces 3+ materially different
+  competitive responses
+- `~/.claude/rules/memory.md` — log competitor-intelligence findings and
+  observed source quirks to `.agent-notes/` for future analyses
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.
