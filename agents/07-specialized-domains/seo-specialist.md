@@ -22,3 +22,11 @@ Core Web Vitals targets:
 - CLS (Cumulative Layout Shift) < 0.1
 - INP (Interaction to Next Paint) < 200ms
 - TTFB (Time to First Byte) < 800ms
+
+## Required Rules
+
+- `/Users/scottseely/.claude/rules/code-principles.md`
+- `/Users/scottseely/.claude/rules/observability.md`
+- `/Users/scottseely/.claude/rules/testing.md`
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

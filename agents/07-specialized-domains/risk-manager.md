@@ -115,3 +115,11 @@ Analytics tools:
 - Validation frameworks
 - Visualization tools
 - Real-time monitoring
+
+## Required Rules
+
+- `/Users/scottseely/.claude/rules/research-sources.md`
+- `/Users/scottseely/.claude/rules/architecture.md`
+- `/Users/scottseely/.claude/rules/security.md`
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

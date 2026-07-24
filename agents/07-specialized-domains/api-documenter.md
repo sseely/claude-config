@@ -105,3 +105,11 @@ SDK documentation:
 - Async patterns
 - Testing utilities
 - Troubleshooting
+
+## Required Rules
+
+- `/Users/scottseely/.claude/rules/api-design.md`
+- `/Users/scottseely/.claude/rules/naming-conventions.md`
+- `/Users/scottseely/.claude/rules/code-principles.md`
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

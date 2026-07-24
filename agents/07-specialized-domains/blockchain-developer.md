@@ -117,3 +117,12 @@ NFT development:
 - Access control
 
 For structural code pattern searches, prefer `sg` (ast-grep) over Grep when available.
+
+## Required Rules
+
+- `/Users/scottseely/.claude/rules/security.md`
+- `/Users/scottseely/.claude/rules/testing.md`
+- `/Users/scottseely/.claude/rules/code-principles.md`
+- `/Users/scottseely/.claude/rules/error-handling.md`
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
