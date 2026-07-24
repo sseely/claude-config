@@ -29,7 +29,9 @@ at session start), skip the user review presentation step. Log the execution pla
 - Read-only access is unrestricted — multiple agents may read the same file concurrently
 - If the plan produces a write conflict that can't be resolved by collapsing, that's a signal the subtasks aren't actually independent and should be a single agent
 
-**Agent prompt structure:**
+**Agent prompt structure** (ordered procedure — assemble sections in this
+order; this is a sequential build sequence, not a parallel checklist, so
+the ≤6-constraint budget in `prompting-quality.md` does not apply):
 
 Subagents start with a blank slate — no conversation history, no
 CLAUDE.md, no awareness of prior decisions. Every agent prompt
@@ -57,6 +59,9 @@ must be self-contained:
    shapes this task must produce or consume. If subagent output is
    consumed by a downstream agent, specify a JSON schema.
    If output is human-facing, prose is appropriate.
+   This governs shape, not size — target subagent return payloads at
+   1k–2k tokens regardless of shape; verbose returns dilute the
+   orchestrator's context.
 7. **Quality bar** — "run `npm test` before finishing; all tests
    must pass"
 8. **Boundaries** — three tiers: *Always do* (non-negotiables), *Ask first*
@@ -79,12 +84,16 @@ Match model to task complexity and cost:
 
 | Role | Model alias | Effort | Context | When |
 |------|-------------|--------|---------|------|
-| Planning / architecture | `opus` (`claude-opus-4-8`) | `high` default; `xhigh` for deep multi-path decisions | 1M tokens | Phase 3 decisions, mission decomposition, threat modeling |
+| Planning / architecture / implementation (heavy) | `opus` (`claude-opus-5`) | `high` default; `xhigh` for deep multi-path decisions | 1M tokens | Phase 3 decisions, mission decomposition, threat modeling; also viable for high-value implementation and routine agentic work now that Opus 5 is cheaper |
 | Long-horizon autonomous execution | `fable` (`claude-fable-5`) | `high` default; `xhigh` for agentic runs | 1M | Mission-brief execution, autonomous sessions, multi-hour/multi-day work |
 | Implementation | `sonnet` (`claude-sonnet-5`) | `high` default; `xhigh` for hard tasks; lower to `medium` if token-sensitive | 1M tokens | Feature work, bug fixes, refactoring, code generation |
 | Scoring / dedup / validation | `haiku` (`claude-haiku-4-5-20251001`) | n/a | 200k tokens | Confidence scoring, dedup passes, format checking, simple grep tasks |
 
 > **Haiku context limit:** 200k tokens vs 1M for Sonnet/Opus. Do not pass >50 files to a Haiku agent in a single prompt.
+
+> **Version gate:** `opus` resolves to Opus 5 only on Claude Code v2.1.219+;
+> earlier versions resolve to Opus 4.8. Confirm `claude --version` before
+> relying on Opus-5-era routing economics below.
 
 Note: Haiku 4.5 supports fixed-budget extended thinking (`budget_tokens`) but not adaptive thinking; the `effort` parameter returns 400 on Haiku — do not set it.
 
@@ -100,8 +109,16 @@ evaluate, score, or format — not to create.
 > **Sonnet 5 shifts the routing economics.** Sonnet 5 reaches near-Opus-4.8
 > quality on coding and agentic work at ~60% of Opus token cost, so it now
 > covers most implementation *and* routine agentic work — the default-to-Sonnet
-> rule is stronger, not weaker. Reserve Opus for the deepest multi-path
-> reasoning and the longest-horizon autonomous runs.
+> rule is stronger, not weaker. (Opus's own economics have since shifted too —
+> see the Opus 5 note below.)
+
+> **Opus 5 shifts the economics again.** Opus 5 is roughly Fable-class
+> capability at roughly half the token cost of Opus 4.8. That makes Opus
+> viable for more implementation and routine agentic work than Opus 4.8 was —
+> it is no longer reserved solely for the deepest multi-path architectural
+> decisions. This does not change the long-horizon autonomous row: Fable
+> remains the recommendation for mission-brief execution and multi-hour/
+> multi-day runs (see table above).
 
 **Opus behavioral compensation:**
 
