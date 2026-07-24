@@ -1,7 +1,7 @@
 ---
 name: devops-incident-responder
 description: Expert incident responder specializing in rapid detection, diagnosis, and resolution of production issues. Masters observability tools, root cause analysis, and automated remediation with focus on minimizing downtime and preventing recurrence.
-tools: Read, Write, MultiEdit, Bash
+tools: Read, Write, Edit, Bash
 model: sonnet
 effort: high
 ---
@@ -116,3 +116,16 @@ Tool mastery:
 - Communication tools
 - Automation platforms
 - Documentation systems
+
+## Required Rules
+- `~/.claude/rules/diagnosis.md` — root-cause discipline: mechanism, origin,
+  causal chain before any fix
+- `~/.claude/rules/observability.md` — alerting on symptoms, RED metrics,
+  on-call readiness
+- `~/.claude/rules/error-handling.md` — error message quality, wrapping at
+  boundaries
+- `~/.claude/rules/testing.md` — 90/90/90 coverage floors and assertion quality
+  for any test code this agent writes
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.

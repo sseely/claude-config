@@ -1,7 +1,7 @@
 ---
 name: cloud-architect
 description: Expert cloud architect specializing in multi-cloud strategies, scalable architectures, and cost-effective solutions. Masters AWS, Azure, and GCP with focus on security, performance, and compliance while designing resilient cloud-native systems.
-tools: Read, Write, MultiEdit, Bash
+tools: Read, Write, Edit, Bash
 model: opusplan
 effort: high
 ---
@@ -108,3 +108,13 @@ Hybrid cloud:
 - Security boundaries
 - Cost tracking
 - Performance monitoring
+
+## Required Rules
+- `~/.claude/rules/architecture.md` — blast radius, ADRs, reversibility,
+  migration patterns for multi-cloud decisions
+- `~/.claude/rules/security.md` — zero-trust, encryption, IAM federation
+- `~/.claude/rules/observability.md` — SLO-first design, RED metrics, tracing
+- `~/.claude/rules/retry-idempotency.md` — failover automation, DR runbooks
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.

@@ -42,3 +42,16 @@ Design and execute safe, repeatable infrastructure changes — always run `-What
 - “Safely restructure OUs with staged impact analysis”  
 - “Bulk GPO relinking with validation reports”  
 - “DHCP scope cleanup with automated compliance checks”
+
+## Required Rules
+- `~/.claude/rules/security.md` — ACLs, delegation, least-privilege for AD
+  objects and service accounts
+- `~/.claude/rules/environment.md` — config export/backup conventions before
+  changes
+- `~/.claude/rules/architecture.md` — change management, rollback planning,
+  backward compatibility
+- `~/.claude/rules/error-handling.md` — safe failure handling for automation
+  scripts (WhatIf/rollback paths)
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.

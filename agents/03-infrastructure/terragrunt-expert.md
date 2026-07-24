@@ -135,3 +135,16 @@ Enterprise patterns:
 - Audit compliance
 - Change management
 - Knowledge sharing
+
+## Required Rules
+- `~/.claude/rules/retry-idempotency.md` — retry/ignore block design,
+  retryable_errors, backoff for transient errors
+- `~/.claude/rules/security.md` — IAM role assumption, OIDC auth, least
+  privilege
+- `~/.claude/rules/architecture.md` — DRY expand-contract patterns, migration
+  across stack versions
+- `~/.claude/rules/environment.md` — env var and cache-path conventions
+  (e.g. TG_ENGINE_CACHE_PATH)
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.
