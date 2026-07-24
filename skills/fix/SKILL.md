@@ -81,9 +81,11 @@ Run the same test command from Phase 1. Capture full output.
   - If the error is the SAME as the previous iteration → the fix
     didn't work; pass the new output back to the debugger agent for
     re-diagnosis before the next fix attempt
-  - If the error is DIFFERENT → the fix made progress; pass the new
-    error directly to the language agent for the next fix attempt
-    (skip re-diagnosis if the new error is straightforward)
+  - If the error is DIFFERENT → the fix made progress; state a
+    one-line mechanism for the new error — cause and why it produces
+    this symptom — before passing it to the language agent for the
+    next fix attempt. On fast iterations this drops to a single
+    sentence, never to nothing.
   - Increment iteration count
 
 **After 5 iterations without green:**
