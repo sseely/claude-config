@@ -31,9 +31,10 @@ CLAUDE.md is automatically reloaded from disk after compaction —
 it survives verbatim. Instructions lost after compaction were given
 only in conversation, not written to CLAUDE.md.
 
-A `PostCompact` hook injects `~/.claude/post-compact-context.md`
-for content that isn't in any instruction file: the autonomous
-execution recovery sequence.
+A `PostCompact` hook injects `~/.claude/post-compact-context.md`:
+the autonomous execution recovery sequence, plus 3 sections
+restoring condensed `rules/` content (model routing, commit
+format, autonomous restraint).
 
 ## Complex Tasks
 
