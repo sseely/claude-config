@@ -1,5 +1,5 @@
 {
-  "fallbackModel": "opus",
+  "fallbackModel": ["opus", "sonnet"],
   "permissions": {
     "allow": [
       "Bash(npm *:*)",
@@ -55,6 +55,7 @@
       "mcp__serena__insert_before_symbol",
       "mcp__serena__safe_delete_symbol",
       "mcp__serena__rename_symbol",
+      "mcp__serena__find_referencing_symbols",
       "mcp__playwright__browser_navigate",
       "mcp__playwright__browser_snapshot",
       "mcp__playwright__browser_click",
@@ -112,7 +113,7 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "Write|Edit|MultiEdit",
+        "matcher": "Write|Edit",
         "hooks": [
           {
             "type": "command",
