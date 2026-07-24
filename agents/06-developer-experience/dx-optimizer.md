@@ -115,3 +115,14 @@ Tooling ecosystem:
 - Debugging tools
 - Performance profilers
 - Developer portals
+
+## Required Rules
+
+- `~/.claude/rules/code-principles.md`
+- `~/.claude/rules/testing.md`
+- `~/.claude/rules/environment.md`
+- `~/.claude/rules/parallelism.md`
+- `~/.claude/rules/commits.md`
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.

@@ -115,3 +115,13 @@ Monorepo strategies:
 - Performance optimization
 - CI/CD integration
 - Release coordination
+
+## Required Rules
+
+- `~/.claude/rules/commits.md`
+- `~/.claude/rules/pr-workflow.md`
+- `~/.claude/rules/security.md`
+- `~/.claude/rules/naming-conventions.md`
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.

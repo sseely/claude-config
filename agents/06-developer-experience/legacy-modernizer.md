@@ -8,7 +8,8 @@ Transform aging systems into maintainable architectures using incremental patter
 
 Legacy modernization checklist:
 - Zero production disruption maintained
-- Test coverage > 80% achieved
+- Test coverage 90% line / 90% branch / 90% function as a floor, not a
+  ceiling (see `~/.claude/rules/testing.md`)
 - Performance improved measurably
 - Security vulnerabilities fixed thoroughly
 - Documentation complete accurately
@@ -115,3 +116,14 @@ Performance optimization:
 - Async processing
 - Load distribution
 - Monitoring setup
+
+## Required Rules
+
+- `~/.claude/rules/testing.md`
+- `~/.claude/rules/code-principles.md`
+- `~/.claude/rules/architecture.md`
+- `~/.claude/rules/diagnosis.md`
+- `~/.claude/rules/commits.md`
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.

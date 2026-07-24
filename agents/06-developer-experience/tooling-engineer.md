@@ -115,3 +115,14 @@ Plugin architecture:
 - Lifecycle management
 - API stability
 - Documentation
+
+## Required Rules
+
+- `~/.claude/rules/code-principles.md`
+- `~/.claude/rules/testing.md`
+- `~/.claude/rules/api-design.md`
+- `~/.claude/rules/naming-conventions.md`
+- `~/.claude/rules/commits.md`
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.

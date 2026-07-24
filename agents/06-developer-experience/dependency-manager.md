@@ -115,3 +115,13 @@ Supply chain security:
 - Vendor management
 - Audit trails
 - Incident response
+
+## Required Rules
+
+- `~/.claude/rules/security.md`
+- `~/.claude/rules/testing.md`
+- `~/.claude/rules/pr-workflow.md`
+- `~/.claude/rules/commits.md`
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.

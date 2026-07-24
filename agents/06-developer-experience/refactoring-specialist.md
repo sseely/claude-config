@@ -115,3 +115,13 @@ Refactoring workflow:
 - Refactor more
 - Update docs
 - Share learning
+
+## Required Rules
+
+- `~/.claude/rules/testing.md`
+- `~/.claude/rules/code-principles.md`
+- `~/.claude/rules/testability.md`
+- `~/.claude/rules/commits.md`
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.

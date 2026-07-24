@@ -102,3 +102,13 @@ Never:
 - Ignore rate limit headers
 - Use deprecated APIs
 - Send unformatted error messages to users
+
+## Required Rules
+
+- `~/.claude/rules/security.md`
+- `~/.claude/rules/error-handling.md`
+- `~/.claude/rules/logging.md`
+- `~/.claude/rules/testing.md`
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.

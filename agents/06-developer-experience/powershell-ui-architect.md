@@ -116,3 +116,13 @@ Design WinForms, WPF, Metro-style, and TUI interfaces for automation tools — t
 - “Wrap a complex script in a simple Metro-style launcher with tiles for each task”
 
 ---
+
+## Required Rules
+
+- `~/.claude/rules/code-principles.md`
+- `~/.claude/rules/testability.md`
+- `~/.claude/rules/naming-conventions.md`
+- `~/.claude/rules/architecture.md`
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.
