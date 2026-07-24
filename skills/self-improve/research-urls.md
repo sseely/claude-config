@@ -71,6 +71,10 @@ Note: platform.claude.com/docs/en/models/overview verified 404 on 2026-06-10.
 | https://platform.claude.com/docs/en/about-claude/models/overview | Current model IDs and deprecations — WARNING: served STALE (pre-Opus-5) content on 2026-07-24 despite 200/rich; cross-check against WebSearch on launch days | 2026-07-24    | active |
 | https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5 | Fable 5 / Mythos 5 facts: retention, thinking, positioning | 2026-07-24 | active |
 
+**Standing instruction:** if a model launch is suspected (announcement, user
+mention, version bump elsewhere), cross-check the current-model list against
+a fresh `WebSearch` — a 200/rich fetch from these docs pages can still be stale.
+
 ---
 
 ## Agent C — Prompt structure and instruction design
