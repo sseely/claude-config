@@ -26,10 +26,47 @@ if ! command -v sg >/dev/null 2>&1; then
     if [[ "${CLAUDE_AUTO_INSTALL_TOOLS:-false}" == "true" ]]; then
         echo ""
         echo "Installing ast-grep (sg)..."
+        # Pick whichever timeout wrapper this platform has (macOS ships
+        # neither by default; Homebrew coreutils provides both names).
+        # Fall back to running with no time limit if neither exists —
+        # never fail this script just because timeout(1) is missing.
+        if command -v timeout >/dev/null 2>&1; then
+            TIMEOUT_BIN="timeout"
+        elif command -v gtimeout >/dev/null 2>&1; then
+            TIMEOUT_BIN="gtimeout"
+        else
+            TIMEOUT_BIN=""
+            echo "  WARNING: no timeout/gtimeout found; installing with no time limit."
+        fi
+        run_with_timeout() {
+            if [[ -n "$TIMEOUT_BIN" ]]; then
+                "$TIMEOUT_BIN" 60 "$@"
+            else
+                "$@"
+            fi
+        }
         if command -v brew >/dev/null 2>&1; then
-            brew install ast-grep
+            if run_with_timeout brew install ast-grep; then
+                :
+            else
+                install_status=$?
+                if [[ -n "$TIMEOUT_BIN" && $install_status -eq 124 ]]; then
+                    echo "  WARNING: ast-grep install timed out after 60s; continuing without it."
+                else
+                    echo "  WARNING: ast-grep install failed (exit $install_status); continuing without it."
+                fi
+            fi
         elif command -v cargo >/dev/null 2>&1; then
-            cargo install ast-grep --locked
+            if run_with_timeout cargo install ast-grep --locked; then
+                :
+            else
+                install_status=$?
+                if [[ -n "$TIMEOUT_BIN" && $install_status -eq 124 ]]; then
+                    echo "  WARNING: ast-grep install timed out after 60s; continuing without it."
+                else
+                    echo "  WARNING: ast-grep install failed (exit $install_status); continuing without it."
+                fi
+            fi
         else
             echo "  WARNING: cannot auto-install ast-grep without sudo."
             echo "  Install manually: 'apt-get install ast-grep' (needs root),"
