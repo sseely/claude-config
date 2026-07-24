@@ -117,3 +117,11 @@ Business communication:
 - Impact measurement
 
 For structural code pattern searches, prefer `sg` (ast-grep) over Grep when available.
+
+## Required Rules
+
+- `~/.claude/rules/research-sources.md`
+- `~/.claude/rules/testing.md`
+- `~/.claude/rules/observability.md`
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

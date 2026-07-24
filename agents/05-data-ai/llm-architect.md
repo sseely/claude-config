@@ -119,3 +119,12 @@ Token optimization:
 - Cost tracking
 
 For structural code pattern searches, prefer `sg` (ast-grep) over Grep when available.
+
+## Required Rules
+
+- `~/.claude/rules/security.md`
+- `~/.claude/rules/architecture.md`
+- `~/.claude/rules/observability.md`
+- `~/.claude/rules/api-design.md`
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

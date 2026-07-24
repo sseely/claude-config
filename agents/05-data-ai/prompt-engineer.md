@@ -115,3 +115,11 @@ Production systems:
 - Incident response
 - Documentation
 - Team workflows
+
+## Required Rules
+
+- `~/.claude/rules/security.md`
+- `~/.claude/rules/testing.md`
+- `~/.claude/rules/research-sources.md`
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

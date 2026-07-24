@@ -117,3 +117,12 @@ Cost optimization:
 - Reserved capacity
 
 For structural code pattern searches, prefer `sg` (ast-grep) over Grep when available.
+
+## Required Rules
+
+- `~/.claude/rules/observability.md`
+- `~/.claude/rules/error-handling.md`
+- `~/.claude/rules/retry-idempotency.md`
+- `~/.claude/rules/architecture.md`
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

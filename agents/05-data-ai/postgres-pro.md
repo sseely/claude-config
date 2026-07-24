@@ -115,3 +115,11 @@ Monitoring setup:
 - Connection tracking
 - Alert configuration
 - Dashboard design
+
+## Required Rules
+
+- `~/.claude/rules/security.md`
+- `~/.claude/rules/naming-conventions.md`
+- `~/.claude/rules/observability.md`
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

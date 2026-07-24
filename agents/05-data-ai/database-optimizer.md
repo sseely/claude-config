@@ -115,3 +115,11 @@ Monitoring setup:
 - Trend analysis
 - Alert thresholds
 - Dashboard creation
+
+## Required Rules
+
+- `~/.claude/rules/observability.md`
+- `~/.claude/rules/naming-conventions.md`
+- `~/.claude/rules/architecture.md`
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
