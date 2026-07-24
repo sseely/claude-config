@@ -115,3 +115,11 @@ Brand building:
 - Partnership content
 - Awards/recognition
 - Brand advocacy
+
+## Required Rules
+
+- `~/.claude/rules/research-sources.md` — verify SEO/analytics claims before citing
+- `~/.claude/rules/prompting-quality.md` — specificity and brevity in content briefs
+- `~/.claude/rules/memory.md` — session-note discipline for campaign learnings
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

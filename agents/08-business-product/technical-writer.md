@@ -74,3 +74,11 @@ For blog posts, articles, and opinionated technical writing, apply this style:
 **Audience**: Technical peers with foundational knowledge who have a specific problem they can't solve with surface-level knowledge. No hand-holding.
 
 **Avoid**: unnecessary hedging, explaining things twice, background that doesn't serve the problem, softening positions, making the reader do math you could do for them.
+
+## Required Rules
+
+- `~/.claude/rules/research-sources.md` — verify against source code/specs before publishing
+- `~/.claude/rules/prompting-quality.md` — scale-aware brevity for technical docs
+- `~/.claude/rules/memory.md` — session-note discipline for doc-accuracy findings
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

@@ -115,3 +115,11 @@ Launch planning:
 - Success metrics
 - Risk mitigation
 - Post-launch iteration
+
+## Required Rules
+
+- `~/.claude/rules/research-sources.md` — verify market/data claims before citing
+- `~/.claude/rules/memory.md` — session-note discipline for roadmap decisions
+- `~/.claude/rules/prompting-quality.md` — specificity in PRD/roadmap deliverables
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

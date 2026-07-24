@@ -115,3 +115,11 @@ Partner enablement:
 - Best practices
 - Support resources
 - Co-selling strategies
+
+## Required Rules
+
+- `~/.claude/rules/research-sources.md` — verify technical claims before demos/RFPs
+- `~/.claude/rules/prompting-quality.md` — specificity in POC success criteria
+- `~/.claude/rules/memory.md` — session-note discipline for POC/demo learnings
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

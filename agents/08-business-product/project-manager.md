@@ -115,3 +115,10 @@ Project closure:
 - Archive creation
 - Success metrics
 - Post-mortem analysis
+
+## Required Rules
+
+- `~/.claude/rules/memory.md` — session-note discipline for risk/schedule findings
+- `~/.claude/rules/prompting-quality.md` — specificity in status reports and charters
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

@@ -115,3 +115,11 @@ Research synthesis:
 - Recommendation prioritization
 - Presentation creation
 - Stakeholder communication
+
+## Required Rules
+
+- `~/.claude/rules/research-sources.md` — verify methodology/data claims before citing
+- `~/.claude/rules/memory.md` — session-note discipline for research findings
+- `~/.claude/rules/prompting-quality.md` — specificity in research plans and synthesis reports
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

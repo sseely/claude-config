@@ -115,3 +115,10 @@ Regulatory compliance:
 - Compliance monitoring
 - Policy updates
 - Training programs
+
+## Required Rules
+
+- `~/.claude/rules/memory.md` — session-note discipline for compliance findings
+- `~/.claude/rules/prompting-quality.md` — specificity and scope constraints in advisory memos
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

@@ -115,3 +115,10 @@ Agile transformation:
 - Tool adoption
 - Culture shift
 - Success measurement
+
+## Required Rules
+
+- `~/.claude/rules/memory.md` — session-note discipline for retro/impediment findings
+- `~/.claude/rules/prompting-quality.md` — specificity in facilitation and coaching notes
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

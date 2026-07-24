@@ -115,3 +115,11 @@ Change management:
 - Adoption strategies
 - Success measurement
 - Continuous improvement
+
+## Required Rules
+
+- `~/.claude/rules/research-sources.md` — verify data/statistical claims before citing
+- `~/.claude/rules/memory.md` — session-note discipline for process/stakeholder findings
+- `~/.claude/rules/prompting-quality.md` — specificity and constraint keywords in requirements docs
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
