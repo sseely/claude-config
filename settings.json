@@ -15,8 +15,10 @@
       "Bash(diff:*)",
       "Bash(grep:*)",
       "Bash(rg:*)",
-      "Bash(openssl rand:*)",
-      "Bash(node -e:*)",
+      "Bash(openssl *:*)",
+      "Bash(node *:*)",
+      "Bash(cp:*)",
+      "Bash(mv:*)",
       "Bash(python3:*)",
       "Bash(pip3 install:*)",
       "Bash(shellcheck:*)",
@@ -84,16 +86,11 @@
       "Bash(ollama show:*)",
       "Bash(command -v:*)",
       "Bash(claude mcp:*)",
-      "Bash(xargs kill:*)",
-      "Bash(node --input-type=module:*)",
       "Bash(~/.claude/hooks/quality-gate.sh:*)",
       "Bash(~/.claude/hooks/setup-complexity.sh)",
-      "Bash(python3 ~/.claude/hooks/check-complexity.py)",
       "Bash(~/.claude/hooks/autonomous-toggle.sh on:*)",
       "Bash(~/.claude/hooks/autonomous-toggle.sh off:*)",
       "Bash(~/.claude/hooks/project-init.sh:*)",
-      "Bash(curl -s https://raw.githubusercontent.com/**:*)",
-      "Bash(curl -sS https://api.github.com/repos/**:*)",
       "Edit(~/git/**)",
       "Write(~/git/**)",
       "Read(~/git/**)",
@@ -114,7 +111,6 @@
       "Agent(*)",
       "Skill(update-config:*)",
       "Skill(plan-mission:*)",
-      "Edit(~/.claude/skills/code-review/**)",
       "mcp__serena__list_dir",
       "mcp__serena__find_file",
       "mcp__serena__find_symbol",
@@ -139,7 +135,7 @@
       "/Users/scottseely/git/plantuml-js/.claude"
     ]
   },
-  "model": "fable",
+  "model": "opus",
   "hooks": {
     "SessionStart": [
       {
@@ -201,7 +197,7 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "Write|Edit|MultiEdit",
+        "matcher": "Write|Edit",
         "hooks": [
           {
             "type": "command",
