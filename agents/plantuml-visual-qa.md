@@ -290,3 +290,14 @@ cosmetic differences observed."
 - Preview container: `#preview`
 - Reference images committed at: `tests/visual/reference/<type>/canonical.png`
 - Report output: `test-results/visual-qa/index.html` (gitignored)
+
+## Required Rules
+
+- `~/.claude/rules/testing.md` — assertion quality: assert on specific
+  observed differences, never on "no exception thrown"
+- `~/.claude/rules/diagnosis.md` — a visual regression is an observed
+  discrepancy; state the mechanism before proposing a fix
+- `~/.claude/rules/testability.md` — inject non-determinism (clocks, random
+  seeds) so renders are reproducible across runs
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
