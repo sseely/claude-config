@@ -139,6 +139,7 @@
       "/Users/scottseely/git/plantuml-js/.claude"
     ]
   },
+  "model": "fable",
   "hooks": {
     "SessionStart": [
       {
