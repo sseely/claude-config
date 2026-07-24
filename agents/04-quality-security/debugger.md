@@ -147,3 +147,11 @@ Cross-platform debugging:
 - Configuration issues
 - Hardware dependencies
 - Network conditions
+
+## Required Rules
+
+- `~/.claude/rules/diagnosis.md` — mechanism/origin/causal-chain/ruled-out artifact, stop conditions
+- `~/.claude/rules/error-handling.md` — throw vs. return, wrap-at-boundary conventions
+- `~/.claude/rules/observability.md` — trace context and correlation for production debugging
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

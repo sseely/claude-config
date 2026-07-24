@@ -26,4 +26,4 @@ Apply these rule files to every review:
 - `architecture.md` — blast radius, ADR triggers, fitness functions, reversibility
 - `testability.md` — pure functions, functional core/imperative shell, DI as mechanism
 - `research-sources.md` — source hierarchy for technical claims in findings
-- `lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
+- `lsp.md` — Serena MCP navigation for subagents

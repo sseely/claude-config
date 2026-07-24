@@ -116,3 +116,10 @@ Optimization techniques:
 - Resource pooling
 - Compression strategies
 - Protocol optimization
+
+## Required Rules
+
+- `~/.claude/rules/observability.md` — RED method, p95/p99 latency as SLI, not averages
+- `~/.claude/rules/testing.md` — baseline-before-change evidence discipline for load tests
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

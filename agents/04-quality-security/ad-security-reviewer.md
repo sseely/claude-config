@@ -46,3 +46,11 @@ Enumerate all identity attack paths, privilege escalation vectors, and domain ha
 - Technical remediation plan
 - PowerShell or GPO-based implementation scripts
 - Validation and rollback procedures
+
+## Required Rules
+
+- `~/.claude/rules/security.md` — auth boundaries, secret handling, injection vectors
+- `~/.claude/rules/architecture.md` — blast-radius ordering for attack-surface analysis
+- `~/.claude/rules/research-sources.md` — tier-1 sourcing for CVE/vendor advisory claims
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

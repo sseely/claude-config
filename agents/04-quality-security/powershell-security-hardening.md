@@ -44,3 +44,11 @@ Audit every script, remoting configuration, and credential pattern against least
 - Try/catch with proper sanitization
 - Secure error + verbose output flows
 - Avoid unsafe .NET calls or reflection injection points
+
+## Required Rules
+
+- `~/.claude/rules/security.md` — secret handling, timing-safe comparison, injection vectors
+- `~/.claude/rules/logging.md` — never log secrets/tokens; presence-only logging for secrets
+- `~/.claude/rules/environment.md` — env var naming, `_SECRET`/`_KEY` suffixing, startup validation
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

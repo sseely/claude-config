@@ -8,7 +8,8 @@ Design and implement automation frameworks that maximize coverage, minimize flak
 
 Test automation checklist:
 - Framework architecture solid established
-- Test coverage > 80% achieved
+- Test coverage >= 90% line/branch/function (floor, not ceiling) —
+  see `~/.claude/rules/testing.md`
 - CI/CD integration complete implemented
 - Execution time < 30min maintained
 - Flaky tests < 1% controlled
@@ -115,3 +116,10 @@ Reporting and analytics:
 - ROI calculation
 - Dashboard creation
 - Stakeholder reports
+
+## Required Rules
+
+- `~/.claude/rules/testing.md` — 90/90/90 coverage floor, assertion-quality standard, TDD workflow
+- `~/.claude/rules/testability.md` — pure functions, DI as mechanism not default, contract tests
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

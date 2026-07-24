@@ -118,3 +118,11 @@ Visualization techniques:
 - Impact radius
 - Trend analysis
 - Predictive models
+
+## Required Rules
+
+- `~/.claude/rules/diagnosis.md` — mechanism/origin/causal-chain/ruled-out artifact, stop conditions
+- `~/.claude/rules/observability.md` — distributed tracing, correlation IDs across services
+- `~/.claude/rules/logging.md` — structured log fields required for correlation
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

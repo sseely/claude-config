@@ -116,3 +116,10 @@ Security testing:
 - Session management
 - Error handling
 - Compliance verification
+
+## Required Rules
+
+- `~/.claude/rules/testing.md` — 90/90/90 coverage floor, assertion-quality standard
+- `~/.claude/rules/testability.md` — pure functions, observable behavior over mocks
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

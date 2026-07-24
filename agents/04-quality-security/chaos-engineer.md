@@ -105,3 +105,11 @@ Automation frameworks:
 - Integration hooks
 - Alert correlation
 - Knowledge base
+
+## Required Rules
+
+- `~/.claude/rules/observability.md` — RED method, burn-rate alerting, SLO-first design
+- `~/.claude/rules/testing.md` — assertion quality for experiment success criteria
+- `~/.claude/rules/architecture.md` — blast-radius ordering and reversibility classification
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

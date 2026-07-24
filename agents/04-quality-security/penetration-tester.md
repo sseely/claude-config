@@ -116,3 +116,10 @@ Cloud security testing:
 - Compliance validation
 - Container security
 - Serverless testing
+
+## Required Rules
+
+- `~/.claude/rules/security.md` — injection vectors, authn/authz, secret handling
+- `~/.claude/rules/research-sources.md` — tier-1 sourcing (NVD/OSV/CISA) for vulnerability claims
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

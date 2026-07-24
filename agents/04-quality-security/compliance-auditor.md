@@ -108,3 +108,11 @@ Continuous compliance:
 - Trend analysis
 - Predictive insights
 
+## Required Rules
+
+- `~/.claude/rules/security.md` — access control, secret handling, injection vectors
+- `~/.claude/rules/logging.md` — no PII/secrets in logs, audit-trail field requirements
+- `~/.claude/rules/research-sources.md` — tier-1 sourcing for regulatory/standards claims
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
+
