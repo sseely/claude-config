@@ -132,9 +132,16 @@ model IDs. The following are ALL valid `model:` values in agent frontmatter and
 | `opusplan` | **Valid alias**: uses `opus` in plan mode, switches to `sonnet` for execution |
 | `opusplan[1m]` | **Valid variant**: `opusplan` with 1M token context window |
 
-Full Anthropic API model IDs (`claude-opus-4-8`, `claude-sonnet-5`,
-`claude-haiku-4-5-20251001`, `claude-fable-5`) are also valid (the `sonnet`
-alias now resolves to Sonnet 5; `claude-sonnet-4-6` remains a valid pinned ID).
+**Version note (v2.1.219+):** Installed Claude Code is v2.1.219. On this and
+later versions, the `opus` alias resolves to **Opus 5** (`claude-opus-5`), not
+Opus 4.8; the `default` alias likewise resolves to Opus 5. Do not flag agent
+or settings configs pinning `opus` or `default` as stale on this basis — this
+is the current resolution, not a version mismatch.
+
+Full Anthropic API model IDs (`claude-opus-4-8`, `claude-opus-5`,
+`claude-sonnet-5`, `claude-haiku-4-5-20251001`, `claude-fable-5`) are also
+valid (the `sonnet` alias now resolves to Sonnet 5; `claude-sonnet-4-6`
+remains a valid pinned ID).
 Note: Fable 5 runs 1M context natively — there is NO `fable[1m]` variant, so
 `claude-fable-5[1m]` is invalid; use plain `fable` / `claude-fable-5`.
 `sonnetplan` is NOT a documented alias. When auditing agent `model:`
@@ -144,11 +151,15 @@ Effort levels (set via `effort:` frontmatter or `/effort` command):
 
 | Level | Supported on | Notes |
 |-------|-------------|-------|
-| `low` | Opus 4.8, 4.7, 4.6, Sonnet 5, Sonnet 4.6 | Fastest/cheapest |
+| `low` | Opus 5, Opus 4.8, 4.7, 4.6, Sonnet 5, Sonnet 4.6, Fable 5 | Fastest/cheapest |
 | `medium` | Same | |
-| `high` | Same | Default on Opus 4.8, Opus 4.6, Sonnet 5, Sonnet 4.6 |
-| `xhigh` | Opus 4.8, Opus 4.7, Sonnet 5 | Default on Opus 4.7 |
-| `max` | Opus 4.8, Opus 4.7, Sonnet 5 | Session-only; not saved to settings |
+| `high` | Same | Default on Opus 4.8, Opus 4.6, Sonnet 5, Sonnet 4.6, Fable 5 |
+| `xhigh` | Opus 5, Opus 4.8, Opus 4.7, Sonnet 5, Fable 5 | Default on Opus 4.7 |
+| `max` | Opus 5, Opus 4.8, Opus 4.7, Sonnet 5, Fable 5 | Session-only; not saved to settings |
+
+Note: Fable 5 (`claude-fable-5`) supports the full `low`–`max` effort range
+(previously omitted from this table) — it is the autonomous/mission-brief
+execution model, not merely a research-agent alias.
 
 Note: `ultracode` is **not** an effort level — it is a Workflow opt-in keyword
 (standing authorization to author/run multi-agent workflows). Do not list it as
@@ -347,9 +358,15 @@ partial findings — note which pages were fully read vs. skimmed. Agent A
 should fetch in this priority order so partial output is still high-signal:
 (1) new blog posts, (2) hooks and settings doc pages, (3) remaining doc pages.
 
+**Agent-crash handling:** If any agent in this phase returns no output
+(crashed, killed, or timed out), relaunch it once. If it fails again on
+retry, proceed without it and record the unaudited axis as an explicit gap
+in the Phase 4 report.
+
 **Phase 1 completion:** Each agent writes its full output to
 `.agent-notes/self-improve-phase1-[A|B|C|X].md` before returning. Once all
-four have completed, append `phase-1: done` to `~/.claude/.self-improve-progress.md`.
+four have completed (or been retried/gapped per the crash-handling rule
+above), append `phase-1: done` to `~/.claude/.self-improve-progress.md`.
 
 ---
 
@@ -616,9 +633,15 @@ concrete fix. No findings without a concrete fix.
 
 Wait for all five agents to complete before Phase 3.
 
+**Agent-crash handling:** If any agent in this phase returns no output
+(crashed, killed, or timed out), relaunch it once. If it fails again on
+retry, proceed without it and record the unaudited axis as an explicit gap
+in the Phase 4 report.
+
 **Phase 2 completion:** Each agent writes its full output to
 `.agent-notes/self-improve-phase2-[D|E|F|G|H].md` before returning. Once all
-five have completed, append `phase-2: done` to `~/.claude/.self-improve-progress.md`.
+five have completed (or been retried/gapped per the crash-handling rule
+above), append `phase-2: done` to `~/.claude/.self-improve-progress.md`.
 
 ---
 
@@ -643,15 +666,14 @@ Agent X's Discovery Summary):
      suppression. This makes the frontier-lag explicit and auditable.
    - **Low evidence OR Low applicability** → rule wins, finding dropped.
    Document the reasoning in all three cases.
-4. Score each finding 0-100 using this rubric (apply yourself, no
-   need for a separate scoring agent for this skill):
-   - **0**: False positive, pre-existing issue not worth surfacing
-   - **25**: Might be real, unverified
-   - **50**: Verified, but low-frequency or low-impact
-   - **75**: Double-checked, will be hit in practice
-   - **100**: Confirmed, happens frequently, direct evidence
-5. Filter: drop score 0-24; classify 25-49 as Note or Suggestion;
-   cap 50-74 at Suggestion; keep 75+ as-is.
+4. Score each finding 0-100 using the shared rubric in
+   `skills/code-review/references/scoring-rubric.md` (see the "Scoring
+   rubric" heading for the 0/25/50/75/100 table, and the "Filtering rules"
+   below it for the drop/classify/cap thresholds).
+   **Self-improve delta:** apply the rubric yourself — unlike code-review,
+   this skill does not spawn a separate Haiku scoring agent to run it.
+5. Apply the filtering rules from that same reference (drop 0-24; classify
+   25-49 as Note or Suggestion; cap 50-74 at Suggestion; keep 75+ as-is).
 
 **Phase 3 completion:** Write the deduplicated, scored, filtered findings to
 `.agent-notes/self-improve-phase3.md`. Append `phase-3: done` to
@@ -675,7 +697,7 @@ confidence score, issue, and concrete fix.
 For Notes: include the full comment text ready to paste.
 
 **Verdict**: APPROVE / APPROVE WITH NITS / REQUEST CHANGES
-(APPROVE if Critical=0; NITS if Critical=0 and Warning<3;
+(APPROVE if Critical=0 and Warning=0; NITS if Critical=0 and 1≤Warning<3;
 REQUEST CHANGES if Critical>0 or Warning≥3)
 
 **Convergence alarm — required when verdict is APPROVE or APPROVE WITH NITS:**
