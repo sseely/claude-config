@@ -20,6 +20,58 @@ or change. May be a single sentence or multiple paragraphs.
 If `$ARGUMENTS` is empty, ask the user to describe what they want
 built.
 
+## Phase 0 — Resume check
+
+**Resume check**: Before doing anything, check `.plan-mission-progress.md`
+in the project root. This mirrors the resume-gate pattern in
+`skills/self-improve/SKILL.md` Phase 0.
+
+If it exists:
+- Read it. It records, for each phase (1 through 7), whether that
+  phase's output is `pending`, `in-progress`, or `confirmed` — and for
+  phases 2-6 it embeds the confirmed content itself (file table,
+  architecture decisions, operational-readiness answers, task
+  decomposition, stop conditions).
+- Skip straight past any phase marked `confirmed` or `done` — reuse the
+  recorded content instead of re-deriving it.
+- Resume from the first phase marked `pending`, `in-progress`, or
+  absent. If a phase's analysis exists but is not yet `confirmed`,
+  re-present that existing output to the user for confirmation — do
+  not redo the analysis.
+- If the file doesn't exist, this is a fresh run: start at Phase 1.
+
+After completing Phase 1, and after every user confirmation in Phases 2
+through 6, and after Phase 7 finishes, write or update
+`.plan-mission-progress.md`:
+
+```
+# Plan Mission Progress — [feature-name]
+
+## Phase 1: done
+[stack, test/lint/build commands, directory map]
+
+## Phase 2: confirmed
+[file table]
+
+## Phase 3: confirmed
+[architecture decisions]
+
+## Phase 4: confirmed
+[operational readiness answers]
+
+## Phase 5: confirmed
+[task decomposition]
+
+## Phase 6: confirmed
+[stop / push-forward conditions]
+
+## Phase 7: done
+Brief written to plans/[feature-name]/
+```
+
+Delete `.plan-mission-progress.md` once Phase 8 passes and the brief is
+handed off — its content now lives in the generated brief.
+
 ## Phase 1 — Understand the codebase
 
 Check whether an architecture overview exists in the current project.
@@ -233,95 +285,24 @@ The brief is a **directory of focused documents**, not a single
 monolithic file. This keeps each doc within a healthy context
 window and avoids burying critical information deep in a long file.
 
-### Directory structure
+Full directory layout and the step-by-step generation procedure are
+in [references/brief-structure.md](references/brief-structure.md) —
+read that file when you reach this phase. Summary of what gets
+created under `plans/[feature-name]/`:
 
-```
-plans/[feature-name]/
-  README.md              ← overview + index (the only file the
-                           executor MUST read on startup)
-  decisions.md           ← architecture decisions from Phase 3
-  batch-1/
-    overview.md          ← batch description, tasks, write-sets
-    T1-[name].md         ← full task spec (context, read-set,
-                           write-set, interface contracts, etc.)
-    T2-[name].md
-  batch-2/
-    overview.md
-    T3-[name].md
-  diagrams/
-    data-flow.md         ← mermaid sequence diagrams
-    component-map.md     ← mermaid graph of affected components
-  decision-journal.md    ← empty at creation, appended during
-                           execution
-```
+- `README.md` — overview + index (the only file the executor MUST
+  read on startup)
+- `decisions.md` — architecture decisions from Phase 3
+- `batch-N/overview.md` + `batch-N/TN-[name].md` — per-batch task
+  specs (context, read-set, write-set, interface contracts,
+  observability requirements, rollback notes, acceptance criteria)
+- `diagrams/data-flow.md` and `diagrams/component-map.md` — mermaid
+  diagrams
+- `decision-journal.md` — empty at creation, appended during execution
+- `.claude/settings.autonomous.json` — tailored from
+  `~/.claude/templates/autonomous-settings.json`
 
-Phases may have sub-phases. If a batch has >5 tasks, split it
-into sub-directories (`batch-2a/`, `batch-2b/`) with their own
-overview docs.
-
-### Generation steps
-
-1. Create the directory structure above.
-2. Write `README.md` as the overview and index:
-   - Objective (one paragraph)
-   - Branch info
-   - Constraints (stop/push-forward conditions from Phase 6)
-   - Quality gate commands (from Phase 1)
-   - Table of batches with status checkboxes
-   - Links to every other doc in the plan
-   This is what the executor re-reads after compaction. Keep it
-   under 200 lines — it must fit comfortably in context alongside
-   the CLAUDE.md chain.
-3. Write `decisions.md` with the confirmed architecture decisions
-   from Phase 3.
-4. For each batch, write `batch-N/overview.md` with:
-   - Batch description and dependency summary
-   - Task table with explicit dependency column:
-     `| ID | Description | Agent | Writes | Depends On | Done |`
-     The `Depends On` column lists task IDs (e.g. `T1, T2`) or
-     `—` for tasks with no dependencies. Tasks within the same
-     batch that have `—` or depend only on prior-batch tasks can
-     run in parallel; the executor uses this column to decide.
-5. For each task, write `batch-N/TN-[name].md` following the
-   agent prompt structure from `parallelism.md`:
-   - Context, task, write-set, read-set, architecture decisions
-     relevant to this task, interface contracts, acceptance
-     criteria (Given/When/Then from Phase 5), quality bar
-   - **Observability requirements** — which SLIs this task must
-     instrument, what trace spans to add, whether a dashboard
-     panel needs updating. If none, write "N/A — no new
-     observable operations."
-   - **Rollback notes** — the rollback classification from Phase
-     4 (Reversible / Reversible with migration / Irreversible)
-     and any per-task migration steps required.
-   - **Scope read-set references.** Instead of listing whole
-     files, point to the relevant section or line range:
-     `decisions.md#token-storage`, `src/api/subscribe.js:15-40`.
-     This keeps agent context small — load only what the task
-     needs, not the entire artifact.
-   - The executor can pass this file directly as the agent prompt
-6. Write mermaid diagrams in `diagrams/`:
-   - `data-flow.md` — sequence diagrams for key flows affected
-     by the feature
-   - `component-map.md` — graph showing which components are
-     touched and how they relate
-   Use mermaid fenced blocks (```mermaid).
-7. Write an empty `decision-journal.md` with just the table
-   header.
-8. Generate a project-specific `.claude/settings.autonomous.json`
-   for autonomous execution. Start from
-   `~/.claude/templates/autonomous-settings.json`, then tailor
-   based on what Phase 1 discovered:
-   - If the project uses MCP tools (playwright, etc.), add
-     those permissions
-   - If the project has specific build/test scripts, add
-     those `Bash()` patterns
-   - If the project doesn't need web access, drop `WebSearch`
-     and `WebFetch`
-   Write to `.claude/settings.autonomous.json` (NOT the active
-   settings.json — the user toggles it on via
-   `~/.claude/hooks/autonomous-toggle.sh`).
-9. Ensure `plans/` and `.claude/` are in `.gitignore`.
+Ensure `plans/` and `.claude/` are in `.gitignore`.
 
 ## Phase 8 — Pre-flight check
 
@@ -349,6 +330,7 @@ Print the path to the generated brief and tell the user:
 > 1. `~/.claude/hooks/autonomous-toggle.sh on .`
 > 2. "Execute the mission brief at plans/[name]/README.md"
 > Recommended execution model: `claude-fable-5` (long-horizon, native 1M context). Enable with `~/.claude/hooks/autonomous-toggle.sh on`.
+> Note: the interactive planning phases you just went through (Phases 1-6, 8) ran on Opus 5, the session's default `opus` alias — this recommendation covers autonomous mission execution only.
 
 ## Rules
 
@@ -366,32 +348,12 @@ Print the path to the generated brief and tell the user:
 
 ## Document hygiene
 
-These rules apply to every file generated in the plan directory:
-
-- **No file > 500 lines.** If a document is growing past this,
-  split it. The executor will read these into its context window —
-  a 1000-line file wastes half the window on one doc.
-- **Front-load the important content.** The first 50 lines of
-  any doc should contain the information needed to decide whether
-  to keep reading. Put tables, summaries, and decisions at the
-  top. Put details, examples, and edge cases below.
-- **Use mermaid for all diagrams.** No ASCII art, no prose
-  descriptions of relationships. Mermaid renders in most editors
-  and is token-efficient.
-- **One concept per file.** A task spec is one file. A batch
-  overview is one file. Architecture decisions are one file. Don't
-  combine unrelated concerns.
-- **No minimum length.** A 3-line task file is fine. A one-liner
-  decision doc is fine. Every file should be exactly as long as
-  it needs to be — no padding, no boilerplate headers that add
-  nothing. Short files are cheap to read into context; that's
-  the point.
-- **The README.md is an index, not a dump.** It links to other
-  docs — it does not duplicate their content. If the executor
-  needs detail, it follows a link and reads the specific file.
-- **Logical directory nesting.** Group by batch, not by doc type.
-  The executor works batch-by-batch, so the file structure should
-  match the execution order.
+Full rules (file length limits, front-loading, mermaid usage,
+one-concept-per-file, README as index not dump, directory nesting)
+are in
+[references/brief-structure.md#document-hygiene](references/brief-structure.md#document-hygiene).
+They apply to every file generated in the plan directory during
+Phase 7.
 
 ## Model Routing
 
