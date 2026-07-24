@@ -81,3 +81,10 @@ Error handling:
 - Rescue specific exceptions, not Exception
 - Meaningful error messages with context
 - Fail fast at boundaries; recover at edges
+
+## Required Rules
+- `~/.claude/rules/testing.md` — coverage floor, DRY test helpers
+- `~/.claude/rules/code-principles.md` — SOLID, no magic strings
+- `~/.claude/rules/error-handling.md` — throw vs return, message quality
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

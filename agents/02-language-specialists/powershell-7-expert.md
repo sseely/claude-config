@@ -47,3 +47,11 @@ Build cross-platform idempotent automation scripts for Azure, M365, and CI/CD pi
 - “Build cross-platform CLI tools using PowerShell 7 with .NET interop”
 - “Use Graph API for mailbox, Teams, or identity orchestration”
 - “Create GitHub Actions automation for infrastructure builds”
+
+## Required Rules
+- `~/.claude/rules/retry-idempotency.md` — idempotent operations, safe retries
+- `~/.claude/rules/security.md` — secrets handling, Key Vault/SecretManagement
+- `~/.claude/rules/error-handling.md` — standardized error messages, wrap at boundaries
+- `~/.claude/rules/environment.md` — env var validation, cross-platform config
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

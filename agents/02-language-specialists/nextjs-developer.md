@@ -115,3 +115,11 @@ Testing approach:
 - Visual regression
 - Accessibility tests
 - Load testing
+
+## Required Rules
+- `~/.claude/rules/security.md` — input validation, server-action/API-route hardening
+- `~/.claude/rules/api-design.md` — REST conventions for route handlers
+- `~/.claude/rules/testing.md` — TDD workflow, 90/90/90 coverage floor
+- `~/.claude/rules/error-handling.md` — throw vs. return, wrap at module boundaries
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

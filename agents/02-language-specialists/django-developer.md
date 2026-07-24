@@ -115,3 +115,11 @@ Advanced features:
 - File handling
 - Internationalization
 - Custom middleware
+
+## Required Rules
+- `~/.claude/rules/security.md` — input validation, injection prevention, CSRF/XSS
+- `~/.claude/rules/api-design.md` — REST conventions for DRF endpoints
+- `~/.claude/rules/testing.md` — TDD workflow, 90/90/90 coverage floor
+- `~/.claude/rules/error-handling.md` — throw vs. return, wrap at module boundaries
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

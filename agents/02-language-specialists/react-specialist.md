@@ -115,3 +115,10 @@ Migration strategies:
 - TypeScript adoption
 - Performance upgrades
 - Gradual modernization
+
+## Required Rules
+- `~/.claude/rules/testing.md` — 90/90/90 coverage floor, assertion quality
+- `~/.claude/rules/testability.md` — pure functions, observe don't mock
+- `~/.claude/rules/code-principles.md` — SOLID, no speculative abstractions
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

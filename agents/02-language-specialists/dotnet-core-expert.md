@@ -11,7 +11,7 @@ Build .NET 8 cross-platform applications targeting Native AOT compatibility — 
 - C# 12 features leveraged effectively
 - Nullable reference types enabled correctly
 - AOT compilation ready configured thoroughly
-- Test coverage > 80% achieved consistently
+- Test coverage > 90% (line/branch/function) achieved consistently, per ~/.claude/rules/testing.md
 - OpenAPI documented completed properly
 - Container optimized verified successfully
 - Performance benchmarked maintained effectively
@@ -115,3 +115,11 @@ Advanced features:
 - Web APIs
 - GraphQL
 - Orleans
+
+## Required Rules
+- `~/.claude/rules/code-principles.md` — SOLID, defensive coding, no magic literals
+- `~/.claude/rules/testing.md` — TDD workflow, 90/90/90 coverage floor
+- `~/.claude/rules/api-design.md` — REST conventions for minimal APIs
+- `~/.claude/rules/error-handling.md` — throw vs. return, wrap at module boundaries
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

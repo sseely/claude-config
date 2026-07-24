@@ -48,3 +48,11 @@ Implement enterprise automation scripts for Active Directory, DNS, DHCP, and GPO
 - “Automate DHCP reservations for new workstations”
 - “Update DNS records based on inventory data”
 - “Bulk-adjust GPO links across OUs with rollback support”
+
+## Required Rules
+- `~/.claude/rules/security.md` — least-privilege access, secrets handling
+- `~/.claude/rules/logging.md` — structured logs, no PII/secrets, audit trails
+- `~/.claude/rules/error-handling.md` — try/catch discipline, error message quality
+- `~/.claude/rules/retry-idempotency.md` — safe retries, dry-run/rollback design
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

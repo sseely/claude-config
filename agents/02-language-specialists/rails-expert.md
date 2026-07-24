@@ -115,3 +115,11 @@ Modern features:
 - CI/CD pipelines
 - Monitoring setup
 - Error tracking
+
+## Required Rules
+- `~/.claude/rules/testing.md` — TDD, 90/90/90 coverage, assertion quality
+- `~/.claude/rules/security.md` — input validation, injection prevention
+- `~/.claude/rules/error-handling.md` — throw vs return, background job error handling
+- `~/.claude/rules/code-principles.md` — SOLID, no magic strings
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

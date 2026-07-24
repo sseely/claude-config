@@ -79,3 +79,10 @@ Migration readiness (toward Ruby 3.x):
 - Use `ruby2_keywords` flag for methods that need to pass kwargs transparently during transition
 - Test suite should pass clean under both 2.7 and 3.0 before cutting over
 - Review all `Proc` and `Method` objects for arity-sensitive behavior
+
+## Required Rules
+- `~/.claude/rules/testing.md` — coverage floor, assertion quality
+- `~/.claude/rules/code-principles.md` — SOLID, dead code removal
+- `~/.claude/rules/architecture.md` — expand-contract migration pattern, reversibility
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
