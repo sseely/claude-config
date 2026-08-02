@@ -1,152 +1,132 @@
-# Self-Improve Phase 1 — Agent B Findings
+# Self-Improve Phase 1 — Agent B: Model Routing & API-Surface Currency Audit
 
-**Scope:** Model version and API-surface changes the config may be lagging on.
-**Date:** 2026-07-24 (supersedes 2026-06-20 and 2026-07-01 runs in this file's
-history — both prior runs' content is preserved in git history / prior tool
-output; this run re-verifies against live docs and records only the delta).
+Run date: 2026-08-01. Claude Code version: 2.1.220. Supersedes stale
+2026-07-24 copy of this file.
 
-## Fetch guard results
-All three assigned URLs returned 200 with rich content (all several KB, no
-truncation/redirect issues). No FETCH GUARD warnings triggered.
-- https://code.claude.com/docs/en/model-config — OK (~28K chars persisted)
-- https://platform.claude.com/docs/en/about-claude/models/overview — OK
-- https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5 — OK
+## Model/Alias Changes Found
 
----
+None. Every `model:` value found under `agents/` is one of `opus`, `sonnet`,
+`haiku`, `opusplan` — all valid aliases per the pre-seeded table and
+confirmed live against `https://code.claude.com/docs/en/model-config`
+(fetched 2026-08-01). No agent pins a full model ID, no `claude-opus-4-1`,
+no `sonnetplan`, no `fable[1m]`, no other invalid string.
 
-## 1. Deprecated patterns present in config
+`settings.json:141` sets top-level `"model": "opus"` — valid; on the
+installed CLI (v2.1.220, ≥ v2.1.219 threshold confirmed live) this resolves
+to Opus 5 on the Anthropic API. Confidence: HIGH.
 
-### D1 (RESOLVED since 2026-06-20 audit)
-`skills/self-improve/SKILL.md:125` — `best` alias description now correctly
-reads "Fable 5 where the account has access, else `opus`". The 2026-06-20
-finding that this was stale is no longer true. No action needed.
+## Deprecated Patterns In Current Config
 
-### D2 (STILL OPEN) — effort table in SKILL.md omits Fable 5 entirely
-`skills/self-improve/SKILL.md:145-151` — the effort-level support table lists
-`low/medium/high` as available on "Opus 4.8, 4.7, 4.6, Sonnet 5, Sonnet 4.6"
-and `xhigh/max` on "Opus 4.8, Opus 4.7, Sonnet 5" — Fable 5 is not in any row.
-Live docs (model-config, "Adjust effort level" table) state: **Fable 5 |
-low, medium, high, xhigh, max**. Fable 5 supports the full range including
-`xhigh`/`max`, same as Sonnet 5/Opus 4.8/4.7. This table under-reports valid
-effort values for Fable and should add a `Fable 5` entry to every row.
-Note: this task's own pre-seeded effort-level list has the identical gap
-(lists xhigh/max as "Opus 4.8, Opus 4.7, Sonnet 5" without Fable 5) — the
-SKILL.md table appears to have been generated from the same incomplete
-source. Recommend fixing both the seed text and SKILL.md together.
+None found. `grep -rn "budget_tokens"` across `agents/`, `rules/`,
+`skills/` returns zero hits outside `rules/parallelism.md` and
+`rules/extended-thinking.md`, and in both files the term appears only in
+prose *warning against* using it (correctly stating it 400s on Opus 5 /
+Opus 4.8 / Sonnet 5, deprecated on Opus 4.6 / Sonnet 4.6) — not as a
+parameter anyone is actually setting. Confidence: HIGH.
 
-### D3 — no invalid model/effort values in current config (confirmed clean)
-- `grep -rn "^model:" agents/` → 130 agents, all values ∈ {sonnet, opus,
-  haiku, opusplan}. All valid per model-config aliases table. No
-  `sonnetplan`, no pinned `claude-opus-4-1`, no other invalid string.
-- `grep -rn "^effort:" agents/` → 18 agents, all `effort: high`. Valid on
-  every model those agents use (sonnet/opus default to `high` anyway, so
-  these are redundant-but-harmless, not wrong).
-- `settings.json:142` `"model": "fable"` — valid alias (session default
-  intentionally changed; not flagged as error per task instructions).
-- `settings.json:253` `"effortLevel": "high"` — valid; matches Fable 5's
-  documented default effort (`high`).
+No `claude-opus-4-*` / `claude-sonnet-4-*` full IDs pinned anywhere in
+config (only appear in prose inside `rules/parallelism.md`,
+`rules/extended-thinking.md`, and `skills/self-improve/SKILL.md`,
+correctly used as examples of deprecated/removed parameter behavior).
 
-### D4 (NEW) — fallbackModel set as a bare string, not an array
-`templates/autonomous-settings.json:2` — `"fallbackModel": "opus"`.
-Every documented example of `fallbackModel` in settings
-(code.claude.com/docs/en/model-config, "Fallback model chains") uses an
-**array**: `"fallbackModel": ["claude-sonnet-5", "claude-haiku-4-5"]`. The
-docs describe it as "one or more fallback models" configured "as an array."
-A bare string was not verified against the live schema (no API to test
-against in this audit) — recommend converting to `["opus"]` defensively
-since the documented contract is array-typed, or confirm with a live test
-that Claude Code coerces a scalar. Not confirmed broken; confidence MEDIUM.
+## Bug Found — invalid model+effort combination
 
-### D5 — Opus 4.1 retirement now 12 days out (2026-08-05)
-`claude-opus-4-1-20250805` is deprecated and retires **2026-08-05** per
-models/overview. Confirmed via grep: **not referenced anywhere in
-~/.claude** (no action required), but flagging because the retirement date
-has moved from "3 weeks out" (07-01 audit) to imminent. Informational only.
+- `agents/04-quality-security/compliance-auditor.md:5-6` — `model: haiku`
+  paired with `effort: high`. Haiku does not appear in the effort-support
+  table on either side: the pre-seeded task knowledge states "the `effort`
+  parameter returns 400 on Haiku — do not set it," and the live fetch of
+  `code.claude.com/docs/en/model-config` § Adjust effort level confirms:
+  "The available effort levels depend on the model. Models not listed here
+  do not support effort" — Haiku is absent from that table entirely (only
+  Fable 5, Opus 5/Sonnet 5/Opus 4.8/Opus 4.7, and Opus 4.6/Sonnet 4.6 are
+  listed). This is the only `model:`/`effort:` mismatch found across all 18
+  agents that set `effort:` — every other `effort: high` agent pairs with
+  `sonnet` or `opusplan`, both of which support `high`.
+  Fix: delete the `effort: high` line from `compliance-auditor.md`
+  (haiku agents elsewhere in the repo — e.g. `search-specialist.md`,
+  `trend-analyst.md`, `qa-expert.md`, `error-detective.md`,
+  `penetration-tester.md`, `accessibility-tester.md` — correctly omit
+  `effort:` entirely).
+  Confidence: 90 (mechanism confirmed against two independent sources;
+  exact runtime failure mode — hard error vs. silent clamp — not
+  independently reproduced, but the setting is unsupported regardless).
 
----
+## New Capabilities Not Leveraged
 
-## 2. New capabilities not yet leveraged
+- **`ultracode` effort-menu entry confirmed as Workflow-only, not an
+  effort level** — matches the pre-seeded warning exactly. Live fetch:
+  "The `/effort` menu also offers `ultracode`. Ultracode is a Claude Code
+  setting rather than a model effort level: it sends `xhigh` to the model
+  and additionally has Claude orchestrate dynamic workflows for substantive
+  tasks." No config in this repo references `ultracode` — nothing to fix,
+  noted for completeness. Confidence: HIGH.
+- **Organization effort limits / `availableModels` / fallback model
+  chains** (`fallbackModel` in settings) — none of these are configured in
+  `settings.json` or `templates/autonomous-settings.json`. Not a defect
+  (this is a personal, non-enterprise config), but worth noting as
+  available knobs if `settings.json` model routing ever needs a hard
+  ceiling or an overload/availability fallback distinct from the
+  content-based Fable/Opus 5 safety-classifier fallback. Confidence:
+  MEDIUM (not verified whether the user wants this).
+- **Category-based automatic model fallback (Fable 5 → Opus 5/Opus 4.8 by
+  category)** requires Claude Code v2.1.219+, which the installed 2.1.220
+  satisfies — this is active by default, no action needed.
+- **Effort levels for Opus 5 / Sonnet 5 confirmed as full
+  `low/medium/high/xhigh/max`** — `rules/parallelism.md` already states
+  this correctly for Sonnet 5. `rules/extended-thinking.md` states the
+  same range for Sonnet 5 but never mentions Opus 5 in its per-model
+  default-effort sentence (only names Opus 4.8, Sonnet 5, Sonnet 4.6, Opus
+  4.7). Opus 5 behaves identically to Opus 4.8 for effort (default
+  `high`, supports the full range) so this is not a factual error, just an
+  incomplete enumeration. Confidence: 60 (cosmetic/completeness, not a
+  behavioral bug — below the report cutoff).
 
-### N1 — `availableModels` + `enforceAvailableModels` governance unused
-No `availableModels` allowlist anywhere in settings.json or templates
-(grep clean). Could codify the existing informal tiering (haiku for
-scoring/research, sonnet default, opus/opusplan for architecture, fable for
-long-horizon) as an enforced allowlist per role. Unchanged from 2026-06-20
-finding N3 — still not adopted.
+## Recommended Model Routing Table
 
-### N2 — `fallbackModel` chain absent from the main settings.json
-Only `templates/autonomous-settings.json` sets a fallback (and only as a
-bare string, see D4). The primary `settings.json` (which now runs
-`"model": "fable"` as the session default) has **no fallback chain** for
-overload/server-error conditions. Given Fable 5 also has *content-based*
-automatic fallback to Opus 4.8 on safety-classifier flags (separate
-mechanism, already documented in parallelism.md), an *availability*-based
-`fallbackModel: ["opus", "sonnet"]` in settings.json would cover the
-complementary failure mode (Fable overloaded/unavailable, not flagged).
+No changes recommended to `rules/parallelism.md`'s routing table — it
+already reflects Opus 5 as current (`opus` → `claude-opus-5`), already has
+the v2.1.219 version-gate note, and already lists Fable/Sonnet 5/Haiku
+correctly. Table verified consistent with the live model-config and
+models-overview fetches on every cell checked (aliases, context windows,
+effort defaults).
 
-### N3 — Fable 5 feature surface not referenced in rules
-Fable 5 supports (per the intro doc): task budgets (beta header
-`task-budgets-2026-03-13`), the memory tool, code execution tool,
-programmatic tool calling, context-editing tool-result clearing, and
-compaction — none of these are mentioned in `rules/parallelism.md`'s Fable
-section or `rules/extended-thinking.md`. Not necessarily gaps requiring
-action (may be out of scope for this repo's usage pattern), but worth a
-scan if any agent/skill would benefit from task budgets on long
-mission-brief runs.
+## Fetch Warnings
 
-### N4 — Agent Teams as a distinct multi-agent mode not documented
-WebSearch results (Tembo, eesel, Shipyard) consistently describe three
-Claude Code multi-agent patterns: (a) subagents within a session, (b) the
-built-in **Agent Teams** feature (shared task list, teammate cross-talk via
-SendMessage, parallel teammates on one machine), and (c) external
-orchestrators. `rules/parallelism.md` documents (a) and references the
-`Workflow` tool, but does not name Agent Teams as a distinct pattern —
-despite this session's own tool surface (`SendMessage`, `TaskStop` with
-"agent-team teammates" in its description) clearly supporting it. Consider
-a short subsection distinguishing "subagent (report-back)" from "team
-(shared task list)" dispatch, per the search-result framing.
+None. All three required fetches returned 200 with substantial content:
 
----
+- `https://code.claude.com/docs/en/model-config` — ~28k tokens rendered,
+  no truncation issues after paging.
+- `https://platform.claude.com/docs/en/about-claude/models/overview` — full
+  content returned, includes Opus 5 launch info, so the 2026-07-24
+  staleness warning in the task brief did NOT reproduce on this run.
+- `https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5`
+  — full content returned.
 
-## 3. Recommended model-routing table (2026-07-24 — unchanged from 07-01)
+WebSearch cross-check ("Anthropic new Claude model release August 2026")
+returned low-quality aggregator/blog sources (stormap.ai, scriptbyai.com,
+buildfastwithai.com) with one internally-contradictory claim ("Opus 4.8
+slated for late 2026" — factually wrong, Opus 4.8 already shipped and is
+superseded by Opus 5 per every authoritative source fetched this run).
+This is flagged as **LOW confidence, do not trust** — the authoritative
+platform.claude.com fetches are unambiguous and current, and win over the
+search aggregator per the research-sources hierarchy (Tier 1 docs over
+Tier 5 web). No discrepancy between WebSearch and the docs regarding
+which models are *current* (both agree Opus 5 is current); the only
+disagreement is the aggregator's false claim about Opus 4.8's release
+timing, which is simply wrong and not treated as a real discrepancy to
+resolve.
 
-| Role | Recommended | Effort | Notes |
-|------|-------------|--------|-------|
-| Long-horizon autonomous / mission execution | `fable` (`claude-fable-5`) | `high`→`xhigh`/`max` for hard runs | Falls back to Opus 4.8 automatically on safety-classifier flags (security/biology domains) |
-| Planning / architecture | `opus` (`claude-opus-4-8`) | `high` default; `xhigh`/`max` for deep multi-path | 1M context on API |
-| `opusplan` hybrid | `opusplan` / `opusplan[1m]` | n/a | Opus in plan mode, Sonnet in execution |
-| Implementation | `sonnet` (`claude-sonnet-5`) | `high` default; `medium` if token-sensitive | Native 1M context, no `[1m]` suffix needed on API |
-| Scoring / dedup / format validation | `haiku` (`claude-haiku-4-5-20251001`) | n/a — `effort` param returns 400 | 200k context cap |
+## Candidate URLs Discovered
 
-This matches the live table in `rules/parallelism.md` almost exactly; the
-only gap is D2 above (Fable missing from the SKILL.md effort-support table,
-not from parallelism.md itself, which already lists Fable correctly).
+| URL | purpose | Agent B | 2026-08-01 |
+|---|---|---|---|
+| https://claude.com/blog/claude-model-and-effort-level-in-claude-code | Anthropic guidance blog on model/effort selection in Claude Code, linked from model-config docs | Agent B | 2026-08-01 |
+| https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback | Refusal (`stop_reason: "refusal"`) response shapes and handling guidance for Fable 5/Opus 5 | Agent B | 2026-08-01 |
+| https://platform.claude.com/docs/en/build-with-claude/fallback-credit | Fallback credit mechanics (avoid double-paying prompt-cache cost on model fallback retries) | Agent B | 2026-08-01 |
+| https://platform.claude.com/docs/en/advisor | Advisor tool / `advisorModel` Claude Code setting — pairs a fast executor model with a stronger advisor model mid-generation | Agent B | 2026-08-01 |
+| https://platform.claude.com/docs/en/about-claude/models/migration-guide | Canonical migration guide (breaking changes per model generation); heavily cross-referenced by the claude-api skill's cached copy — worth periodic live diff | Agent B | 2026-08-01 |
 
----
+## Summary of actionable items (score ≥ 70)
 
-## 4. WebSearch step (provenance-gated)
-
-Both queries ("Claude Code advanced patterns 2026", "Claude Code multi-agent
-best practices 2026") returned only blog/aggregator/webinar content — no
-GitHub repos in the top 3 results for either query that would pass the
-PROVENANCE GATE (github.com/anthropics OR >1000 stars AND >6mo history).
-No clones performed, no injection scan needed. Top-3-read signal summarized
-in section 2 (N4) and section 1 note on Haiku→Sonnet→Opus→Fable routing
-(matches existing config, no change required).
-
-Sources referenced (uncloned, background context only, Tier 5 general web
-per research-sources.md — not treated as authoritative):
-- https://www.tembo.io/blog/claude-code-multi-agent-orchestration
-- https://www.eesel.ai/blog/claude-code-multiple-agent-systems-complete-2026-guide
-- https://shipyard.build/blog/claude-code-multi-agent/
-- https://resources.anthropic.com/hubfs/Claude%20Code%20Advanced%20Patterns_%20Subagents,%20MCP,%20and%20Scaling%20to%20Real%20Codebases.pdf (Anthropic-hosted, Tier 1-adjacent)
-
----
-
-## 5. Staleness note
-
-`skills/self-improve/research-urls.md` last-verified dates for all three
-assigned URLs are 2026-07-01 (23 days old; 90-day staleness threshold not
-yet breached). This run re-verified them live; recommend the orchestrator
-(Agent A / self-improve skill owner) bump `last-verified` to 2026-07-24 in
-research-urls.md, since Agent B is scoped read-only on that file.
+1. `agents/04-quality-security/compliance-auditor.md:6` — remove
+   `effort: high` (invalid on `model: haiku`). Confidence 90.

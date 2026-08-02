@@ -1,184 +1,142 @@
-# Self-Improve Phase 1 — Agent A Findings (2026-07-24)
+# Self-Improve Phase 1 — Agent A Findings (2026-08-01)
 
-Supersedes the 2026-06-20 run (same file). Deltas from that run noted
-inline where relevant.
+Installed Claude Code: 2.1.220. Supersedes the 2026-07-24 copy of this file.
 
-**Pages read fully:** changelog, hooks, settings, sub-agents (persisted,
-re-read in full), memory, overview, tutorials (common-workflows),
-agent-teams, agent-view, routines, worktrees, skills (persisted, re-read
-in full). **Summarized only (fetch succeeded, not re-read line-by-line):**
-mcp — summary covered server config basics and "what you can do with MCP";
-moderate confidence only on MCP frontmatter specifics not already known.
+## URLs fetched this run
+- **Fully read (200, rich content)**: changelog, hooks, settings, agent-teams,
+  routines, sub-agents, agent-view, memory, skills
+- **Skipped (priority 3, time budget)**: overview, mcp, tutorials, worktrees —
+  all four are already tracked as `active` in `research-urls.md` from the
+  2026-07-24 promotion, so re-fetching was low-value this run.
+- **Failed / thin**: none.
 
-No FETCH GUARD warnings: all 13 URLs returned 200 with well over 1000
-chars (several >50KB, two required persisted-file reads due to size).
+## Resolved since the 2026-07-24 audit (verified this run, not re-flagged)
+- **`MultiEdit` tool references removed from all agent files.**
+  `grep -rl "MultiEdit" agents/` → 0 matches (was 44 files on 2026-07-24).
+  Confirmed by recent commits in `git log` ("drop MultiEdit" across
+  category dirs). The background-subagent tool-resolution risk flagged
+  last run is closed.
+- **`~/.claude/agents/explore.md` and `plan.md` now exist**, overriding the
+  built-in Explore/Plan subagents' model inheritance. The 2026-07-24
+  cost-leak finding (exploration billing at session default model instead
+  of Haiku) is closed.
+- **`settings.json` `model` is now `"opus"`**, not `"fable"` as in the
+  2026-07-24 snapshot — see Model Routing Improvements below for why this
+  now matters differently (Opus 5 version gate).
 
-No new candidate URLs appended to research-urls.md — all 13 target URLs
-were already tracked (active or candidate) from the prior run.
+Several other 2026-07-24 findings remain open and are repeated below with
+fresh grep evidence rather than re-derived from scratch.
 
 ---
 
 ## New Features Unused
 
-- **Path-scoped rules (`paths:` frontmatter in `.claude/rules/*.md`)**:
-  confirmed absent — `grep -rln "^paths:" rules/` → empty across all 24
-  rule files. (Flagged as unverified in the 2026-06-20 run; now confirmed.)
-  Every rule loads unconditionally every session. Recommend scoping
-  domain-specific rules (api-design.md → `src/api/**`, logging.md /
-  error-handling.md → code globs) to cut baseline context.
-- **Skill `background: false` on `context: fork`** (new field, v2.1.218,
-  since last run): `skills/explore/SKILL.md` uses `context: fork` with no
-  `background` field, so as of v2.1.218 it now runs as a background
-  subagent by default (previously always blocked the turn). Verify this
-  matches the desired UX for `/explore` — add `background: false` if the
-  user expects to watch it work synchronously.
-- **Subagent `hooks` frontmatter field**: still absent (`grep -rln
-  "^hooks:" agents/` → empty). code-reviewer.md/debugger.md — both now
-  have `memory: user` (see Memory section) — could add a `PostToolUse`
-  hook to auto-run lint/tests after their own edits, scoped only to that
-  agent's run.
-- **Subagent `mcpServers` field** for inline/scoped MCP: still absent.
-  See MCP Opportunities.
-- **Routine `/fire` semantics changed (v2.1.214, since last run)**: a
-  routine's saved prompt is now delivered as an *assigned task*, not an
-  untrusted background notification (previously refusable). Routines
-  remain candidate-not-adopted; noting only because the trust model
-  changed materially.
-- **Skill stacking now supports up to 6 skills** (`/write-tests
-  /fix-issue 123`, v2.1.199) — no current skill design relies on
-  stacking; informational only.
+- Feature: Path-scoped rules (`paths:` YAML frontmatter in `.claude/rules/*.md`) — loads a rule only when Claude touches matching files, instead of every session.
+- Config status: UNUSED — `grep -rln "^paths:" rules/` → empty across all rule files. **REPEAT finding**, open since at least the 2026-06-20 audit, confirmed unresolved across three subsequent audits including this one.
+- Recommendation: `api-design.md` → scope to `src/api/**`; `logging.md`/`error-handling.md`/`observability.md` → scope to source globs; `naming-conventions.md` → scope to source + test globs. Rules like `commits.md`, `pr-workflow.md`, `diagnosis.md`, `parallelism.md` are session-wide by nature and should stay unscoped. `prompting-quality.md` already documents this exact recommendation ("Domain-specific rules should use `paths:` frontmatter") — the rule file is telling the config to do this and it hasn't been done.
+- Confidence: 75
+
+- Feature: Nested subagent spawn depth default raised 1 → 3 layers (v2.1.219); override via `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH`.
+- Config status: UNUSED (no override) — `grep -n "CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH" settings.json` → no match. The default behavioral change is live in this config with no explicit review.
+- Recommendation: Add a line to `rules/parallelism.md` noting the new 3-layer default so agent authors know nested delegation (e.g. a reviewer agent dispatching per-finding verifiers) is now possible without extra config, and that it increases the effective token/cost multiplier of a single Agent-tool call.
+- Confidence: 75
+
+- Feature: `isolation: worktree` subagent frontmatter/call field — runs a subagent in an isolated git worktree, auto-cleaned if no changes made.
+- Config status: UNUSED — `grep -rn "isolation: worktree\|isolation:worktree" agents/ rules/ skills/` → no matches outside `research-urls.md`'s own tracking table.
+- Recommendation: `rules/autonomous-execution.md`'s parallel-batch model relies on write-set discipline alone to avoid cross-file conflicts. For batches with any risk of accidental overlap, prefer `isolation: "worktree"` on the Agent tool call over trusting write-set bookkeeping.
+- Confidence: 60
+
+- Feature: `fallbackModel` setting — ordered fallback list tried when the primary model is overloaded/unavailable.
+- Config status: UNUSED — `grep -n "fallbackModel" settings.json` → no match.
+- Recommendation: With `"model": "opus"` as the sole session model, an Opus outage/overload stalls interactive sessions with no automatic degrade path. Add `"fallbackModel": ["sonnet"]` to `settings.json`.
+- Confidence: 60
 
 ## Hook Opportunities
 
-Delta from 2026-06-20: `TaskCreated`/`TaskCompleted` are new hook events
-(not in the June inventory) — added below. `PostToolBatch`,
-`SubagentStart`/`Stop`, `StopFailure`, `PostToolUseFailure`, `ConfigChange`
-were already flagged last run and remain unconfigured (confirmed still
-absent via current `settings.json` hooks keys: SessionStart,
-UserPromptSubmit, PostCompact, PreCompact, PreToolUse, PostToolUse,
-InstructionsLoaded, Stop — unchanged from June).
+- Feature: New/still-unwired hook events — `SessionEnd`, `SubagentStop`, `TaskCreated`, `TaskCompleted`, `PostToolBatch`, `PermissionRequest`, `PermissionDenied`, `WorktreeCreate`/`WorktreeRemove`, `TeammateIdle`, `ConfigChange`, `StopFailure`, `PostToolUseFailure`.
+- Config status: UNUSED — `settings.json` hooks block wires only `SessionStart`, `UserPromptSubmit` (x2), `PreCompact`, `PostCompact`, `PreToolUse` (Bash), `PostToolUse` (Write|Edit), `InstructionsLoaded`, `Stop`. **REPEAT finding** across at least 3 prior audits (`self-improve-2026-07-01-R2.md` Finding 4.1, `self-improve-phase1-A.md` 2026-07-24 copy) — unactioned.
+- Recommendation: Highest-value single addition given `rules/autonomous-execution.md`'s quality-gate discipline: a `TaskCompleted` hook that blocks marking a mission-brief task complete without evidence a quality-gate command ran (exit 2 to reject + feedback). This mechanically enforces a rule currently enforced only by the model self-policing its own TodoWrite/README.md checkbox updates.
+- Confidence: 70
 
-- **`TaskCreated`/`TaskCompleted` hooks** (new event pair, exit 2 to
-  block + give feedback): not configured. `rules/autonomous-execution.md`
-  requires marking TodoWrite/mission-brief tasks `[x]` "only when fully
-  accomplished" as a purely self-enforced convention. A `TaskCompleted`
-  hook could mechanically block marking a task complete without a
-  preceding test/gate run, enforcing the rule instead of trusting the
-  model to self-police.
-- **`ConfigChange` hook**: still absent (repeat finding from June, still
-  unresolved). Directly relevant now: this very audit session edits
-  `settings.json` and `research-urls.md`; a `ConfigChange` hook would log
-  every settings mutation for an audit trail.
-- **`PermissionDenied` hook**: not configured. Given the user's known
-  preference for broad pre-approved permissions (MEMORY.md), a
-  `PermissionDenied` logger would surface recurring friction points more
-  precisely than transcript scanning (which `/fewer-permission-prompts`
-  currently relies on).
+- Feature: Subagent-frontmatter `hooks:` field — defines hooks scoped to only that agent's run (fires on `SubagentStop` etc. when the agent is dispatched as a subagent).
+- Config status: UNUSED — `grep -rln "^hooks:" agents/` → empty across all 128 agent files.
+- Recommendation: `code-reviewer.md` and `debugger.md` both carry `memory: user` for cross-session learning already — a scoped `PostToolUse` hook on `debugger.md` that re-runs the failing test after each edit would tighten the loop `skills/fix/SKILL.md` currently drives manually.
+- Confidence: 50
+
+- Feature: Hook `if` field — scopes a hook to a specific permission-rule pattern (e.g. `"if": "Bash(rm *)"`) instead of the hook body doing its own filtering.
+- Config status: UNUSED — `grep -rn '"if"' . --include="*.json"` → no match anywhere in the repo. The current `PreToolUse` hook (`settings.json:190-200`) matches every `Bash` call and does inline Python regex to filter for `rm -rf /` and `sudo`.
+- Recommendation: Split into two hooks with `"if": "Bash(rm *)"` and `"if": "Bash(sudo *)"` so each only fires for commands that could match, instead of spawning a Python subprocess on every Bash call.
+- Confidence: 55
 
 ## Model Routing Improvements
 
-- **Explore/Plan built-in subagents now inherit the main model instead of
-  always running on Haiku (v2.1.198, since last run's audit window)**,
-  capped at Opus on the Claude API. `settings.json` sets `"model":
-  "fable"` as the session default. No user/project subagent named
-  `Explore` or `Plan` exists to override this (`find agents -iname
-  "explore.md" -o -iname "plan.md"` → empty; `grep -rln "^name:
-  Explore$\|^name: Plan$" agents/` → empty). Every codebase
-  search/plan-mode research now runs on the expensive default model
-  instead of Haiku. **Actionable, higher priority than most items here**:
-  create `~/.claude/agents/explore.md` and `plan.md` with `model: haiku`
-  to restore low-cost exploration, per `rules/parallelism.md`'s own
-  routing table ("Scoring/dedup/validation → Haiku").
-- **`effort:` field on subagents** — now on 5 agents (compliance-auditor,
-  platform-engineer, devops-engineer, architect-reviewer,
-  devops-incident-responder), up from 3 in the June run. Still absent on
-  code-reviewer.md and debugger.md, both of which now carry `memory:
-  user` and do deep root-cause work per `rules/diagnosis.md`. Consider
-  `effort: high` on debugger.md given its explicit root-cause mandate.
+- Feature: Claude Opus 5 (`claude-opus-5`) became the default Opus model at v2.1.219, with 1M context and new fast-mode pricing. `rules/parallelism.md` documents a version gate: `"opus"` alias resolves to Opus 5 only on Claude Code v2.1.219+.
+- Config status: USED — `settings.json:141` sets `"model": "opus"`; installed version 2.1.220 clears the documented gate.
+- Recommendation: None needed — confirms the routing-economics assumptions in `rules/parallelism.md` (Opus 5 ≈ Fable-class capability at ~half Opus 4.8 cost) are now live for this config's main-thread model, not aspirational.
+- Confidence: 85
+
+- Feature: `effortLevel` persisted setting (`low`/`medium`/`high`/`xhigh`).
+- Config status: USED — `settings.json:252` sets `"effortLevel": "high"`, matching `rules/extended-thinking.md`'s stated default.
+- Recommendation: None — correctly configured.
+- Confidence: 90
 
 ## MCP Opportunities
 
-- **Serena MCP server is project-scoped in `.mcp.json`, not
-  subagent-scoped**: `~/.claude/.mcp.json` defines `serena` at project
-  level (confirmed by direct read), so its tool descriptions load into
-  the *main* orchestrator's context every session even though
-  `rules/lsp.md` states Serena is for subagents only ("Subagents use
-  Serena MCP tools — not the LSP tool"; the orchestrator itself uses the
-  native LSP plugin). This was flagged for Playwright in the June run
-  (item #2, MCP); it applies equally to Serena and was not caught then.
-  **Actionable**: move the Serena definition into each relevant agent's
-  `mcpServers:` frontmatter (inline definition, connects only when that
-  subagent runs) instead of `.mcp.json`, keeping Serena's tool schema out
-  of the main session's context budget.
-- Playwright MCP wiring question from the June run (settings.json
-  permission rules reference `mcp__playwright__*` but no `.mcp.json`
-  entry) was not re-verified this run — carry forward for the next audit
-  pass; check whether it resolved via a plugin or global
-  `~/.claude.json` entry.
+- Feature: Subagent-frontmatter `mcpServers:` field — lets an individual agent declare an MCP server inline, scoping its tool schema to only that agent's context instead of the whole session.
+- Config status: UNUSED — `grep -rln "^mcpServers:" agents/` → empty across all 128 agent files. Meanwhile `serena` is declared in project-scoped `.mcp.json` (`/Users/scottseely/.claude/.mcp.json`), so its tool descriptions load into every session's context, even though `rules/lsp.md` states Serena is for subagents only ("Subagents use Serena MCP tools — not the LSP tool").
+- Recommendation: **REPEAT finding** from 2026-07-24 (MCP Opportunities item 1), unactioned. Move the `serena` MCP definition from `.mcp.json` into `mcpServers:` frontmatter on the agents that actually use it (per `rules/lsp.md`'s subagent list), so its schema stops consuming main-session context budget.
+- Confidence: 65
+
+- Feature: Duplicate/stray `.claude/.mcp.json` with a `--project` path of `/Users/scottseely/.claude/.claude` (double `.claude` segment), distinct from the root `.mcp.json`'s correct `/Users/scottseely/.claude`.
+- Config status: Present but likely misconfigured — `cat .mcp.json .claude/.mcp.json` shows the two files point Serena at two different, inconsistent project roots.
+- Recommendation: Verify whether `.claude/.mcp.json` is a stray duplicate; if so, delete it. A Serena instance pointed at a non-existent project path could silently return empty symbol-lookup results to any agent that picks it up.
+- Confidence: 60
+
+- Feature: Official MCP plugin marketplace ships ready-to-enable servers (`github`, `playwright`, `gitlab`, `linear`, `terraform`, `context7`, `greptile`, `firebase`, etc.) alongside the LSP plugins already enabled.
+- Config status: PARTIAL — `enabledPlugins` in `settings.json:235-243` enables only LSP plugins + `claude-code-setup`; `ls plugins/marketplaces/claude-plugins-official/external_plugins/` confirms `github`/`playwright` are present in the marketplace but not enabled.
+- Recommendation: `skills/webapp-testing/SKILL.md` drives Playwright via hand-rolled `sync_playwright()` Python scripts rather than the `playwright` MCP plugin already sitting in the marketplace. Evaluate enabling `playwright@claude-plugins-official` for that skill.
+- Confidence: 45
 
 ## Memory System Insights
 
-- **Subagent persistent memory (`memory: user`) is now adopted** on
-  code-reviewer.md and debugger.md, with populated directories at
-  `~/.claude/agent-memory/code-reviewer/` and `.../debugger/` (confirmed
-  via `ls`). This resolves the June run's Memory-Insights item #3
-  ("barely used, 2/126") for these two agents — working as intended, no
-  further action needed on them specifically. Broader rollout to
-  security-auditor/architect-reviewer (suggested in June) still open.
-- **`MEMORY.md` frontmatter `modified` timestamp (v2.1.214, since last
-  run)**: the orchestrator's own auto-memory index at
-  `~/.claude/projects/-Users-scottseely--claude/memory/MEMORY.md` has no
-  YAML frontmatter, so this feature never activates for it (per docs,
-  Claude Code "never adds frontmatter to a file that has none"). Low
-  priority — informational only.
-- The June run's item #4 (path-scoping domain rules for context savings)
-  is now confirmed rather than flagged-for-verification — see New
-  Features Unused above.
+- Feature: Subagent persistent memory (`memory: user` frontmatter field).
+- Config status: PARTIAL, unchanged since 2026-07-24 — `grep -rln "^memory:" agents/` → only `code-reviewer.md` and `debugger.md` (2 of 128); `ls ~/.claude/agent-memory/` confirms both have populated directories and are working as intended.
+- Recommendation: Broader rollout still open — `security-auditor` and `architect-reviewer` were suggested previously and remain un-adopted. Both do repeat-invocation work (recurring false-positive patterns, prior architectural decisions) that would benefit from cross-session memory the way debugger.md already does.
+- Confidence: 45
+
+- Feature: `MEMORY.md` 200-line/25KB read budget with Claude Code now warning/erroring when a write pushes the file near or over the limit (v2.1.210+).
+- Config status: Unaudited this run — did not check actual line/byte counts of `~/.claude/projects/*/memory/MEMORY.md` files (out of this task's write-set; would require a dedicated read-only pass).
+- Recommendation: Flag for a follow-up audit: `wc -l`/`wc -c` every project `MEMORY.md` to confirm none are silently truncating content past the load limit.
+- Confidence: 35
 
 ## Agent Design Patterns
 
-- **`MultiEdit` tool referenced in 44 agent definitions** under
-  `~/.claude/agents/` (devops-engineer.md, platform-engineer.md,
-  database-administrator.md, cloud-architect.md, terraform-engineer.md,
-  and 39 more). The current `sub-agents` doc's background-subagent
-  built-in tool allowlist lists `Edit`, not `MultiEdit`, and **subagents
-  run in the background by default as of v2.1.198**. If `MultiEdit` is no
-  longer a resolvable tool name, these 44 agents risk silently losing
-  edit capability (or the zero-tools failure mode documented in the
-  v2.1.208 changelog entry) whenever dispatched in the background.
-  **Confidence: MEDIUM** — inferred from the documented tool list, not a
-  direct tool-registry check. Recommend a quick smoke test: dispatch one
-  affected agent (e.g., `devops-engineer`) and confirm it can still edit
-  files; if not, bulk-rename `MultiEdit` → `Edit` across the 44 files.
-- Fictional tool names in agent frontmatter (docker/terraform/kubectl/
-  figma/prometheus, flagged in June as item #1) not re-verified this run
-  — carry forward.
+- Feature: Background-by-default subagents (v2.1.198) strip the built-in tool list to `Read, Grep, Glob, Bash, PowerShell, Edit, Write, NotebookEdit, WebFetch, WebSearch, TodoWrite, Skill, ToolSearch, EnterWorktree, ExitWorktree, Monitor, TaskStop, SendMessage, Artifact` — any other tool named in an agent's `tools:` frontmatter is dropped when that agent runs backgrounded, which is now the default.
+- Config status: Partially audited — the one known casualty (`MultiEdit`, 44 agents) was already fixed this cycle (see Resolved section above). Did not cross-check all 128 agents' full `tools:` lines against the background-safe allowlist for other non-background-safe tool names this run.
+- Recommendation: Follow-up audit: grep every `agents/*/*.md` `tools:` line for tools outside the documented background-safe set (e.g. any custom/plugin tool names) to catch a repeat of the MultiEdit issue before it ships.
+- Confidence: 40
 
 ## Cost Optimization
 
-- **Auto mode (`autoMode` settings block, `permissionMode: auto`) still
-  not configured** anywhere in `settings.json`, despite MEMORY.md
-  recording "User prefers broad pre-approved permission rules over
-  repetitive per-call prompts." Auto mode replaces static allow/deny
-  lists with a classifier that evaluates commands live — a closer fit to
-  the stated preference than continuing to hand-maintain the large
-  `permissions.allow` array currently in `settings.json`. Worth a
-  deliberate trial (`autoMode.allow: ["$defaults", ...]`) rather than
-  further list maintenance.
-- **Explore/Plan model-inheritance change is also a direct cost issue**
-  (see Model Routing above): every exploration now bills at the
-  session's default model (fable) instead of Haiku until an override
-  agent is added. This is new since the June run and likely the
-  highest-leverage single fix in this report.
-- Subagent concurrency defaults (`CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS`
-  default 20, `CLAUDE_CODE_MAX_SUBAGENTS_PER_SESSION` default 200)
-  checked and untouched — no evidence this needs tuning; confirmed-fine
-  default, not an action item.
+- Feature: Concurrent/per-session subagent spawn caps (`CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS` default 20, `CLAUDE_CODE_MAX_SUBAGENTS_PER_SESSION` default 200).
+- Config status: UNUSED (defaults) — `grep -n "CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS\|CLAUDE_CODE_MAX_SUBAGENTS_PER_SESSION" settings.json` → no match.
+- Recommendation: Defaults are generous relative to this repo's typical batch sizes (3-5 teammates per `rules/parallelism.md`). No action needed; confirmed-fine default.
+- Confidence: 40
 
----
+- Feature: `autoMode` classifier-based permissions (replaces static allow/deny lists with live command classification).
+- Config status: UNUSED — no `autoMode` block in `settings.json`, which instead hand-maintains a ~50-entry `permissions.allow` array. **REPEAT finding**, open since at least 2026-07-24, despite MEMORY.md explicitly recording "User prefers broad pre-approved permission rules over repetitive per-call prompts" — auto mode is a closer structural fit to that stated preference than continued list maintenance.
+- Recommendation: Worth a deliberate trial (`"autoMode": {"allow": ["$defaults", ...]}`) rather than further manual list growth.
+- Confidence: 55
 
-## Warnings
+## Fetch Warnings
 
-None. All 13 URLs fetched successfully with substantial content this run.
-The June run's warning about `anthropic.com/blog` being thin does not
-apply here — that URL was not in this run's target list.
+None. All 9 URLs fetched this run returned 200 with substantial content
+(smallest rendered response ~2.5KB, most 15-90KB raw before summarization).
+
+## Candidate URLs Discovered
+
+None. All feature areas surfaced this run (agent-teams, routines, worktrees,
+overview, mcp, tutorials, skills, sub-agents, agent-view) are already
+present in `skills/self-improve/research-urls.md`, several marked
+`PROMOTED 2026-07-24` / `active`. No new documentation pages outside the
+existing fetch list were discovered.
