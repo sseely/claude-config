@@ -121,7 +121,10 @@
       "mcp__serena__insert_before_symbol",
       "mcp__serena__find_referencing_symbols",
       "mcp__serena__safe_delete_symbol",
-      "mcp__serena__rename_symbol"
+      "mcp__serena__rename_symbol",
+      "Bash(forge lint *)",
+      "Bash(echo \"forge lint exit=$?\")",
+      "Bash(lizard src/shared/scrubSvg.ts)"
     ],
     "additionalDirectories": [
       "/tmp",

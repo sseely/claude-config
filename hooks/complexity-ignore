@@ -12,3 +12,4 @@
 
 # Graphviz TypeScript port — consumed as a dependency, not owned here.
 ~/git/graphviz-ts
+/Users/scottseely/git/plantuml-ts/src/diagrams/class/class-notes.ts
