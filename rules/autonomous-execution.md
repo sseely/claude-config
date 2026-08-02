@@ -21,7 +21,7 @@ plans/[feature]/
   batch-N/overview.md  ← batch description + task table
   batch-N/TN-name.md   ← individual task spec (usable as
                          agent prompt directly)
-  diagrams/*.md        ← mermaid diagrams
+  diagrams/*.md        ← PlantUML diagrams (see rules/diagrams.md)
   decision-journal.md  ← appended during execution
 ```
 

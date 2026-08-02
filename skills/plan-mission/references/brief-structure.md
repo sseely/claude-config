@@ -20,8 +20,9 @@ plans/[feature-name]/
     overview.md
     T3-[name].md
   diagrams/
-    data-flow.md         ← mermaid sequence diagrams
-    component-map.md     ← mermaid graph of affected components
+    data-flow.md         ← PlantUML sequence diagrams
+    component-map.md     ← PlantUML component diagram of affected
+                           components
   decision-journal.md    ← empty at creation, appended during
                            execution
 ```
@@ -71,12 +72,14 @@ overview docs.
      This keeps agent context small — load only what the task
      needs, not the entire artifact.
    - The executor can pass this file directly as the agent prompt
-6. Write mermaid diagrams in `diagrams/`:
+6. Write PlantUML diagrams in `diagrams/`:
    - `data-flow.md` — sequence diagrams for key flows affected
      by the feature
-   - `component-map.md` — graph showing which components are
-     touched and how they relate
-   Use mermaid fenced blocks (```mermaid).
+   - `component-map.md` — component diagram showing which
+     components are touched and how they relate
+   Use PlantUML fenced blocks (```plantuml) wrapping `@startuml`
+   … `@enduml`. Pick diagram types per
+   `~/.claude/rules/diagrams.md`.
 7. Write an empty `decision-journal.md` with just the table
    header.
 8. Generate a project-specific `.claude/settings.autonomous.json`
@@ -105,9 +108,9 @@ These rules apply to every file generated in the plan directory:
   any doc should contain the information needed to decide whether
   to keep reading. Put tables, summaries, and decisions at the
   top. Put details, examples, and edge cases below.
-- **Use mermaid for all diagrams.** No ASCII art, no prose
-  descriptions of relationships. Mermaid renders in most editors
-  and is token-efficient.
+- **Use PlantUML for all diagrams.** No ASCII art, no prose
+  descriptions of relationships. Select the diagram type using
+  the rubric in `~/.claude/rules/diagrams.md`.
 - **One concept per file.** A task spec is one file. A batch
   overview is one file. Architecture decisions are one file. Don't
   combine unrelated concerns.

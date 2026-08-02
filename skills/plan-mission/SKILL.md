@@ -296,7 +296,7 @@ created under `plans/[feature-name]/`:
 - `batch-N/overview.md` + `batch-N/TN-[name].md` — per-batch task
   specs (context, read-set, write-set, interface contracts,
   observability requirements, rollback notes, acceptance criteria)
-- `diagrams/data-flow.md` and `diagrams/component-map.md` — mermaid
+- `diagrams/data-flow.md` and `diagrams/component-map.md` — PlantUML
   diagrams
 - `decision-journal.md` — empty at creation, appended during execution
 - `.claude/settings.autonomous.json` — tailored from
@@ -348,7 +348,7 @@ Print the path to the generated brief and tell the user:
 
 ## Document hygiene
 
-Full rules (file length limits, front-loading, mermaid usage,
+Full rules (file length limits, front-loading, PlantUML usage,
 one-concept-per-file, README as index not dump, directory nesting)
 are in
 [references/brief-structure.md#document-hygiene](references/brief-structure.md#document-hygiene).

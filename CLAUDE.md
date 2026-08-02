@@ -69,5 +69,6 @@ All rules live in `~/.claude/rules/`:
 - **lsp.md, extended-thinking.md, prompting-quality.md** — tooling and prompting
 - **logging.md, error-handling.md, api-design.md, observability.md** — quality standards
 - **diagnosis.md** — root-cause discipline for observed defects
+- **diagrams.md** — PlantUML default + diagram-type selection rubric
 - **architecture.md, research-sources.md, environment.md** — design and environment
 - **naming-conventions.md, pr-workflow.md, commits.md, retry-idempotency.md** — workflow

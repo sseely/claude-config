@@ -1,6 +1,6 @@
 ---
 name: explore
-description: Explore an unfamiliar codebase. Creates a docs/architecture/ folder, identifies related repos in the same GitHub org, clones them locally, then produces architecture diagrams, component maps, and an overview doc using Mermaid and Markdown.
+description: Explore an unfamiliar codebase. Creates a docs/architecture/ folder, identifies related repos in the same GitHub org, clones them locally, then produces architecture diagrams, component maps, and an overview doc using PlantUML and Markdown.
 disable-model-invocation: false
 context: fork
 ---
@@ -14,7 +14,7 @@ Perform a full architecture exploration of the current project and its related r
 | Step | Agent role | Model |
 |------|-----------|-------|
 | Per-repo analysis agents | Code/architecture reading | `sonnet` |
-| Diagram generation | Mermaid/doc writing | `sonnet` |
+| Diagram generation | PlantUML/doc writing | `sonnet` |
 | Dedup / inventory passes | Pass/fail, counting | `haiku` |
 
 ## Step 0 — Resume check
@@ -100,21 +100,30 @@ Action column values: `OK`, `Update available`, `EOL — upgrade required`,
 
 Append `tech-health.md` to the index in `overview.md`.
 
+All diagrams below use PlantUML in ```plantuml fenced blocks. Select
+diagram types per `~/.claude/rules/diagrams.md`.
+
 ### `architecture.md`
-High-level system architecture diagram in Mermaid (`graph TD` or `C4Context`), showing:
+High-level system architecture as a PlantUML component diagram (or C4
+via `!include <C4/C4_Container>` when the system has clear boundaries),
+showing:
 - Services and their relationships
 - Data stores
 - External dependencies
 - Inter-service communication (sync/async, protocol)
 
 ### `components.md`
-Per-repo component diagrams in Mermaid (`graph TD`), showing internal structure:
+Per-repo PlantUML component diagrams showing internal structure:
 - Major modules/namespaces
 - Key classes or services
 - Data flow within the repo
 
+Use a class diagram instead where the useful content is types and their
+relationships rather than deployable parts.
+
 ### `data-flow.md`
-Sequence diagrams (`sequenceDiagram`) for the 2-3 most important user-facing or system-critical flows you can identify from the code.
+PlantUML sequence diagrams for the 2-3 most important user-facing or
+system-critical flows you can identify from the code.
 
 ## Finish
 
