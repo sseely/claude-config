@@ -56,23 +56,54 @@ case "$ACTION" in
         cp "$SOURCE" "$SETTINGS_FILE"
         echo "Autonomous permissions enabled in $SETTINGS_FILE"
 
-        # Ensure .claude/ is gitignored
+        # Verify .claude/ is actually ignored. Appending to .gitignore does
+        # not untrack an already-tracked file, so a bare grep-and-append can
+        # report success while git keeps reporting the file dirty forever.
+        # Ask git, and say so plainly when the answer is "still tracked".
         GITIGNORE="$PROJECT_DIR/.gitignore"
-        if [[ ! -f "$GITIGNORE" ]]; then
-            echo '.claude/' > "$GITIGNORE"
-            echo "Created .gitignore with .claude/"
-        elif ! grep -qF '.claude/' "$GITIGNORE" 2>/dev/null; then
+        if ! grep -qF '.claude/' "$GITIGNORE" 2>/dev/null; then
             echo '.claude/' >> "$GITIGNORE"
             echo "Added .claude/ to .gitignore"
         fi
+        if git -C "$PROJECT_DIR" rev-parse --git-dir >/dev/null 2>&1; then
+            if git -C "$PROJECT_DIR" ls-files --error-unmatch .claude/ >/dev/null 2>&1; then
+                echo "WARNING: .claude/ is listed in .gitignore but still TRACKED." >&2
+                echo "         The ignore has no effect until you run:" >&2
+                echo "           git -C \"$PROJECT_DIR\" rm --cached -r .claude/" >&2
+            fi
+        fi
         ;;
     off)
+        # on-call: if a restore fails, settings.json is left exactly as it was
+        # and the backup is still on disk at $BACKUP_FILE — recover by hand
+        # with `cp "$BACKUP_FILE" "$SETTINGS_FILE"`. Never delete either file
+        # to "clean up": losing the pre-autonomous profile is how an elevated
+        # profile survives a mission. Runbook: hooks/README or this comment.
         if [[ -f "$BACKUP_FILE" ]]; then
-            mv "$BACKUP_FILE" "$SETTINGS_FILE"
+            # cp, not mv — the backup must survive until the restore is
+            # verified, so a second `off` is a no-op rather than a deletion.
+            if ! cp "$BACKUP_FILE" "$SETTINGS_FILE"; then
+                echo "ERROR: failed to restore $SETTINGS_FILE from $BACKUP_FILE" >&2
+                echo "Backup is intact. Settings left untouched." >&2
+                exit 1
+            fi
+            if ! cmp -s "$BACKUP_FILE" "$SETTINGS_FILE"; then
+                echo "ERROR: restore verification failed — $SETTINGS_FILE does not match the backup" >&2
+                echo "Backup retained at $BACKUP_FILE. Resolve by hand." >&2
+                exit 1
+            fi
+            rm -f "$BACKUP_FILE"
             echo "Restored pre-autonomous settings"
         elif [[ -f "$SETTINGS_FILE" ]]; then
-            rm "$SETTINGS_FILE"
-            echo "Removed autonomous settings (no backup to restore)"
+            # No backup: either `off` already ran, or `on` was never used here.
+            # Deleting the settings file is never the right answer — it would
+            # destroy a profile this script did not create.
+            if cmp -s "$SETTINGS_FILE" "$PROJECT_AUTONOMOUS" || cmp -s "$SETTINGS_FILE" "$GLOBAL_TEMPLATE"; then
+                echo "ERROR: $SETTINGS_FILE still holds the autonomous profile, but no backup exists at $BACKUP_FILE." >&2
+                echo "Not deleting it. Restore the intended profile by hand, or remove the file deliberately." >&2
+                exit 1
+            fi
+            echo "No backup found; $SETTINGS_FILE is not the autonomous profile — already off"
         else
             echo "No settings file found — already off"
         fi
