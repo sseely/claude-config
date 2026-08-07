@@ -80,3 +80,31 @@ libraries when native fetch would work.
 ## Dead code policy
 
 See `pr-workflow.md` — Pre-existing violations section.
+
+## Complexity limits (hook-enforced)
+
+These are not advisory. `hooks/check-complexity.py` runs as a `PostToolUse`
+hook on every `Write` and `Edit` and **blocks** the write when a threshold is
+exceeded. Write to them from the start rather than discovering them by being
+blocked.
+
+| Limit | Value | Measures |
+|-------|-------|----------|
+| File length | 500 lines | Total lines in the file |
+| Function length | 30 NLOC | Lines of *code* — excludes comments, docblocks, and blanks, so documenting a function never pushes it over |
+| Cyclomatic complexity | 10 CCN | Independent paths through a single function |
+| Parameters | 5 | Parameters in a single signature |
+
+Checked for `.py`, `.js`, `.ts`, `.jsx`, `.tsx`, `.go`, `.rs`, `.java`,
+`.cs`, `.cpp`, `.c`, `.h`, `.swift`, `.kt`, `.rb`, `.php`. Test, fixture,
+mock, vendor, and build directories are skipped.
+
+The file-length check is self-contained. The three function-level checks need
+`lizard`; when it is absent the hook blocks and asks permission to run
+`hooks/setup-complexity.sh`, which installs it into `hooks/.venv` without
+touching any project's dependencies.
+
+For code we port but do not own — where upstream's structure must be
+preserved — add a path prefix or glob to `hooks/complexity-ignore`, one per
+line. That file is for faithful-port discipline, not for silencing an
+inconvenient limit in code we do own.
