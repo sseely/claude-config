@@ -50,6 +50,15 @@ not finished.
 are NOT stop conditions.** Do not offer them. If you are tempted to, that is the
 signal to instrument further, not to stop.
 
+### Under autonomous execution
+
+`rules/autonomous-execution.md` caps quality-gate **fix attempts** at 2. That
+cap bounds edits, not inquiry — it does not license halting without a cause.
+Reaching it is a valid halt only when the decision-journal entry records the
+mechanism, the origin (`file:line`), the causal chain, and what was ruled out.
+Without that artifact the halt is incomplete work, exactly as above: spending
+the attempt budget is not a diagnosis.
+
 ## Scope of change
 When you do apply a fix, prefer the change that addresses the **mechanism at its
 origin** over a broader edit that suppresses the symptom downstream. A targeted
