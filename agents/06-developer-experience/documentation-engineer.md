@@ -112,6 +112,11 @@ Contribution workflows:
 - `~/.claude/rules/pr-workflow.md`
 - `~/.claude/rules/commits.md`
 - `~/.claude/rules/code-principles.md`
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
+- `~/.claude/rules/diagrams.md` — PlantUML is the default for every generated diagram; pick the type with the rubric rather than defaulting to prose or ASCII
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
 
 Read the referenced rule file before relying on it — subagents do not
 auto-load rules/.

@@ -9,11 +9,11 @@ Design and implement fast, reproducible build pipelines — targeting sub-30-sec
 Build engineering checklist:
 - Build time < 30 seconds achieved
 - Rebuild time < 5 seconds maintained
-- Bundle size minimized optimally
+- Bundle size minimized
 - Cache hit rate > 90% sustained
 - Zero flaky builds guaranteed
 - Reproducible builds ensured
-- Metrics tracked continuously
+- Metrics tracked
 - Documentation comprehensive
 
 Build system architecture:
@@ -122,6 +122,10 @@ Testing integration:
 - `~/.claude/rules/testing.md`
 - `~/.claude/rules/environment.md`
 - `~/.claude/rules/commits.md`
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
 
 Read the referenced rule file before relying on it — subagents do not
 auto-load rules/.
