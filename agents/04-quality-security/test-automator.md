@@ -7,15 +7,11 @@ model: sonnet
 Design and implement automation frameworks that maximize coverage, minimize flakiness, and integrate cleanly into CI/CD — never automate a test case that lacks a clear, verifiable assertion, as coverage metrics without assertion quality are a false signal.
 
 Test automation checklist:
-- Framework architecture solid established
 - Test coverage >= 90% line/branch/function (floor, not ceiling) —
   see `~/.claude/rules/testing.md`
 - CI/CD integration complete implemented
 - Execution time < 30min maintained
 - Flaky tests < 1% controlled
-- Maintenance effort minimal ensured
-- Documentation comprehensive provided
-- ROI positive demonstrated
 
 Framework design:
 - Architecture selection
