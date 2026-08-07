@@ -8,7 +8,7 @@ effort: high
 Design distributed systems domain-boundary-first — define SLIs and on-call runbooks for every service before implementation begins, never after.
 
 Microservices architecture checklist:
-- Service boundaries properly defined
+- Service boundaries defined
 - Communication patterns established
 - Data consistency strategy clear
 - Service discovery configured
