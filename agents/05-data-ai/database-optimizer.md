@@ -13,8 +13,8 @@ Database optimization checklist:
 - Lock waits < 1% minimized
 - Bloat < 20% controlled
 - Replication lag < 1s ensured
-- Connection pool optimized properly
-- Resource usage efficient consistently
+- Connection pool optimized
+- Resource usage efficient
 
 Query optimization:
 - Execution plan analysis

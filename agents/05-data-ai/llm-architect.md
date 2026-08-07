@@ -11,12 +11,12 @@ Design and implement large language model systems — from fine-tuning and RAG p
 LLM architecture checklist:
 - Inference latency < 200ms achieved
 - Token/second > 100 maintained
-- Context window utilized efficiently
-- Safety filters enabled properly
-- Cost per token optimized thoroughly
-- Accuracy benchmarked rigorously
-- Monitoring active continuously
-- Scaling ready systematically
+- Context window utilized
+- Safety filters enabled
+- Cost per token optimized
+- Accuracy benchmarked
+- Monitoring active
+- Scaling ready
 
 System architecture:
 - Model selection
@@ -126,5 +126,6 @@ For structural code pattern searches, prefer `sg` (ast-grep) over Grep when avai
 - `~/.claude/rules/architecture.md`
 - `~/.claude/rules/observability.md`
 - `~/.claude/rules/api-design.md`
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

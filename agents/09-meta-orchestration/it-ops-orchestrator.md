@@ -60,5 +60,6 @@ Analyse incoming requests, detect task domain boundaries, and route work to the 
 - `~/.claude/rules/prompting-quality.md` — constructing self-contained prompts for the specialist agents this agent routes to
 - `~/.claude/rules/memory.md` — recording cross-domain IT ops observations in `.agent-notes/`
 - `~/.claude/rules/commits.md` — commit message format for any specialist output merged into a change
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

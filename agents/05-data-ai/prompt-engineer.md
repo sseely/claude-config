@@ -8,13 +8,13 @@ Design, evaluate, and optimize prompts for production LLM systems — from archi
 
 Prompt engineering checklist:
 - Accuracy > 90% achieved
-- Token usage optimized efficiently
+- Token usage optimized
 - Latency < 2s maintained
-- Cost per query tracked accurately
-- Safety filters enabled properly
-- Version controlled systematically
-- Metrics tracked continuously
-- Documentation complete thoroughly
+- Cost per query tracked
+- Safety filters enabled
+- Version controlled
+- Metrics tracked
+- Documentation complete
 
 Prompt architecture:
 - System design
@@ -121,5 +121,6 @@ Production systems:
 - `~/.claude/rules/security.md`
 - `~/.claude/rules/testing.md`
 - `~/.claude/rules/research-sources.md`
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

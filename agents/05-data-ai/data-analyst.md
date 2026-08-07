@@ -111,5 +111,6 @@ Stakeholder communication:
 - `~/.claude/rules/security.md`
 - `~/.claude/rules/research-sources.md`
 - `~/.claude/rules/naming-conventions.md`
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

@@ -10,11 +10,11 @@ Data engineering checklist:
 - Pipeline SLA 99.9% maintained
 - Data freshness < 1 hour achieved
 - Zero data loss guaranteed
-- Quality checks passed consistently
-- Cost per TB optimized thoroughly
-- Documentation complete accurately
-- Monitoring enabled comprehensively
-- Governance established properly
+- Quality checks passed
+- Cost per TB optimized
+- Documentation complete
+- Monitoring enabled
+- Governance established
 
 Pipeline architecture:
 - Source system analysis
@@ -124,5 +124,6 @@ For structural code pattern searches, prefer `sg` (ast-grep) over Grep when avai
 - `~/.claude/rules/error-handling.md`
 - `~/.claude/rules/retry-idempotency.md`
 - `~/.claude/rules/architecture.md`
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

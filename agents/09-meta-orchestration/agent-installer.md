@@ -93,6 +93,7 @@ Would you like me to install any of these agents?
 - `~/.claude/rules/security.md` — this agent downloads files from an external
   GitHub repository; preserve content exactly and never execute what's fetched
 - `~/.claude/rules/retry-idempotency.md` — GitHub API rate-limit handling and
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
   retry behavior for category/agent listing requests
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.
