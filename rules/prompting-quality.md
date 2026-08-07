@@ -25,20 +25,29 @@ Include in the prompt:
 ## Instruction bloat
 
 Custom instructions (CLAUDE.md, system prompts) are prepended to every
-request. Keep them under 4KB. Every kilobyte beyond that is dead weight
-on every token budget in every session.
+request. Keep CLAUDE.md **under 200 lines**, per Anthropic's guidance at
+code.claude.com/docs/en/memory. Everything beyond that is dead weight on
+every token budget in every session.
 
 Audit periodically: remove instructions that are no longer relevant,
 consolidate duplicates, and move project-specific rules to project-level
 CLAUDE.md files rather than the global one.
 
 Per-file caps bound each file, but nothing caps the **aggregate resident
-footprint** of `rules/` (~62KB). All rule files are injected verbatim every
-session — confirmed by direct inspection (22 files, ~10.3k words / ~14k
-tokens) — so this is a real, recurring per-session context cost, not a
-theoretical one. Manage it: prefer task-scoped reading of the one or two
-relevant rule files over loading the set, and dedup cross-file repetition
-rather than restating it.
+footprint** of `rules/`, which is now the larger cost by a wide margin —
+several times CLAUDE.md itself, growing with every rule added. Every
+unscoped rule file is injected verbatim at session start, so this is a
+real, recurring per-session cost, not a theoretical one.
+
+The operative mitigation is `paths:` frontmatter, which loads a rule only
+when Claude reads a matching file. Apply it to rules with a genuine
+file-path correlate; for cross-cutting concerns a narrow glob would break
+the rule silently and a broad one saves nothing, so leave those
+unconditional. Then dedup cross-file repetition rather than restating it.
+
+Deliberately not stated here: the file count, byte total, or token
+estimate. Those re-stale on every rule addition, and a number that has
+drifted is worse than no number — it gets cited.
 
 ## File context discipline
 
