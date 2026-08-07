@@ -2,7 +2,7 @@
 name: i18n-setup
 description: Scaffold i18n infrastructure into a React/Vite project. Sets up i18next with 18 locales (en + 17), lazy-loading, browser language detection, localStorage persistence, a Claude-powered translate script, an audit script, and an optional server-side language preference endpoint. Keeps NAMESPACES in sync across all three files that reference them.
 user-invocable: true
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch, WebSearch
 ---
 
 Scaffold i18n infrastructure into this project. Templates live at
@@ -66,6 +66,22 @@ collected_inputs: true
 - [ ] wire-into-app
 - [ ] generate-translations
 ```
+
+---
+
+## Step 1b — Verify i18next against current docs
+
+i18next's initialization options and plugin surface drift across major
+versions, and the detector/backend plugins version independently of the core.
+Before templating the i18n module, WebFetch the current docs and confirm the
+`init()` options, the lazy-loading backend API, and the language-detector
+option names the templates use:
+
+- i18next — https://www.i18next.com/overview/configuration-options
+- React bindings — https://react.i18next.com/latest/using-with-hooks
+
+If an option has been renamed or deprecated, update the templated values
+before relying on them.
 
 ---
 
