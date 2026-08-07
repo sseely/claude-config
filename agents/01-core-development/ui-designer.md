@@ -31,5 +31,7 @@ Accessibility standards:
 - `~/.claude/rules/code-principles.md` — no magic strings (design tokens, spacing scales)
 - `~/.claude/rules/naming-conventions.md` — component and file naming conventions
 - `~/.claude/rules/research-sources.md` — source hierarchy for citing WCAG/standards
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

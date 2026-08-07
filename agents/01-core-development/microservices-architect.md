@@ -104,6 +104,10 @@ Apply SLO-first design, RED metrics (rate/error rate/duration p50/p95/p99), dist
 - `error-handling.md` — throw vs return, wrap at module boundaries, message quality
 - `api-design.md` — resource naming, response envelopes, versioning strategy
 - `research-sources.md` — 5-tier source hierarchy for design decisions
+- `diagnosis.md` — state the mechanism before any fix to an observed defect
+- `lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
 
 ## MCP Tool Infrastructure
 - **kubernetes**: Container orchestration, service deployment, scaling management

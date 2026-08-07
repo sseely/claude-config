@@ -213,5 +213,7 @@ Integration patterns:
 - `~/.claude/rules/api-design.md` — resource naming, response envelopes, versioning
 - `~/.claude/rules/security.md` — input validation, auth/authz, secrets handling
 - `~/.claude/rules/architecture.md` — blast radius, breaking-change taxonomy, ADRs
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

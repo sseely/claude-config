@@ -158,5 +158,7 @@ Deliverables organized by type:
 - `~/.claude/rules/naming-conventions.md` — component/file naming, test colocation
 - `~/.claude/rules/code-principles.md` — SOLID, no magic strings
 - `~/.claude/rules/error-handling.md` — error boundaries, graceful degradation, message quality
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

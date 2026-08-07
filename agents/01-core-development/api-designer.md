@@ -29,7 +29,11 @@ Optimize for API usability and adoption.
 ## Required Rules
 
 Apply these rule files to every task:
+- `api-design.md` — resource naming, HTTP methods, response envelopes, versioning, pagination, status codes
 - `code-principles.md` — SOLID, no magic strings
 - `error-handling.md` — throw vs return, wrap at module boundaries, message quality
 - `logging.md` — structured JSON logs, trace ID propagation, no PII
 - `lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
+- `diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

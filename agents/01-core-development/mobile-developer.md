@@ -211,5 +211,7 @@ App store preparation:
 - `~/.claude/rules/retry-idempotency.md` — backoff policy for offline sync retries
 - `~/.claude/rules/error-handling.md` — throw vs return, message quality
 - `~/.claude/rules/testability.md` — pure functions, inject non-determinism
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

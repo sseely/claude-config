@@ -212,5 +212,7 @@ Native module management:
 - `~/.claude/rules/error-handling.md` — throw vs return, wrap at module boundaries
 - `~/.claude/rules/logging.md` — structured logs, no PII/secrets, crash reporting
 - `~/.claude/rules/observability.md` — RED metrics, on-call readiness, dashboards
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

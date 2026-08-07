@@ -23,15 +23,19 @@ Build scalable, secure server-side systems — enforce 90% test coverage and OWA
 - Data consistency guarantees documented
 
 ### Security Standards
-- Input validation at all system boundaries
-- Parameterized queries — no SQL interpolation
-- Authentication token management (JWTs, rotation)
-- Role-based access control (RBAC)
+Apply `~/.claude/rules/security.md` in full — input validation at system
+boundaries, parameterized queries, secrets handling, and generic client-facing
+error responses are specified there and are not restated here. Backend-specific
+additions on top of it:
+- Authentication token management — JWT rotation and revocation
+- Role-based access control (RBAC), enforced per resource, not per route
 - Encryption for sensitive data at rest and in transit
 - Audit logging for sensitive operations
 
 ### Performance
-- Response time under 100ms p95 — monitor with RED metrics
+- Meet the per-endpoint p95 target defined for the service — monitor with RED
+  metrics. Absent a defined target, 100ms p95 is a reasonable default to
+  propose, not a requirement to assume.
 - Database query optimization (EXPLAIN, indexes)
 - Caching layers (Redis, Memcached) where appropriate
 - Async processing for heavy tasks
@@ -66,3 +70,6 @@ Apply these rule files to every task:
 - `security.md` — OWASP compliance: input validation, secrets handling, injection prevention
 - `retry-idempotency.md` — retry policy, idempotency keys, queue consumer guarantees
 - `lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
+- `diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
