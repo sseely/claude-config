@@ -6,7 +6,34 @@
 
      TICK THE BOXES as you implement. The 2026-07-24 file was fully
      implemented (~25 commits) but left every box unchecked, forcing this
-     run's Phase 0 to reconstruct state from git. See W24. -->
+     run's Phase 0 to reconstruct state from git. See W24.
+
+     IMPLEMENTED 2026-08-07 by plans/code-review-tasks-2026-08/ on branch
+     chore/code-review-tasks-2026-08. Every box below is reconciled against
+     that branch's commits. Legend:
+       [x] done — annotated with task ID and commit SHA
+       [~] cancelled — annotated with the reason
+       [ ] not done — annotated with why; exactly one remains (the
+           lsp.md vs disallowedTools conflict, a STOP awaiting a decision)
+
+     DO NOT RE-DERIVE THESE — resolved without work, recorded in
+     plans/code-review-tasks-2026-08/decisions.md#resolved-without-work:
+       1. templates/autonomous-settings.json missing docker-compose/psql —
+          stale finding; both grants were already present.
+       2. W22's "drop the dead serena perms" branch — superseded by D7,
+          which keeps all 22 grants.
+       3. The Critical resolved in-run (autonomous profile left live 8 days)
+          is under "Already resolved during this run" below.
+
+     GIT RECONCILIATION CAVEAT: a missing commit does not prove a task was
+     not done. The doc-pptx item is complete on disk and uncommittable by
+     license — it is annotated accordingly and must not be re-filed. -->
+
+<!-- Code review (2026-08-07): the three Criticals that stalled autonomous
+     dispatch (T1, T3) could not be implemented — the harness auto-mode
+     classifier denies every edit to a permissions file, in either
+     direction. They are the highest-value open items in this file. -->
+
 
 ## Already resolved during this run
 - [x] `.claude/settings.json` — autonomous permission profile had been live in
@@ -17,16 +44,16 @@
   Root cause is unfixed — see W25.
 
 ## Must fix (Critical)
-- [ ] `templates/autonomous-settings.json` — no `Agent(*)` grant, yet
+- [~] `templates/autonomous-settings.json` — no `Agent(*)` grant, yet  **(cancelled — Agent(*) grant BLOCKED: harness auto-mode classifier denies all edits to permissions files (T1))**
   `rules/autonomous-execution.md` mandates launching parallel subagents per
   batch. The first dispatch of a mission stalls waiting on a human who isn't
   there. Fix: add `"Agent(*)"` to the template allow-list.
-- [ ] `templates/autonomous-settings.json` — no
+- [~] `templates/autonomous-settings.json` — no  **(cancelled — setup-complexity grant BLOCKED, same classifier denial (T1))**
   `Bash(~/.claude/hooks/setup-complexity.sh)`. `hooks/check-complexity.py:107-114`
   blocks and requests permission for exactly that script when lizard is missing,
   so a fresh autonomous environment hits an approval wall on its first edit.
   Fix: add the grant.
-- [ ] `rules/diagnosis.md:42-51` vs `rules/autonomous-execution.md:78-82` —
+- [x] `rules/diagnosis.md:42-51` vs `rules/autonomous-execution.md:78-82` —  **(T2, 5f2f24b)**
   contradiction. A failing quality gate is an observed discrepancy, which engages
   diagnosis mode ("valid stop conditions (only these two)", both requiring an
   identified root cause). autonomous-execution mandates STOP after 2 failed
@@ -36,7 +63,7 @@
   ruled-out) in the STOP journal entry.
 
 ## Should fix (Warning)
-- [ ] `rules/*.md` (10 files) — **highest-value item in this file.** `paths:`
+- [~] `rules/*.md` (10 files) — **highest-value item in this file.** `paths:`  **(cancelled — T13 pilot RED (blocked, not falsified): the InstructionsLoaded matcher registration lives in settings.json, which T3 could not edit. paths: NOT applied — unverified scoping risks silent rule unloading per D1)**
   frontmatter is now VERIFIED SUPPORTED (code.claude.com/docs/en/memory,
   "Path-specific rules"; applies to `.claude/rules/*.md` including user-level).
   Four prior audits flagged it unused and deferred every time for lack of
@@ -47,26 +74,26 @@
   entire prose-tightening axis yields ~105 tokens/session. Fix: add `paths:` to
   those 10. Pilot ONE file first and confirm scoping actually fires — user-level
   applicability is inferred from the shared format, not stated verbatim in docs.
-- [ ] `rules/prompting-quality.md:35-41` — claims "22 files, ~62KB, ~14k tokens";
+- [x] `rules/prompting-quality.md:35-41` — claims "22 files, ~62KB, ~14k tokens";  **(T7, e249bac)**
   actual is 23 files / 72,367 B / ~18k tokens. Worse, the prescribed mitigation
   ("prefer task-scoped reading of the one or two relevant rule files") is
   inoperative — all 23 inject verbatim at session start. Fix: correct the numbers
   AND drop the precise counts entirely (they re-stale on every rule addition;
   this drift arrived via commit 73837bd earlier today). State the constraint
   qualitatively and point to `paths:` as the operative mitigation.
-- [ ] `agents/` — 0 of 128 agents reference `rules/diagrams.md` while 9 produce
+- [x] `agents/` — 0 of 128 agents reference `rules/diagrams.md` while 9 produce  **(T19/T21/T22/T23, 7c9d3a3 d708369 60c3cec 2ac2f25 — 9 agents now reference diagrams.md)**
   diagrams. Regression from commit 73837bd earlier this session: the rule was
   added and 3 skills updated, but never propagated to agents, so the PlantUML
   default silently reverts on any delegation. Fix: add `diagrams.md` to the
   Required Rules of plantuml-visual-qa, documentation-engineer, technical-writer,
   legacy-modernizer, error-detective, data-researcher, trend-analyst,
   sales-engineer, and the 9th diagram-producing agent.
-- [ ] `CLAUDE.md` — 3,921 / 4,096 bytes = 95.7% of the cap set by
+- [x] `CLAUDE.md` — 3,921 / 4,096 bytes = 95.7% of the cap set by  **(T10, cf8fbcb — byte cap retired by D4; now governed by <200 lines)**
   `prompting-quality.md:31-33`. 175 B headroom, and the established pattern adds
   one index line per new rule file (~60 B consumed today). The next 1-2 rule
   files breach it. Fix: collapse the `## Rules` index (~700 B naming all 23
   files) to a pointer plus the load-bearing entries; reclaims ~400 B.
-- [ ] `agents/04-quality-security/` — `error-detective`, `penetration-tester`,
+- [x] `agents/04-quality-security/` — `error-detective`, `penetration-tester`,  **(T17, 8d91f37 — 5 agents haiku→sonnet; accessibility-tester kept on haiku)**
   `performance-engineer`, `compliance-auditor`, `qa-expert` are pinned
   `model: haiku`, but `rules/parallelism.md:90` scopes haiku to "confidence
   scoring, dedup passes, format checking, simple grep tasks". error-detective's
@@ -76,30 +103,30 @@
   files, which a codebase-wide audit exceeds. Failure mode is silent false
   negatives — a missed finding looks identical to a clean audit. Fix: raise those
   5 to `sonnet`; leave `accessibility-tester` on haiku.
-- [ ] `agents/04-quality-security/compliance-auditor.md:5-6` — `model: haiku` +
+- [x] `agents/04-quality-security/compliance-auditor.md:5-6` — `model: haiku` +  **(T17, 8d91f37 — model: sonnet, effort: high retained)**
   `effort: high`; Haiku rejects the effort parameter (400). Sole such pairing
   among the 18 agents that set effort. Fix: set `model: sonnet` and KEEP
   `effort: high`. (Deleting the effort line also clears the API error but
   silently downgrades a compliance audit — take the routing fix, which resolves
   this and the item above together.)
-- [ ] `settings.json:125-127` — `Bash(forge lint *)`,
+- [~] `settings.json:125-127` — `Bash(forge lint *)`,  **(cancelled — BLOCKED, classifier denies settings.json edits (T3))**
   `Bash(echo "forge lint exit=$?")` (dead: the unexpanded `$?` never matches a
   real command), and `Bash(lizard src/shared/scrubSvg.ts)` (that file does not
   exist in this repo). Added at global scope in commit c987da5 earlier today —
   exactly the one-off noise this check exists to catch. Fix: move to
   project-local settings; delete the echo entry outright.
-- [ ] `agents/` (6 files) — Required Rules blocks say only "Apply these rule
+- [x] `agents/` (6 files) — Required Rules blocks say only "Apply these rule  **(T14/T15/T16/T17/T19/T22, 71a1a46 c8e7e28 531bac5 8d91f37 7c9d3a3 60c3cec — 0 agents now missing the closer)**
   files" or are bare lists, missing the canonical "the agent must Read that file"
   closer required by `rules/parallelism.md:55-57`: backend-developer:56,
   api-designer:31, microservices-architect:99, typescript-pro:136,
   architect-reviewer:15, code-reviewer:23. 119/125 have it. Fix: append the
   canonical closer to these 6.
-- [ ] `rules/lsp.md:81-83` vs `agents/04-quality-security/code-reviewer.md:6` and
+- [ ] `rules/lsp.md:81-83` vs `agents/04-quality-security/code-reviewer.md:6` and  **(STOP — scoped Bash(sg:*)/Bash(tsc:*) is not expressible in agent frontmatter (verified against code.claude.com/docs/en/sub-agents: tools: accepts tool names, mcp__server patterns, and Agent(type) only). The documented alternative edits rules/lsp.md, owned by no task in this batch. Needs a decision.)**
   `architect-reviewer.md:7` — lsp.md mandates `sg` (ast-grep) and `tsc --noEmit`;
   both agents list lsp.md in Required Rules but set `disallowedTools: … Bash`,
   making the instruction unexecutable. Fix: grant scoped `Bash(sg:*)` /
   `Bash(tsc:*)`, or scope lsp.md's mandate to Bash-capable agents.
-- [ ] `agents/07-specialized-domains/forge-app-developer.md` — added 2026-08-02
+- [x] `agents/07-specialized-domains/forge-app-developer.md` — added 2026-08-02  **(T20, f300f33 — Required Rules block added; tools: list kept at 14 per T6's MCP carve-out)**
   with no `## Required Rules` block, making it the third of 129 agents without
   one after the July rollout standardized the other 126. Its `tools:` list is
   also 14 entries (6 base + 8 forge MCP) against the >8 anti-pattern in
@@ -108,69 +135,69 @@
   same way. Fix: add the Required Rules block; extend the parallelism.md
   MCP-set carve-out to name cohesive MCP tool groups generally, rather than
   Serena specifically.
-- [ ] `.mcp.json` and `.claude/` — both are listed in `.gitignore` yet both are
+- [x] `.mcp.json` and `.claude/` — both are listed in `.gitignore` yet both are  **(T4, 154df5e)**
   tracked, so `git add -A` refuses them while `git status` keeps reporting them
   dirty. This is why the 8-day autonomous elevation stayed visible-but-unnoticed,
   and why the forge MCP server registration cannot be committed with its skill.
   Fix: pick one per path — `git rm --cached` to make the ignore real, or drop the
   ignore entry and track deliberately. The current half-state is the worst of both.
-- [ ] `agents/04-quality-security/security-auditor.md` — no Required Rules block
+- [x] `agents/04-quality-security/security-auditor.md` — no Required Rules block  **(T17, 8d91f37)**
   at all, in the one agent where `security.md` matters most. Fix: add the block
   including security.md.
-- [ ] `agents/01-core-development/api-designer.md` — Required Rules omit
+- [x] `agents/01-core-development/api-designer.md` — Required Rules omit  **(T14, 71a1a46)**
   `api-design.md`, the rule governing its entire job. Fix: add it.
-- [ ] `skills/` + `agents/` — no eval harness anywhere (0 `evals/` dirs across 28
+- [x] `skills/` + `agents/` — no eval harness anywhere (0 `evals/` dirs across 28  **(T30, 17a9830 — skills/code-review/evals/ only, per D3)**
   skills and 128 agents), though Anthropic's skill-creator mandates test cases
   plus a baseline-vs-with-skill comparison. Fix: add evals for `code-review`,
   `fix`, and `plan-mission` only — do not attempt all 28.
-- [ ] `skills/self-improve/SKILL.md` — 831 lines vs Anthropic's <500-line skill
+- [x] `skills/self-improve/SKILL.md` — 831 lines vs Anthropic's <500-line skill  **(T25, b6ced49 — 831 → 347 lines)**
   ceiling; the sole breach of 28 skills (`payments-setup` at 498 is one edit
   away). The `references/` pattern already exists in plan-mission and
   code-review. Fix: move the Phase 1/2 agent-prompt blocks to `references/`.
-- [ ] `rules/parallelism.md:40-42` — section 0 instructs injecting
+- [x] `rules/parallelism.md:40-42` — section 0 instructs injecting  **(T6, 27f4336)**
   `.agent-notes/` findings "verbatim" with no information-boundary rule;
   distractor leakage is a leading measured orchestration failure. Cheapest
   high-value fix in this file. Fix: add a need-only clause — pass only
   observations bearing on this task's write-set.
-- [ ] `CLAUDE.md:34-37` — says post-compact-context.md restores "3 sections"; it
+- [x] `CLAUDE.md:34-37` — says post-compact-context.md restores "3 sections"; it  **(T10, cf8fbcb — corrected to 5 (T5 raised it from 4))**
   has 4 (commit 33b15f7 landed after ca4461f corrected the count). Fix: say 4, or
   drop the count.
-- [ ] `rules/autonomous-execution.md:75` vs `:155-157` — ":75 one commit per
+- [x] `rules/autonomous-execution.md:75` vs `:155-157` — ":75 one commit per  **(T2, 5f2f24b)**
   completed task (not per file, not per batch)" contradicts ":155-157" mandating
   a second `fix(TN)` commit for gate fixes. Fix: reword :75 to "one commit per
   task, plus fix commits where a quality gate requires them".
-- [ ] `hooks/check-complexity.py` — enforces 500 lines / 30 NLOC / CCN 10 / 5
+- [x] `hooks/check-complexity.py` — enforces 500 lines / 30 NLOC / CCN 10 / 5  **(T8, 8a27874)**
   params, but no rule file states these thresholds. Agents cannot comply with
   limits they cannot see. Fix: document them in `rules/code-principles.md`.
-- [ ] `skills/changelog-generator/SKILL.md:13-20` — carries a Model Routing table
+- [x] `skills/changelog-generator/SKILL.md:13-20` — carries a Model Routing table  **(T26, ba221f4)**
   while self-documenting "This skill runs inline (no sub-agents)"; 0 Agent
   invocations in the file. Missed by commit d74fad3, which stripped this exact
   pattern from 13 sibling skills. Fix: delete the table.
-- [ ] `settings.json:47-51` — only 5 scoped `gh` subcommands; `gh pr create`,
+- [~] `settings.json:47-51` — only 5 scoped `gh` subcommands; `gh pr create`,  **(cancelled — BLOCKED, classifier denies settings.json edits (T3))**
   used by this repo's own `rules/pr-workflow.md`, is absent (local and template
   both grant `gh *:*`). Fix: add `gh pr create`.
-- [ ] `.claude/settings.local.json:37-39` — disables the serena MCP server while
+- [~] `.claude/settings.local.json:37-39` — disables the serena MCP server while  **(cancelled — BLOCKED, classifier denies .claude/settings.local.json edits (T3). D7 unrealized: serena remains disabled)**
   `settings.json:114-124` still grants 22 `mcp__serena__*` permissions that are
   dead in this project. Fix: drop the dead perms, or re-enable serena.
-- [ ] `settings.json:104-108` — `~/church/**` grants an unrelated personal
+- [~] `settings.json:104-108` — `~/church/**` grants an unrelated personal  **(cancelled — BLOCKED, classifier denies settings.json edits (T3))**
   project at global scope. Fix: move to that project's local settings.
-- [ ] `agents/` (88 lines across 50 files) — unmeasurable adverb-stacked
+- [x] `agents/` (88 lines across 50 files) — unmeasurable adverb-stacked  **(T14–T23 — 279 lines stripped of adverb padding, 36 deleted where nothing verifiable survived)**
   checklist lines (e.g. `agents/10-research-analysis/research-analyst.md:12-16`),
   confirmed independently by two agents. Pure subtraction: deleting an
   unmeasurable line loses no behavior. Fix: delete, or replace with measurable
   criteria.
-- [ ] `skills/self-improve/research-urls.md` — candidate table has grown
+- [x] `skills/self-improve/research-urls.md` — candidate table has grown  **(T25, b6ced49 — Agent X now drains top-5 candidates per run; inline comment added)**
   31 → 36 → 57 → 91 while only 6 entries have ever been promoted. Phase 6
   promotes only URLs "fetched this run", but Agents A/B/C each fetch their own
   *active* list, so no agent ever fetches a candidate and promotion happens only
   by accident. Discovery works; nothing drains the queue. Fix: add a Phase 1 step
   where one agent fetches the top-5 candidates by relevance and promotes or
   demotes each.
-- [ ] `code-review-tasks.md` — the 2026-07-24 file left every box `[ ]` despite
+- [x] `code-review-tasks.md` — the 2026-07-24 file left every box `[ ]` despite  **(T31 (this file) + T25 Phase 0 reconciliation, b6ced49)**
   ~25 commits implementing it, forcing this run to reconstruct state from git and
   risking re-derivation of fixed findings. Fix: tick boxes in the implementing
   commit, or have self-improve Phase 0 reconcile against git and rewrite the file.
-- [ ] `hooks/autonomous-toggle.sh:70-78` — `off` uses `mv` to restore, consuming
+- [x] `hooks/autonomous-toggle.sh:70-78` — `off` uses `mv` to restore, consuming  **(T11, 98fb8ff)**
   the backup; a second `off` falls through to the `elif` and **deletes
   settings.json outright**. Nothing auto-reverts on mission end, which is the
   root cause of the 8-day elevation resolved above. Fix: use `cp` plus explicit
@@ -178,61 +205,61 @@
   byte-identical to `.claude/settings.autonomous.json`.
 
 ## Consider improving (Suggestion)
-- [ ] `rules/parallelism.md:87` + `skills/plan-mission/SKILL.md:365,367` —
+- [x] `rules/parallelism.md:87` + `skills/plan-mission/SKILL.md:365,367` —  **(T6 + T29, 27f4336 d04e21f)**
   `[frontier-lag]` PerspectiveGap (arXiv:2606.08878, preprint) scores
   `claude-opus-4-8` worst-in-family (13.9%) at orchestration-prompt composition,
   the exact task these lines route to `opus`. The paper never tested Opus 5,
   which is what `opus` now resolves to, so the rule holds. Fix: add a cautionary
   note so the tension is auditable rather than silently suppressed; re-evaluate
   if Opus 5 orchestration data appears.
-- [ ] `rules/parallelism.md` — v2.1.219 raised the default nested subagent spawn
+- [x] `rules/parallelism.md` — v2.1.219 raised the default nested subagent spawn  **(T6, 27f4336)**
   depth from 1 to 3; no `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` guidance exists,
   and this config fans out heavily. Fix: document the default and when to cap it.
-- [ ] `settings.json` hooks — `SessionEnd`, `SubagentStop`, and `TaskCompleted`
+- [~] `settings.json` hooks — `SessionEnd`, `SubagentStop`, and `TaskCompleted`  **(cancelled — TaskCompleted hook registration BLOCKED, classifier denies settings.json edits (T3))**
   remain unwired across 3+ audits. Highest-value addition is `TaskCompleted`
   enforcing the write-set verification in `rules/autonomous-execution.md`.
-- [ ] `skills/doc-pptx/SKILL.md:444-453` — the `soffice`/`pdftoppm` conversion
+- [x] `skills/doc-pptx/SKILL.md:444-453` — the `soffice`/`pdftoppm` conversion  **(done — uncommittable by license, verify on disk (T27). skills/doc-pptx/ is gitignored as Anthropic-proprietary; preflight, timeout 120, and post-op verification are present in SKILL.md on disk. There is no commit and there never will be — do not re-file this on a git reconciliation.)**
   block has no preflight check, timeout, or post-op verification, all of which
   its `doc-docx` twin has. Fix: port the three safeguards.
-- [ ] `templates/autonomous-settings.json` — missing `docker-compose *:*` and
+- [x] `templates/autonomous-settings.json` — missing `docker-compose *:*` and  **(no work required — both grants were already present in the template (stale finding; see decisions.md#resolved-without-work))**
   `psql *:*`, both present in global settings.
-- [ ] `rules/parallelism.md:36-77` — no Resumption section telling a subagent how
+- [x] `rules/parallelism.md:36-77` — no Resumption section telling a subagent how  **(T6, 27f4336)**
   to treat terse follow-up messages (Anthropic's shipped coordinator-worker
   prompt has one: "terse follow-ups are intentional, not ambiguous").
-- [ ] `agents/01-core-development/backend-developer.md:8` vs `:34` — ":8 per-
+- [x] `agents/01-core-development/backend-developer.md:8` vs `:34` — ":8 per-  **(T14, 71a1a46)**
   endpoint p95 target defined for the service" vs ":34 under 100ms p95"
   hardcoded. Fix: drop the hardcoded figure or mark it a default.
-- [ ] `agents/01-core-development/backend-developer.md:25-31` — Security
+- [x] `agents/01-core-development/backend-developer.md:25-31` — Security  **(T14, 71a1a46)**
   Standards bullets restate `rules/security.md:5-12`, already pulled via Required
   Rules. Fix: replace with a pointer plus the 3 backend-specific additions (JWT
   rotation, RBAC, encryption-at-rest).
-- [ ] `post-compact-context.md:6-15` — the only section over the 6-line
+- [x] `post-compact-context.md:6-15` — the only section over the 6-line  **(T5, e0cd3fc — 8 → 5 content lines, all 5 steps intact)**
   calibration threshold (8 content lines / ~73 words for 5 recovery steps).
   Compressible to ~4 lines with all steps intact.
-- [ ] `post-compact-context.md:21` — a pointer to CLAUDE.md, which reloads from
+- [x] `post-compact-context.md:21` — a pointer to CLAUDE.md, which reloads from  **(T5, e0cd3fc)**
   disk automatically after compaction, so the line is pure waste; meanwhile the
   one-commit-per-task `feat(T3):` convention is restored by neither file. Fix:
   swap the pointer for the commit convention.
-- [ ] Playwright permissions in `.claude/settings.local.json`,
+- [~] Playwright permissions in `.claude/settings.local.json`,  **(cancelled — BLOCKED. T1 was to strip these from the template and T3 from settings.json; the harness classifier denied both. The dead grants remain in every permission file.)**
   `settings.autonomous.json`, and `templates/autonomous-settings.json` — no
   playwright MCP server exists in `.mcp.json`, so these grants are dead
   everywhere. Fix: remove, or add the server.
-- [ ] `skills/testing-setup`, `skills/i18n-setup`,
+- [x] `skills/testing-setup`, `skills/i18n-setup`,  **(T28, 35f4683)**
   `skills/powerpoint-addin-setup` — lack the verify-against-current-docs step
   their 4 siblings (auth/payments/analytics/compliance-setup) gained in July,
   despite templating driftable external surfaces (vitest-pool-workers, i18next,
   Office Add-in manifest schema).
-- [ ] `rules/parallelism.md` — largest rule file (166 lines / 10,610 B, ~15% of
+- [x] `rules/parallelism.md` — largest rule file (166 lines / 10,610 B, ~15% of  **(T6, 27f4336)**
   the rules/ budget). The blockquotes at :109-113 and :115-121 are compressible
   ~60% each.
-- [ ] `agents/` rule coverage — `diagnosis.md` appears in 6/128 agents and in no
+- [x] `agents/` rule coverage — `diagnosis.md` appears in 6/128 agents and in no  **(T14–T23 — diagnosis.md and lsp.md now cover every Write-capable / Serena-carrying agent)**
   Write-capable agent; `lsp.md` in 4/128 despite 65 agents carrying Serena tools;
   CLAUDE.md's HIGH/MEDIUM/LOW/UNKNOWN confidence ladder reaches 0 subagents. Fix
   for the last one: move the ladder into `rules/research-sources.md`, already
   referenced by 27 agents.
-- [ ] `hooks/session-start.sh:84` — lacks the error-trap pattern its sibling
+- [x] `hooks/session-start.sh:84` — lacks the error-trap pattern its sibling  **(T12, 2ff8482)**
   hooks use.
-- [ ] `hooks/autonomous-toggle.sh:59-67` — the "ensure .claude/ is gitignored"
+- [x] `hooks/autonomous-toggle.sh:59-67` — the "ensure .claude/ is gitignored"  **(T11, 98fb8ff — now verifies via git ls-files instead of blindly appending)**
   step is a no-op here: `.claude/settings.json` is already tracked, and
   `.gitignore` does not untrack existing files. Consequence: autonomous
   permission state is version-controlled, every toggle dirties the working tree,
@@ -242,9 +269,9 @@
   deliberately tracked — but pick one; the current state is the worst of both.
 
 ## Inline comments to add (Notes)
-- [ ] `rules/parallelism.md:87` — add comment:
+- [x] `rules/parallelism.md:87` — add comment:  **(T6, 27f4336 — comment added verbatim)**
   `<!-- Code review (2026-08-01): PerspectiveGap (arXiv:2606.08878, preprint) scores Opus worst-in-family at orchestration-prompt composition, but never tested Opus 5, which is what `opus` resolves to on v2.1.219+. Rule retained deliberately. Revisit if Opus 5 orchestration data appears. -->`
-- [ ] `skills/self-improve/research-urls.md` (Candidate URLs header) — add comment:
+- [x] `skills/self-improve/research-urls.md` (Candidate URLs header) — add comment:  **(T25, b6ced49 — comment added verbatim)**
   `<!-- Code review (2026-08-01): 91 candidates, 6 ever promoted. No agent fetches candidates, so promotion is accidental. Revisit if this table passes 120 entries without a draining step. -->`
 
 ## Research-source follow-up
