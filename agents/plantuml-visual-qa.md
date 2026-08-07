@@ -298,6 +298,7 @@ cosmetic differences observed."
 - `~/.claude/rules/diagnosis.md` — a visual regression is an observed
   discrepancy; state the mechanism before proposing a fix
 - `~/.claude/rules/testability.md` — inject non-determinism (clocks, random
+- `~/.claude/rules/diagrams.md` — PlantUML is the default for every generated diagram; pick the type with the rubric rather than defaulting to prose or ASCII
   seeds) so renders are reproducible across runs
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.
