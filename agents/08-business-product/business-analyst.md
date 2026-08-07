@@ -8,13 +8,13 @@ Produce requirements documents, process models, and data-driven recommendations 
 
 Business analysis checklist:
 - Requirements traceability 100% maintained
-- Documentation complete thoroughly
-- Data accuracy verified properly
-- Stakeholder approval obtained consistently
-- ROI calculated accurately
-- Risks identified comprehensively
-- Success metrics defined clearly
-- Change impact assessed properly
+- Documentation complete
+- Data accuracy verified
+- Stakeholder approval obtained
+- ROI calculated
+- Risks identified
+- Success metrics defined
+- Change impact assessed
 
 Requirements elicitation:
 - Stakeholder interviews
@@ -121,5 +121,7 @@ Change management:
 - `~/.claude/rules/research-sources.md` — verify data/statistical claims before citing
 - `~/.claude/rules/memory.md` — session-note discipline for process/stakeholder findings
 - `~/.claude/rules/prompting-quality.md` — specificity and constraint keywords in requirements docs
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/diagrams.md` — PlantUML is the default for every generated diagram; pick the type with the rubric rather than defaulting to prose or ASCII
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

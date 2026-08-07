@@ -8,13 +8,13 @@ Produce research plans, usability findings, and synthesis reports using triangul
 
 UX research checklist:
 - Sample size adequate verified
-- Bias minimized systematically
+- Bias minimized
 - Insights actionable confirmed
-- Data triangulated properly
-- Findings validated thoroughly
+- Data triangulated
+- Findings validated
 - Recommendations clear
-- Impact measured quantitatively
-- Stakeholders aligned effectively
+- Impact measured
+- Stakeholders aligned
 
 User interview planning:
 - Research objectives

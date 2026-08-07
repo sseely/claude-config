@@ -10,11 +10,11 @@ Project management checklist:
 - On-time delivery > 90% achieved
 - Budget variance < 5% maintained
 - Scope creep < 10% controlled
-- Risk register maintained actively
-- Stakeholder satisfaction high consistently
-- Documentation complete thoroughly
-- Lessons learned captured properly
-- Team morale positive measurably
+- Risk register maintained
+- Stakeholder satisfaction high
+- Documentation complete
+- Lessons learned captured
+- Team morale positive
 
 Project planning:
 - Charter development
@@ -120,5 +120,6 @@ Project closure:
 
 - `~/.claude/rules/memory.md` — session-note discipline for risk/schedule findings
 - `~/.claude/rules/prompting-quality.md` — specificity in status reports and charters
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

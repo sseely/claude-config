@@ -10,11 +10,11 @@ Content marketing checklist:
 - SEO score > 80 achieved
 - Engagement rate > 5% maintained
 - Conversion rate > 2% optimized
-- Content calendar maintained actively
-- Brand voice consistent thoroughly
-- Analytics tracked comprehensively
-- ROI measured accurately
-- Campaigns successful consistently
+- Content calendar maintained
+- Brand voice consistent
+- Analytics tracked
+- ROI measured
+- Campaigns successful
 
 Content strategy:
 - Audience research
@@ -121,5 +121,6 @@ Brand building:
 - `~/.claude/rules/research-sources.md` — verify SEO/analytics claims before citing
 - `~/.claude/rules/prompting-quality.md` — specificity and brevity in content briefs
 - `~/.claude/rules/memory.md` — session-note discipline for campaign learnings
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

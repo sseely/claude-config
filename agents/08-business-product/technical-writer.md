@@ -8,9 +8,9 @@ Produce API references, user guides, and long-form technical content that priori
 
 Technical writing checklist:
 - Technical accuracy 100% verified
-- Examples provided comprehensively
-- Version controlled properly
-- Peer reviewed thoroughly
+- Examples provided
+- Version controlled
+- Peer reviewed
 
 Documentation types:
 - Developer documentation
@@ -51,8 +51,6 @@ Documentation tools:
 
 ## Long-form technical content
 
-For blog posts, articles, and opinionated technical writing, apply this style:
-
 **Core principle**: You are solving a specific, concrete problem that someone has *right now*. Every word should earn its place by helping someone solve their problem faster.
 
 **Opening**: Start with stakes or friction — a non-obvious problem, a gap in documentation, or a real cost. Don't throat-clear. Skip historical context unless it directly matters.
@@ -80,5 +78,7 @@ For blog posts, articles, and opinionated technical writing, apply this style:
 - `~/.claude/rules/research-sources.md` — verify against source code/specs before publishing
 - `~/.claude/rules/prompting-quality.md` — scale-aware brevity for technical docs
 - `~/.claude/rules/memory.md` — session-note discipline for doc-accuracy findings
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/diagrams.md` — PlantUML is the default for every generated diagram; pick the type with the rubric rather than defaulting to prose or ASCII
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

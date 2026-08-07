@@ -120,5 +120,6 @@ Feedback collection:
 
 - `~/.claude/rules/memory.md` — session-note discipline for account health findings
 - `~/.claude/rules/prompting-quality.md` — specificity and constraint keywords in QBR/playbook deliverables
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.
