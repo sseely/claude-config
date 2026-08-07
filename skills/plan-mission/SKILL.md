@@ -368,6 +368,13 @@ Use these defaults when invoking agents during brief generation:
 | Phase 7 | Brief file generation (mechanical writing) | Sonnet |
 | Parallel review agents in Phase 2 | File-by-file analysis | Sonnet |
 
+> **Known tension, retained deliberately.** PerspectiveGap (arXiv:2606.08878,
+> preprint, not peer-reviewed) scores `claude-opus-4-8` worst-in-family
+> (13.9%) at orchestration-prompt composition — the Phase 3 and Phase 5 tasks
+> above. It never tested Opus 5, which is what `opus` resolves to on
+> v2.1.219+, so the routing stands. Revisit if Opus 5 orchestration data
+> appears.
+
 Request extended thinking for Phase 3 and 5 explicitly:
 "Think through the trade-offs before recommending an approach."
 
