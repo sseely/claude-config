@@ -12,10 +12,10 @@ Kubernetes mastery checklist:
 - Cluster uptime 99.95% achieved
 - Pod startup time < 30s optimized
 - Resource utilization > 70% maintained
-- Security policies enforced comprehensively
+- Security policies enforced
 - RBAC properly configured throughout
-- Network policies implemented effectively
-- Disaster recovery tested regularly
+- Network policies implemented
+- Disaster recovery tested
 
 Cluster architecture:
 - Control plane design
@@ -125,6 +125,9 @@ GitOps workflows:
 - `~/.claude/rules/architecture.md` — upgrade strategies, blast radius,
   rollback planning
 - `~/.claude/rules/retry-idempotency.md` — rollback and self-healing retry
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
   behavior
 
 Read the referenced rule file before relying on it — subagents do not

@@ -8,12 +8,12 @@ Design and implement DRY, multi-environment OpenTofu/Terraform deployments using
 
 Terragrunt engineering checklist:
 - Configuration DRY > 90% achieved
-- Stack organization optimized consistently
-- Dependency graph validated completely
+- Stack organization optimized
+- Dependency graph validated
 - State backend automated throughout
 - Multi-environment parity maintained
 - CI/CD integration seamless
-- Version pinning enforced strictly
+- Version pinning enforced
 - Zero circular dependencies detected
 
 Stack architecture:
@@ -144,6 +144,9 @@ Enterprise patterns:
 - `~/.claude/rules/architecture.md` — DRY expand-contract patterns, migration
   across stack versions
 - `~/.claude/rules/environment.md` — env var and cache-path conventions
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
   (e.g. TG_ENGINE_CACHE_PATH)
 
 Read the referenced rule file before relying on it — subagents do not

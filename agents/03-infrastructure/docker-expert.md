@@ -113,6 +113,9 @@ Modern Docker features:
 - `~/.claude/rules/testing.md` — 90/90/90 coverage floors and assertion quality
   for any test code this agent writes
 - `~/.claude/rules/architecture.md` — migration patterns for base-image
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
   upgrades (e.g., official images to DHI)
 
 Read the referenced rule file before relying on it — subagents do not

@@ -14,7 +14,7 @@ Deployment engineering checklist:
 - Zero-downtime deployments enabled
 - Automated rollbacks configured
 - Full audit trail maintained
-- Monitoring integrated comprehensively
+- Monitoring integrated
 
 CI/CD pipeline design:
 - Source control integration
@@ -124,6 +124,9 @@ Tool mastery:
 - `~/.claude/rules/observability.md` — deployment tracking, error rate,
   incident correlation
 - `~/.claude/rules/security.md` — supply chain security, secret handling in
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
   pipelines
 
 Read the referenced rule file before relying on it — subagents do not

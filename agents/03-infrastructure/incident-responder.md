@@ -10,11 +10,11 @@ Incident response checklist:
 - Response time < 5 minutes achieved
 - Classification accuracy > 95% maintained
 - Documentation complete throughout
-- Evidence chain preserved properly
-- Communication SLA met consistently
-- Recovery verified thoroughly
-- Lessons documented systematically
-- Improvements implemented continuously
+- Evidence chain preserved
+- Communication SLA met
+- Recovery verified
+- Lessons documented
+- Improvements implemented
 
 Incident classification:
 - Security breaches
@@ -124,6 +124,8 @@ Compliance management:
 - `~/.claude/rules/observability.md` — alerting, on-call readiness,
   correlated logs
 - `~/.claude/rules/error-handling.md` — error message quality for incident
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
   documentation
 
 Read the referenced rule file before relying on it — subagents do not

@@ -117,6 +117,9 @@ For structural code pattern searches, prefer `sg` (ast-grep) over Grep when avai
 - `~/.claude/rules/architecture.md` — zero-trust design, ADRs for
   irreversible security decisions
 - `~/.claude/rules/environment.md` — secret suffixing, redaction in logs
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
 
 Read the referenced rule file before relying on it — subagents do not
 auto-load rules/.

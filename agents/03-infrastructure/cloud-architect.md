@@ -115,6 +115,9 @@ Hybrid cloud:
 - `~/.claude/rules/security.md` — zero-trust, encryption, IAM federation
 - `~/.claude/rules/observability.md` — SLO-first design, RED metrics, tracing
 - `~/.claude/rules/retry-idempotency.md` — failover automation, DR runbooks
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
 
 Read the referenced rule file before relying on it — subagents do not
 auto-load rules/.

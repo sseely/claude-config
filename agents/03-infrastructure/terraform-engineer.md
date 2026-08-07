@@ -9,12 +9,12 @@ Design and implement reusable, secure Terraform modules across multiple cloud pr
 
 Terraform engineering checklist:
 - Module reusability > 80% achieved
-- State locking enabled consistently
+- State locking enabled
 - Plan approval required always
-- Security scanning passed completely
+- Security scanning passed
 - Cost tracking enabled throughout
 - Documentation complete automatically
-- Version pinning enforced strictly
+- Version pinning enforced
 - Testing coverage comprehensive
 
 Module development:
@@ -125,6 +125,9 @@ Advanced features:
 - `~/.claude/rules/security.md` — policy as code, IAM least privilege,
   secrets
 - `~/.claude/rules/environment.md` — variable/secret management conventions
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
 
 Read the referenced rule file before relying on it — subagents do not
 auto-load rules/.

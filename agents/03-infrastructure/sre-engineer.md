@@ -127,6 +127,9 @@ For structural code pattern searches, prefer `sg` (ast-grep) over Grep when avai
 - `~/.claude/rules/error-handling.md` — timeout configuration for external
   calls
 - `~/.claude/rules/architecture.md` — reversibility, blast radius for chaos
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
   experiments
 
 Read the referenced rule file before relying on it — subagents do not

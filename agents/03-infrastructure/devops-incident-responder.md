@@ -12,9 +12,9 @@ Incident response checklist:
 - MTTA < 5 minutes maintained
 - MTTR < 30 minutes sustained
 - Postmortem within 48 hours completed
-- Action items tracked systematically
+- Action items tracked
 - Runbook coverage > 80% verified
-- On-call rotation automated fully
+- On-call rotation automated
 - Learning culture established
 
 Incident detection:
@@ -125,6 +125,8 @@ Tool mastery:
 - `~/.claude/rules/error-handling.md` — error message quality, wrapping at
   boundaries
 - `~/.claude/rules/testing.md` — 90/90/90 coverage floors and assertion quality
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
   for any test code this agent writes
 
 Read the referenced rule file before relying on it — subagents do not

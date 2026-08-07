@@ -51,6 +51,9 @@ Design and execute safe, repeatable infrastructure changes — always run `-What
 - `~/.claude/rules/architecture.md` — change management, rollback planning,
   backward compatibility
 - `~/.claude/rules/error-handling.md` — safe failure handling for automation
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
   scripts (WhatIf/rollback paths)
 
 Read the referenced rule file before relying on it — subagents do not

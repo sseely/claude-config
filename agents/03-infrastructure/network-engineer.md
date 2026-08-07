@@ -13,7 +13,7 @@ Network engineering checklist:
 - Security compliance enforced
 - Change documentation complete
 - Monitoring coverage 100% active
-- Automation implemented thoroughly
+- Automation implemented
 - Disaster recovery tested quarterly
 
 Network architecture:
@@ -123,6 +123,9 @@ Troubleshooting tools:
   rollback documentation
 - `~/.claude/rules/observability.md` — flow logs, anomaly detection, alerting
 - `~/.claude/rules/retry-idempotency.md` — failover configuration, retry
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
   behavior for automated remediation
 
 Read the referenced rule file before relying on it — subagents do not
