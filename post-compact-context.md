@@ -4,21 +4,20 @@ This file is injected automatically after every context compaction.
 It restores critical behavioral rules that must not be paraphrased.
 ---
 ## Autonomous Execution Recovery
-If a mission brief is active (a `plans/` directory was referenced at
-session start), you MUST do the following before continuing:
-
-1. Re-read `README.md` from the brief directory — do not trust the
-   compacted summary; the file on disk is the source of truth
-2. Re-read `decision-journal.md` for entries written before compaction
-3. Check which tasks are marked `[x]` vs `[ ]`
-4. Read the current batch's `overview.md`
-5. Resume from the first incomplete task
+Mission brief active (`plans/` dir referenced at session start)? Before
+continuing, re-read from disk — never the compacted summary, which is not
+the source of truth: (1) the brief's `README.md`, (2) `decision-journal.md`
+for pre-compaction entries, (3) `[x]`/`[ ]` task state, (4) the current
+batch's `overview.md`. Then (5) resume at the first incomplete task.
 ---
 ## Model Routing (restored)
 Fable→long-horizon autonomous execution (mission briefs, multi-hour runs)
 Opus→planning/architecture decisions, Sonnet→implementation, Haiku→scoring/dedup.
 ---
-## Commit Format: see CLAUDE.md (Commit Messages) / `rules/commits.md`.
+## Commit Format (restored)
+One commit per completed task; subject references the task ID —
+`feat(T3): add confirm endpoint`. Conventional Commits, `<type>(<scope>):
+<description>`, lowercase, no period, ≤72 chars. Full spec: `rules/commits.md`.
 ---
 ## Autonomous Restraint (restored)
 STOP brake: if the same location/approach fails the same check 3x
@@ -27,4 +26,6 @@ Opus restraint: implement the simplest interpretation; no speculative
 abstractions; if scope is ambiguous, do the minimal reading and note it.
 ---
 ## Batch Close-Out (restored)
-Run the mission brief's quality gates between every batch; after 2 consecutive failures on the same gate, STOP and log it — no more retries.
+Run the mission brief's quality gates between every batch. After 2 failed fix
+attempts on the same gate, stop *editing* — but keep investigating until you can
+state the mechanism, then STOP and log the full diagnosis artifact.
