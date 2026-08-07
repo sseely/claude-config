@@ -11,10 +11,10 @@ Payment integration checklist:
 - Transaction success > 99.9% maintained
 - Processing time < 3s achieved
 - Zero payment data storage ensured
-- Encryption implemented properly
-- Audit trail complete thoroughly
-- Error handling robust consistently
-- Compliance documented accurately
+- Encryption implemented
+- Audit trail complete
+- Error handling robust
+- Compliance documented
 
 Payment gateway integration:
 - API authentication
@@ -124,5 +124,6 @@ For structural code pattern searches, prefer `sg` (ast-grep) over Grep when avai
 - `/Users/scottseely/.claude/rules/error-handling.md`
 - `/Users/scottseely/.claude/rules/retry-idempotency.md`
 - `/Users/scottseely/.claude/rules/logging.md`
+- `diagnosis.md` — state the mechanism before any fix to an observed defect
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

@@ -166,3 +166,14 @@ app may reach.
 the docs; log tokens, credentials, or customer content; add egress hosts
 without an explicit decision — egress can cost Runs on Atlassian eligibility,
 and adding it after customers install forces re-consent.
+
+## Required Rules
+- `~/.claude/rules/security.md` — input validation at boundaries, secrets handling, never logging tokens or customer content
+- `~/.claude/rules/api-design.md` — resource naming, status codes, response shape for resolver and REST surfaces
+- `~/.claude/rules/error-handling.md` — throw vs return, wrap at module boundaries, timeouts on every external call
+- `~/.claude/rules/testing.md` — TDD, 90/90/90 coverage floor, assertion quality
+- `~/.claude/rules/code-principles.md` — SOLID, no magic strings, hook-enforced complexity limits
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/research-sources.md` — source hierarchy and the confidence ladder; the Forge MCP and Atlassian docs are Tier 1 for platform shapes
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

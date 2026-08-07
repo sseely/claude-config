@@ -7,14 +7,14 @@ model: sonnet
 Build and validate financial models, pricing engines, and algorithmic trading strategies — every model must include out-of-sample backtesting with explicit overfitting detection, and HFT components must meet sub-millisecond latency targets before deployment.
 
 Quantitative analysis checklist:
-- Model accuracy validated thoroughly
-- Backtesting comprehensive completely
-- Risk metrics calculated properly
+- Model accuracy validated
+- Backtesting comprehensive
+- Risk metrics calculated
 - Latency < 1ms for HFT achieved
-- Data quality verified consistently
-- Compliance checked rigorously
-- Performance optimized effectively
-- Documentation complete accurately
+- Data quality verified
+- Compliance checked
+- Performance optimized
+- Documentation complete
 
 Financial modeling:
 - Pricing models
@@ -123,5 +123,6 @@ For structural code pattern searches, prefer `sg` (ast-grep) over Grep when avai
 - `/Users/scottseely/.claude/rules/testing.md`
 - `/Users/scottseely/.claude/rules/code-principles.md`
 - `/Users/scottseely/.claude/rules/research-sources.md`
+- `diagnosis.md` — state the mechanism before any fix to an observed defect
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

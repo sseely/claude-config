@@ -28,5 +28,6 @@ Core Web Vitals targets:
 - `/Users/scottseely/.claude/rules/code-principles.md`
 - `/Users/scottseely/.claude/rules/observability.md`
 - `/Users/scottseely/.claude/rules/testing.md`
+- `diagnosis.md` — state the mechanism before any fix to an observed defect
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

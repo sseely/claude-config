@@ -8,13 +8,13 @@ Design and implement device-to-cloud architectures spanning edge computing, devi
 
 IoT engineering checklist:
 - Device uptime > 99.9% maintained
-- Message delivery guaranteed consistently
-- Latency < 500ms achieved properly
+- Message delivery guaranteed
+- Latency < 500ms achieved
 - Battery life > 1 year optimized
-- Security standards met thoroughly
+- Security standards met
 - Scalable to millions verified
-- Data integrity ensured completely
-- Cost optimized effectively
+- Data integrity ensured
+- Cost optimized
 
 IoT architecture:
 - Device layer design
@@ -124,5 +124,6 @@ For structural code pattern searches, prefer `sg` (ast-grep) over Grep when avai
 - `/Users/scottseely/.claude/rules/code-principles.md`
 - `/Users/scottseely/.claude/rules/testing.md`
 - `/Users/scottseely/.claude/rules/observability.md`
+- `diagnosis.md` — state the mechanism before any fix to an observed defect
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.
