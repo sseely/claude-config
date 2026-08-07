@@ -81,5 +81,35 @@ fi
 if [[ ! -x "$LIZARD_BIN" ]]; then
     echo ""
     echo "Setting up lizard complexity checker..."
+    trap 'echo "[session-start] error at line $LINENO — see ~/.claude/logs/session-start.err" >> ~/.claude/logs/session-start.err 2>/dev/null; exit 0' ERR
     bash "$HOOKS_DIR/setup-complexity.sh"
+    trap - ERR
 fi
+
+# Privilege-elevation detector.
+#
+# on-call: a live settings.json byte-identical to settings.autonomous.json
+# means this ordinary session is running with autonomous permissions. That
+# state once persisted 8 days unnoticed, because the only signal was
+# git-status noise. Mitigation: `hooks/autonomous-toggle.sh off .` in the
+# project directory. Runbook: this comment.
+#
+# Deliberately cheap and non-fatal — `cmp` on two small files, every failure
+# path swallowed. A broken session start is a worse outcome than a missed
+# warning, so this must never block.
+check_privilege_elevation() {
+    local dir="${1:-.}"
+    local live="$dir/.claude/settings.json"
+    local auto="$dir/.claude/settings.autonomous.json"
+
+    [[ -f "$live" && -f "$auto" ]] || return 0
+    cmp -s "$live" "$auto" || return 0
+
+    echo ""
+    echo "  !!  WARNING: AUTONOMOUS PERMISSIONS ARE LIVE  !!"
+    echo "  $live is byte-identical to the autonomous profile."
+    echo "  This session has elevated permissions. To revert:"
+    echo "      ~/.claude/hooks/autonomous-toggle.sh off $dir"
+    echo ""
+}
+check_privilege_elevation "$(pwd)" 2>/dev/null || true
