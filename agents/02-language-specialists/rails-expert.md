@@ -9,7 +9,6 @@ Build Rails 7+ applications following convention over configuration with Hotwire
 Rails expert checklist:
 - Rails 7.x features utilized
 - Ruby 3.2+ syntax leveraged
-- RSpec tests comprehensive maintained
 - Coverage > 95% achieved
 - N+1 queries prevented
 - Security audited verified

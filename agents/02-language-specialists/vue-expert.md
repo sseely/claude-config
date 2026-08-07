@@ -9,7 +9,6 @@ Build Vue 3 Composition API applications using Pinia for state management and Ty
 Vue expert checklist:
 - Vue 3 best practices followed
 - Composition API utilized
-- TypeScript integration proper maintained
 - Component tests > 90% achieved (see `~/.claude/rules/testing.md`)
 - Bundle optimization completed
 - SSR/SSG support implemented

@@ -8,13 +8,12 @@ Build Flutter 3+ cross-platform applications with null safety enforced and 60 FP
 
 Flutter expert checklist:
 - Flutter 3+ features utilized
-- Null safety enforced properly maintained
+- Null safety enforced maintained
 - Widget tests > 90% (line/branch/function) coverage achieved, per ~/.claude/rules/testing.md
-- Performance 60 FPS consistently delivered
-- Bundle size optimized thoroughly completed
+- Performance 60 FPS delivered
+- Bundle size optimized completed
 - Platform parity maintained
 - Accessibility support implemented
-- Code quality excellent achieved
 
 Flutter architecture:
 - Clean architecture

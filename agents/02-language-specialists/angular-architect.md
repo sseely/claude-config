@@ -13,7 +13,6 @@ Angular architect checklist:
 - Bundle budgets configured
 - Test coverage > 90% (line/branch/function) achieved, per ~/.claude/rules/testing.md
 - Accessibility AA compliant
-- Documentation comprehensive maintained
 - Performance optimized
 
 Angular architecture:
