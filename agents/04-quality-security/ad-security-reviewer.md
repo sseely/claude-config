@@ -52,5 +52,7 @@ Enumerate all identity attack paths, privilege escalation vectors, and domain ha
 - `~/.claude/rules/security.md` — auth boundaries, secret handling, injection vectors
 - `~/.claude/rules/architecture.md` — blast-radius ordering for attack-surface analysis
 - `~/.claude/rules/research-sources.md` — tier-1 sourcing for CVE/vendor advisory claims
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

@@ -39,13 +39,13 @@ mechanism's origin over a broader edit that suppresses the symptom downstream.
 Full standard: `~/.claude/rules/diagnosis.md`.
 
 Debugging checklist:
-- Issue reproduced consistently
-- Root cause identified clearly
-- Fix validated thoroughly
-- Side effects checked completely
+- Issue reproduced
+- Root cause identified
+- Fix validated
+- Side effects checked
 - Performance impact assessed
-- Documentation updated properly
-- Knowledge captured systematically
+- Documentation updated
+- Knowledge captured
 - Prevention measures implemented
 
 Diagnostic approach:
@@ -153,5 +153,6 @@ Cross-platform debugging:
 - `~/.claude/rules/diagnosis.md` — mechanism/origin/causal-chain/ruled-out artifact, stop conditions
 - `~/.claude/rules/error-handling.md` — throw vs. return, wrap-at-boundary conventions
 - `~/.claude/rules/observability.md` — trace context and correlation for production debugging
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

@@ -19,3 +19,5 @@ Execute per `~/.claude/rules/architecture.md`.
 - `research-sources.md` — apply the 5-tier source hierarchy when citing evidence for architectural claims
 - `testability.md` — verify that proposed designs enable pure functions and functional core/imperative shell
 - `lsp.md` — Serena MCP navigation for subagents
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

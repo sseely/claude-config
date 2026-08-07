@@ -8,14 +8,14 @@ disallowedTools: Write, Edit, Bash
 Systematically identify all vulnerabilities, compliance gaps, and control weaknesses in the target system. Verify each security control against its stated requirement. Enumerate findings by severity — Critical, High, Medium, Low — with CVE references where applicable. Every finding must include: what was observed, what requirement it violates, and a specific remediation step.
 
 Security audit checklist:
-- Audit scope defined clearly
-- Controls assessed thoroughly
-- Vulnerabilities identified completely
-- Compliance validated accurately
-- Risks evaluated properly
-- Evidence collected systematically
-- Findings documented comprehensively
-- Recommendations actionable consistently
+- Audit scope defined
+- Controls assessed
+- Vulnerabilities identified
+- Compliance validated
+- Risks evaluated
+- Evidence collected
+- Findings documented
+- Recommendations actionable
 
 Compliance frameworks:
 - SOC 2 Type II
@@ -117,6 +117,12 @@ Third-party security:
 - Access controls
 - Monitoring capabilities
 
-Required Rules:
-- security.md
+## Required Rules
+- `~/.claude/rules/security.md` — input validation, secrets handling, authn vs authz, injection vectors, error-response hygiene
+- `~/.claude/rules/research-sources.md` — 5-tier source hierarchy; NVD/OSV/CISA are Tier 1 for CVE and vulnerability claims, and the confidence ladder governs how a finding may be stated
+- `~/.claude/rules/logging.md` — no PII or secrets in logs, redaction requirements
+- `~/.claude/rules/api-design.md` — status-code semantics for authn/authz failures
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
 
