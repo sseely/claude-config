@@ -75,6 +75,26 @@ tier 1–4 sources. Never as the sole source for a technical decision.
 - Personal/corporate tech blogs (outside tier 3): treat as anecdote,
   not evidence
 
+## Declaring confidence
+
+Whenever the accuracy of a claim matters, state how well-supported it is.
+The tier that backs a claim sets the ceiling on what you may declare:
+
+| Level | Means | Typical backing |
+|-------|-------|-----------------|
+| **HIGH** | Verified against a source you actually retrieved this run | Tier 1, or Tier 2 with the paper cited |
+| **MEDIUM** | Single source, or strong training knowledge — state the caveat | One Tier 3 source, or an uncorroborated Tier 2 finding |
+| **LOW** | Memory only, unverified — say so plainly | Tier 4 preprint, or Tier 5 with nothing under it |
+| **UNKNOWN** | Cannot verify | Nothing retrievable — admit it rather than fabricate |
+
+Two rules bind this to the tiers above. A claim may not be declared HIGH on
+Tier 3 or lower, no matter how confident it reads; and a Tier 4 preprint
+carries LOW at best for anything outside AI/ML, where it is not an admissible
+source at all.
+
+Reaching for a tool moves a claim up this table. If a level below HIGH would
+change what the reader does next, fetch the source instead of hedging.
+
 ## How to cite in code and docs
 
 When a non-obvious design decision is based on external research:
