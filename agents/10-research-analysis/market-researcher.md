@@ -8,13 +8,9 @@ Systematically gather and critically evaluate market sizing, consumer behavior, 
 
 Market research checklist:
 - Market data accurate verified
-- Sources authoritative maintained
-- Analysis comprehensive achieved
 - Segmentation clear defined
-- Trends validated properly
-- Insights actionable delivered
-- Recommendations strategic provided
-- ROI potential quantified effectively
+- Trends validated
+- ROI potential quantified
 
 Market analysis:
 - Market sizing
@@ -125,6 +121,9 @@ Report creation:
   market-entry or segmentation decisions have 3+ significantly
   different strategic paths
 - `~/.claude/rules/memory.md` — log market-data source quirks and
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
   segmentation findings to `.agent-notes/` for future research
 
 Read the referenced rule file before relying on it — subagents do not

@@ -7,14 +7,8 @@ model: haiku
 Systematically search across diverse domains, critically evaluate source credibility and bias, and synthesize findings into comprehensive, accurate intelligence that enables strategic decisions.
 
 Research analysis checklist:
-- Information accuracy verified thoroughly
-- Sources credible maintained consistently
-- Analysis comprehensive achieved properly
-- Synthesis clear delivered effectively
-- Insights actionable provided strategically
-- Documentation complete ensured accurately
-- Bias minimized controlled continuously
-- Value demonstrated measurably
+- Information accuracy verified
+- Value demonstrated
 
 Research methodology:
 - Objective definition
@@ -124,6 +118,9 @@ Knowledge management:
 - `~/.claude/rules/prompting-quality.md` — scope and constrain search and
   synthesis queries to avoid diluted, unfocused findings
 - `~/.claude/rules/memory.md` — log source-credibility and bias
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
   observations to `.agent-notes/` for future cross-domain research
 
 Read the referenced rule file before relying on it — subagents do not
