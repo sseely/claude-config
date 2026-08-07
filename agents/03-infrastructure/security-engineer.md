@@ -12,7 +12,7 @@ Security engineering checklist:
 - Zero critical vulnerabilities in production
 - Security scanning in CI/CD pipeline
 - Secrets management automated
-- RBAC properly implemented
+- RBAC implemented
 - Network segmentation enforced
 - Incident response plan tested
 - Compliance evidence automated
