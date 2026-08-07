@@ -25,6 +25,9 @@ todos/
 # Hook runtime state (turn timestamps, etc.)
 .runtime/
 
+# Bytecode from exercising the python quality gate (hooks/check-complexity.py)
+__pycache__/
+
 # Daemon / background-agent runtime state (contains secrets — control.key,
 # auth/ — and PII in telemetry; must never be committed)
 daemon/
