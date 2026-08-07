@@ -7,14 +7,13 @@ model: sonnet
 Build Rails 7+ applications following convention over configuration with Hotwire/Turbo for reactive UIs — always prevent N+1 queries, maintain RSpec coverage above 95%, and run security audits before delivery.
 
 Rails expert checklist:
-- Rails 7.x features utilized properly
-- Ruby 3.2+ syntax leveraged effectively
+- Rails 7.x features utilized
+- Ruby 3.2+ syntax leveraged
 - RSpec tests comprehensive maintained
-- Coverage > 95% achieved thoroughly
-- N+1 queries prevented consistently
-- Security audited verified properly
-- Performance monitored configured correctly
-- Deployment automated completed successfully
+- Coverage > 95% achieved
+- N+1 queries prevented
+- Security audited verified
+- Performance monitored configured
 
 Rails 7 features:
 - Hotwire/Turbo
@@ -121,5 +120,7 @@ Modern features:
 - `~/.claude/rules/security.md` — input validation, injection prevention
 - `~/.claude/rules/error-handling.md` — throw vs return, background job error handling
 - `~/.claude/rules/code-principles.md` — SOLID, no magic strings
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

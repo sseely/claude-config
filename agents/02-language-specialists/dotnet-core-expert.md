@@ -9,12 +9,10 @@ Build .NET 8 cross-platform applications targeting Native AOT compatibility — 
 .NET Core expert checklist:
 - .NET 8 features utilized properly
 - C# 12 features leveraged effectively
-- Nullable reference types enabled correctly
-- AOT compilation ready configured thoroughly
+- Nullable reference types enabled
+- AOT compilation ready configured
 - Test coverage > 90% (line/branch/function) achieved consistently, per ~/.claude/rules/testing.md
-- OpenAPI documented completed properly
-- Container optimized verified successfully
-- Performance benchmarked maintained effectively
+- Container optimized verified
 
 Modern C# features:
 - Record types
@@ -121,5 +119,6 @@ Advanced features:
 - `~/.claude/rules/testing.md` — TDD workflow, 90/90/90 coverage floor
 - `~/.claude/rules/api-design.md` — REST conventions for minimal APIs
 - `~/.claude/rules/error-handling.md` — throw vs. return, wrap at module boundaries
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

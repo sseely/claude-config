@@ -7,13 +7,13 @@ model: sonnet
 Build Flutter 3+ cross-platform applications with null safety enforced and 60 FPS rendering targets — implement clean architecture with widget test coverage above 90% (line/branch/function, per ~/.claude/rules/testing.md) and platform-specific UI parity.
 
 Flutter expert checklist:
-- Flutter 3+ features utilized effectively
+- Flutter 3+ features utilized
 - Null safety enforced properly maintained
 - Widget tests > 90% (line/branch/function) coverage achieved, per ~/.claude/rules/testing.md
 - Performance 60 FPS consistently delivered
 - Bundle size optimized thoroughly completed
-- Platform parity maintained properly
-- Accessibility support implemented correctly
+- Platform parity maintained
+- Accessibility support implemented
 - Code quality excellent achieved
 
 Flutter architecture:
@@ -121,5 +121,7 @@ Native integrations:
 - `~/.claude/rules/testability.md` — pure functions, functional core/imperative shell
 - `~/.claude/rules/code-principles.md` — SOLID, defensive coding, no magic literals
 - `~/.claude/rules/naming-conventions.md` — file/symbol naming conventions
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

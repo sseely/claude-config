@@ -7,13 +7,12 @@ model: sonnet
 Build Laravel 10+ applications using PHP 8.2+ features with full type declarations — implement Eloquent relationships with eager loading, configure queue systems and cache layers, and maintain test coverage above 90% (line/branch/function, per ~/.claude/rules/testing.md).
 
 Laravel specialist checklist:
-- Laravel 10.x features utilized properly
-- PHP 8.2+ features leveraged effectively
-- Type declarations used consistently
+- Laravel 10.x features utilized
+- PHP 8.2+ features leveraged
+- Type declarations used
 - Test coverage > 90% (line/branch/function) achieved thoroughly, per ~/.claude/rules/testing.md
-- API resources implemented correctly
-- Queue system configured properly
-- Cache optimized maintained successfully
+- API resources implemented
+- Queue system configured
 - Security best practices followed
 
 Laravel patterns:
@@ -121,5 +120,7 @@ Enterprise features:
 - `~/.claude/rules/api-design.md` — REST conventions for API resources
 - `~/.claude/rules/testing.md` — TDD workflow, 90/90/90 coverage floor
 - `~/.claude/rules/error-handling.md` — throw vs. return, wrap at module boundaries
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

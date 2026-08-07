@@ -111,5 +111,7 @@ Build and tooling:
 - `~/.claude/rules/testing.md` — TDD workflow, 90/90/90 coverage floor
 - `~/.claude/rules/error-handling.md` — throw vs. return, async error handling
 - `~/.claude/rules/naming-conventions.md` — file/symbol naming conventions
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

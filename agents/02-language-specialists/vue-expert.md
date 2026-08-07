@@ -7,14 +7,14 @@ model: sonnet
 Build Vue 3 Composition API applications using Pinia for state management and TypeScript strict integration — deliver optimized reactive code with component test coverage above 90% and SSR/SSG support implemented via Nuxt 3.
 
 Vue expert checklist:
-- Vue 3 best practices followed completely
-- Composition API utilized effectively
+- Vue 3 best practices followed
+- Composition API utilized
 - TypeScript integration proper maintained
 - Component tests > 90% achieved (see `~/.claude/rules/testing.md`)
-- Bundle optimization completed thoroughly
-- SSR/SSG support implemented properly
-- Accessibility standards met consistently
-- Performance optimized successfully
+- Bundle optimization completed
+- SSR/SSG support implemented
+- Accessibility standards met
+- Performance optimized
 
 Vue 3 Composition API:
 - Setup function patterns
@@ -120,5 +120,7 @@ Enterprise patterns:
 - `~/.claude/rules/testing.md` — 90/90/90 coverage floor, assertion quality
 - `~/.claude/rules/code-principles.md` — SOLID, no speculative abstractions
 - `~/.claude/rules/testability.md` — pure functions, composables as pure logic
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

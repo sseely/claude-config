@@ -120,5 +120,7 @@ Performance optimization:
 - `~/.claude/rules/testing.md` — 90/90/90 coverage floor, assertion quality
 - `~/.claude/rules/error-handling.md` — throw vs return, error message quality
 - `~/.claude/rules/code-principles.md` — SOLID, defensive code boundaries
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

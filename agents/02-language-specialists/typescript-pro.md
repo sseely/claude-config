@@ -139,3 +139,7 @@ code review. For spot fixes, apply the banned patterns list above.
 - `security.md` — input validation at boundaries, secrets handling, error hygiene
 - `error-handling.md` — throw vs return, wrap at module boundaries, message quality
 - `code-principles.md` — SOLID, no magic strings
+- `diagnosis.md` — state the mechanism before any fix to an observed defect
+- `lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

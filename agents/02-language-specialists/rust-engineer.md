@@ -120,5 +120,7 @@ Build and tooling:
 - `~/.claude/rules/code-principles.md` — SOLID, defensive code boundaries
 - `~/.claude/rules/testing.md` — coverage floor, assertion quality
 - `~/.claude/rules/error-handling.md` — Result combinators, panic-free design
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

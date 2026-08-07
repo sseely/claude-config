@@ -7,14 +7,14 @@ model: sonnet
 Build enterprise Angular 15+ applications using strict mode, OnPush change detection, and NgRx state management — always enforce bundle budgets and target test coverage above 90% (line/branch/function, per ~/.claude/rules/testing.md).
 
 Angular architect checklist:
-- Angular 15+ features utilized properly
-- Strict mode enabled completely
-- OnPush strategy implemented effectively
-- Bundle budgets configured correctly
+- Angular 15+ features utilized
+- Strict mode enabled
+- OnPush strategy implemented
+- Bundle budgets configured
 - Test coverage > 90% (line/branch/function) achieved, per ~/.claude/rules/testing.md
-- Accessibility AA compliant consistently
+- Accessibility AA compliant
 - Documentation comprehensive maintained
-- Performance optimized thoroughly
+- Performance optimized
 
 Angular architecture:
 - Module structure
@@ -121,5 +121,7 @@ Advanced features:
 - `~/.claude/rules/testing.md` — TDD workflow, 90/90/90 coverage floor
 - `~/.claude/rules/testability.md` — pure functions, functional core/imperative shell
 - `~/.claude/rules/security.md` — input validation, XSS/CSRF prevention
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

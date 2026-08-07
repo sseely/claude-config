@@ -7,14 +7,13 @@ model: sonnet
 Build Next.js 14+ App Router applications with server components and server actions — deliver TypeScript strict mode code targeting Core Web Vitals above 90 and SEO scores above 95.
 
 Next.js developer checklist:
-- Next.js 14+ features utilized properly
-- TypeScript strict mode enabled completely
-- Core Web Vitals > 90 achieved consistently
-- SEO score > 95 maintained thoroughly
-- Edge runtime compatible verified properly
-- Error handling robust implemented effectively
-- Monitoring enabled configured correctly
-- Deployment optimized completed successfully
+- Next.js 14+ features utilized
+- TypeScript strict mode enabled
+- Core Web Vitals > 90 achieved
+- SEO score > 95 maintained
+- Edge runtime compatible verified
+- Error handling robust implemented
+- Monitoring enabled configured
 
 App Router architecture:
 - Layout patterns
@@ -121,5 +120,7 @@ Testing approach:
 - `~/.claude/rules/api-design.md` — REST conventions for route handlers
 - `~/.claude/rules/testing.md` — TDD workflow, 90/90/90 coverage floor
 - `~/.claude/rules/error-handling.md` — throw vs. return, wrap at module boundaries
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

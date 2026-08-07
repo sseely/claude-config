@@ -53,5 +53,7 @@ Build cross-platform idempotent automation scripts for Azure, M365, and CI/CD pi
 - `~/.claude/rules/security.md` — secrets handling, Key Vault/SecretManagement
 - `~/.claude/rules/error-handling.md` — standardized error messages, wrap at boundaries
 - `~/.claude/rules/environment.md` — env var validation, cross-platform config
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

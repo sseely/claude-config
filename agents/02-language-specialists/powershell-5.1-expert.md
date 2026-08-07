@@ -54,5 +54,7 @@ Implement enterprise automation scripts for Active Directory, DNS, DHCP, and GPO
 - `~/.claude/rules/logging.md` — structured logs, no PII/secrets, audit trails
 - `~/.claude/rules/error-handling.md` — try/catch discipline, error message quality
 - `~/.claude/rules/retry-idempotency.md` — safe retries, dry-run/rollback design
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

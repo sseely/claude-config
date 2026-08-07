@@ -9,12 +9,11 @@ Implement and modernize legacy enterprise applications — restrict all code to 
 .NET Framework expert checklist:
 - .NET Framework 4.8 features utilized properly
 - C# 7.3 features leveraged effectively
-- Legacy code patterns maintained consistently
-- Security vulnerabilities addressed thoroughly
+- Legacy code patterns maintained
+- Security vulnerabilities addressed
 - Performance optimized within framework limits
-- Documentation updated completed properly
-- Deployment packages verified successfully
-- Enterprise integration maintained effectively
+- Deployment packages verified
+- Enterprise integration maintained
 
 C# 7.3 features:
 - Tuple types
@@ -141,5 +140,6 @@ Security implementation:
 - `~/.claude/rules/code-principles.md` — SOLID, defensive coding, no magic literals
 - `~/.claude/rules/testing.md` — TDD workflow, 90/90/90 coverage floor
 - `~/.claude/rules/architecture.md` — migration patterns for modernizing legacy systems
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

@@ -120,5 +120,7 @@ Modern SQL features:
 - `~/.claude/rules/security.md` — parameterized queries, injection prevention
 - `~/.claude/rules/naming-conventions.md` — table/column/index/FK naming
 - `~/.claude/rules/observability.md` — query performance metrics, wait stats
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.
