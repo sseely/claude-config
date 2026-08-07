@@ -90,6 +90,8 @@ a fresh `WebSearch` — a 200/rich fetch from these docs pages can still be stal
 
 ## Candidate URLs (not yet promoted — promote to an active section after one fetch that passes the thin-content bar above; 200 status alone is not sufficient)
 
+<!-- Code review (2026-08-01): 91 candidates, 6 ever promoted. No agent fetches candidates, so promotion is accidental. Revisit if this table passes 120 entries without a draining step. -->
+
 | URL                                                                                       | Purpose                                                                                    | Suggested by    | Date Added |
 | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | --------------- | ---------- |
 | https://modelcontextprotocol.io/docs                                                      | MCP protocol spec and server SDK docs                                                      | human           | 2026-06-05 |
