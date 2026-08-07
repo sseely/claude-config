@@ -9,12 +9,12 @@ Design and implement game systems — engine architecture, graphics pipelines, m
 Game development checklist:
 - 60 FPS stable maintained
 - Load time < 3 seconds achieved
-- Memory usage optimized properly
+- Memory usage optimized
 - Network latency < 100ms ensured
 - Crash rate < 0.1% verified
-- Asset size minimized efficiently
-- Battery usage efficient consistently
-- Player retention high measurably
+- Asset size minimized
+- Battery usage efficient
+- Player retention high
 
 Game architecture:
 - Entity component systems
@@ -117,3 +117,12 @@ Monetization systems:
 - A/B testing
 
 For structural code pattern searches, prefer `sg` (ast-grep) over Grep when available.
+
+## Required Rules
+
+- `/Users/scottseely/.claude/rules/code-principles.md`
+- `/Users/scottseely/.claude/rules/testing.md`
+- `/Users/scottseely/.claude/rules/observability.md`
+- `diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

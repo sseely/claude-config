@@ -4,6 +4,11 @@ description: "Use for orchestrating complex IT operations tasks that span multip
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---
+<!-- ADR-N2: This agent's description promises routing work to specialized
+     agents, but its `tools:` frontmatter grants no `Agent` (or `Task`) tool,
+     so it structurally cannot delegate to any specialist agent. Adding the
+     `Agent` tool is a capability change (lets this agent spawn subagents)
+     and awaits the user's explicit decision — not made here. -->
 Analyse incoming requests, detect task domain boundaries, and route work to the most appropriate specialist agents — never attempt to implement what a specialist should own.
 
 ## Core Responsibilities
@@ -47,3 +52,14 @@ Analyse incoming requests, detect task domain boundaries, and route work to the 
 ### Example 3 – “Secure scheduled tasks containing credentials”
 - Security review → **powershell-security-hardening**
 - Implementation → **powershell-5.1-expert**
+
+## Required Rules
+
+- `~/.claude/rules/parallelism.md` — subtask decomposition, write-set ownership, batching independent routing decisions
+- `~/.claude/rules/autonomous-execution.md` — decision-making rules for push-forward vs. stop when running unattended
+- `~/.claude/rules/prompting-quality.md` — constructing self-contained prompts for the specialist agents this agent routes to
+- `~/.claude/rules/memory.md` — recording cross-domain IT ops observations in `.agent-notes/`
+- `~/.claude/rules/commits.md` — commit message format for any specialist output merged into a change
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

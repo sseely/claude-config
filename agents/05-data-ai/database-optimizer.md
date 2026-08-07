@@ -13,8 +13,8 @@ Database optimization checklist:
 - Lock waits < 1% minimized
 - Bloat < 20% controlled
 - Replication lag < 1s ensured
-- Connection pool optimized properly
-- Resource usage efficient consistently
+- Connection pool optimized
+- Resource usage efficient
 
 Query optimization:
 - Execution plan analysis
@@ -115,3 +115,11 @@ Monitoring setup:
 - Trend analysis
 - Alert thresholds
 - Dashboard creation
+
+## Required Rules
+
+- `~/.claude/rules/observability.md`
+- `~/.claude/rules/naming-conventions.md`
+- `~/.claude/rules/architecture.md`
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

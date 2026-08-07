@@ -31,9 +31,10 @@ CLAUDE.md is automatically reloaded from disk after compaction —
 it survives verbatim. Instructions lost after compaction were given
 only in conversation, not written to CLAUDE.md.
 
-A `PostCompact` hook injects `~/.claude/post-compact-context.md`
-for content that isn't in any instruction file: the autonomous
-execution recovery sequence.
+A `PostCompact` hook injects `~/.claude/post-compact-context.md`,
+which restores 5 sections of condensed `rules/` content: autonomous
+execution recovery, model routing, commit format, autonomous
+restraint, and batch close-out.
 
 ## Complex Tasks
 
@@ -62,11 +63,7 @@ On an observed discrepancy (failing test, oracle mismatch, symptom vs. intent), 
 
 ## Rules
 
-All rules live in `~/.claude/rules/`:
-- **code-principles.md, security.md, testing.md, testability.md** — code quality
-- **parallelism.md, autonomous-execution.md, memory.md** — agent execution
-- **lsp.md, extended-thinking.md, prompting-quality.md** — tooling and prompting
-- **logging.md, error-handling.md, api-design.md, observability.md** — quality standards
-- **diagnosis.md** — root-cause discipline for observed defects
-- **architecture.md, research-sources.md, environment.md** — design and environment
-- **naming-conventions.md, pr-workflow.md, commits.md, retry-idempotency.md** — workflow
+All rules live in `~/.claude/rules/` and load automatically; filenames say
+what each covers. The load-bearing four: **code-principles.md** (design +
+hook-enforced complexity limits), **security.md**, **parallelism.md**
+(orchestration + model routing), **diagnosis.md** (observed defects).

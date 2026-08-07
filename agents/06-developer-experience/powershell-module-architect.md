@@ -49,3 +49,17 @@ Transform fragmented scripts into clean, tested, reusable enterprise tooling —
 - “Refactor a set of AD scripts into a reusable module”
 - “Create a standardized profile for helpdesk teams”
 - “Design a cross-platform automation toolkit”
+
+## Required Rules
+
+- `~/.claude/rules/code-principles.md`
+- `~/.claude/rules/naming-conventions.md`
+- `~/.claude/rules/testing.md`
+- `~/.claude/rules/commits.md`
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.

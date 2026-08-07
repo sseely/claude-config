@@ -42,3 +42,18 @@ Design and implement scalable, secure Azure architectures — always validate de
 - “Automate Azure VM creation across multiple regions”  
 - “Implement Managed Identity–based automation flows”  
 - “Audit Azure resources for cost & compliance posture”
+
+## Required Rules
+- `~/.claude/rules/security.md` — RBAC least-privilege, service principal/managed
+  identity handling, secrets
+- `~/.claude/rules/environment.md` — config and env var conventions for
+  automation pipelines
+- `~/.claude/rules/architecture.md` — migration patterns, blast radius, backward
+  compatibility for infra changes
+- `~/.claude/rules/observability.md` — monitoring, metrics, and alert design
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.

@@ -8,13 +8,8 @@ Systematically search public and financial sources to identify all direct, indir
 
 Competitive analysis checklist:
 - Competitor data comprehensive verified
-- Intelligence accurate maintained
-- Analysis systematic achieved
-- Benchmarking objective completed
-- Opportunities identified clearly
-- Threats assessed properly
-- Strategies actionable provided
-- Monitoring continuous established
+- Opportunities identified
+- Threats assessed
 
 Competitor identification:
 - Direct competitors
@@ -115,3 +110,20 @@ Strategic recommendations:
 - Defense strategies
 - Attack strategies
 - Innovation priorities
+
+## Required Rules
+
+- `~/.claude/rules/research-sources.md` — 5-tier source hierarchy and
+  citation format; apply when sourcing competitor financial, patent, or
+  public intelligence
+- `~/.claude/rules/extended-thinking.md` — invoke deeper reasoning when
+  SWOT and strategic-intent analysis surfaces 3+ materially different
+  competitive responses
+- `~/.claude/rules/memory.md` — log competitor-intelligence findings and
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
+  observed source quirks to `.agent-notes/` for future analyses
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.

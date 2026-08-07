@@ -25,18 +25,29 @@ Include in the prompt:
 ## Instruction bloat
 
 Custom instructions (CLAUDE.md, system prompts) are prepended to every
-request. Keep them under 4KB. Every kilobyte beyond that is dead weight
-on every token budget in every session.
+request. Keep CLAUDE.md **under 200 lines**, per Anthropic's guidance at
+code.claude.com/docs/en/memory. Everything beyond that is dead weight on
+every token budget in every session.
 
 Audit periodically: remove instructions that are no longer relevant,
 consolidate duplicates, and move project-specific rules to project-level
 CLAUDE.md files rather than the global one.
 
 Per-file caps bound each file, but nothing caps the **aggregate resident
-footprint** of `rules/` (~62KB). Rules are referenced by pointer from
-CLAUDE.md, not `@`-imported, so they are not all resident — keep it that
-way: prefer task-scoped reading of the one or two relevant rule files over
-loading the set, and dedup cross-file repetition rather than restating it.
+footprint** of `rules/`, which is now the larger cost by a wide margin —
+several times CLAUDE.md itself, growing with every rule added. Every
+unscoped rule file is injected verbatim at session start, so this is a
+real, recurring per-session cost, not a theoretical one.
+
+The operative mitigation is `paths:` frontmatter, which loads a rule only
+when Claude reads a matching file. Apply it to rules with a genuine
+file-path correlate; for cross-cutting concerns a narrow glob would break
+the rule silently and a broad one saves nothing, so leave those
+unconditional. Then dedup cross-file repetition rather than restating it.
+
+Deliberately not stated here: the file count, byte total, or token
+estimate. Those re-stale on every rule addition, and a number that has
+drifted is worse than no number — it gets cited.
 
 ## File context discipline
 
@@ -49,11 +60,8 @@ understanding the codebase. Prefer:
 Attaching 30+ files to a single prompt floods the context window, reduces
 cache hit rates, and makes it harder for the model to attend to what matters.
 
-<!-- Code review (2026-07-01): `paths:`-scoped rule loading (load a domain rule
-only when matching files are open) would cut per-session token load, but is not
-yet confirmed as a Claude Code feature. Verify support against
-code.claude.com/docs/en/settings before adding `paths:` frontmatter to rules. -->
-
+Domain-specific rules should use `paths:` frontmatter to load only when
+matching files are in play, rather than resident every session.
 
 ## Agent context budget
 
@@ -103,10 +111,12 @@ result acted on.
 
 Per arxiv:2604.00025 (Hakim, 2026 — preprint): brevity constraints yield up to
 26pp accuracy gain on math/science benchmarks across 31 general LLMs (preprint,
-not validated on planning tasks or Opus-tier agents specifically). Opus-tier
-models over-elaborate without explicit constraint.
+tested only on open models, not validated on planning tasks or Opus-tier
+agents specifically). Opus-tier models have been observed in practice to
+over-elaborate without explicit constraint — treat this as an operational
+heuristic, not an established finding.
 
-- Every Opus agent prompt must include: "Return only the structured result —
+- Every Opus agent prompt should include: "Return only the structured result —
   no preamble, no trailing summary."
 - Specify output shape explicitly (bullet list, table, schema). "Report findings"
   is weaker than "Report as a bullet list, one line per finding, no prose."

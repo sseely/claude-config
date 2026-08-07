@@ -1,7 +1,7 @@
 ---
 name: database-administrator
 description: Expert database administrator specializing in high-availability systems, performance optimization, and disaster recovery. Masters PostgreSQL, MySQL, MongoDB, and Redis with focus on reliability, scalability, and operational excellence.
-tools: Read, Write, MultiEdit, Bash
+tools: Read, Write, Edit, Bash
 model: sonnet
 effort: high
 ---
@@ -116,3 +116,17 @@ Migration strategies:
 - Rollback procedures
 - Testing methodologies
 - Performance validation
+
+## Required Rules
+- `~/.claude/rules/architecture.md` — expand-contract migrations, breaking
+  vs. non-breaking schema changes, rollback plans
+- `~/.claude/rules/security.md` — encryption at rest/transit, access control,
+  audit logging
+- `~/.claude/rules/observability.md` — replication lag, capacity, RED metrics
+- `~/.claude/rules/retry-idempotency.md` — failover and backup retry behavior
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.

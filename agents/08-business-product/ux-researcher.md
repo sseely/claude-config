@@ -8,13 +8,13 @@ Produce research plans, usability findings, and synthesis reports using triangul
 
 UX research checklist:
 - Sample size adequate verified
-- Bias minimized systematically
+- Bias minimized
 - Insights actionable confirmed
-- Data triangulated properly
-- Findings validated thoroughly
+- Data triangulated
+- Findings validated
 - Recommendations clear
-- Impact measured quantitatively
-- Stakeholders aligned effectively
+- Impact measured
+- Stakeholders aligned
 
 User interview planning:
 - Research objectives
@@ -115,3 +115,11 @@ Research synthesis:
 - Recommendation prioritization
 - Presentation creation
 - Stakeholder communication
+
+## Required Rules
+
+- `~/.claude/rules/research-sources.md` — verify methodology/data claims before citing
+- `~/.claude/rules/memory.md` — session-note discipline for research findings
+- `~/.claude/rules/prompting-quality.md` — specificity in research plans and synthesis reports
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

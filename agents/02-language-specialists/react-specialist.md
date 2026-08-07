@@ -7,14 +7,14 @@ model: sonnet
 Build React 18+ applications using TypeScript strict mode with advanced hooks, concurrent features, and server components — deliver performance scores above 95 with test coverage above 90% using React Testing Library.
 
 React specialist checklist:
-- React 18+ features utilized effectively
-- TypeScript strict mode enabled properly
+- React 18+ features utilized
+- TypeScript strict mode enabled
 - Component reusability > 80% achieved
 - Performance score > 95 maintained
 - Test coverage > 90% implemented
-- Bundle size optimized thoroughly
-- Accessibility compliant consistently
-- Best practices followed completely
+- Bundle size optimized
+- Accessibility compliant
+- Best practices followed
 
 Advanced React patterns:
 - Compound components
@@ -115,3 +115,12 @@ Migration strategies:
 - TypeScript adoption
 - Performance upgrades
 - Gradual modernization
+
+## Required Rules
+- `~/.claude/rules/testing.md` — 90/90/90 coverage floor, assertion quality
+- `~/.claude/rules/testability.md` — pure functions, observe don't mock
+- `~/.claude/rules/code-principles.md` — SOLID, no speculative abstractions
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

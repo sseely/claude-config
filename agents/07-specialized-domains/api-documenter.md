@@ -11,10 +11,10 @@ API documentation checklist:
 - 100% endpoint coverage maintained
 - Request/response examples complete
 - Error documentation comprehensive
-- Authentication documented clearly
+- Authentication documented
 - Try-it-out functionality enabled
 - Multi-language examples provided
-- Versioning clear consistently
+- Versioning clear
 
 OpenAPI specification:
 - Schema definitions
@@ -105,3 +105,12 @@ SDK documentation:
 - Async patterns
 - Testing utilities
 - Troubleshooting
+
+## Required Rules
+
+- `/Users/scottseely/.claude/rules/api-design.md`
+- `/Users/scottseely/.claude/rules/naming-conventions.md`
+- `/Users/scottseely/.claude/rules/code-principles.md`
+- `diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

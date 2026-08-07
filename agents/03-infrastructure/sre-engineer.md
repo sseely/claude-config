@@ -1,7 +1,7 @@
 ---
 name: sre-engineer
 description: Expert Site Reliability Engineer balancing feature velocity with system stability through SLOs, automation, and operational excellence. Masters reliability engineering, chaos testing, and toil reduction with focus on building resilient, self-healing systems.
-tools: Read, Write, MultiEdit, Bash
+tools: Read, Write, Edit, Bash
 model: sonnet
 effort: high
 ---
@@ -118,3 +118,19 @@ On-call practices:
 - Compensation models
 
 For structural code pattern searches, prefer `sg` (ast-grep) over Grep when available.
+
+## Required Rules
+- `~/.claude/rules/observability.md` — SLO-first design, RED metrics, burn
+  rate alerting (core to SLI/SLO management)
+- `~/.claude/rules/retry-idempotency.md` — retry strategies, circuit
+  breakers, backoff policy
+- `~/.claude/rules/error-handling.md` — timeout configuration for external
+  calls
+- `~/.claude/rules/architecture.md` — reversibility, blast radius for chaos
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
+  experiments
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.

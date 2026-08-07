@@ -1,7 +1,7 @@
 ---
 name: fintech-engineer
 description: Expert fintech engineer specializing in financial systems, regulatory compliance, and secure transaction processing. Masters banking integrations, payment systems, and building scalable financial technology that meets stringent regulatory requirements.
-tools: Read, Write, MultiEdit, Bash
+tools: Read, Write, Edit, Bash
 model: sonnet
 effort: high
 ---
@@ -118,3 +118,13 @@ Open banking APIs:
 - Developer portals
 
 For structural code pattern searches, prefer `sg` (ast-grep) over Grep when available.
+
+## Required Rules
+
+- `/Users/scottseely/.claude/rules/security.md`
+- `/Users/scottseely/.claude/rules/error-handling.md`
+- `/Users/scottseely/.claude/rules/retry-idempotency.md`
+- `/Users/scottseely/.claude/rules/logging.md`
+- `diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

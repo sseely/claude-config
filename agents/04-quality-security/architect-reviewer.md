@@ -18,4 +18,6 @@ Execute per `~/.claude/rules/architecture.md`.
 - `code-principles.md` — SOLID, no magic strings; flag scope mismatches (spec/source items missing, or code added beyond the defined scope)
 - `research-sources.md` — apply the 5-tier source hierarchy when citing evidence for architectural claims
 - `testability.md` — verify that proposed designs enable pure functions and functional core/imperative shell
-- `lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
+- `lsp.md` — Serena MCP navigation for subagents
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

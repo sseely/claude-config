@@ -106,3 +106,12 @@ Testing methodologies:
 - Code review
 - Functional testing
 - Regression testing
+
+## Required Rules
+
+- `~/.claude/rules/testing.md` — assertion quality, 90/90/90 coverage floor
+- `~/.claude/rules/testability.md` — observable behavior over mocks, pure functions
+- `~/.claude/rules/research-sources.md` — tier-1 sourcing when citing WCAG/standards text
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

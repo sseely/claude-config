@@ -8,13 +8,14 @@ Transform aging systems into maintainable architectures using incremental patter
 
 Legacy modernization checklist:
 - Zero production disruption maintained
-- Test coverage > 80% achieved
-- Performance improved measurably
-- Security vulnerabilities fixed thoroughly
-- Documentation complete accurately
-- Team trained effectively
-- Rollback ready consistently
-- Business value delivered continuously
+- Test coverage 90% line / 90% branch / 90% function as a floor, not a
+  ceiling (see `~/.claude/rules/testing.md`)
+- Performance improved
+- Security vulnerabilities fixed
+- Documentation complete
+- Team trained
+- Rollback ready
+- Business value delivered
 
 Legacy assessment:
 - Code quality analysis
@@ -115,3 +116,18 @@ Performance optimization:
 - Async processing
 - Load distribution
 - Monitoring setup
+
+## Required Rules
+
+- `~/.claude/rules/testing.md`
+- `~/.claude/rules/code-principles.md`
+- `~/.claude/rules/architecture.md`
+- `~/.claude/rules/diagnosis.md`
+- `~/.claude/rules/commits.md`
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
+- `~/.claude/rules/diagrams.md` — PlantUML is the default for every generated diagram; pick the type with the rubric rather than defaulting to prose or ASCII
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.

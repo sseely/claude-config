@@ -20,9 +20,12 @@ decay to `unknown` on the next run. An `unknown` entry is re-verified before use
 it is not removed. This prevents the trusted set from silently accumulating sources
 that were valid once and have since rotted.
 
-Last full verification: 2026-07-24 (Full run — all 4 Phase-1 agents completed;
-Agent A fetched all 13 Agent-A doc URLs at 200/rich, Agent B its 3, Agent C
-anthropic.com/research, Agent X ran 84 discovery queries → 26 candidates added).
+Last full verification: 2026-08-01 (PARTIAL — Agent A fetched 9 of 13 Agent-A
+URLs and deliberately skipped 4 as already-active: overview, mcp, tutorials,
+worktrees; those retain last-verified 2026-07-24. Agent B fetched all 3,
+Agent C 1, Agent X ran 76 of 84 discovery queries -> 34 candidates added.
+The 2026-07-24 same-day staleness on models/overview did NOT reproduce —
+the page correctly shows Opus 5 as current.).
 CAVEAT: on 2026-07-24 the Agent-B models/overview + model-config pages returned
 200/rich but STALE content — they did NOT reflect the same-day Claude Opus 5
 launch (confirmed live via WebSearch). The fetch-guard cannot detect same-day
@@ -40,7 +43,7 @@ Note: platform.claude.com/docs/en/models/overview verified 404 on 2026-06-10.
 
 | URL                                                       | Purpose                                          | Last Verified | Status |
 | --------------------------------------------------------- | ------------------------------------------------ | ------------- | ------ |
-| https://code.claude.com/docs/en/changelog                 | PRIMARY: scan for new/changed/deprecated Claude Code features (last 90 days) | 2026-07-24    | active |
+| https://code.claude.com/docs/en/changelog                 | PRIMARY: scan for new/changed/deprecated Claude Code features (last 90 days) | 2026-08-01    | active |
 | https://www.anthropic.com/blog                            | SECONDARY/optional: occasional Claude Code launch posts; thin (press newsroom) — use only if the changelog misses a topic | 2026-06-20    | active |
 | https://platform.claude.com/docs/en/docs/claude-code/overview   | Core feature overview                            | 2026-06-10    | unreachable |
 | https://platform.claude.com/docs/en/docs/claude-code/hooks      | Hook events and configuration                    | 2026-06-10    | unreachable |
@@ -49,16 +52,16 @@ Note: platform.claude.com/docs/en/models/overview verified 404 on 2026-06-10.
 | https://platform.claude.com/docs/en/docs/claude-code/mcp        | MCP integration docs                             | 2026-06-10    | unreachable |
 | https://platform.claude.com/docs/en/docs/claude-code/sub-agents | Sub-agent docs                                   | 2026-06-10    | unreachable |
 | https://code.claude.com/docs/en/overview                  | Core feature overview — replaces unreachable platform.claude.com URL | 2026-07-24 | active |
-| https://code.claude.com/docs/en/hooks                     | Hook events and configuration — replaces unreachable platform.claude.com URL | 2026-07-24 | active |
-| https://code.claude.com/docs/en/settings                  | Settings reference — replaces unreachable platform.claude.com URL | 2026-07-24 | active |
-| https://code.claude.com/docs/en/memory                    | Memory system docs — replaces unreachable platform.claude.com URL | 2026-07-24 | active |
+| https://code.claude.com/docs/en/hooks                     | Hook events and configuration — replaces unreachable platform.claude.com URL | 2026-08-01 | active |
+| https://code.claude.com/docs/en/settings                  | Settings reference — replaces unreachable platform.claude.com URL | 2026-08-01 | active |
+| https://code.claude.com/docs/en/memory                    | Memory system docs — replaces unreachable platform.claude.com URL | 2026-08-01 | active |
 | https://code.claude.com/docs/en/mcp                       | MCP integration docs — replaces unreachable platform.claude.com URL | 2026-07-24 | active |
-| https://code.claude.com/docs/en/sub-agents                | Sub-agent docs — replaces unreachable platform.claude.com URL | 2026-07-24 | active |
+| https://code.claude.com/docs/en/sub-agents                | Sub-agent docs — replaces unreachable platform.claude.com URL | 2026-08-01 | active |
 | https://code.claude.com/docs/en/tutorials                 | Common workflows / tutorials — replaces unreachable platform.claude.com URL | 2026-07-24 | active |
-| https://code.claude.com/docs/en/skills                    | Skills config: context: fork, run-in-subagent, disable-model-invocation, frontmatter — PROMOTED 2026-07-24 (Agent A fetched 200/rich) | 2026-07-24 | active |
-| https://code.claude.com/docs/en/agent-teams               | Agent teams: parallel teammates, independent context, SendMessage — PROMOTED 2026-07-24 | 2026-07-24 | active |
-| https://code.claude.com/docs/en/agent-view                | Background agents: run/monitor many parallel sessions — PROMOTED 2026-07-24 | 2026-07-24 | active |
-| https://code.claude.com/docs/en/routines                  | Routines: hosted scheduled/cron + GitHub-event-triggered runs — PROMOTED 2026-07-24 | 2026-07-24 | active |
+| https://code.claude.com/docs/en/skills                    | Skills config: context: fork, run-in-subagent, disable-model-invocation, frontmatter — PROMOTED 2026-07-24 (Agent A fetched 200/rich) | 2026-08-01 | active |
+| https://code.claude.com/docs/en/agent-teams               | Agent teams: parallel teammates, independent context, SendMessage — PROMOTED 2026-07-24 | 2026-08-01 | active |
+| https://code.claude.com/docs/en/agent-view                | Background agents: run/monitor many parallel sessions — PROMOTED 2026-07-24 | 2026-08-01 | active |
+| https://code.claude.com/docs/en/routines                  | Routines: hosted scheduled/cron + GitHub-event-triggered runs — PROMOTED 2026-07-24 | 2026-08-01 | active |
 | https://code.claude.com/docs/en/worktrees                 | Worktree isolation for subagents (isolation: worktree), base-branch selection — PROMOTED 2026-07-24 | 2026-07-24 | active |
 
 ---
@@ -67,9 +70,13 @@ Note: platform.claude.com/docs/en/models/overview verified 404 on 2026-06-10.
 
 | URL                                                             | Purpose                            | Last Verified | Status |
 | --------------------------------------------------------------- | ---------------------------------- | ------------- | ------ |
-| https://code.claude.com/docs/en/model-config                    | Model aliases and effort levels    | 2026-07-24    | active |
-| https://platform.claude.com/docs/en/about-claude/models/overview | Current model IDs and deprecations — WARNING: served STALE (pre-Opus-5) content on 2026-07-24 despite 200/rich; cross-check against WebSearch on launch days | 2026-07-24    | active |
-| https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5 | Fable 5 / Mythos 5 facts: retention, thinking, positioning | 2026-07-24 | active |
+| https://code.claude.com/docs/en/model-config                    | Model aliases and effort levels    | 2026-08-01    | active |
+| https://platform.claude.com/docs/en/about-claude/models/overview | Current model IDs and deprecations — WARNING: served STALE (pre-Opus-5) content on 2026-07-24 despite 200/rich; cross-check against WebSearch on launch days | 2026-08-01    | active |
+| https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5 | Fable 5 / Mythos 5 facts: retention, thinking, positioning | 2026-08-01 | active |
+
+**Standing instruction:** if a model launch is suspected (announcement, user
+mention, version bump elsewhere), cross-check the current-model list against
+a fresh `WebSearch` — a 200/rich fetch from these docs pages can still be stale.
 
 ---
 
@@ -77,11 +84,13 @@ Note: platform.claude.com/docs/en/models/overview verified 404 on 2026-06-10.
 
 | URL                                | Purpose                                                                  | Last Verified | Status |
 | ---------------------------------- | ------------------------------------------------------------------------ | ------------- | ------ |
-| https://www.anthropic.com/research | Recent Anthropic papers on instruction-following and agent orchestration | 2026-07-24    | active |
+| https://www.anthropic.com/research | Recent Anthropic papers on instruction-following and agent orchestration | 2026-08-01    | active |
 
 ---
 
 ## Candidate URLs (not yet promoted — promote to an active section after one fetch that passes the thin-content bar above; 200 status alone is not sufficient)
+
+<!-- Code review (2026-08-01): 91 candidates, 6 ever promoted. No agent fetches candidates, so promotion is accidental. Revisit if this table passes 120 entries without a draining step. -->
 
 | URL                                                                                       | Purpose                                                                                    | Suggested by    | Date Added |
 | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | --------------- | ---------- |
@@ -142,6 +151,40 @@ Note: platform.claude.com/docs/en/models/overview verified 404 on 2026-06-10.
 | https://arxiv.org/html/2606.11672v1                                                       | PREPRINT: open-source LLM agents underperform Bandit SAST tool (recall <0.25, high false-positive) | Discovery agent | 2026-07-24 |
 | https://arxiv.org/abs/2508.14419                                                          | PREPRINT: iterative static-analysis feedback (Bandit/Pylint) cuts LLM code security issues 40%->13% | Discovery agent | 2026-07-24 |
 | https://arxiv.org/abs/2607.01903                                                          | PREPRINT: HECATE — complexity metrics spanning prompt layer + code layer for LLM-integrated apps | Discovery agent | 2026-07-24 |
+| https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents | (rel: 97) Anthropic official: how to shape agent context — write/select/compress/isolate; directly informs context-mgmt and compaction rule design | Agent X | 2026-08-01 |
+| https://arxiv.org/pdf/2607.25398 | (rel: 92) PREPRINT: HANDBOOK.md — benchmark for long-context agentic instruction following; no model exceeds 25% strict pass@1, directly tests CLAUDE.md-style files | Agent X | 2026-08-01 |
+| https://dl.acm.org/doi/10.1145/3786304.3787891 | (rel: 88) Offscript (CHIIR 2026, peer-reviewed): agentic auditing methodology for instruction adherence to behavioral guidelines | Agent X | 2026-08-01 |
+| https://arxiv.org/abs/2606.10209 | (rel: 88) PREPRINT: Less Context, Better Agents — efficient context engineering for long-horizon tool-using agents; more context ≠ better | Agent X | 2026-08-01 |
+| https://arxiv.org/pdf/2603.24755 | (rel: 87) PREPRINT: SlopCodeBench — benchmarks how coding agents degrade over long-horizon iterative tasks; directly relevant to autonomous-execution quality gates | Agent X | 2026-08-01 |
+| https://arxiv.org/html/2603.20432v1 | (rel: 86) PREPRINT: Coding Agents are Effective Long-Context Processors — agents externalize context via files/tools instead of raw context stuffing | Agent X | 2026-08-01 |
+| https://www.anthropic.com/research/trustworthy-agents | (rel: 85) Anthropic official research on trustworthy agent design in production | Agent X | 2026-08-01 |
+| https://dl.acm.org/doi/10.1145/3748302 | (rel: 84) ACM TOIS (peer-reviewed): survey on memory mechanisms of LLM-based agents | Agent X | 2026-08-01 |
+| https://dl.acm.org/doi/10.1145/3728894 | (rel: 84) ACM PACMSE (peer-reviewed): LLM hallucinations in practical code generation — phenomena, mechanism, mitigation | Agent X | 2026-08-01 |
+| https://arxiv.org/pdf/2604.03515 | (rel: 83) PREPRINT: Inside the Scaffold — source-code taxonomy of coding agent architectures (harness design patterns) | Agent X | 2026-08-01 |
+| https://arxiv.org/pdf/2601.10343 | (rel: 83) PREPRINT: OctoBench — benchmarking scaffold-aware instruction following in repository-grounded agentic coding | Agent X | 2026-08-01 |
+| https://arxiv.org/pdf/2603.06847 | (rel: 82) PREPRINT: Characterizing Faults in Agentic AI — taxonomy of failure types/symptoms/root causes; feeds diagnosis.md / error-handling.md | Agent X | 2026-08-01 |
+| https://www.anthropic.com/research/measuring-agent-autonomy | (rel: 82) Anthropic official research on measuring AI agent autonomy in practice | Agent X | 2026-08-01 |
+| https://arxiv.org/html/2606.20683 | (rel: 81) PREPRINT: From Question Answering to Task Completion — survey on agent system and harness design | Agent X | 2026-08-01 |
+| https://dl.acm.org/doi/abs/10.1145/3806007.3810961 | (rel: 80) ACM workshop (peer-reviewed): MCP-SecLint — open-source static analyzer for vulnerabilities in LLM tool integrations | Agent X | 2026-08-01 |
+| https://ast-grep.github.io/advanced/prompting.html | (rel: 80) Official ast-grep docs: using ast-grep with AI tools/agents — extends existing lsp.md ast-grep coverage with agent-specific guidance | Agent X | 2026-08-01 |
+| https://www.anthropic.com/research/prompt-injection-defenses | (rel: 79) Anthropic official research: mitigating prompt injection risk in browser/agent use | Agent X | 2026-08-01 |
+| https://arxiv.org/pdf/2512.03549 | (rel: 78) PREPRINT: PARC — autonomous self-reflective coding agent for robust execution of long-horizon tasks | Agent X | 2026-08-01 |
+| https://arxiv.org/abs/2601.19752 | (rel: 77) PREPRINT: Agentic Design Patterns — system-theoretic framework for engineering robust AI agents | Agent X | 2026-08-01 |
+| https://arxiv.org/pdf/2607.01640 | (rel: 76) PREPRINT: AgentFlow — building agent dependency graphs for static analysis of agent programs | Agent X | 2026-08-01 |
+| https://arxiv.org/pdf/2510.18893 | (rel: 76) PREPRINT: CodeCRDT — observation-driven coordination for multi-agent LLM code generation; relevant to parallelism.md | Agent X | 2026-08-01 |
+| https://arxiv.org/pdf/2603.27277 | (rel: 75) PREPRINT: Codebase-Memory — tree-sitter-based knowledge graphs for LLM code exploration via MCP | Agent X | 2026-08-01 |
+| https://arxiv.org/pdf/2603.29231 | (rel: 74) PREPRINT: Beyond pass@1 — reliability science framework for long-horizon LLM agents | Agent X | 2026-08-01 |
+| https://arxiv.org/pdf/2606.19135 | (rel: 73) PREPRINT: A Technical Taxonomy of LLM Agent Communication Protocols | Agent X | 2026-08-01 |
+| https://mlsec.org/docs/2026-icse.pdf | (rel: 73) ICSE 2026 (peer-reviewed): LLM-based vulnerability discovery through the lens of code metrics | Agent X | 2026-08-01 |
+| https://arxiv.org/pdf/2606.22741 | (rel: 72) PREPRINT: GRADE — graph representation of LLM agent dependency and execution; dependency layer predicts agent failure | Agent X | 2026-08-01 |
+| https://doi.org/10.1145/3696630.3728702 | (rel: 72) ACM FSE 2025 (peer-reviewed): From Prompts to Properties — rethinking LLM code generation with property-based testing | Agent X | 2026-08-01 |
+| https://arxiv.org/abs/2506.18315 | (rel: 70) PREPRINT: using property-based testing to bridge LLM code generation and validation | Agent X | 2026-08-01 |
+| https://www.anthropic.com/research/agentic-misalignment | (rel: 70) Anthropic official research: how LLM agents could become insider threats under autonomy | Agent X | 2026-08-01 |
+| https://arxiv.org/pdf/2601.07190 | (rel: 70) PREPRINT: Active Context Compression — autonomous memory management in LLM agents (Focus agent, 22.7% token reduction) | Agent X | 2026-08-01 |
+| https://arxiv.org/pdf/2607.00692 | (rel: 69) PREPRINT: Self-GC — self-governing context for long-horizon LLM agents | Agent X | 2026-08-01 |
+| https://arxiv.org/pdf/2605.23135 | (rel: 68) PREPRINT: The Impact of AI Coding Assistants on Software Engineering — longitudinal study | Agent X | 2026-08-01 |
+| https://arxiv.org/pdf/2607.05677 | (rel: 66) PREPRINT: From Conversation to Contribution — characterizing coding agents in open-source software | Agent X | 2026-08-01 |
+| https://arxiv.org/pdf/2507.15003 | (rel: 65) PREPRINT: The Rise of AI Teammates in Software Engineering 3.0 | Agent X | 2026-08-01 |
 
 ---
 

@@ -21,7 +21,7 @@ plans/[feature]/
   batch-N/overview.md  ← batch description + task table
   batch-N/TN-name.md   ← individual task spec (usable as
                          agent prompt directly)
-  diagrams/*.md        ← mermaid diagrams
+  diagrams/*.md        ← PlantUML diagrams (see rules/diagrams.md)
   decision-journal.md  ← appended during execution
 ```
 
@@ -72,14 +72,28 @@ mission brief's "Quality Gates" section. Additionally:
 
 - Verify no files were modified outside the declared write-set
   (compare `git diff --name-only` against the batch's file list)
-- Verify each completed task has exactly one commit
+- Verify each completed task has exactly one commit, plus any fix
+  commits a quality gate required
 - Log gate results in the decision journal
 
 If a quality gate fails:
 1. Attempt to fix (max 2 tries per gate)
 2. If fix succeeds, re-run all gates from scratch
-3. If fix fails after 2 tries, STOP and document the failure
-   in the decision journal with full error output
+3. If the second fix fails, stop *changing code* — the attempt budget
+   is spent. Investigation is not: continue diagnosing until you can
+   state the mechanism, then STOP and log it.
+
+The 2-try cap bounds **fix attempts, not investigation.** Reaching it
+is a valid halt only if the STOP entry in the decision journal carries
+the full diagnosis artifact required by `rules/diagnosis.md`:
+
+- **Mechanism** — the specific cause, in one or two sentences
+- **Origin** — the `file:line` where it originates
+- **Causal chain** — why the observed failure follows from that cause
+- **Ruled out** — what you eliminated, and the evidence that did it
+
+Plus the full error output. A STOP entry that says only "two attempts
+failed" is incomplete work — "this is hard" is not a diagnosis.
 
 ### Quality Gate format (for mission briefs)
 
@@ -147,7 +161,8 @@ differently, log it.
 
 - Commit message format: see `~/.claude/rules/commits.md`. The conventions
   below are the autonomous-specific additions to that spec.
-- One commit per completed task (not per file, not per batch)
+- One commit per task, plus fix commits where a quality gate requires
+  them (not per file, not per batch)
 - Commit message references the task ID: `feat(T3): add confirm
   endpoint`
 - Do NOT commit work-in-progress. If a task isn't done, don't

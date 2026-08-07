@@ -2,12 +2,10 @@
 name: testing-setup
 description: Scaffold Vitest with the Cloudflare Workers pool, Istanbul coverage, ESLint, Prettier, husky pre-commit hooks, shared test helpers, Docker Compose for local services, and a GitHub Actions CI workflow into a Cloudflare Workers + Neon + React/Vite project.
 user-invocable: true
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch, WebSearch
 ---
 
 # /testing-setup
-
-Model routing: Sonnet for implementation; Haiku for verification/scoring; Opus only for explicit architectural decisions.
 
 Scaffold testing infrastructure into a Cloudflare Workers + Neon PostgreSQL +
 React/Vite project. Installs Vitest with the Workers pool, 80/80/80 coverage
@@ -86,6 +84,22 @@ collected_inputs: true
 - [ ] github-actions-ci
 - [ ] bootstrap-test-file
 ```
+
+---
+
+## Step 1b — Verify Vitest and Cloudflare Workers pool against current docs
+
+Vitest's config surface and `@cloudflare/vitest-pool-workers` drift together,
+and the pool package tracks Workers runtime changes closely. Before templating
+config, WebFetch the current docs and confirm the pool package name, the
+`defineWorkersConfig` entry point, the `miniflare` options block, and the
+coverage provider settings the templates use:
+
+- Vitest config — https://vitest.dev/config/
+- Workers pool — https://developers.cloudflare.com/workers/testing/vitest-integration/
+
+If an option has been renamed or removed, update the templated values before
+relying on them.
 
 ---
 

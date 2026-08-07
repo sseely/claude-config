@@ -5,8 +5,6 @@ user-invocable: true
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
-Model routing: Sonnet for implementation; Haiku for verification/scoring; Opus only for explicit architectural decisions.
-
 Scaffold full GDPR + CRA compliance features into this project. Templates live at
 `~/.claude/skills/compliance-setup/`. Work through each step in order.
 
@@ -56,6 +54,7 @@ collected_inputs: true
 <record each collected input as a key: value line>
 
 ## Steps
+- [ ] verify-external-docs
 - [ ] migrations
 - [ ] backend-routes
 - [ ] frontend-components
@@ -64,6 +63,30 @@ collected_inputs: true
 - [ ] write-tests
 - [ ] verify
 ```
+
+---
+
+## Step 1b — Verify service integration details against current docs
+
+External service embed snippets, API endpoints, and auth headers drift. Before
+templating provider-specific code, WebFetch the current docs for each service
+enabled in Step 1 and confirm the embed/init pattern, endpoint, and any required
+attributes the templates use:
+
+- Termly — https://help.termly.io/en/articles/8977193-termly-auto-blocker-installation-guide
+  — confirm the embed attribute name (`data-tid`/`data-id`) used by `TermlyEmbed.tsx`
+  and the Cookie/Privacy/Terms policy pages
+- Canny — https://developers.canny.io/install — confirm the widget bootstrap snippet
+  and `Identify` call shape used by `CannyFeedback.tsx` (skip if `CANNY_APP_ID` is blank)
+- SendGrid — https://docs.sendgrid.com/api-reference/mail-send/mail-send — confirm the
+  v3 Mail Send endpoint and auth header used by `sendSbomEmail` in `sbom_cron.ts`
+- Cloudflare R2 — https://developers.cloudflare.com/r2/api/s3/presigned-urls/ — confirm
+  presigned URL generation via the S3-compatible API used by `generateR2PresignedUrl`
+
+If an embed snippet, endpoint, or parameter name has changed, update the templated
+values before relying on them.
+
+On success, mark `- [x] verify-external-docs` in `.compliance-setup-progress.md`.
 
 ---
 

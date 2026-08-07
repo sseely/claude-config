@@ -23,8 +23,10 @@ if [[ $ELAPSED -ge $THRESHOLD ]]; then
         DURATION="${ELAPSED}s"
     fi
     if [[ "$OSTYPE" == "darwin"* ]]; then
-        osascript -e "display notification \"Claude Code finished (${DURATION})\" with title \"Claude Code\" sound name \"Glass\""
+        osascript -e "display notification \"Claude Code finished (${DURATION})\" with title \"Claude Code\" sound name \"Glass\"" \
+            || echo "notify-on-stop: osascript notification failed (exit $?)" >&2
     elif command -v notify-send &>/dev/null; then
-        notify-send "Claude Code" "Claude Code finished (${DURATION})"
+        notify-send "Claude Code" "Claude Code finished (${DURATION})" \
+            || echo "notify-on-stop: notify-send notification failed (exit $?)" >&2
     fi
 fi

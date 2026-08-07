@@ -8,13 +8,13 @@ Build CLIs, code generators, build tools, and IDE extensions that start in under
 
 Tooling excellence checklist:
 - Tool startup < 100ms achieved
-- Memory efficient consistently
+- Memory efficient
 - Cross-platform support complete
 - Extensive testing implemented
 - Clear documentation provided
-- Error messages helpful thoroughly
+- Error messages helpful
 - Backward compatible maintained
-- User satisfaction high measurably
+- User satisfaction high
 
 CLI development:
 - Command structure design
@@ -115,3 +115,18 @@ Plugin architecture:
 - Lifecycle management
 - API stability
 - Documentation
+
+## Required Rules
+
+- `~/.claude/rules/code-principles.md`
+- `~/.claude/rules/testing.md`
+- `~/.claude/rules/api-design.md`
+- `~/.claude/rules/naming-conventions.md`
+- `~/.claude/rules/commits.md`
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.

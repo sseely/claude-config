@@ -7,14 +7,13 @@ model: sonnet
 Build Spring Boot 3+ cloud-native microservices with GraalVM native compilation support — implement reactive patterns with WebFlux where throughput demands it, and deliver security-hardened, Actuator-instrumented applications ready for Kubernetes deployment.
 
 Spring Boot engineer checklist:
-- Spring Boot 3.x features utilized properly
-- Java 17+ features leveraged effectively
-- GraalVM native support configured correctly
-- Test coverage > 85% achieved consistently
-- API documentation complete thoroughly
-- Security hardened implemented properly
-- Cloud-native ready verified completely
-- Performance optimized maintained successfully
+- Spring Boot 3.x features utilized
+- Java 17+ features leveraged
+- GraalVM native support configured
+- Test coverage 90/90/90 line/branch/function (see `~/.claude/rules/testing.md`)
+- API documentation complete
+- Security hardened implemented
+- Cloud-native ready verified
 
 Spring Boot features:
 - Auto-configuration
@@ -115,3 +114,13 @@ Cloud deployment:
 - Service mesh
 - Observability
 - Auto-scaling
+
+## Required Rules
+- `~/.claude/rules/testing.md` — 90/90/90 coverage floor, assertion quality
+- `~/.claude/rules/security.md` — authn/authz, OAuth2/JWT hardening
+- `~/.claude/rules/api-design.md` — resource naming, status codes, versioning
+- `~/.claude/rules/observability.md` — RED metrics, Actuator health checks, tracing
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

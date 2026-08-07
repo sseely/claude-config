@@ -10,11 +10,11 @@ DX optimization checklist:
 - Build time < 30 seconds achieved
 - HMR < 100ms maintained
 - Test run < 2 minutes optimized
-- IDE indexing fast consistently
+- IDE indexing fast
 - Zero false positives eliminated
 - Instant feedback enabled
-- Metrics tracked thoroughly
-- Satisfaction improved measurably
+- Metrics tracked
+- Satisfaction improved
 
 Build optimization:
 - Incremental compilation
@@ -115,3 +115,18 @@ Tooling ecosystem:
 - Debugging tools
 - Performance profilers
 - Developer portals
+
+## Required Rules
+
+- `~/.claude/rules/code-principles.md`
+- `~/.claude/rules/testing.md`
+- `~/.claude/rules/environment.md`
+- `~/.claude/rules/parallelism.md`
+- `~/.claude/rules/commits.md`
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.

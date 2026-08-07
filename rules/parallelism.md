@@ -29,15 +29,20 @@ at session start), skip the user review presentation step. Log the execution pla
 - Read-only access is unrestricted — multiple agents may read the same file concurrently
 - If the plan produces a write conflict that can't be resolved by collapsing, that's a signal the subtasks aren't actually independent and should be a single agent
 
-**Agent prompt structure:**
+**Agent prompt structure** (ordered procedure — assemble sections in this
+order; this is a sequential build sequence, not a parallel checklist, so
+the ≤6-constraint budget in `prompting-quality.md` does not apply):
 
 Subagents start with a blank slate — no conversation history, no
 CLAUDE.md, no awareness of prior decisions. Every agent prompt
 must be self-contained:
 
-0. **Prior observations** — If `.agent-notes/` contains relevant findings for this
-   task, inject them verbatim here. Do not rely on the agent to discover them;
-   the orchestrator's job is to pre-load this context.
+0. **Prior observations** — If `.agent-notes/` contains findings that bear on
+   *this* task's write-set, inject those verbatim here. Do not rely on the
+   agent to discover them; the orchestrator's job is to pre-load this context.
+   Pass only what bears on the write-set — irrelevant observations are
+   distractors, and distractor leakage is a leading measured cause of
+   orchestration failure. When in doubt whether a note applies, leave it out.
 1. **Context** — what the project is, what stack it uses, and
    what conventions to follow (test framework, naming, patterns)
 2. **Task** — what to build or change, with enough detail that
@@ -57,6 +62,9 @@ must be self-contained:
    shapes this task must produce or consume. If subagent output is
    consumed by a downstream agent, specify a JSON schema.
    If output is human-facing, prose is appropriate.
+   This governs shape, not size — target subagent return payloads at
+   1k–2k tokens regardless of shape; verbose returns dilute the
+   orchestrator's context.
 7. **Quality bar** — "run `npm test` before finishing; all tests
    must pass"
 8. **Boundaries** — three tiers: *Always do* (non-negotiables), *Ask first*
@@ -79,12 +87,18 @@ Match model to task complexity and cost:
 
 | Role | Model alias | Effort | Context | When |
 |------|-------------|--------|---------|------|
-| Planning / architecture | `opus` (`claude-opus-4-8`) | `high` default; `xhigh` for deep multi-path decisions | 1M tokens | Phase 3 decisions, mission decomposition, threat modeling |
+| Planning / architecture / implementation (heavy) | `opus` (`claude-opus-5`) | `high` default; `xhigh` for deep multi-path decisions | 1M tokens | Phase 3 decisions, mission decomposition, threat modeling; also viable for high-value implementation and routine agentic work now that Opus 5 is cheaper |
 | Long-horizon autonomous execution | `fable` (`claude-fable-5`) | `high` default; `xhigh` for agentic runs | 1M | Mission-brief execution, autonomous sessions, multi-hour/multi-day work |
 | Implementation | `sonnet` (`claude-sonnet-5`) | `high` default; `xhigh` for hard tasks; lower to `medium` if token-sensitive | 1M tokens | Feature work, bug fixes, refactoring, code generation |
 | Scoring / dedup / validation | `haiku` (`claude-haiku-4-5-20251001`) | n/a | 200k tokens | Confidence scoring, dedup passes, format checking, simple grep tasks |
 
+<!-- Code review (2026-08-01): PerspectiveGap (arXiv:2606.08878, preprint) scores Opus worst-in-family at orchestration-prompt composition, but never tested Opus 5, which is what `opus` resolves to on v2.1.219+. Rule retained deliberately. Revisit if Opus 5 orchestration data appears. -->
+
 > **Haiku context limit:** 200k tokens vs 1M for Sonnet/Opus. Do not pass >50 files to a Haiku agent in a single prompt.
+
+> **Version gate:** `opus` resolves to Opus 5 only on Claude Code v2.1.219+;
+> earlier versions resolve to Opus 4.8. Confirm `claude --version` before
+> relying on Opus-5-era routing economics below.
 
 Note: Haiku 4.5 supports fixed-budget extended thinking (`budget_tokens`) but not adaptive thinking; the `effort` parameter returns 400 on Haiku — do not set it.
 
@@ -97,11 +111,13 @@ Default to Sonnet for implementation agents unless the task requires deep
 multi-path reasoning. Use Haiku aggressively for any agent whose job is to
 evaluate, score, or format — not to create.
 
-> **Sonnet 5 shifts the routing economics.** Sonnet 5 reaches near-Opus-4.8
-> quality on coding and agentic work at ~60% of Opus token cost, so it now
-> covers most implementation *and* routine agentic work — the default-to-Sonnet
-> rule is stronger, not weaker. Reserve Opus for the deepest multi-path
-> reasoning and the longest-horizon autonomous runs.
+> **Sonnet 5** reaches near-Opus-4.8 quality on coding and agentic work at
+> ~60% of Opus cost, strengthening the default-to-Sonnet rule above.
+
+> **Opus 5** is roughly Fable-class capability at roughly half Opus 4.8's
+> cost, so Opus now covers implementation and routine agentic work too — not
+> just the deepest multi-path decisions. Fable still owns the long-horizon
+> autonomous row.
 
 **Opus behavioral compensation:**
 
@@ -146,4 +162,39 @@ Opus behavior mid-run and don't mistake it for a routing bug.
 | Max thinking for routine tasks | 2–4× token multiplier | Adaptive thinking only when 3+ significantly different approaches exist (see `extended-thinking.md`) |
 | Haiku for code generation | Under-powered; produces more errors requiring fix loops | Sonnet minimum for any task that writes or modifies code |
 | Sonnet for simple scoring/grep | Wasted cost | Haiku for pass/fail checks, dedup, format validation |
-| Tool list >8 per agent | Decision paralysis; wasted token selection | Scope to 3–5 tools per agent; delegate to narrower specialists (Exception: Serena MCP navigation tools — all 8 entries count as one navigation capability for this limit.) |
+| Tool list >8 per agent | Decision paralysis; wasted token selection | Scope to 3–5 tools per agent; delegate to narrower specialists. See the MCP carve-out below. |
+
+### MCP carve-out on the >8 tool limit
+
+A **cohesive MCP tool group** counts as one capability against the >8 limit,
+not as N tools. A group qualifies when its tools come from a single MCP
+server, serve one capability the agent genuinely needs, and would be selected
+as a set rather than weighed against each other — which is what makes them
+cheap to reason over. Serena's navigation tools qualify; so do the forge MCP
+tools on `forge-app-developer`.
+
+This is a carve-out, not a blanket exemption for anything prefixed `mcp__`.
+Two unrelated MCP servers on one agent are two capabilities, and the limit
+applies normally to the tools outside any qualifying group.
+
+## Subagent spawn depth
+
+As of v2.1.219 the default nested spawn depth is **3** (was 1): a subagent
+may spawn a subagent, which may spawn another. This config fans out heavily,
+so the default is now the thing to watch, not the thing to raise.
+
+Cap it with `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` when a run must stay
+predictable — autonomous mission execution, anything under a token budget, or
+any task where you cannot enumerate in advance what the third level would do.
+Set it to 1 to forbid nesting outright.
+
+## Resumption — terse follow-ups
+
+A subagent that receives a short follow-up ("continue", "now the tests", a
+bare filename) should treat the brevity as **intentional, not ambiguous**. The
+orchestrator has the full context and is naming the delta; the prior prompt
+still governs everything it does not contradict.
+
+Resume the task under the original context. Do not restate the plan, re-derive
+the write-set, or ask what was meant — if the follow-up genuinely conflicts
+with a locked decision, that is the one case to stop and say so.

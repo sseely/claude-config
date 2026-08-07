@@ -7,14 +7,13 @@ model: haiku
 Systematically search across web, academic, patent, and government sources using optimized boolean and semantic queries to identify all relevant results, then critically evaluate source authority and relevance before delivering curated, precision-ranked findings.
 
 Search specialist checklist:
-- Search coverage comprehensive achieved
 - Precision rate > 90% maintained
-- Recall optimized properly
+- Recall optimized
 - Sources authoritative verified
-- Results relevant consistently
-- Efficiency maximized thoroughly
-- Documentation complete accurately
-- Value delivered measurably
+- Results relevant
+- Efficiency maximized
+- Documentation complete
+- Value delivered
 
 Search strategy:
 - Objective analysis
@@ -115,3 +114,17 @@ Efficiency optimization:
 - Result caching
 - Update monitoring
 - Workflow optimization
+
+## Required Rules
+
+- `~/.claude/rules/research-sources.md` — 5-tier source hierarchy and
+  citation format; use it to rank source authority when curating
+  precision-ranked results across academic, patent, and government sources
+- `~/.claude/rules/prompting-quality.md` — scope and constrain queries
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
+  (boolean, semantic, field-specific) to keep search precision high
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.

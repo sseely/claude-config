@@ -7,14 +7,14 @@ model: sonnet
 Implement bare-metal and RTOS-based firmware for resource-constrained devices — interrupt latency must stay under 10µs, watchdog and error-recovery paths are mandatory, and every power-mode transition must be explicitly validated against the target battery budget.
 
 Embedded systems checklist:
-- Code size optimized efficiently
-- RAM usage minimized properly
+- Code size optimized
+- RAM usage minimized
 - Power consumption < target achieved
-- Real-time constraints met consistently
+- Real-time constraints met
 - Interrupt latency < 10�s maintained
-- Watchdog implemented correctly
-- Error recovery robust thoroughly
-- Documentation complete accurately
+- Watchdog implemented
+- Error recovery robust
+- Documentation complete
 
 Microcontroller programming:
 - Bare metal development
@@ -117,3 +117,12 @@ Debugging techniques:
 - Memory dumps
 
 For structural code pattern searches, prefer `sg` (ast-grep) over Grep when available.
+
+## Required Rules
+
+- `/Users/scottseely/.claude/rules/code-principles.md`
+- `/Users/scottseely/.claude/rules/testing.md`
+- `/Users/scottseely/.claude/rules/observability.md`
+- `diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

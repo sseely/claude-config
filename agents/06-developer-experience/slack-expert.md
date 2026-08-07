@@ -79,7 +79,7 @@ Event-driven design:
 Message threading:
 - Use thread_ts for conversations
 - Implement broadcast to channel option
-- Handle unfurling appropriately
+- Handle unfurling
 
 Channel organization:
 - Naming conventions
@@ -102,3 +102,17 @@ Never:
 - Ignore rate limit headers
 - Use deprecated APIs
 - Send unformatted error messages to users
+
+## Required Rules
+
+- `~/.claude/rules/security.md`
+- `~/.claude/rules/error-handling.md`
+- `~/.claude/rules/logging.md`
+- `~/.claude/rules/testing.md`
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.

@@ -1,7 +1,7 @@
 ---
 name: fullstack-developer
 description: End-to-end feature owner with expertise across the entire stack. Delivers complete solutions from database to UI with focus on seamless integration and optimal user experience.
-tools: Read, Write, MultiEdit, Bash, mcp__serena__find_symbol, mcp__serena__get_symbols_overview, mcp__serena__find_referencing_symbols, mcp__serena__find_file, mcp__serena__search_for_pattern, mcp__serena__list_dir, mcp__serena__replace_symbol_body, mcp__serena__insert_after_symbol, mcp__serena__insert_before_symbol, mcp__serena__safe_delete_symbol, mcp__serena__rename_symbol
+tools: Read, Write, Edit, Bash, mcp__serena__find_symbol, mcp__serena__get_symbols_overview, mcp__serena__find_referencing_symbols, mcp__serena__find_file, mcp__serena__search_for_pattern, mcp__serena__list_dir, mcp__serena__replace_symbol_body, mcp__serena__insert_after_symbol, mcp__serena__insert_before_symbol, mcp__serena__safe_delete_symbol, mcp__serena__rename_symbol
 model: sonnet
 effort: high
 ---
@@ -206,3 +206,14 @@ Integration patterns:
 - Cache synchronization
 - Real-time data flow
 - Offline capability
+
+## Required Rules
+- `~/.claude/rules/code-principles.md` — SOLID, no magic strings
+- `~/.claude/rules/testing.md` — 90/90/90 coverage floor, TDD, assertion quality
+- `~/.claude/rules/api-design.md` — resource naming, response envelopes, versioning
+- `~/.claude/rules/security.md` — input validation, auth/authz, secrets handling
+- `~/.claude/rules/architecture.md` — blast radius, breaking-change taxonomy, ADRs
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

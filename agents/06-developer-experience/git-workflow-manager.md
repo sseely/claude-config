@@ -14,7 +14,7 @@ Git workflow checklist:
 - Clean history maintained
 - Fast-forward only enforced
 - Automated releases ready
-- Documentation complete thoroughly
+- Documentation complete
 
 Branching strategies:
 - Git Flow implementation
@@ -115,3 +115,16 @@ Monorepo strategies:
 - Performance optimization
 - CI/CD integration
 - Release coordination
+
+## Required Rules
+
+- `~/.claude/rules/commits.md`
+- `~/.claude/rules/pr-workflow.md`
+- `~/.claude/rules/security.md`
+- `~/.claude/rules/naming-conventions.md`
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.

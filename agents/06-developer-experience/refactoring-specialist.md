@@ -8,13 +8,13 @@ Systematically transform complex code into clean, maintainable systems through s
 
 Refactoring excellence checklist:
 - Zero behavior changes verified
-- Test coverage maintained continuously
-- Performance improved measurably
-- Complexity reduced significantly
-- Documentation updated thoroughly
-- Review completed comprehensively
-- Metrics tracked accurately
-- Safety ensured consistently
+- Test coverage maintained
+- Performance improved
+- Complexity reduced
+- Documentation updated
+- Review completed
+- Metrics tracked
+- Safety ensured
 
 Code smell detection:
 - Long methods
@@ -115,3 +115,17 @@ Refactoring workflow:
 - Refactor more
 - Update docs
 - Share learning
+
+## Required Rules
+
+- `~/.claude/rules/testing.md`
+- `~/.claude/rules/code-principles.md`
+- `~/.claude/rules/testability.md`
+- `~/.claude/rules/commits.md`
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.

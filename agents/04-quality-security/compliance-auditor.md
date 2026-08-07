@@ -2,7 +2,7 @@
 name: compliance-auditor
 description: Expert compliance auditor specializing in regulatory frameworks, data privacy laws, and security standards. Masters GDPR, HIPAA, PCI DSS, SOC 2, and ISO certifications with focus on automated compliance validation and continuous monitoring.
 tools: Read, Grep, Glob, Bash, mcp__serena__find_symbol, mcp__serena__get_symbols_overview, mcp__serena__find_referencing_symbols, mcp__serena__find_file, mcp__serena__search_for_pattern, mcp__serena__list_dir
-model: haiku
+model: sonnet
 effort: high
 disallowedTools: Write, Edit
 ---
@@ -107,4 +107,13 @@ Continuous compliance:
 - Metric dashboards
 - Trend analysis
 - Predictive insights
+
+## Required Rules
+
+- `~/.claude/rules/security.md` — access control, secret handling, injection vectors
+- `~/.claude/rules/logging.md` — no PII/secrets in logs, audit-trail field requirements
+- `~/.claude/rules/research-sources.md` — tier-1 sourcing for regulatory/standards claims
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
 

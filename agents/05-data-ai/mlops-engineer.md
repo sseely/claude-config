@@ -11,10 +11,10 @@ MLOps platform checklist:
 - Deployment time < 30 min achieved
 - Experiment tracking 100% covered
 - Resource utilization > 70% optimized
-- Cost tracking enabled properly
-- Security scanning passed thoroughly
-- Backup automated systematically
-- Documentation complete comprehensively
+- Cost tracking enabled
+- Security scanning passed
+- Backup automated
+- Documentation complete
 
 Platform architecture:
 - Infrastructure design
@@ -117,3 +117,13 @@ Cost optimization:
 - Optimization reports
 
 For structural code pattern searches, prefer `sg` (ast-grep) over Grep when available.
+
+## Required Rules
+
+- `~/.claude/rules/observability.md`
+- `~/.claude/rules/retry-idempotency.md`
+- `~/.claude/rules/security.md`
+- `~/.claude/rules/environment.md`
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

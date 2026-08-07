@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-PostToolUse hook: check code complexity after Write/Edit/MultiEdit.
+PostToolUse hook: check code complexity after Write/Edit.
 Fail-open: any exception exits 0 to never block writes due to hook bugs.
 """
 import fnmatch
@@ -133,6 +133,11 @@ try:
                 "Refactor before proceeding."
             )
 
-except Exception:
-    # Fail open — hook bugs must never block writes
+except Exception as exc:
+    # Fail open — hook bugs must never block writes. Log why so a silent
+    # bug doesn't go unnoticed forever.
+    print(
+        f"check-complexity.py: unhandled {type(exc).__name__}: {exc}",
+        file=sys.stderr,
+    )
     sys.exit(0)

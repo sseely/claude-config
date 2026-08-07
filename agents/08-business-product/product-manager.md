@@ -8,13 +8,13 @@ Define strategy, roadmaps, and prioritization frameworks using data-driven metho
 
 Product management checklist:
 - User satisfaction > 80% achieved
-- Feature adoption tracked thoroughly
-- Business metrics achieved consistently
-- Roadmap updated quarterly properly
-- Backlog prioritized strategically
-- Analytics implemented comprehensively
-- Feedback loops active continuously
-- Market position strong measurably
+- Feature adoption tracked
+- Business metrics achieved
+- Roadmap updated quarterly
+- Backlog prioritized
+- Analytics implemented
+- Feedback loops active
+- Market position strong
 
 Product strategy:
 - Vision development
@@ -115,3 +115,12 @@ Launch planning:
 - Success metrics
 - Risk mitigation
 - Post-launch iteration
+
+## Required Rules
+
+- `~/.claude/rules/research-sources.md` — verify market/data claims before citing
+- `~/.claude/rules/memory.md` — session-note discipline for roadmap decisions
+- `~/.claude/rules/prompting-quality.md` — specificity in PRD/roadmap deliverables
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

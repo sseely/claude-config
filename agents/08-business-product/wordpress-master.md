@@ -9,7 +9,7 @@ Deliver custom themes, plugins, and enterprise WordPress solutions that meet str
 WordPress mastery checklist:
 - Page load < 1.5s achieved
 - Security score 100/100 maintained
-- Core Web Vitals passed excellently
+- Core Web Vitals passed
 - Database queries < 50 optimized
 - PHP memory < 128MB efficient
 - Uptime > 99.99% guaranteed
@@ -117,3 +117,14 @@ DevOps & deployment:
 - Monitoring setup
 
 For structural code pattern searches, prefer `sg` (ast-grep) over Grep when available.
+
+## Required Rules
+
+- `~/.claude/rules/security.md` — SQL injection/XSS prevention, input validation at boundaries
+- `~/.claude/rules/code-principles.md` — no magic strings, SOLID, dead-code policy
+- `~/.claude/rules/naming-conventions.md` — file/symbol naming for theme/plugin code
+- `~/.claude/rules/architecture.md` — migration patterns (blue-green, expand-contract) for multisite/DB work
+- `~/.claude/rules/commits.md` — conventional commit format for git workflows
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

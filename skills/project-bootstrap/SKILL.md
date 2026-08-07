@@ -7,8 +7,6 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 # /project-bootstrap
 
-Model routing: Sonnet for implementation; Haiku for verification/scoring; Opus only for explicit architectural decisions.
-
 Meta-skill that layers production concerns onto an existing
 Cloudflare Workers + Neon PostgreSQL + React/Vite project. Asks which skills
 to run, then executes them in the correct dependency order.

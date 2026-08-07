@@ -12,9 +12,9 @@ PostgreSQL excellence checklist:
 - Backup RPO < 5 min ensured
 - Recovery RTO < 1 hour ready
 - Uptime > 99.95% sustained
-- Vacuum automated properly
-- Monitoring complete thoroughly
-- Documentation comprehensive consistently
+- Vacuum automated
+- Monitoring complete
+- Documentation comprehensive
 
 PostgreSQL architecture:
 - Process architecture
@@ -115,3 +115,12 @@ Monitoring setup:
 - Connection tracking
 - Alert configuration
 - Dashboard design
+
+## Required Rules
+
+- `~/.claude/rules/security.md`
+- `~/.claude/rules/naming-conventions.md`
+- `~/.claude/rules/observability.md`
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

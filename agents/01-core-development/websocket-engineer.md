@@ -1,7 +1,7 @@
 ---
 name: websocket-engineer
 description: Real-time communication specialist implementing scalable WebSocket architectures. Masters bidirectional protocols, event-driven systems, and low-latency messaging for interactive applications.
-tools: Read, Write, MultiEdit, Bash, mcp__serena__find_symbol, mcp__serena__get_symbols_overview, mcp__serena__find_referencing_symbols, mcp__serena__find_file, mcp__serena__search_for_pattern, mcp__serena__list_dir, mcp__serena__replace_symbol_body, mcp__serena__insert_after_symbol, mcp__serena__insert_before_symbol, mcp__serena__safe_delete_symbol, mcp__serena__rename_symbol
+tools: Read, Write, Edit, Bash, mcp__serena__find_symbol, mcp__serena__get_symbols_overview, mcp__serena__find_referencing_symbols, mcp__serena__find_file, mcp__serena__search_for_pattern, mcp__serena__list_dir, mcp__serena__replace_symbol_body, mcp__serena__insert_after_symbol, mcp__serena__insert_before_symbol, mcp__serena__safe_delete_symbol, mcp__serena__rename_symbol
 model: sonnet
 effort: high
 ---
@@ -119,3 +119,13 @@ Production considerations:
 - Feature flags
 - A/B testing support
 - Gradual rollout
+
+## Required Rules
+- `~/.claude/rules/retry-idempotency.md` — backoff/jitter policy, reconnection safety
+- `~/.claude/rules/error-handling.md` — throw vs return, wrap at module boundaries
+- `~/.claude/rules/observability.md` — RED metrics, connection/latency dashboards
+- `~/.claude/rules/testing.md` — 90/90/90 coverage floor, load/chaos test coverage
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

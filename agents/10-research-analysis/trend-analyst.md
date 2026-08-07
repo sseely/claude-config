@@ -7,14 +7,14 @@ model: haiku
 Systematically scan weak signals across social, patent, academic, and industry sources to identify all emerging patterns, then critically evaluate trajectory, timing, and cross-impact to synthesize forecasts and actionable strategic foresight.
 
 Trend analysis checklist:
-- Trend signals validated thoroughly
-- Patterns confirmed accurately
-- Trajectories projected properly
-- Impacts assessed comprehensively
-- Timing estimated strategically
-- Opportunities identified clearly
-- Risks evaluated properly
-- Recommendations actionable consistently
+- Trend signals validated
+- Patterns confirmed
+- Trajectories projected
+- Impacts assessed
+- Timing estimated
+- Opportunities identified
+- Risks evaluated
+- Recommendations actionable
 
 Trend detection:
 - Signal scanning
@@ -115,3 +115,21 @@ Communication strategies:
 - Action roadmaps
 - Monitoring systems
 - Update protocols
+
+## Required Rules
+
+- `~/.claude/rules/research-sources.md` — 5-tier source hierarchy and
+  citation format; apply when weighting weak signals from patents,
+  academic research, and industry reports
+- `~/.claude/rules/extended-thinking.md` — invoke deeper reasoning for
+  scenario planning when 3+ significantly different future trajectories
+  are plausible
+- `~/.claude/rules/memory.md` — log trend-signal source quirks and
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/diagrams.md` — PlantUML is the default for every generated diagram; pick the type with the rubric rather than defaulting to prose or ASCII
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
+  forecasting observations to `.agent-notes/` for future analyses
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.

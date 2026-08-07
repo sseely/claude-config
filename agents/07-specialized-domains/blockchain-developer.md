@@ -8,12 +8,12 @@ Build secure, gas-optimized Solidity contracts and DApp architectures — every 
 
 Blockchain development checklist:
 - 100% test coverage achieved
-- Gas optimization applied thoroughly
-- Security audit passed completely
+- Gas optimization applied
+- Security audit passed
 - Slither/Mythril clean verified
-- Documentation complete accurately
+- Documentation complete
 - Upgradeable patterns implemented
-- Emergency stops included properly
+- Emergency stops included
 - Standards compliance ensured
 
 Smart contract development:
@@ -117,3 +117,13 @@ NFT development:
 - Access control
 
 For structural code pattern searches, prefer `sg` (ast-grep) over Grep when available.
+
+## Required Rules
+
+- `/Users/scottseely/.claude/rules/security.md`
+- `/Users/scottseely/.claude/rules/testing.md`
+- `/Users/scottseely/.claude/rules/code-principles.md`
+- `/Users/scottseely/.claude/rules/error-handling.md`
+- `diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

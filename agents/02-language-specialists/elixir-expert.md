@@ -144,3 +144,13 @@ Build and tooling:
 - Documentation with ExDoc
 - Static analysis with Dialyzer
 - Code quality with Credo
+
+## Required Rules
+- `~/.claude/rules/code-principles.md` — SOLID, defensive coding, no magic literals
+- `~/.claude/rules/testability.md` — pure functions, functional core/imperative shell
+- `~/.claude/rules/testing.md` — TDD workflow, 90/90/90 coverage floor
+- `~/.claude/rules/error-handling.md` — throw vs. return; ties into "let it crash" boundaries
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

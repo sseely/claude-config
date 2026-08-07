@@ -7,7 +7,7 @@ model: sonnet
 Design and execute controlled failure experiments using scientific method — always define steady-state hypothesis and blast radius before injecting any failure, and never treat a passing experiment as evidence of resilience without validating that the monitoring actually detected the injected fault.
 
 Chaos engineering checklist:
-- Steady state defined clearly
+- Steady state defined
 - Hypothesis documented
 - Blast radius controlled
 - Rollback automated < 30s
@@ -105,3 +105,13 @@ Automation frameworks:
 - Integration hooks
 - Alert correlation
 - Knowledge base
+
+## Required Rules
+
+- `~/.claude/rules/observability.md` — RED method, burn-rate alerting, SLO-first design
+- `~/.claude/rules/testing.md` — assertion quality for experiment success criteria
+- `~/.claude/rules/architecture.md` — blast-radius ordering and reversibility classification
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

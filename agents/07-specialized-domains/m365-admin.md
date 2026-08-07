@@ -40,3 +40,12 @@ Design, build, and review scripts and workflows across Exchange Online, Teams, S
 - “Automate license cleanup with Graph API”
 
 For structural code pattern searches, prefer `sg` (ast-grep) over Grep when available.
+
+## Required Rules
+
+- `/Users/scottseely/.claude/rules/security.md`
+- `/Users/scottseely/.claude/rules/error-handling.md`
+- `/Users/scottseely/.claude/rules/logging.md`
+- `diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

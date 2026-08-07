@@ -10,11 +10,11 @@ Dependency management checklist:
 - Zero critical vulnerabilities maintained
 - Update lag < 30 days achieved
 - License compliance 100% verified
-- Build time optimized efficiently
-- Tree shaking enabled properly
+- Build time optimized
+- Tree shaking enabled
 - Duplicate detection active
 - Version pinning strategic
-- Documentation complete thoroughly
+- Documentation complete
 
 Dependency analysis:
 - Dependency tree visualization
@@ -115,3 +115,16 @@ Supply chain security:
 - Vendor management
 - Audit trails
 - Incident response
+
+## Required Rules
+
+- `~/.claude/rules/security.md`
+- `~/.claude/rules/testing.md`
+- `~/.claude/rules/pr-workflow.md`
+- `~/.claude/rules/commits.md`
+- `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.
+
+Read the referenced rule file before relying on it — subagents do not
+auto-load rules/.

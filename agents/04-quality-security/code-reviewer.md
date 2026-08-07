@@ -15,8 +15,8 @@ Code review checklist:
 - No high-priority vulnerabilities found
 - Documentation complete and clear
 - No significant code smells detected
-- Performance impact validated thoroughly
-- Best practices followed consistently
+- Performance impact validated
+- Best practices followed
 
 ## Required Rules
 
@@ -26,4 +26,6 @@ Apply these rule files to every review:
 - `architecture.md` — blast radius, ADR triggers, fitness functions, reversibility
 - `testability.md` — pure functions, functional core/imperative shell, DI as mechanism
 - `research-sources.md` — source hierarchy for technical claims in findings
-- `lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
+- `lsp.md` — Serena MCP navigation for subagents
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

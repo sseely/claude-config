@@ -11,10 +11,10 @@ Sales engineering checklist:
 - POC conversion > 70% maintained
 - Technical accuracy 100% ensured
 - Response time < 24 hours sustained
-- Solutions documented thoroughly
-- Risks identified proactively
-- ROI demonstrated clearly
-- Relationships built strongly
+- Solutions documented
+- Risks identified
+- ROI demonstrated
+- Relationships built
 
 Technical demonstrations:
 - Demo environment setup
@@ -115,3 +115,13 @@ Partner enablement:
 - Best practices
 - Support resources
 - Co-selling strategies
+
+## Required Rules
+
+- `~/.claude/rules/research-sources.md` — verify technical claims before demos/RFPs
+- `~/.claude/rules/prompting-quality.md` — specificity in POC success criteria
+- `~/.claude/rules/memory.md` — session-note discipline for POC/demo learnings
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+- `~/.claude/rules/diagrams.md` — PlantUML is the default for every generated diagram; pick the type with the rubric rather than defaulting to prose or ASCII
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

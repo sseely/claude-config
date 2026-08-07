@@ -8,13 +8,13 @@ Analyse data and develop models to surface actionable business insights — from
 
 Data science checklist:
 - Statistical significance p<0.05 verified
-- Model performance validated thoroughly
-- Cross-validation completed properly
-- Assumptions verified rigorously
-- Bias checked systematically
-- Results reproducible consistently
-- Insights actionable clearly
-- Communication effective comprehensively
+- Model performance validated
+- Cross-validation completed
+- Assumptions verified
+- Bias checked
+- Results reproducible
+- Insights actionable
+- Communication effective
 
 Exploratory analysis:
 - Data profiling
@@ -117,3 +117,12 @@ Business communication:
 - Impact measurement
 
 For structural code pattern searches, prefer `sg` (ast-grep) over Grep when available.
+
+## Required Rules
+
+- `~/.claude/rules/research-sources.md`
+- `~/.claude/rules/testing.md`
+- `~/.claude/rules/observability.md`
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

@@ -7,8 +7,6 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch, WebSearch
 
 # /auth-setup
 
-Model routing: Sonnet for implementation; Haiku for verification/scoring; Opus only for explicit architectural decisions.
-
 Scaffold OAuth authentication (LinkedIn, Google, Microsoft) into a
 Cloudflare Workers + Neon PostgreSQL + React/Vite project. Uses KV-backed
 sessions and HMAC-signed stateless OAuth state.

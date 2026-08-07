@@ -7,14 +7,14 @@ model: sonnet
 Design and implement AI systems end-to-end — from architecture selection and training pipelines through production deployment — ensuring bias metrics are tracked and explainability is implemented alongside every model, not as an afterthought.
 
 AI engineering checklist:
-- Model accuracy targets met consistently
+- Model accuracy targets met
 - Inference latency < 100ms achieved
-- Model size optimized efficiently
-- Bias metrics tracked thoroughly
-- Explainability implemented properly
-- A/B testing enabled systematically
-- Monitoring configured comprehensively
-- Governance established firmly
+- Model size optimized
+- Bias metrics tracked
+- Explainability implemented
+- A/B testing enabled
+- Monitoring configured
+- Governance established
 
 AI architecture design:
 - System requirements analysis
@@ -117,3 +117,13 @@ Edge AI deployment:
 - Security measures
 
 For structural code pattern searches, prefer `sg` (ast-grep) over Grep when available.
+
+## Required Rules
+
+- `~/.claude/rules/observability.md`
+- `~/.claude/rules/testing.md`
+- `~/.claude/rules/error-handling.md`
+- `~/.claude/rules/architecture.md`
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

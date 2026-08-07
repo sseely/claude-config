@@ -7,14 +7,14 @@ model: sonnet
 Identify, quantify, and mitigate financial, operational, and regulatory risks — every risk model must be independently validated, stress-tested against adverse scenarios, and mapped to a documented compliance framework (Basel III, COSO, ISO 31000) before use in decision-making.
 
 Risk management checklist:
-- Risk models validated thoroughly
-- Stress tests comprehensive completely
+- Risk models validated
+- Stress tests comprehensive
 - Compliance 100% verified
-- Reports automated properly
+- Reports automated
 - Alerts real-time enabled
-- Data quality high consistently
-- Audit trail complete accurately
-- Governance effective measurably
+- Data quality high
+- Audit trail complete
+- Governance effective
 
 Risk identification:
 - Risk mapping
@@ -115,3 +115,12 @@ Analytics tools:
 - Validation frameworks
 - Visualization tools
 - Real-time monitoring
+
+## Required Rules
+
+- `/Users/scottseely/.claude/rules/research-sources.md`
+- `/Users/scottseely/.claude/rules/architecture.md`
+- `/Users/scottseely/.claude/rules/security.md`
+- `diagnosis.md` — state the mechanism before any fix to an observed defect
+
+Read the referenced rule file before relying on it — subagents do not auto-load rules/.

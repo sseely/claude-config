@@ -1,512 +1,661 @@
-# Self-Improve Phase 2 — Agent F: Rules / CLAUDE.md / Agent Consistency Audit (2026-07-24)
+# Phase 2 — Agent F: Config Audit (2026-08-01)
 
-Read-only. Scope read in full: `CLAUDE.md`, all **23** files under `rules/`
-(the brief said 22 — the CLAUDE.md index at :65-72 is correct, the brief was
-stale), `post-compact-context.md`, 7 sampled agents, plus `skills/fix`,
-`skills/auth-setup`, `skills/payments-setup` and grep sweeps across all 126
-agents where a claim required fleet-wide verification.
+Scope: `CLAUDE.md`, all 23 `rules/*.md`, `post-compact-context.md`, 7 sampled
+agents, plus repo-wide greps over `agents/` (128 files) and `skills/`.
+Baseline: `git log --oneline -30` reviewed; the 2026-07-24 remediation pass and
+the 2026-08-01 mermaid→PlantUML switch (`73837bd`) are treated as done.
+Read-only: no config file modified.
 
-Severity: **Critical** / **Warning** / **Suggestion** / **Note**.
-25 findings, highest impact first within each section.
+Measured facts used below (verified this session):
+- `wc -c CLAUDE.md` → **3921** bytes (cap 4096).
+- `wc -c post-compact-context.md` → **1439** bytes.
+- `cat rules/*.md | wc -c` → **72,367** bytes; **23** files; **11,055** words.
+- `diagrams.md` appears in **0 of 128** agent files.
+- 125/128 agents have `## Required Rules`; **119** contain a Read instruction,
+  **6** do not.
 
 ---
 
 ## 1. Contradictions
 
-### F1. Coverage floor drift — six agents ship a floor below the global floor
-**Critical**
+### C1 — Diagnosis "only two stop conditions" vs. autonomous 2-try gate cap
+`rules/diagnosis.md:42-51` — **Critical** — confidence 90
 
-- `rules/testing.md:26-27` — "Target at least 90% line coverage, 90% branch
-  coverage, and 90% function coverage. Treat these as a floor, not a ceiling."
-- `agents/01-core-development/frontend-developer.md:23` — "Comprehensive test
-  coverage (>85%)" (repeated at `:147`)
-- `agents/02-language-specialists/java-architect.md:14` — "Test coverage
-  exceeding 85%"
-- `agents/02-language-specialists/angular-architect.md:14` — "Test coverage >
-  85% achieved"
-- `agents/04-quality-security/test-automator.md:11` — "Test coverage > 80%
-  achieved"
-- `agents/03-infrastructure/devops-engineer.md:13` — "Test automation > 80%
-  coverage"
-- `agents/06-developer-experience/legacy-modernizer.md:11` — "Test coverage >
-  80% achieved"
+> "## Valid stop conditions (only these two)
+> 1. **Root cause identified and fixed** — mechanism known, change applied, verified.
+> 2. **Root cause identified and proven irreducible** …
+> **"This is hard," "this looks like enough," or "should we call it good enough?"
+> are NOT stop conditions.**"
 
-None of the six cite `testing.md`. `test-automator` — the agent whose entire
-job is coverage — ships the lowest number. An agent asked to "meet the coverage
-bar" will meet 80%, and the orchestrator has no signal that the floor was
-missed.
+`rules/autonomous-execution.md:78-82`
 
-**Fix:** replace each numeric with "per `~/.claude/rules/testing.md` — 90/90/90
-floor". Six single-line edits. Root cause is F11.
+> "If a quality gate fails:
+> 1. Attempt to fix (max 2 tries per gate)
+> 2. If fix succeeds, re-run all gates from scratch
+> 3. If fix fails after 2 tries, STOP and document the failure
+>    in the decision journal with full error output"
 
-### F2. `/fix` explicitly permits skipping diagnosis mid-loop
-**Critical**
+A failing quality gate (`npm test`) is exactly the "observed discrepancy" that
+`diagnosis.md:4-8` says triggers diagnosis mode. Diagnosis then forbids stopping
+without a mechanism; autonomous-execution mandates stopping after 2 tries
+regardless of whether a mechanism was found. `autonomous-execution.md:132-138`
+adds a third number (3 consecutive changes to the same location).
 
-- `rules/diagnosis.md:33-34` — "**No fix before a stated mechanism.** A proposed
-  change offered before the mechanism is identified is incomplete work. Do not
-  propose it."
-- `skills/fix/SKILL.md:84-86` — "If the error is DIFFERENT → the fix made
-  progress; pass the new error directly to the language agent for the next fix
-  attempt **(skip re-diagnosis if the new error is straightforward)**"
+**Fix:** add one sentence to `autonomous-execution.md` after line 82: "The 2-try
+cap bounds *attempts*, not *investigation*. Per `diagnosis.md`, the STOP entry in
+the decision journal must carry the diagnosis artifact (mechanism, origin
+`file:line`, causal chain, ruled-out) or an explicit statement of what was ruled
+out and what would be instrumented next." Add the reciprocal pointer at
+`diagnosis.md:47`.
 
-A different error is a new observed discrepancy, which `diagnosis.md:4-8`
-defines as the trigger to enter diagnosis mode. The skill's Phase 2 gate
-(`fix/SKILL.md:53-56`) enforces the root-cause artifact correctly on entry, then
-the Phase 3 loop routes around it. This is the exact failure mode
-`diagnosis.md:35-37` names ("Do not guess to make progress").
+### C2 — "exactly one commit per task" vs. the mandated fix commit
+`rules/autonomous-execution.md:75` — **Warning** — confidence 88
 
-**Fix:** at `fix/SKILL.md:86`, delete the parenthetical and route the new error
-back to the debugger for a fresh Mechanism/Origin/Causal-chain/Ruled-out
-artifact before the next fix attempt.
+> "- Verify each completed task has exactly one commit"
 
-### F3. `/fix` iteration budget overruns the consecutive-fix stop rule
-**Warning**
+`rules/autonomous-execution.md:155-157`
 
-- `rules/autonomous-execution.md:132-138` — "If the same code location or
-  approach has been changed 3 or more times consecutively without resolving the
-  same failing check, **stop**. Three consecutive failures signal an
-  architectural or design problem…"
-- `skills/fix/SKILL.md:58` — "## Phase 3 — Fix loop (max 5 iterations)"; and
-  `:107-108` — "cap the total iteration budget across all failures at 10"
+> "- If a quality gate fix requires changes to an already-committed
+>   task, create a `fix` commit referencing the task:
+>   `fix(T3): resolve lint errors in confirm endpoint`"
 
-In an autonomous session `/fix` runs to 5 (or 10) where the protocol brakes at
-3. `post-compact-context.md:26-28` restores the 3× brake, so after a compaction
-the two numbers are both live and disagree.
+The gate at line 75 is a hard between-batch check; line 157 guarantees a second
+commit on the same task ID whenever a gate fix lands. The gate fails by
+construction on any batch that needed a gate fix.
 
-**Fix:** add to `fix/SKILL.md:58` — "In autonomous mode (mission brief active),
-the cap is 3 per the consecutive-fix stop rule in `autonomous-execution.md`."
+**Fix:** rewrite line 75 as "Verify each completed task has exactly one `feat`/
+`refactor`/`docs` commit; `fix(TN)` commits from gate remediation are expected
+and exempt."
 
-### F4. Scaffolding skills write implementation before tests
-**Warning**
+### C3 — `lsp.md` requires shell tooling that two agents are structurally denied
+`rules/lsp.md:81-83` — **Warning** — confidence 92
 
-- `rules/testing.md:11-13` — "Don't write implementation code that isn't
-  covered by a test you wrote first."
-- `skills/auth-setup/SKILL.md:392` — "## Step 14b — Write tests", following
-  Steps 1–14 which write the OAuth handlers, session KV layer, and DB schema
-- `skills/payments-setup/SKILL.md:433` — "## Step 15b — Write tests", following
-  15 implementation steps
+> "For structural code pattern searches, prefer `sg` (ast-grep) over Grep.
+> After edits, run the project's typecheck command (`tsc --noEmit`, `mypy`,
+> etc.) as the quality bar instead of reading LSP diagnostics."
 
-The tests enumerated (`auth-setup:395-397`, `payments-setup:436-438`) cover
-exactly the behavior the prior steps implemented — test-last by construction.
-`testing.md:15-16`'s exceptions (config, generated code, one-off migrations, UI
-markup with no logic) do not cover session handlers or webhook idempotency
-logic. Note `skills/testing-setup/SKILL.md:371` and
-`skills/plan-mission/SKILL.md:183` both do mandate TDD — the config is
-internally split on this.
+`agents/04-quality-security/code-reviewer.md:6` and
+`agents/04-quality-security/architect-reviewer.md:7`
 
-**Fix:** pick one. Either move the test step ahead of the handler steps in both
-skills, or add an explicit carve-out to `testing.md:15` for
-template-instantiating scaffold skills. Current silence reads as a violation.
+> "disallowedTools: Write, Edit, Bash"
 
-### F5. Reviewer agents are prescribed `sg` but denied Bash
-**Warning**
+Both agents list `lsp.md` in their Required Rules (`code-reviewer.md:29`,
+`architect-reviewer.md:21`). `sg` and `tsc --noEmit` are Bash invocations; these
+are the only two Bash-denied agents that carry `lsp.md`. They are instructed to
+use tooling they cannot invoke.
 
-- `rules/lsp.md:81` — "For structural code pattern searches, prefer `sg`
-  (ast-grep) over Grep."
-- `agents/04-quality-security/code-reviewer.md:6` — "disallowedTools: Write,
-  Edit, Bash" (tools at `:4` = Read, Grep, Glob + Serena), while `:29` lists
-  `lsp.md` in Required Rules
-- `agents/04-quality-security/architect-reviewer.md:7` — "disallowedTools:
-  Write, Edit, Bash", while `:21` lists `lsp.md`
+**Fix:** in `lsp.md`, scope the Subagent note: "If the agent has no `Bash` tool,
+`sg` and typecheck commands do not apply — use Serena `search_for_pattern` and
+report findings without running a typecheck." Alternatively drop `lsp.md` from
+the two review agents' Required Rules and replace it with a one-line Serena
+pointer.
 
-`sg` is a CLI. Both agents are handed a rule whose central recommendation they
-cannot execute, and both fall back to Grep — the tool `lsp.md:34-41`
-specifically warns produces false positives on injection and error-swallowing
-patterns, which is what a code reviewer is looking for.
+### C4 — pr-workflow mandates and forbids the same unrelated fix
+`rules/pr-workflow.md:33` and `:36` — **Warning** — confidence 82
 
-**Fix:** add `Bash(sg:*)` to both agents' allowed tools (it is read-only), or
-drop the ast-grep clause from those two Required Rules glosses.
+> "- Fix violations **in the same file** if the fix is 1-3 lines; include it in your commit"
+> "- For **dead code** in a file you are modifying: remove it in the same commit; first grep for references …"
 
-### F6. `backend-developer` hardcodes a p95 its own preamble calls per-service
-**Warning**
+`rules/pr-workflow.md:38-39`
 
-- `agents/01-core-development/backend-developer.md:8` — "meet the **per-endpoint
-  p95 latency target defined for the service**"
-- `agents/01-core-development/backend-developer.md:34` — "Response time under
-  **100ms p95** — monitor with RED metrics"
-- `rules/observability.md:5-9` — "define 'working' as measurable SLI + SLO for
-  each operation … (e.g., error rate < 0.1%, p95 < 200ms)"
+> "- Never accumulate unrelated fixes into a feature or bug-fix PR — it muddies
+>   blame history and makes rollback harder"
 
-A prior audit (phase3 S7) softened line 8; line 34 was not updated in the same
-pass, so the file now asserts both. It is also a magic literal per
-`code-principles.md:50-54`.
+Lines 33/36 require folding unrelated lint/dead-code fixes into the working
+commit; line 38 forbids exactly that. Line 36 has no size carve-out at all, so
+an arbitrarily large dead-code removal is simultaneously required and banned.
 
-**Fix:** `:34` → "Meet the endpoint's declared p95 SLO — monitor with RED
-metrics."
+**Fix:** rewrite line 38 as "Never accumulate unrelated fixes **beyond the
+same-file allowances above** into a feature or bug-fix PR." Add a size cap to
+line 36: "…remove it in the same commit if ≤20 lines; otherwise log it to
+`.agent-notes/`."
 
-### F7. `pr-workflow.md` pre-existing-violation rules conflict internally
-**Warning**
+### C5 — prompting-quality contradicts itself on rule residency
+`rules/prompting-quality.md:36-38` — **Warning** — confidence 78
 
-- `rules/pr-workflow.md:33` — "Fix violations **in the same file** if the fix is
-  1-3 lines; include it in your commit"
-- `rules/pr-workflow.md:36` — "For **dead code** in a file you are modifying:
-  remove it in the same commit"
-- `rules/pr-workflow.md:38-39` — "Never accumulate unrelated fixes into a
-  feature or bug-fix PR — it muddies blame history and makes rollback harder"
+> "All rule files are injected verbatim every
+> session — confirmed by direct inspection (22 files, ~10.3k words / ~14k
+> tokens) — so this is a real, recurring per-session context cost"
 
-For a 40-line dead function found while fixing a bug, the three bullets give
-three different answers: leave it (>3 lines), remove it (dead-code bullet), and
-don't touch it (unrelated fix). `code-principles.md:80-82` delegates the entire
-dead-code policy to this section, so no tiebreaker exists anywhere.
+`rules/prompting-quality.md:39-41`
 
-**Fix:** state precedence at `:36` — "dead code is exempt from the 1-3 line cap
-and from the unrelated-fix prohibition; if removal exceeds ~30 lines, log to
-`.agent-notes/` for a dedicated cleanup PR instead."
+> "Manage it: prefer task-scoped reading of the one or two
+> relevant rule files over loading the set, and dedup cross-file repetition
+> rather than restating it."
 
-### F8. `parallelism.md`'s cost gate contradicts its own trigger list
-**Warning**
+If all 23 files are already injected verbatim, "task-scoped reading … over
+loading the set" saves nothing — there is no load step to skip. The advice is
+actionable only for *subagents* (which do not auto-load rules) and for the
+`paths:` frontmatter idea at line 54.
 
-- `rules/parallelism.md:6` — "Default to single-agent; split only when a
-  specific bottleneck is demonstrated."
-- `rules/parallelism.md:20-21` — "**Trigger this planning step when:** More than
-  one file, module, or component needs the same type of work (analysis,
-  refactoring, test writing)"
+**Fix:** replace lines 39-41 with: "Manage it two ways: (a) for subagents, name
+only the one or two rule files the task actually needs — they do not auto-load;
+(b) for the resident set, dedup cross-file repetition and move domain rules
+behind `paths:` frontmatter. Task-scoped *reading* does not reduce the resident
+cost."
 
-"More than one file needs the same type of work" describes nearly every
-non-trivial task, and step 4 of the triggered procedure (`:17`) says "invoke all
-dependency-free subtasks … as parallel agent calls in a single response". The
-gate at `:6` and the trigger at `:21` point in opposite directions on a 15×-cost
-decision.
+### C6 — backend-developer hardcodes a p95 its own opening line delegates
+`agents/01-core-development/backend-developer.md:8` — **Warning** — confidence 85
 
-Compounding: `CLAUDE.md:53` — the always-resident one-line summary — reproduces
-only the pro-parallel half ("batch independent work in parallel, sequence
-dependent batches") and omits the cost gate entirely. The resident text says
-parallelize; the pointed-to file says don't.
+> "Build scalable, secure server-side systems — enforce 90% test coverage and OWASP security standards, and meet the per-endpoint p95 latency target defined for the service."
 
-**Fix:** reword `:21` to "…**and** serial execution is the measured
-bottleneck"; add "default single-agent (~15× token cost)" to `CLAUDE.md:53`
-(~40 bytes — funded by F23).
+`agents/01-core-development/backend-developer.md:34`
 
-### F9. `environment.md`'s canonical validation contradicts `security.md`
-**Suggestion**
+> "- Response time under 100ms p95 — monitor with RED metrics"
 
-- `rules/security.md:9-12` — "Parse and validate with a schema (Zod, io-ts, JSON
-  Schema) rather than ad-hoc checks … Enforce length limits, type constraints,
-  and allowed-value sets"
-- `rules/environment.md:14-21` — the prescribed startup-validation snippet is a
-  presence-only `if (!process.env[key])` loop with no type or range check; and
-  `environment.md:39` points readers to `security.md` as though the two agree
+Line 8 says the target is whatever the service defines; line 34 fixes it at
+100ms. `rules/observability.md:5-9` (in this agent's Required Rules, line 62)
+sides with line 8: "Before implementation: define 'working' as measurable SLI +
+SLO for each operation."
 
-Env vars are a system boundary (`PORT` arrives as a string,
-`DB_MAX_POOL_SIZE` unbounded).
+**Fix:** change line 34 to "- Meet the endpoint's declared p95 SLO (default
+100ms when the service has not declared one) — monitor with RED metrics".
 
-**Fix:** replace the snippet with a schema parse, or add one line after `:24` —
-"presence is the floor; parse types and ranges with a schema per `security.md`."
+### C7 — CLAUDE.md miscounts the post-compact sections it describes
+`CLAUDE.md:34-37` — **Warning** — confidence 90
 
-### F10. `architecture.md` forbids the review it later mandates
-**Suggestion**
+> "A `PostCompact` hook injects `~/.claude/post-compact-context.md`:
+> the autonomous execution recovery sequence, plus 3 sections
+> restoring condensed `rules/` content (model routing, commit
+> format, autonomous restraint)."
 
-- `rules/architecture.md:56` — "Express **every** architectural constraint as a
-  lint/import check/test — **not code review**."
-- `rules/architecture.md:121-129` — "Stop and get **architectural review** (not
-  just code review) when: … Two valid approaches exist and the choice affects
-  multiple teams"
+`post-compact-context.md:29-30`
 
-"Every" is unachievable — Conway's-law seams (`:117-119`) and reversibility
-judgments (`:60-62`) do not lint. The `architect-reviewer` agent exists solely
-to perform the review `:56` says should not happen.
+> "## Batch Close-Out (restored)
+> Run the mission brief's quality gates between every batch; after 2 consecutive failures on the same gate, STOP and log it — no more retries."
 
-**Fix:** `:56` → "Express every *mechanically checkable* architectural
-constraint as a lint/import check/test."
+Commit `33b15f7` ("restore batch close-out in post-compact context") landed
+*after* `ca4461f` ("correct post-compact-context.md description in CLAUDE.md"),
+so the description was never re-corrected. There are 4 restored sections, not 3.
+
+**Fix:** change lines 35-37 to "…plus 4 sections restoring condensed `rules/`
+content (model routing, commit format, autonomous restraint, batch close-out)."
+Costs ~17 bytes — see S1 for the budget.
+
+### C8 — parallelism requires a Read; six agents' blocks never say Read
+`rules/parallelism.md:55-57` — **Warning** — confidence 93
+
+> "Subagents do not auto-load `rules/`. If an agent's Required Rules
+> list names a rule file, the agent must Read that file before relying
+> on it — the one-line gloss is a pointer, not the authoritative text."
+
+`agents/01-core-development/backend-developer.md:56`
+
+> "Apply these rule files to every task:"
+
+(and `code-reviewer.md:23` "Apply these rule files to every review:";
+`api-designer.md:31` same phrasing; `architect-reviewer.md:15`,
+`typescript-pro.md:136`, `microservices-architect.md:99` are bare lists with no
+imperative at all.)
+
+119 of the 125 agents carry the canonical closer verbatim — "Read the referenced
+rule file before relying on it — subagents do not auto-load rules/." — so this is
+a 6-file miss from the July per-directory rollout, not a design choice. "Apply
+these rule files" tells the agent to comply with text it has never loaded; it
+will comply with its prior instead.
+
+**Fix:** append the canonical closer line to all six:
+`agents/01-core-development/{backend-developer,api-designer,microservices-architect}.md`,
+`agents/02-language-specialists/typescript-pro.md`,
+`agents/04-quality-security/{architect-reviewer,code-reviewer}.md`.
+
+### C9 — Required Rules lists exceed the constraint budget
+`rules/prompting-quality.md:77-80` — **Suggestion** — confidence 70
+
+> "Keep each section of a rule file, agent prompt, or skill phase to **≤6 hard
+> prescriptive constraints**. If a section needs more, split it into named
+> sub-sections, each with ≤6 items."
+
+`agents/01-core-development/backend-developer.md:57-68` — 12 rule entries in one
+unsplit section (`code-principles`, `testing`, `api-design`, `error-handling`,
+`logging`, `observability`, `architecture`, `testability`, `research-sources`,
+`security`, `retry-idempotency`, `lsp`). Each entry is a prescriptive "apply
+this," landing in the 7-15 "unpredictable — partial compliance" band the same
+rule defines at line 74.
+
+**Fix:** split oversized Required Rules blocks into two named sub-sections —
+`### Always read` (≤6: the rules that gate correctness for this agent's domain)
+and `### Consult when relevant` (the rest). Apply to any agent with >6 entries.
+
+### C10 — `rules/diagrams.md` vs. everything else: no textual conflict found
+`rules/diagrams.md` — **Note** — confidence 95
+
+Checked against all 22 other rule files, `CLAUDE.md`, and the 7 sampled agents.
+Repo-wide `grep -rn "mermaid"` over `rules/`, `agents/`, `skills/`, `CLAUDE.md`
+returns **zero** hits — the `73837bd` switch was applied completely. The three
+downstream consumers agree with it explicitly and by name:
+`rules/autonomous-execution.md:24` ("diagrams/*.md ← PlantUML diagrams (see
+rules/diagrams.md)"), `skills/explore/SKILL.md:103-104`,
+`skills/plan-mission/references/brief-structure.md:80-82` and `:111-113`.
+No fix needed for consistency. The real exposure is propagation — see G2.
+
+### C11 — the Artifact escape hatch does not name the notation that works
+`rules/diagrams.md:19-23` — **Suggestion** — confidence 75
+
+> "- **The destination has a fixed renderer that excludes PlantUML.**
+>   Claude Artifacts are the live example — the runtime has no
+>   PlantUML renderer, so a PlantUML block there displays as raw
+>   text. Use whatever notation that renderer does support, and say
+>   in your response why."
+
+The Artifact tool contract states artifacts render mermaid natively (```mermaid
+fences in markdown; `<pre class="mermaid">` in HTML). `diagrams.md:10` says
+"Never use ASCII art or a prose description" and the whole file drills
+PlantUML-only; an agent that has internalized it will emit raw PlantUML into an
+artifact rather than infer the unnamed fallback.
+
+**Fix:** change line 22 to "Use whatever notation that renderer does support —
+for Claude Artifacts that is mermaid (```mermaid fence in Markdown,
+`<pre class="mermaid">` in HTML) — and say in your response why."
 
 ---
 
 ## 2. Agent isolation risk
 
-### F11. 119 of 126 agents carry no rule propagation at all
-**Critical**
+### A1 — six agents name rules without instructing a Read
+See **C8**. — **Warning** — confidence 93
 
-`grep -rl "Required Rules" agents/` returns **7 of 126 files** —
-`code-reviewer`, `security-auditor`, `architect-reviewer`, `api-designer`,
-`microservices-architect`, `backend-developer`, `typescript-pro`. The sample
-supplied for this audit was 6 of those 7, which makes the fleet look far
-healthier than it is.
+### A2 — the confidence ladder exists only in CLAUDE.md and evaporates everywhere
+`CLAUDE.md:17-22` — **Warning** — confidence 88
 
-- `rules/parallelism.md:34-36` — "Subagents start with a blank slate — no
-  conversation history, no CLAUDE.md, no awareness of prior decisions."
+> "Confidence levels — declare these when the accuracy of a claim matters:
+> - **HIGH**: Verified via tool or cited source
+> - **MEDIUM**: Single source, or strong training knowledge — add a caveat
+> - **LOW**: Memory only, unverified — say so
+> - **UNKNOWN**: Cannot verify — admit it rather than fabricate"
 
-Everything else inherits nothing: `python-pro`, `frontend-developer`,
-`debugger`, `security-engineer`, `test-automator`, `refactoring-specialist`, all
-13 haiku agents. TDD (`testing.md`), the 90/90/90 floor, `security.md`,
-`logging.md`, `error-handling.md` and `diagnosis.md` are in force for ~6% of the
-agent fleet. F1 is the observable symptom.
+No rule file carries this ladder, so it reaches 0 of 128 subagents. Reports come
+back unlabeled and the orchestrator relays them as if verified.
+`research-sources.md` governs *where* evidence comes from but never *how
+confidence is declared*.
 
-**Fix:** mechanical batch edit. Append a 3-5 line Required Rules block to the
-02- (language specialists) and 04- (quality/security) tiers first — those are
-the agents that write and review code. Do not attempt all 119 in one pass.
+**Fix:** move the four-line ladder verbatim into `rules/research-sources.md`
+under a new `## Declaring confidence` heading. It is already in 27 agents'
+Required Rules, so this propagates the behavior at zero agent-file churn.
 
-### F12. The "you must Read the rule file" instruction is unreachable
-**Critical**
+### A3 — `diagnosis.md` reaches 6 of 128 agents; no code-writing agent has it
+`CLAUDE.md:60-62` — **Warning** — confidence 90
 
-- `rules/parallelism.md:53-55` — "Subagents do not auto-load `rules/`. If an
-  agent's Required Rules list names a rule file, the agent must Read that file
-  before relying on it — the one-line gloss is a pointer, not the authoritative
-  text."
+> "On an observed discrepancy (failing test, oracle mismatch, symptom vs. intent),
+> enter diagnosis mode per `~/.claude/rules/diagnosis.md`…"
 
-This sentence lives inside `parallelism.md`, which subagents also do not
-auto-load. It is addressed to a reader who never sees it.
-`grep -rn "Read .*rules/" agents/` returns **zero matches** — not one of the 126
-agents instructs itself to Read a rule file. The prior audit's W7 remediation
-was applied to the wrong file: it documents the requirement rather than
-delivering it.
+CLAUDE.md states this globally, but only `debugger`, `error-detective`,
+`incident-responder`, `devops-incident-responder`, `legacy-modernizer`, and
+`plantuml-visual-qa` list `diagnosis.md`. Every implementation agent
+(`backend-developer`, `typescript-pro`, `python-pro`, all language specialists)
+hits failing tests routinely and will guess-and-patch instead.
 
-**Fix:** move the sentence into the Required Rules block header of each of the 7
-agents that have one (and into the F11 template) — "Read each file below at
-`~/.claude/rules/<name>` before starting; the gloss is a pointer, not the rule."
+**Fix:** add `- \`diagnosis.md\` — root-cause discipline: state the mechanism
+before any fix on an observed defect` to the Required Rules of every agent that
+holds `Write` or `Edit`. That is the correct filter: only agents that can change
+code can guess-and-patch.
 
-### F13. Required Rules cite bare filenames that will not resolve
-**Warning**
+### A4 — `lsp.md` reaches 4 of 128 agents while 65 hold Serena tools
+`rules/lsp.md:74-83` — **Warning** — confidence 88
 
-- Bare names: `backend-developer.md:57-68`, `typescript-pro.md:137-141`,
-  `microservices-architect.md:100-106`, `code-reviewer.md:24-29` — e.g.
-  "`testing.md` — TDD, 90/90/90 coverage floor, assertion quality"
-- Resolvable paths, only 4 of 126 files: `api-designer.md:11`
-  ("`~/.claude/rules/api-design.md`"), `architect-reviewer.md:13`,
-  `debugger.md:39`, `error-detective.md:10`
+65 agent files grant `mcp__serena__find_symbol` et al.; only 4
+(`architect-reviewer`, `code-reviewer`, `api-designer`, `backend-developer`)
+list `lsp.md`. The other 61 receive the tools with no guidance on the
+Serena-over-Grep / ast-grep-over-regex priority order.
 
-A subagent whose cwd is a user project that acts on F12 and calls
-`Read("testing.md")` gets a miss and silently proceeds without the rule.
+**Fix:** either add `lsp.md` to the Required Rules of every agent whose `tools:`
+line contains `mcp__serena__`, or (cheaper, and it dodges C3) inline the
+two-sentence Subagent note as a shared snippet appended by the same script that
+added the Required Rules blocks.
 
-**Fix:** prefix every Required Rules entry with `~/.claude/rules/`. Combine with
-the F12 edit — same lines.
+### A5 — named rules do not match need: api-designer omits `api-design.md`
+`agents/01-core-development/api-designer.md:11` — **Warning** — confidence 90
 
-### F14. `it-ops-orchestrator` cannot invoke the agents it exists to route to
-**Warning**
+> "Execute API design per `~/.claude/rules/api-design.md`."
 
-- `agents/09-meta-orchestration/it-ops-orchestrator.md:3` — "routing work to
-  specialized agents"; `:26-28` — "Assign each sub-problem to the correct agent
-  / Merge responses into a coherent unified solution"
-- `agents/09-meta-orchestration/it-ops-orchestrator.md:4` — "tools: Read, Write,
-  Edit, Bash, Glob, Grep" — **no Agent/Task tool**
+`agents/01-core-development/api-designer.md:31-35` — the Required Rules block
+lists `code-principles`, `error-handling`, `logging`, `lsp` — and **not**
+`api-design.md`. Line 7 also commits the agent to a "breaking-change policy,"
+which lives in `architecture.md:75-93`, also absent. The one rule this agent
+exists to enforce is the one its Required Rules block omits.
 
-Its sole declared purpose is unreachable with its declared toolset; it will
-implement the work itself, which `:7` explicitly forbids ("never attempt to
-implement what a specialist should own"). It also has no Required Rules block
-and never references `parallelism.md`'s agent-prompt structure (`:32-71`) or
-file-ownership rules (`:25-30`) — an orchestrator carrying none of the
-orchestration rules.
+**Fix:** add `api-design.md` and `architecture.md` to the block (and the Read
+closer per C8); the line-11 pointer can then be deleted as redundant.
 
-**Fix:** add `Agent` to `:4`; add a Required Rules block naming
-`~/.claude/rules/parallelism.md` with the F12 Read instruction.
+### A6 — code-reviewer's rule list omits what its own checklist checks
+`agents/04-quality-security/code-reviewer.md:13` — **Warning** — confidence 85
 
-### F15. `microservices-architect` paraphrases `observability.md` in place
-**Suggestion**
+> "- Coverage: verify a coverage report exists in CI output; flag uncovered changed lines; …"
 
-- `agents/01-core-development/microservices-architect.md:97` — "Apply SLO-first
-  design, RED metrics (rate/error rate/duration p50/p95/p99), distributed
-  tracing with W3C traceparent, burn-rate alerting, on-call readiness checklist,
-  dashboard minimums, and log correlation format."
-- Same file `:102` also lists `observability.md` in Required Rules
-- `rules/prompting-quality.md:35-39` — "dedup cross-file repetition rather than
-  restating it"
+Its Required Rules (`:24-29`) omit `testing.md` (the 90/90/90 floor and
+assertion-quality bar it is judging against), `pr-workflow.md` (the dead-code and
+pre-existing-violation policy), `error-handling.md`, and `logging.md` — all four
+of which the `/code-review` skill explicitly covers
+(`skills/code-review/SKILL.md:6`).
 
-The paraphrase is what the agent actually acts on (it is in-context; the rule
-file is not), and it drops `observability.md:55-56`'s concrete burn-rate windows
-(fast 1h/2%, slow 6h/5%) — the only numbers in that rule that are directly
-actionable.
+**Fix:** add `testing.md`, `pr-workflow.md`, `error-handling.md`, `logging.md`
+to `code-reviewer.md`'s Required Rules, split per C9 into `### Always read` /
+`### Consult when relevant`.
 
-**Fix:** `:97` → "Read `~/.claude/rules/observability.md` and apply it in full."
+### A7 — three agents have no Required Rules block at all
+`agents/04-quality-security/security-auditor.md`, `agents/explore.md`,
+`agents/plan.md` — **Note** — confidence 95
+
+`explore` and `plan` are pinned to haiku for cheap search (`77c58b4`) and
+arguably need none. `security-auditor` is a substantive reviewer and should
+carry at minimum `security.md` and `research-sources.md`.
+
+**Fix:** add a Required Rules block with `security.md`, `research-sources.md`,
+`architecture.md` plus the Read closer to `security-auditor.md`. Leave
+`explore.md` / `plan.md` alone and note the exemption in the self-improve skill
+so future passes stop flagging them.
 
 ---
 
 ## 3. Coverage gaps
 
-**Verified present, complete, and referenced from CLAUDE.md — no hole:** logging
-(`logging.md` ← `CLAUDE.md:69`), error handling (`error-handling.md` ← `:69`),
-API design (`api-design.md` ← `:69`), file/folder naming
-(`naming-conventions.md` ← `:72`), pre-existing code policy
-(`pr-workflow.md:28-39` ← `:72`), PR/branch workflow (`:72`), SLO-first +
-on-call readiness (`observability.md:3-11` and `:62-75` ← `:69`), system-first
-blast radius (`architecture.md:3-19` ← `:71`), ADR triggers
-(`architecture.md:21-28` ← `:71`), research source tiering
-(`research-sources.md` ← `:71`). Genuine holes below.
+### G1 — the complexity hook enforces four limits no rule file states
+`hooks/check-complexity.py:32-39` — **Warning** — confidence 92
 
-### F16. ADR rule gives a format but no location
-**Suggestion**
+The hook enforces `MAX_FILE_LINES = 500`, `MAX_FUNC_NLOC = 30`, `MAX_CCN = 10`,
+`MAX_PARAMS = 5`, with an exemption list at `hooks/complexity-ignore`. Grepping
+`rules/` for "complexit" returns only incidental prose
+(`parallelism.md:83`, `extended-thinking.md:73`, `testability.md:48`) — no rule
+states any threshold. The numbers survive only in
+`agents/04-quality-security/code-reviewer.md:14` ("Cyclomatic complexity < 10")
+and `skills/code-review/references/checklists.md:20` ("suggest simplification
+>7; flag >10 as Warning; require decomposition >15"). A subagent writing code
+learns the file-length and parameter-count caps only by being rejected.
 
-`rules/architecture.md:23-28` lists five ADR triggers and `:70-73` makes an ADR
-mandatory for irreversible changes, but neither `architecture.md` nor
-`naming-conventions.md:3-20` states where an ADR file lives or how it is
-numbered. `architecture.md:67` cites "ADR-042" as though a scheme exists.
-"Write an ADR" is not an executable instruction without a path.
+**Fix:** add a `## Complexity limits` section to `rules/code-principles.md`
+mirroring the hook constants verbatim (500 file lines / 30 function NLOC / CCN 10
+/ 5 params, with a pointer to `hooks/complexity-ignore` for vendored code). It
+belongs in `code-principles.md` because 46 agents already list that file.
 
-**Fix:** one line after `architecture.md:49` — "Location:
-`docs/adr/NNN-short-title.md`, zero-padded sequential."
+### G2 — `diagrams.md` propagated to 0 of 128 agents
+`rules/diagrams.md:5` — **Warning** — confidence 95
 
-### F17. Skills are governed by nothing and unmentioned in CLAUDE.md
-**Suggestion**
+> "Use PlantUML for all generated diagrams."
 
-`CLAUDE.md:47-49` governs agents and the Workflow tool. The 28 directories under
-`skills/` appear nowhere in `CLAUDE.md` or in any of the 23 rule files, so there
-is no stated precedence when a skill's steps conflict with a rule — which is
-exactly the unadjudicated collision in F2 and F4.
+Seven agents promise diagrams as a deliverable —
+`agents/06-developer-experience/documentation-engineer.md:54`,
+`agents/06-developer-experience/legacy-modernizer.md:96`,
+`agents/08-business-product/business-analyst.md:82-84`,
+`agents/08-business-product/sales-engineer.md:51`,
+`agents/04-quality-security/error-detective.md:84,117`,
+`agents/10-research-analysis/{data-researcher.md:84,trend-analyst.md:105}` —
+and none lists `diagrams.md`. `microservices-architect` and `architect-reviewer`
+also produce architecture figures. Since subagents do not auto-load `rules/`
+(`parallelism.md:36-38`) and mermaid is the strong model prior, every one of them
+will emit mermaid, silently reverting the 2026-08-01 default the moment work is
+delegated. This is the highest-leverage gap in the audit: the new rule is correct
+and internally consistent (C10) but reaches nothing.
 
-**Fix:** one clause appended to the existing `CLAUDE.md:49` paragraph (no new
-section, no net growth if F23 is taken) — "Skills in `~/.claude/skills/` are
-procedures, not exemptions: where a skill's steps conflict with `rules/`, the
-rule wins unless the skill states the carve-out explicitly."
+**Fix:** add `- \`diagrams.md\` — PlantUML default; pick the diagram type from
+the rubric` to the Required Rules of those 7 agents plus
+`microservices-architect`, `architect-reviewer`, `api-documenter`, and
+`technical-writer`.
 
-### F18. The on-call merge gate is invisible to the merge rule
-**Suggestion**
+### G3 — `api-design.md` status table omits 429
+`rules/api-design.md` (Status codes table) — **Suggestion** — confidence 80
 
-- `rules/observability.md:62` — "## On-call readiness (**required before
-  merge**)"; `:86-87` — "Do not merge a feature that introduces new critical
-  paths without updating (or creating) the service dashboard."
-- `rules/pr-workflow.md` — contains branch naming, PR size, merge strategy,
-  pre-existing violations and commit discipline, but no merge checklist and no
-  reference to `observability.md`
+`rules/retry-idempotency.md` mandates 429 handling ("**429 Too Many Requests:**
+retry after the `Retry-After` header value (or 1s if absent)") and
+`api-design.md` requires rate limiting on list endpoints, but the status-code
+table jumps 409 → 410 → 500 with no 429 row, so an implementer following it has
+no sanctioned code to emit when rate-limiting.
 
-A gate declared "required before merge" that the file owning merge policy does
-not know about will not fire.
+**Fix:** add a `| Rate limited | 429 |` row to the status table and a sentence
+requiring a `Retry-After` header on every 429, cross-referencing
+`retry-idempotency.md`.
 
-**Fix:** add to `pr-workflow.md` after `:26` — "Merge gate: a feature adding new
-failure modes requires the on-call readiness items in `observability.md:62-75`."
+### G4 — the enumerated behaviors are all governed
+**Note** — confidence 95
+
+Verified present and actually governing (not merely named): logging standards
+(`logging.md`), error handling (`error-handling.md`), API design
+(`api-design.md`), file/folder naming (`naming-conventions.md`), pre-existing-code
+policy (`pr-workflow.md:28-39`, referenced from `code-principles.md:80-82`),
+PR/branch workflow (`pr-workflow.md`), SLO-first + on-call readiness
+(`observability.md:3-11`, `:62-75`), blast radius in the required order
+(`architecture.md:3-19`), ADR discipline (`architecture.md:21-49`), research
+source tiering (`research-sources.md`). No gap at the rule-file level — the
+gaps are propagation (A3-A6, G2) and the unwritten complexity limits (G1).
 
 ---
 
 ## 4. Rule quality
 
-### F19. `parallelism.md`'s primary gate has no test
-**Warning**
+### Q1 — stale, verifiable numbers in prompting-quality
+`rules/prompting-quality.md:36-38` — **Warning** — confidence 97
 
-- `rules/parallelism.md:4-6` — "Justify multi-agent when: (1) parallel
-  bottleneck **demonstrated** … Default to single-agent; split only when a
-  specific bottleneck is **demonstrated**."
+> "footprint** of `rules/` (~62KB). All rule files are injected verbatim every
+> session — confirmed by direct inspection (22 files, ~10.3k words / ~14k
+> tokens)"
 
-"Demonstrated" is undefined — measured wall-clock? file count? independent
-write-sets? The gate controlling a stated 15× cost multiplier cannot be checked
-by the agent applying it or by a reviewer afterward, which is why the concrete
-trigger list at `:20-23` wins in practice (F8). An unfalsifiable gate is not a
-gate.
+Measured now: **72,367 bytes, 23 files, 11,055 words** — the `diagrams.md`
+addition was not reflected. The passage advertises itself as "confirmed by direct
+inspection," so a stale number here is worse than no number.
 
-**Fix:** give it an operational test at `:6`, e.g. "demonstrated = ≥3
-non-overlapping write-sets, or a serial step measured at >10 minutes."
+**Fix:** update to "(~72KB … 23 files, ~11.1k words / ~15k tokens)" and add
+"— re-measure with `cat rules/*.md | wc -cw` when adding a rule file" so the next
+addition updates it.
 
-### F20. `retry-idempotency.md`'s 5s cap can never bind
-**Suggestion**
+### Q2 — aspirational, unverifiable dashboard requirement
+`rules/observability.md:79-80` — **Suggestion** — confidence 85
 
-- `rules/retry-idempotency.md:5-6` — "**Max attempts:** 3 … **Backoff:**
-  exponential — 100ms base, 2× multiplier, **5s cap**"
-- `rules/retry-idempotency.md:52` — `await new Promise(r => setTimeout(r,
-  Math.min(delay, 5000)))`
+> "Every production feature should be visible on a dashboard within one sprint
+> of launch."
 
-With maxAttempts = 3 the worst-case delay is 200ms × 1.2 = 240ms. The cap binds
-only from attempt 7 onward. A documented constant no code path can reach is a
-dead literal by `code-principles.md:50-54`, and it invites readers to assume a
-much longer retry window than the policy actually produces.
+"Should," "one sprint," and "of launch" are all outside anything an agent can
+observe or verify at authoring time — the agent cannot know sprint length or
+launch date. The actionable sibling directly below it (lines 86-87, "Do not merge
+a feature that introduces new critical paths without updating … the service
+dashboard") already covers the merge-time obligation.
 
-**Fix:** either drop the cap from `:6`, or annotate — "5s cap (binds only if
-maxAttempts is raised above 6)".
+**Fix:** delete lines 79-80 and keep the minimum-panels list attached to the
+merge gate at 86-87, which is checkable in a PR.
 
-### F21. Two constraint-budget self-violations
-**Suggestion**
+### Q3 — overly broad TDD exception
+`rules/testing.md:15-16` — **Suggestion** — confidence 78
 
-- `rules/prompting-quality.md:78-81` — "Keep each section of a rule file, agent
-  prompt, or skill phase to **≤6 hard prescriptive constraints**. … Numbered
-  sequential steps (procedures) are exempt"
-- `agents/02-language-specialists/typescript-pro.md:17-33` — one "tsconfig
-  defaults" section with **16** mandatory settings; `:39-57` "Banned patterns" —
-  **14** prohibitions
-- `agents/01-core-development/backend-developer.md:57-68` — a **12**-entry
-  Required Rules block
+> "Exceptions: pure config files, generated code, one-off migration
+> scripts, and UI markup with no logic."
 
-None are numbered procedures, so the `:81` exemption does not apply. By the
-rule's own MOSAIC citation these land in the ">15 = degraded, constraints
-ignored or averaged together" band — a plausible contributing cause of F1 and
-F6 (constraints in long agent files getting blended away).
+"UI markup with no logic" has no boundary in a React/Vue codebase — nearly every
+component is markup *plus* a handler or a conditional, and the exception is
+readable as covering the whole component. Given `testing.md` reaches 84 of 128
+agents (the widest-propagated rule), a loose exception here has the largest blast
+radius of any wording issue in the set.
 
-**Fix:** split `typescript-pro`'s tsconfig block into "Module resolution" /
-"Strictness" / "Emit" sub-sections of ≤6 each; split `backend-developer`'s
-Required Rules into "Always read" (4) and "Read when relevant" (8).
+**Fix:** narrow to "…and presentational components with no props-derived
+branching, no state, and no event handlers. A component with any conditional
+render or handler is logic and requires a test."
 
-### F22. `observability.md` dashboard rule is aspirational, not checkable
-**Note**
+### Q4 — gate-failure procedure states one policy at :61 and another at :78
+`rules/autonomous-execution.md:61` — **Warning** — confidence 84
 
-- `rules/observability.md:79-80` — "Every production feature **should** be
-  visible on a dashboard **within one sprint** of launch."
+> "8. If gates fail: fix issues, re-run gates, then proceed"
 
-"Should", "sprint" undefined, no artifact to inspect — a reviewer cannot pass or
-fail it. Two lines below, `:86-87` states the same requirement as a hard merge
-gate ("Do not merge a feature that introduces new critical paths without
-updating … the service dashboard"), which is checkable.
+Seventeen lines later, `:78-82` caps this at 2 tries and mandates a STOP. Step 8
+is the one an executor follows in-line while running a batch and reads as
+"iterate until green."
 
-**Fix:** delete `:79-80`; `:86-87` already carries the requirement in
-enforceable form.
+**Fix:** change step 8 to "If gates fail: fix and re-run, **max 2 attempts per
+gate** (see Quality Gates below), then proceed or STOP."
+
+### Q5 — undefined unit in the ADR length cap
+`rules/architecture.md:48` — **Suggestion** — confidence 72
+
+> "Keep ADRs short — 1 page maximum."
+
+ADRs are markdown files; "1 page" has no rendering to measure against.
+
+**Fix:** "Keep ADRs short — 60 lines maximum."
 
 ---
 
 ## 5. CLAUDE.md structure
 
-### F23. The Agents paragraph is the largest block and the least resident-worthy
-**Suggestion**
+### S1 — 3921 of 4096 bytes; 175 bytes of headroom
+`CLAUDE.md` — **Note** — confidence 97
 
-`CLAUDE.md:49` is a single ~640-byte prose paragraph — ~17% of the 3790-byte
-file — mixing five unrelated concerns: agent file location, `subagent_type`
-invoke mechanics, the ~30-minute delegation threshold, the announce requirement,
-and Workflow opt-in. Only the delegation threshold, the announce requirement and
-the Workflow opt-in are needed on every turn; location and invoke mechanics are
-consulted once, at the moment of dispatch, when `parallelism.md` is already the
-natural read.
+`rules/prompting-quality.md:28` sets the cap: "Keep them under 4KB." The file is
+at **95.7%**. The `diagrams.md` line added at `CLAUDE.md:72` consumed part of the
+remaining margin, and fix C7 needs another ~17 bytes. The next rule file added
+will breach it.
 
-**Fix:** keep two sentences (delegation threshold + announce + "Workflow is
-user-opt-in only"), move location/`subagent_type` mechanics into
-`parallelism.md`'s agent-prompt-structure section. Frees ~300 bytes — enough to
-fund F8's cost-gate clause (~40B) and F17's skills clause (~180B) without
-breaching the 4KB cap in `prompting-quality.md:27-29`.
+**Fix:** reclaim ~300 bytes now, before the next addition. Two candidates that
+lose nothing: (a) `CLAUDE.md:50` — the Agents paragraph spends ~200 bytes on
+Workflow-tool caveats ("Use Workflow (via `Workflow` tool) for multi-step
+parallel orchestration… never invoke unless the user explicitly requests it or a
+skill instructs it") that belong in `rules/parallelism.md`; (b) `CLAUDE.md:66-74`
+— the nine-line rules index duplicates `ls rules/`; collapse to two lines naming
+only the rules with non-obvious filenames.
 
-### F24. Verification block outranks the correctness gates by position
-**Note**
+### S2 — the highest-stakes rule sits second-to-last
+`CLAUDE.md:60-62` — **Suggestion** — confidence 72
 
-`CLAUDE.md:8-22` (~700 bytes: Verification plus the four-level confidence
-ladder) sits at positions 2–3, while Diagnosis — the only section carrying a
-hard behavioral gate ("state the mechanism … before any fix") — is at `:59-61`,
-second from last. Ordering inside a reloaded CLAUDE.md is a weak signal, so this
-is a Note, not a defect. But `:17-22` spends ~230 bytes on four definitions that
-compress to one line without loss: "HIGH verified / MEDIUM single-source, caveat
-it / LOW memory, say so / UNKNOWN, admit it." That is a second ~150-byte source
-of headroom if F23's is not enough.
+Diagnosis mode — the rule that prevents guess-and-patch on every failing test —
+is section 8 of 9, below Interaction Style (line 3), Session Notes (24), and
+Complex Tasks (39). Verification (line 8) and Diagnosis (60) are the two
+correctness-critical sections and they bracket four lower-stakes ones.
 
-No finding on the Rules index (`:63-72`) — it names all 23 files correctly
-across seven groups.
+**Fix:** move the `## Diagnosis` block to immediately follow `## Verification`
+(i.e. after line 22). Both govern "do not fabricate"; adjacency reinforces them
+and costs zero bytes.
+
+### S3 — stale post-compact description
+See **C7**. — **Warning** — confidence 90
 
 ---
 
 ## 6. post-compact-context.md completeness
 
-Checked every candidate against `CLAUDE.md` before claiming, per the brief.
-**Not reported** (all reload verbatim and need no restoration): diagnosis mode
-(`CLAUDE.md:59-61`), one-writer-per-file ownership (`:53`), `.agent-notes`
-discipline (`:26`), TodoWrite for multi-part tasks (`:43`), Conventional Commits
-subject format (`:57`), the confidence ladder (`:17-22`).
+Current file: 1439 bytes, 4 restored sections plus the recovery sequence.
 
-### F25. Batch-close discipline is not restored
-**Warning**
+### P1 — the Commit Format line is redundant *and* drops the only convention worth restoring
+`post-compact-context.md:21` — **Warning** — confidence 88
 
-`post-compact-context.md:6-15` restores how to **resume** — re-read README, the
-decision journal, `[x]`/`[ ]` state, current batch overview. Nothing restores
-how to **close** a batch, and none of it is in CLAUDE.md, so it is genuinely
-lost on compaction:
+> "## Commit Format: see CLAUDE.md (Commit Messages) / `rules/commits.md`."
 
-- `rules/autonomous-execution.md:68-76` — quality gates are "mandatory between
-  batches"; "Verify no files were modified outside the declared write-set
-  (compare `git diff --name-only` against the batch's file list)"; "Verify each
-  completed task has exactly one commit"
-- `rules/autonomous-execution.md:78-82` — "Attempt to fix (max **2** tries per
-  gate) … If fix fails after 2 tries, STOP"
+CLAUDE.md reloads verbatim after compaction (stated at `CLAUDE.md:30-32`), so
+pointing at CLAUDE.md restores nothing that is not already back. Meanwhile the
+autonomous-only commit conventions — `rules/autonomous-execution.md:150-151`,
+"One commit per completed task (not per file, not per batch) / Commit message
+references the task ID: `feat(T3): add confirm endpoint`" — appear in **neither**
+CLAUDE.md nor the post-compact file, and are exactly what a post-compaction
+executor loses.
 
-The 3× consecutive-fix brake *is* restored at `post-compact-context.md:26-28`;
-the 2-tries-per-gate limit is a different number and is not. Compaction most
-often lands mid-batch — precisely when the close protocol matters — and the
-restored text tells the model how to pick the work back up but not what it owes
-before moving on.
+**Fix:** replace line 21 with "## Commit Discipline (restored) — one commit per
+completed task, message references the task ID (`feat(T3): …`); gate fixes get a
+separate `fix(TN): …`. Format per CLAUDE.md." Net byte change ≈ +110.
 
-**Fix:** add a 4-line "Batch Close (restored)" block: run the brief's Quality
-Gates; max 2 fix tries per gate then STOP; verify `git diff --name-only` against
-the declared write-set; one commit per task.
+### P2 — two stop thresholds restored side by side with no distinction
+`post-compact-context.md:24-25` — **Warning** — confidence 85
 
-**Funding (Note, bundled):** `post-compact-context.md:21-24` is dead weight —
-"`type(scope): description` ≤72 chars, lowercase, no period. Body … Required for
->3-file changes" duplicates `CLAUDE.md:57`, which reloads verbatim per
-`CLAUDE.md:30-32`. The only non-duplicated content is the type list. Reduce
-`:21-24` to one line ("Types: feat, fix, chore, refactor, test, docs, style,
-perf, ci — format per CLAUDE.md"), reclaiming ~120 bytes for the block above.
+> "STOP brake: if the same location/approach fails the same check 3x
+> consecutively, stop and log to the decision journal — do not keep iterating."
+
+`post-compact-context.md:30`
+
+> "Run the mission brief's quality gates between every batch; after 2 consecutive failures on the same gate, STOP and log it — no more retries."
+
+An executor reading only this file after compaction gets "3x" and "2 consecutive"
+for situations it cannot tell apart. The source rules do distinguish them
+(`autonomous-execution.md:132-138` = repeated edits to the same code location;
+`:78-82` = attempts to fix one gate) but the condensation drops the distinction.
+
+**Fix:** merge into one line: "STOP brakes — 2 failed fix attempts on the *same
+quality gate*, or 3 consecutive edits to the *same code location* without
+resolving the check. Either one: stop and log to the decision journal."
+
+### P3 — the decision-journal obligation is not restored
+`rules/autonomous-execution.md:140-144` — **Warning** — confidence 82
+
+> "Every non-trivial judgment call gets a row in the decision journal.
+> "Non-trivial" means: if a reasonable developer might have chosen
+> differently, log it."
+
+The post-compact file names the decision journal three times, but only as the
+place to record a STOP. The ongoing per-decision logging duty — the thing that
+makes the journal reconstructible across compactions, and the input the audit
+trail depends on — is not restored, so journals thin out after the first
+compaction.
+
+**Fix:** append to the Autonomous Restraint section: "Log every non-trivial
+judgment call to the decision journal as you go — not just STOPs. Non-trivial =
+a reasonable developer might have chosen differently." ≈ +150 bytes.
+
+### P4 — the new PlantUML default is not restored
+`rules/diagrams.md:5` — **Suggestion** — confidence 78
+
+Mission briefs write `diagrams/*.md` (`autonomous-execution.md:24`), and
+`diagrams.md` is a 1-day-old rule that inverts a strong model prior.
+Post-compaction, with only CLAUDE.md's one-line index entry (`CLAUDE.md:72`) to
+go on, an executor regenerating or extending a brief diagram will produce mermaid.
+
+**Fix:** add a one-line section: "## Diagrams (restored) — PlantUML for all
+generated diagrams (```plantuml fence, `@startuml`); pick the type from the rubric
+in `rules/diagrams.md`. No mermaid, no ASCII art." ≈ +170 bytes.
+
+### P5 — the write-set boundary gate is only implied
+`rules/autonomous-execution.md:73-74` — **Suggestion** — confidence 70
+
+> "- Verify no files were modified outside the declared write-set
+>   (compare `git diff --name-only` against the batch's file list)"
+
+`post-compact-context.md:30` restores "run the quality gates" generically. The
+write-set check is the one gate that is *not* a command in the brief's gate list
+— it is an extra check defined only in the rule file — so a generic "run the
+gates" does not recover it.
+
+**Fix:** extend the Batch Close-Out line: "…and verify `git diff --name-only`
+touched nothing outside the batch's declared write-set." ≈ +90 bytes.
+
+### P6 — nothing else in the file is redundant with CLAUDE.md
+**Note** — confidence 85
+
+Audited each section against the verbatim-reloaded CLAUDE.md: Autonomous
+Execution Recovery (`:6-15`), Model Routing (`:17-19`), Autonomous Restraint
+(`:23-27`), and Batch Close-Out (`:29-30`) are all absent from CLAUDE.md and
+correctly belong here. Only line 21 (P1) is pure redirection. Total after P1-P5:
+≈1439 → ≈2000 bytes, which is unconstrained — the 4KB cap in
+`prompting-quality.md:28` applies to always-prepended custom instructions, and
+this file is injected only on compaction.
+
+---
+
+## Summary table
+
+| # | File | Sev | Conf |
+|---|---|---|---|
+| C1 | diagnosis.md:42-51 ↔ autonomous-execution.md:78-82 | Critical | 90 |
+| C2 | autonomous-execution.md:75 ↔ :155-157 | Warning | 88 |
+| C3 | lsp.md:81-83 ↔ code-reviewer.md:6 / architect-reviewer.md:7 | Warning | 92 |
+| C4 | pr-workflow.md:33,36 ↔ :38-39 | Warning | 82 |
+| C5 | prompting-quality.md:36-38 ↔ :39-41 | Warning | 78 |
+| C6 | backend-developer.md:8 ↔ :34 | Warning | 85 |
+| C7 | CLAUDE.md:34-37 ↔ post-compact-context.md:29-30 | Warning | 90 |
+| C8 | parallelism.md:55-57 ↔ 6 agent Required Rules blocks | Warning | 93 |
+| C9 | prompting-quality.md:77-80 ↔ backend-developer.md:57-68 | Suggestion | 70 |
+| C10 | diagrams.md — no conflict found (clean) | Note | 95 |
+| C11 | diagrams.md:19-23 — Artifact fallback unnamed | Suggestion | 75 |
+| A2 | CLAUDE.md:17-22 confidence ladder reaches 0 agents | Warning | 88 |
+| A3 | diagnosis.md in 6/128; no Write-capable agent | Warning | 90 |
+| A4 | lsp.md in 4/128 vs 65 Serena-equipped agents | Warning | 88 |
+| A5 | api-designer.md:31-35 omits api-design.md | Warning | 90 |
+| A6 | code-reviewer.md:24-29 omits testing/pr-workflow | Warning | 85 |
+| A7 | security-auditor.md has no Required Rules | Note | 95 |
+| G1 | complexity limits enforced by hook, in no rule | Warning | 92 |
+| G2 | diagrams.md in 0/128 agents | Warning | 95 |
+| G3 | api-design.md status table omits 429 | Suggestion | 80 |
+| G4 | enumerated behaviors all governed | Note | 95 |
+| Q1 | prompting-quality.md:36-38 stale counts | Warning | 97 |
+| Q2 | observability.md:79-80 aspirational | Suggestion | 85 |
+| Q3 | testing.md:15-16 broad exception | Suggestion | 78 |
+| Q4 | autonomous-execution.md:61 vs :78 | Warning | 84 |
+| Q5 | architecture.md:48 "1 page" | Suggestion | 72 |
+| S1 | CLAUDE.md 3921/4096 bytes | Note | 97 |
+| S2 | CLAUDE.md:60-62 Diagnosis buried | Suggestion | 72 |
+| P1 | post-compact-context.md:21 redundant + lossy | Warning | 88 |
+| P2 | post-compact-context.md:24 vs :30 thresholds | Warning | 85 |
+| P3 | decision-journal duty not restored | Warning | 82 |
+| P4 | PlantUML default not restored | Suggestion | 78 |
+| P5 | write-set gate only implied | Suggestion | 70 |
+| P6 | rest of post-compact non-redundant | Note | 85 |

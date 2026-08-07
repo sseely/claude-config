@@ -2,12 +2,10 @@
 name: powerpoint-addin-setup
 description: Scaffold a PowerPoint Office Add-in (task pane and optional content surface) into an existing Vite + React project, covering HTTPS dev certs, manifest generation, React entry points, Vite config, and the wef manifest sync for sideloading.
 user-invocable: true
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch, WebSearch
 ---
 
 # /powerpoint-addin-setup
-
-Model routing: Sonnet for implementation; Haiku for verification/scoring; Opus only for explicit architectural decisions.
 
 Scaffold a PowerPoint Office Add-in into an existing Vite + React project.
 Covers the HTTPS dev cert (the step everyone forgets), manifest, HTML entry
@@ -80,6 +78,22 @@ collected_inputs: true
 - [ ] wire-wef-sync
 - [ ] verify
 ```
+
+---
+
+## Step 1b — Verify the Office Add-in manifest schema against current docs
+
+The Office Add-in manifest schema changes with the platform, and the unified
+(JSON) manifest and the XML manifest are on different tracks. Before
+templating the manifest, WebFetch the current schema reference and confirm the
+element names, required `Hosts`/`Requirements` entries, and the permission
+values the templates use:
+
+- Manifest reference — https://learn.microsoft.com/office/dev/add-ins/develop/add-in-manifests
+- Task pane add-ins — https://learn.microsoft.com/office/dev/add-ins/design/task-pane-add-ins
+
+If an element or permission value has changed, update the templated values
+before relying on them.
 
 ---
 
