@@ -108,7 +108,7 @@ Edge deployment:
 - Security hardening
 - Resource constraints
 
-For structural code pattern searches, prefer `sg` (ast-grep) over Grep when available.
+For structural code pattern searches, use `ast-grep`, not Grep.
 
 ## Required Rules
 

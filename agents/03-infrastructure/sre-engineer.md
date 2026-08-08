@@ -117,7 +117,7 @@ On-call practices:
 - Well-being support
 - Compensation models
 
-For structural code pattern searches, prefer `sg` (ast-grep) over Grep when available.
+For structural code pattern searches, use `ast-grep`, not Grep.
 
 ## Required Rules
 - `~/.claude/rules/observability.md` — SLO-first design, RED metrics, burn

@@ -8,7 +8,7 @@ HOOKS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LIZARD_BIN="$HOOKS_DIR/.venv/bin/lizard"
 
 echo "Tool availability:"
-for tool in git node python3 gh docker sg; do
+for tool in git node python3 gh docker ast-grep; do
     if command -v "$tool" >/dev/null 2>&1; then
         echo "  $tool: $(command -v "$tool")"
     else
@@ -22,10 +22,10 @@ else
 fi
 
 # Auto-install ast-grep if missing (opt-in: set CLAUDE_AUTO_INSTALL_TOOLS=true)
-if ! command -v sg >/dev/null 2>&1; then
+if ! command -v ast-grep >/dev/null 2>&1; then
     if [[ "${CLAUDE_AUTO_INSTALL_TOOLS:-false}" == "true" ]]; then
         echo ""
-        echo "Installing ast-grep (sg)..."
+        echo "Installing ast-grep..."
         # Pick whichever timeout wrapper this platform has (macOS ships
         # neither by default; Homebrew coreutils provides both names).
         # Fall back to running with no time limit if neither exists —
@@ -73,7 +73,7 @@ if ! command -v sg >/dev/null 2>&1; then
             echo "  'brew install ast-grep', or 'cargo install ast-grep --locked'."
         fi
     else
-        echo "  sg: NOT FOUND (set CLAUDE_AUTO_INSTALL_TOOLS=true to auto-install)"
+        echo "  ast-grep: NOT FOUND (set CLAUDE_AUTO_INSTALL_TOOLS=true to auto-install)"
     fi
 fi
 

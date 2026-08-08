@@ -22,6 +22,10 @@
       "Bash(python3:*)",
       "Bash(pip3 install:*)",
       "Bash(shellcheck:*)",
+      "Bash(ast-grep:*)",
+      "Bash(lizard:*)",
+      "Bash(gzip:*)",
+      "Bash(forge lint *)",
       "Bash(git status:*)",
       "Bash(git diff:*)",
       "Bash(git log:*)",
@@ -92,50 +96,25 @@
       "Bash(~/.claude/hooks/autonomous-toggle.sh off:*)",
       "Bash(~/.claude/hooks/project-init.sh:*)",
       "Edit(~/git/**)",
-      "Write(~/git/**)",
       "Read(~/git/**)",
-      "Glob(~/git/**)",
       "Grep(~/git/**)",
       "Edit(~/.claude/**)",
-      "Write(~/.claude/**)",
       "Read(~/.claude/**)",
-      "Glob(~/.claude/**)",
       "Grep(~/.claude/**)",
       "Edit(~/church/**)",
-      "Write(~/church/**)",
       "Read(~/church/**)",
-      "Glob(~/church/**)",
       "Grep(~/church/**)",
       "WebFetch",
       "WebSearch",
       "Agent(*)",
       "Skill(update-config:*)",
       "Skill(plan-mission:*)",
-      "mcp__serena__list_dir",
-      "mcp__serena__find_file",
-      "mcp__serena__find_symbol",
-      "mcp__serena__search_for_pattern",
-      "mcp__serena__get_symbols_overview",
-      "mcp__serena__replace_symbol_body",
-      "mcp__serena__insert_after_symbol",
-      "mcp__serena__insert_before_symbol",
-      "mcp__serena__find_referencing_symbols",
-      "mcp__serena__safe_delete_symbol",
-      "mcp__serena__rename_symbol",
-      "Bash(forge lint *)",
-      "Bash(echo \"forge lint exit=$?\")",
-      "Bash(lizard src/shared/scrubSvg.ts)"
+      "mcp__serena__*"
     ],
     "additionalDirectories": [
       "/tmp",
       "/private/tmp",
-      "/Users/scottseely/.claude",
-      "/Users/scottseely/.claude/skills",
-      "/Users/scottseely",
-      "/Users/scottseely/.claude/rules",
-      "/Users/scottseely/git/phil-elevator/public/guides",
-      "/Users/scottseely/temp/github-study-guide",
-      "/Users/scottseely/git/plantuml-js/.claude"
+      "/Users/scottseely"
     ]
   },
   "model": "opus",
@@ -193,7 +172,16 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 -c \"\nimport sys, json, re\ndata = json.load(sys.stdin)\ncmd = data.get('tool_input', {}).get('command', '')\nif re.search(r'(?:^|\\n|[;&|])\\s*rm\\s+-rf\\s+/', cmd):\n    print('BLOCKED: rm -rf / is not allowed', file=sys.stderr)\n    sys.exit(2)\nif cmd.strip().startswith('sudo '):\n    print('BLOCKED: sudo requires project opt-in', file=sys.stderr)\n    sys.exit(2)\n\""
+            "command": "python3 ~/.claude/hooks/guard-bash.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/nudge-search-tool.py"
           }
         ]
       }

@@ -61,7 +61,7 @@ See `templates/` for examples.
 
 ### Auto-install tools
 
-The session-start hook checks for `sg` (ast-grep) on every start.
+The session-start hook checks for `ast-grep` on every start.
 To enable automatic installation:
 
 ```sh
