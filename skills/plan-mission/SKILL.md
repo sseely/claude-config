@@ -369,17 +369,20 @@ Use these defaults when invoking agents during brief generation:
 | Parallel review agents in Phase 2 | File-by-file analysis | Sonnet |
 
 > **Known tension, retained deliberately.** PerspectiveGap (arXiv:2606.08878,
-> preprint, not peer-reviewed) scores `claude-opus-4-8` worst-in-family
-> (13.9%) at orchestration-prompt composition — the Phase 3 and Phase 5 tasks
-> above. It never tested Opus 5, which is what `opus` resolves to on
-> v2.1.219+, so the routing stands. Revisit if Opus 5 orchestration data
-> appears.
+> preprint, not peer-reviewed) scores `claude-opus-4-8` at 13.9% on
+> orchestration-prompt composition — the Phase 3 and Phase 5 tasks above.
+> Not worst-in-family: `claude-haiku-4-5` scores 5.7%. But Table 8 does test
+> two Claude 5 models, and both roughly double it — `claude-fable-5` 31.4%,
+> `claude-sonnet-5` 25.7% — while `claude-opus-4-7` (19.1%) outscores 4.8.
+> Opus 5 itself is untested, which is what `opus` resolves to on v2.1.219+,
+> so the routing stands. Revisit if Opus 5 orchestration data appears.
 
 Request extended thinking for Phase 3 and 5 explicitly:
 "Think through the trade-offs before recommending an approach."
 
-**Brevity constraints for Opus phases** (per arxiv:2604.00025 — Opus over-elaborates on
-planning tasks without explicit constraints):
+**Brevity constraints for Opus phases** (operational heuristic — see the
+scale-aware brevity section of `~/.claude/rules/prompting-quality.md` for what
+arxiv:2604.00025 does and does not establish; it did not test planning tasks):
 - Phase 3: "Return only the architecture decisions. Format: numbered ADR list, one sentence
   each for Context / Decision / Consequences. No prose introduction or trailing summary."
 - Phase 5: "Return only the task breakdown. Format: numbered task list with write-set,

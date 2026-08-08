@@ -339,7 +339,9 @@ a fresh run should start from Phase 0.
   Phase 3 synthesis if there are >20 raw findings; Sonnet is
   sufficient for smaller sets. When routing Phase 3 to Opus, instruct:
   "Return only the deduplicated, scored findings list — no preamble, no
-  trailing summary." (per arxiv:2604.00025 — Opus over-elaborates without it).
+  trailing summary." (operational heuristic — see the scale-aware brevity
+  section of `~/.claude/rules/prompting-quality.md` for the evidence and its
+  limits).
 - Cloned repos live in `~/temp/self-improve/`. Clone with
   `--depth 1 --single-branch` (default branch only, minimal history). Do not delete the directory
   after the run — subsequent runs reuse existing clones (pull to

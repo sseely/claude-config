@@ -207,11 +207,17 @@
 ## Consider improving (Suggestion)
 - [x] `rules/parallelism.md:87` + `skills/plan-mission/SKILL.md:365,367` —  **(T6 + T29, 27f4336 d04e21f)**
   `[frontier-lag]` PerspectiveGap (arXiv:2606.08878, preprint) scores
-  `claude-opus-4-8` worst-in-family (13.9%) at orchestration-prompt composition,
-  the exact task these lines route to `opus`. The paper never tested Opus 5,
-  which is what `opus` now resolves to, so the rule holds. Fix: add a cautionary
+  `claude-opus-4-8` at 13.9% on orchestration-prompt composition, the exact task
+  these lines route to `opus`. The paper never tested Opus 5, which is what
+  `opus` now resolves to, so the rule holds. Fix: add a cautionary
   note so the tension is auditable rather than silently suppressed; re-evaluate
   if Opus 5 orchestration data appears.
+  **Correction (2026-08-08, verified against Table 8):** the original
+  "worst-in-family" claim was wrong — `claude-haiku-4-5` scores 5.7%. The 13.9%
+  figure is accurate and correctly attributed (it coincides with `gpt-5.4`).
+  Table 8 also tests `claude-fable-5` (31.4%), `claude-sonnet-5` (25.7%), and
+  `claude-opus-4-7` (19.1%), so relevant Claude 5 data does exist and supports
+  the existing Fable routing. Superlative corrected in all three sites.
 - [x] `rules/parallelism.md` — v2.1.219 raised the default nested subagent spawn  **(T6, 27f4336)**
   depth from 1 to 3; no `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` guidance exists,
   and this config fans out heavily. Fix: document the default and when to cap it.
@@ -271,6 +277,8 @@
 ## Inline comments to add (Notes)
 - [x] `rules/parallelism.md:87` — add comment:  **(T6, 27f4336 — comment added verbatim)**
   `<!-- Code review (2026-08-01): PerspectiveGap (arXiv:2606.08878, preprint) scores Opus worst-in-family at orchestration-prompt composition, but never tested Opus 5, which is what `opus` resolves to on v2.1.219+. Rule retained deliberately. Revisit if Opus 5 orchestration data appears. -->`
+  **Superseded 2026-08-08** — the comment in `rules/parallelism.md` was rewritten
+  against Table 8; "worst-in-family" was false. See the correction note above.
 - [x] `skills/self-improve/research-urls.md` (Candidate URLs header) — add comment:  **(T25, b6ced49 — comment added verbatim)**
   `<!-- Code review (2026-08-01): 91 candidates, 6 ever promoted. No agent fetches candidates, so promotion is accidental. Revisit if this table passes 120 entries without a draining step. -->`
 

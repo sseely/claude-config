@@ -93,7 +93,7 @@ Match model to task complexity and cost:
 | Implementation | `sonnet` (`claude-sonnet-5`) | `high` default; `xhigh` for hard tasks; lower to `medium` if token-sensitive | 1M tokens | Feature work, bug fixes, refactoring, code generation |
 | Scoring / dedup / validation | `haiku` (`claude-haiku-4-5-20251001`) | n/a | 200k tokens | Confidence scoring, dedup passes, format checking, simple grep tasks |
 
-<!-- Code review (2026-08-01): PerspectiveGap (arXiv:2606.08878, preprint) scores Opus worst-in-family at orchestration-prompt composition, but never tested Opus 5, which is what `opus` resolves to on v2.1.219+. Rule retained deliberately. Revisit if Opus 5 orchestration data appears. -->
+<!-- Code review (2026-08-01, corrected 2026-08-08 against Table 8): PerspectiveGap (arXiv:2606.08878, preprint) scores claude-opus-4-8 at 13.9% on orchestration-prompt composition. Not worst-in-family — claude-haiku-4-5 is 5.7%. Table 8 does test two Claude 5 models and both roughly double Opus 4.8: claude-fable-5 31.4%, claude-sonnet-5 25.7%; claude-opus-4-7 is 19.1%. Opus 5 itself is untested, which is what `opus` resolves to on v2.1.219+. Rule retained deliberately; the Fable row above is independently supported by this data. Revisit if Opus 5 orchestration data appears. -->
 
 > **Haiku context limit:** 200k tokens vs 1M for Sonnet/Opus. Do not pass >50 files to a Haiku agent in a single prompt.
 

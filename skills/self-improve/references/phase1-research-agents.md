@@ -173,7 +173,7 @@ Search using the source hierarchy from `research-sources.md`:
 The following paper has already been surfaced and pre-loaded. Evaluate whether
 the current config applies its findings, then continue with new discoveries.
 
-- **arxiv:2604.00025** (Hakim, 2025 — preprint, not peer-reviewed):
+- **arxiv:2604.00025** (Hakim, 2026 — preprint, not peer-reviewed):
   *Brevity Constraints Reverse Performance Hierarchies in Language Models.*
   Key finding: explicit brevity constraints on Opus-tier agents yield up to
   26 percentage point accuracy gains by suppressing "scale-dependent verbosity."
