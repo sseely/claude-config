@@ -43,7 +43,10 @@ Evaluate:
 
 ### Agent E — Skills quality
 
-Read ALL skill SKILL.md files under `~/.claude/skills/`.
+Read ALL skill SKILL.md files under `~/.claude/skills/`, and every
+`references/*.md` file they link to. A reference file is a continuation of
+its SKILL.md, not a separate document — auditing one without the other is
+how the two drift apart.
 
 For each skill, evaluate against these dimensions:
 
@@ -67,6 +70,16 @@ For each skill, evaluate against these dimensions:
    requirements (SLIs, on-call story, alert thresholds), rollback
    classification, and blast radius documentation? Or do they
    produce functionally correct output that is operationally blind?
+9. **Rule consistency** — Wherever a skill or reference file restates
+   content owned by `~/.claude/rules/` (a research finding, a routing
+   rule, a diagram convention, a citation and its caveats), read the
+   cited rule file and compare. Restating is itself the defect: the
+   copy drifts and no one notices. Quote both sides on any mismatch
+   and recommend replacing the restatement with a link. Also check
+   SKILL.md against its own `references/*.md` for the same drift —
+   contradictory instructions and phase numbers that no longer line
+   up. Read only the rule files actually cited; do not pull in all of
+   `rules/`, which is Agent F's read-set.
 
 Report per-skill with **Strengths** / **Gaps** / **Priority** /
 **Specific recommendation**. Then a cross-skill section for patterns
@@ -91,7 +104,8 @@ Sample these agent definitions for rule propagation:
 
 Evaluate:
 1. **Contradictions**: Pairs of rules or rule vs. agent that conflict
-   (quote both sides).
+   (quote both sides). Rule vs. *skill* is Agent E's dimension 9 — do
+   not read skill files here; this read-set is already at its cap.
 2. **Agent isolation risk**: Rules that assume ambient context
    (CLAUDE.md, prior conversation) — these disappear in subagents.
 3. **Coverage gaps**: Behaviors with no governing rule. Common

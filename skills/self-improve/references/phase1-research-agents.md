@@ -175,11 +175,15 @@ the current config applies its findings, then continue with new discoveries.
 
 - **arxiv:2604.00025** (Hakim, 2026 — preprint, not peer-reviewed):
   *Brevity Constraints Reverse Performance Hierarchies in Language Models.*
-  Key finding: explicit brevity constraints on Opus-tier agents yield up to
-  26 percentage point accuracy gains by suppressing "scale-dependent verbosity."
-  Mathematical reasoning and planning tasks show the sharpest reversal. Larger
-  models over-elaborate without explicit constraint; universal prompting (same
+  Key finding: explicit brevity constraints yield up to 26 percentage point
+  accuracy gains by suppressing "scale-dependent verbosity." Larger models
+  over-elaborate without explicit constraint; universal prompting (same
   instructions regardless of model tier) masks latent capability.
+  **Scope — do not overstate.** 31 open models (0.5B–405B), 1,485 problems
+  across 5 math/science datasets. It did not test Opus-tier models, planning,
+  or orchestration tasks. `rules/prompting-quality.md` owns the caveated
+  wording; match it rather than extending it. Applying this paper to planning
+  or Opus-tier behaviour is an operational heuristic, not a finding.
   Recommendation: Opus agent prompts must include explicit conciseness
   instructions; output shape and length bounds should be stated per phase.
   Evaluate: Do Opus agent prompts in `~/.claude/agents/` and
