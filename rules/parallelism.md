@@ -28,6 +28,7 @@ at session start), skip the user review presentation step. Log the execution pla
 - Related changes across multiple files that must stay consistent (e.g., an interface change + all its call sites) are assigned to one agent as a logical unit
 - Read-only access is unrestricted — multiple agents may read the same file concurrently
 - If the plan produces a write conflict that can't be resolved by collapsing, that's a signal the subtasks aren't actually independent and should be a single agent
+- Cross-session messaging does not relax any of the above. Two sessions on the same repo still need separate worktrees; messaging reports what landed, it does not arbitrate writes
 
 **Agent prompt structure** (ordered procedure — assemble sections in this
 order; this is a sequential build sequence, not a parallel checklist, so
@@ -198,3 +199,18 @@ still governs everything it does not contradict.
 Resume the task under the original context. Do not restate the plan, re-derive
 the write-set, or ask what was meant — if the follow-up genuinely conflicts
 with a locked decision, that is the one case to stop and say so.
+
+**Mechanism — resume, do not re-spawn.** `SendMessage` addressed to a
+subagent's name continues that agent *with its context intact*. A fresh
+`Agent` call starts blank and re-pays the entire prompt-structure cost
+above — read-set, contracts, prior observations, all of it. So:
+
+- Name every subagent you may need to follow up with; the name is the address
+- Continue with `SendMessage`, not a second `Agent` call
+- Names survive completion — a send resumes the agent from its transcript
+- Re-spawn only when you genuinely want a blank slate
+
+`ListAgents` enumerates what is reachable. Its rows also include your other
+local Claude Code sessions and, while Remote Control is connected, sessions
+on your other machines — those are independent sessions, governed by the
+separate-worktrees rule above, not orchestration targets.
