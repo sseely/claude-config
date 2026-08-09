@@ -86,6 +86,9 @@ of launch. Minimum panels:
 Do not merge a feature that introduces new critical paths without updating
 (or creating) the service dashboard.
 
+For AI-feature post-deployment monitoring, drift, and near-miss capture
+(MANAGE 4.1/MEASURE 2.4), see `docs/nist-ai-rmf/crosswalk.md`.
+
 ## What not to do
 
 - Do not alert on individual error counts — use rates
