@@ -38,29 +38,8 @@ Launch **A, B, C, and X together** — they share no write targets. Full prompts
 |-------|-------|
 | **A** | What's new in the Claude ecosystem — features, hooks, routing, MCP, cost |
 | **B** | Model version and API surface changes |
-| **C** | Prompt structure and instruction-design research |
-| **X** | Source discovery across all themes, and candidate-queue draining (below) |
-
-### Drain the candidate queue
-
-Discovery has always outrun promotion — the candidate table in
-`research-urls.md` grew 31 → 36 → 57 → 91 while only 6 entries were ever
-promoted. The cause: Phase 6 promotes only URLs "fetched this run," and
-agents A/B/C each fetch from their own *active* list, so no agent ever
-fetched a candidate. Nothing consumed the queue.
-
-Agent X therefore **fetches the top 5 candidate URLs by relevance** to this
-run's themes, and records an outcome for each:
-
-- **Promote** — content is substantive (≥1000 chars for an Agent A-class
-  source, ≥500 for B/C-class) and bears on this config. Move it into the
-  matching active section with today's date as `last-verified`.
-- **Demote** — unreachable, thin, redirected off-domain, or no longer
-  relevant. Leave it in the candidate table and append a `Demoted:` note
-  with the date and reason.
-
-Never delete a candidate. Promotion and demotion are both recorded
-outcomes; silent deletion destroys the evidence that the queue was worked.
+| **C** | Prompt structure, instruction design, and AI governance research |
+| **X** | Source discovery across all themes, and candidate-queue draining |
 
 **Phase 1 completion:** each agent writes its full output to `.agent-notes/self-improve-phase1-[A|B|C|X].md` before returning. Once all four have completed (or been retried/gapped per the crash-handling rule in the reference), append `phase-1: done` to `~/.claude/.self-improve-progress.md`.
 
