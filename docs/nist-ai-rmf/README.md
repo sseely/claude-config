@@ -79,8 +79,12 @@ table into `research-urls.md` and re-checks it each run.
 
 - `README.md` — this file: provenance foundation, header schema, canonical
   URLs.
-- `crosswalk.md` (forthcoming) — the central asset: maps applicable
-  subcategories to where this configuration addresses them, per AD-8.
+- `crosswalk.md` — the central asset: maps all 72 applicable subcategories
+  to where this configuration addresses them, per AD-8.
+- `trustworthiness.md` — subcategory-scoped asset covering the trustworthy-AI
+  characteristics referenced from several `crosswalk.md` MEASURE rows
+  (validity/reliability, safety, security/resilience, accountability/
+  transparency, explainability/interpretability, privacy, fairness/bias).
 - Additional subcategory-scoped assets land here as later mission tasks
   complete, each carrying the header schema above.
 
