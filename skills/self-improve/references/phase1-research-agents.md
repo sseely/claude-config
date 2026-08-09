@@ -126,7 +126,30 @@ Fetch the URLs listed under **Agent B** in
 4. Report: deprecated patterns in current config, new capabilities
    not yet leveraged, recommended model routing table.
 
-### Agent C — Prompt structure and instruction design research
+### Agent C — Prompt structure, instruction design, and AI governance research
+
+Agent C's scope covers two genuinely different domains (AD-5): prompt-
+structure research (below) and AI governance / risk-framework tracking,
+principally the NIST AI Risk Management Framework. For the refresh
+procedure itself — the 180-day staleness threshold, the three drift
+conditions, and the completeness diff — read
+[references/nist-refresh.md](nist-refresh.md). It is not repeated here;
+AD-4 keeps NIST material self-contained in that one asset.
+
+**NIST fetch cap.** Agent C fetches at most 3 NIST URLs per run. Phase 1
+is a synchronization barrier — every other Phase 1 agent waits on Agent
+C's completion — so an unbounded NIST check would make Agent C the long
+pole for the entire run.
+
+**Coherence stretch — on-call failure mode 3.** Agent C now spans two
+unrelated domains under one prompt: instruction-design research and AI
+governance tracking. This is a mild coherence stretch, accepted because
+adding an "Agent N" would break the four-agent parallel-launch contract
+this file defines. Watch Phase 4 reports for the failure signal: if a
+run's Agent C output is dominated by one domain at the expense of the
+other — thin governance findings because prompt-structure research ran
+long, or vice versa — that is the cue to split NIST discovery out to
+Agent X rather than keep stretching Agent C.
 
 Research the current state of the art in writing effective system
 prompts, agent instructions, and markdown-formatted directives for
@@ -278,6 +301,25 @@ Run all queries. Fetch promising results. Be thorough.
 **Output:** The written Candidate URL entries + the Discovery Summary.
 Do not deep-read candidates — that happens in future runs after promotion.
 The goal is to surface the frontier, not to analyze it today.
+
+**Drain the candidate queue.** Discovery has always outrun promotion — the
+candidate table in `research-urls.md` grew 31 → 36 → 57 → 91 while only 6
+entries were ever promoted. The cause: Phase 6 promotes only URLs "fetched
+this run," and Agents A/B/C each fetch from their own *active* list, so no
+agent ever fetched a candidate. Nothing consumed the queue.
+
+Agent X therefore fetches the top 5 candidate URLs by relevance to this
+run's themes, and records an outcome for each:
+
+- **Promote** — content is substantive (≥1000 chars for an Agent A-class
+  source, ≥500 for B/C-class) and bears on this config. Move it into the
+  matching active section with today's date as `last-verified`.
+- **Demote** — unreachable, thin, redirected off-domain, or no longer
+  relevant. Leave it in the candidate table and append a `Demoted:` note
+  with the date and reason.
+
+Never delete a candidate. Promotion and demotion are both recorded
+outcomes; silent deletion destroys the evidence that the queue was worked.
 
 ---
 

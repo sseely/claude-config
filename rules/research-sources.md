@@ -18,6 +18,7 @@ Use for: CVEs, vulnerability data, runtime behavior, standards.
 - **Official language/framework documentation** — MDN, Python docs, Rust reference, Go spec
 - **RFCs** — IETF RFCs for protocol behavior (`rfc-editor.org`)
 - **W3C specifications** — web platform standards
+- **NIST AIRC** (`airc.nist.gov`) — AI Risk Management Framework; standards body, primary material
 
 ## Tier 2 — Peer-reviewed (high confidence, cite the paper)
 

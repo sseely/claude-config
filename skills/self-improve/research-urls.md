@@ -88,6 +88,36 @@ a fresh `WebSearch` — a 200/rich fetch from these docs pages can still be stal
 
 ---
 
+## Agent C — AI governance and risk frameworks
+
+Widens Agent C's scope from "prompt structure" to "prompt structure +
+governance" (AD-5) — a mild coherence stretch, flagged here rather than
+spun into a fifth agent, which would break the four-agent parallel-launch
+contract in `references/phase1-research-agents.md`.
+
+**Cap: Agent C fetches at most 3 NIST URLs per run.** Phase 1 is a
+barrier — all four research agents must finish before Phase 2 starts, so
+an unbounded Agent C becomes the long pole for the whole run.
+
+**Staleness threshold for this table: 180 days, not the registry's
+generic 90-day decay** (AD-9). The AI RMF Playbook's forward states NIST
+integrates comments on Playbook content on a semi-annual basis, so the
+registry's default 90-day window would flag these URLs stale twice as
+often as the publisher's own cadence.
+
+| URL                                                        | Purpose                                          | Last Verified | Status |
+| ----------------------------------------------------------- | ------------------------------------------------- | -------------- | ------ |
+| https://airc.nist.gov/                                      | AIRC home                                          | 2026-08-09     | active |
+| https://airc.nist.gov/airmf-resources/airmf/                | AI RMF Core (framework)                            | 2026-08-09     | active |
+| https://airc.nist.gov/airmf-resources/playbook/              | AI RMF Playbook                                    | 2026-08-09     | active |
+| https://airc.nist.gov/airmf-resources/playbook/audit-log/    | Playbook audit log (revision history)              | 2026-08-09     | active |
+| https://airc.nist.gov/glossary/                              | Glossary                                           | 2026-08-09     | active |
+| https://doi.org/10.6028/NIST.AI.100-1                        | AI RMF 1.0 document (DOI)                          | 2026-08-09     | active |
+| https://doi.org/10.6028/NIST.AI.600-1                        | Generative AI Profile (NIST AI 600-1, companion)   | 2026-08-09     | active |
+| https://airc.nist.gov/airmf-resources/crosswalks/            | Crosswalk Documents (AIRC)                         | 2026-08-09     | active |
+
+---
+
 ## Candidate URLs (not yet promoted — promote to an active section after one fetch that passes the thin-content bar above; 200 status alone is not sufficient)
 
 <!-- Code review (2026-08-01): 91 candidates, 6 ever promoted. No agent fetches candidates, so promotion is accidental. Revisit if this table passes 120 entries without a draining step. -->

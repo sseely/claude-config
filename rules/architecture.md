@@ -105,6 +105,10 @@ consumers.
 Choose the pattern before writing migration code. Write the rollback
 path before the forward path.
 
+For AI-feature decommissioning (GOVERN 1.7/MANAGE 2.4) and third-party
+contingency (GOVERN 6.2/MANAGE 3.1) mapped to these patterns, see
+`docs/nist-ai-rmf/crosswalk.md`.
+
 ## Evolutionary architecture
 
 - **Encapsulate variation** — put the thing most likely to change behind
