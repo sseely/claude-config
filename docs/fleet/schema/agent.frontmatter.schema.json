@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://claude-config.local/docs/fleet/schema/agent.frontmatter.schema.json",
+  "title": "Agent frontmatter (agents/*.md)",
+  "description": "Validates the YAML frontmatter of agent definition files (agents/*.md). FD-1 cross-surface rule: 'tools' (allowlist) and 'disallowedTools' (denylist) are subagent-only fields — they are NOT the same field as the skill surface's 'allowed-tools'. 'disallowedTools' is applied first; 'tools' then resolves against whatever remains. This schema therefore rejects any document carrying 'allowed-tools', since that key belongs exclusively to skill frontmatter (see skill.frontmatter.schema.json).",
+  "type": "object",
+  "required": ["name", "description"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Agent identifier. Used to invoke the agent via the Agent tool's subagent_type parameter."
+    },
+    "description": {
+      "type": "string",
+      "description": "When to use this agent. Read by the orchestrator to decide whether to delegate to it."
+    },
+    "tools": {
+      "description": "Allowlist of tools this agent may use. OMITTED MEANS THE AGENT INHERITS EVERY TOOL available in the session — omission is not 'no tools', it is 'all tools'. When 'disallowedTools' is also present, 'disallowedTools' is applied first and 'tools' then resolves against the remainder. Observed in the fleet as either a YAML block list or a single comma-separated string (both parse to the same allowlist) — this schema accepts both.",
+      "anyOf": [
+        { "type": "array", "items": { "type": "string" } },
+        { "type": "string" }
+      ]
+    },
+    "disallowedTools": {
+      "description": "Denylist of tools this agent may not use. Applied BEFORE 'tools' resolves — i.e. 'tools' (if present) is evaluated against what remains after this denylist removes entries from the full/inherited tool set. Observed in the fleet as either a YAML block list or a single comma-separated string — this schema accepts both.",
+      "anyOf": [
+        { "type": "array", "items": { "type": "string" } },
+        { "type": "string" }
+      ]
+    },
+    "model": {
+      "description": "Model to run this agent on. Default 'inherit' (uses the parent session's model). Either a known alias/full model ID (enum, includes 'opusplan' — a valid Claude Code alias that uses opus in plan mode and sonnet in execution) or any other full model-ID-shaped string (pattern), to tolerate new model IDs not yet enumerated here.",
+      "default": "inherit",
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": ["sonnet", "opus", "haiku", "fable", "opusplan", "inherit"]
+        },
+        {
+          "type": "string",
+          "pattern": "^claude-[a-z0-9.-]+$"
+        }
+      ]
+    },
+    "effort": {
+      "type": "string",
+      "description": "Reasoning effort level for this agent, e.g. low/medium/high/xhigh/max, model-dependent."
+    },
+    "memory": {
+      "type": "string",
+      "description": "Observed in production on agent frontmatter (e.g. 'memory: user') even though this key is also documented on the skill surface — see skill.frontmatter.schema.json. Kept optional-string on both surfaces per FD-2 (schema must validate real frontmatter as it lives in git) rather than rejecting a key already in use."
+    }
+  },
+  "additionalProperties": false,
+  "not": {
+    "anyOf": [
+      { "required": ["allowed-tools"] }
+    ]
+  }
+}
