@@ -28,7 +28,7 @@ If it exists:
 - If `phase-3: done` is set, skip Phase 3 — load deduplicated findings from `.agent-notes/self-improve-phase3.md`.
 - Resume from the first incomplete phase.
 
-Continue with Phase 0 steps 1–5 regardless — fast and idempotent. Full steps (read `.agent-notes/`, ensure the clone workspace, read the URL registry, the prior-change regression gate, reconcile the task file against git) are in [references/phase0-recall.md](references/phase0-recall.md).
+Continue with Phase 0 steps 1–6 regardless — fast and idempotent. Full steps (read `.agent-notes/`, ensure the clone workspace, read the URL registry, the prior-change regression gate, reconcile the task file against git) are in [references/phase0-recall.md](references/phase0-recall.md).
 
 ## Phase 1 — Ecosystem research (parallel)
 

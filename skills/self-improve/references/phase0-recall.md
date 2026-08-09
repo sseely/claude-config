@@ -22,7 +22,7 @@ If it exists:
   `.agent-notes/self-improve-phase3.md`.
 - Resume from the first incomplete phase.
 
-Continue with Phase 0 steps 1–5 regardless — they are fast and idempotent.
+Continue with Phase 0 steps 1–6 regardless — they are fast and idempotent.
 
 Before doing any new work, check what's already known:
 
