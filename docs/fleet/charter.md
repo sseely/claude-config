@@ -60,11 +60,13 @@ or hook that verifies it) or **unverified intention** (no check exists yet).
 **Unverified intention (no check exists yet):**
 
 - That the 130 agents actually save the operator time, or reduce defect
-  rate, versus doing the same work by hand. No eval harness exists — the
-  baseline eval-run count is 0. This is the gap MAP 2.3 and MEASURE 2.1
-  name in the crosswalk as `not addressed`.
+  rate, versus doing the same work by hand. The eval harness (`evals/`)
+  now measures format and adherence conformance, but nothing measures
+  time saved or defect rate — this benefit-magnitude claim remains
+  unverified (the gap MAP 3.1 names in the crosswalk).
 - That agent output is reliable and repeatable across invocations of the
-  same task. Same gap, same crosswalk rows.
+  same task. One baseline run exists (`evals/results.jsonl`); repeatability
+  across runs has not been measured.
 - That the forthcoming risk register (`docs/fleet/risk-register.md`, once
   it lands) correctly ranks which agents carry the most risk. It becomes
   checkable once built, because the eval-target selection is derived from
