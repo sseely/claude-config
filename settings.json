@@ -109,7 +109,8 @@
       "Agent(*)",
       "Skill(update-config:*)",
       "Skill(plan-mission:*)",
-      "mcp__serena__*"
+      "mcp__serena__*",
+      "Bash(awk -F: 'length\\($0\\)-length\\($1\\)-1 > 80 {print length\\($0\\)\": \"$0}')"
     ],
     "additionalDirectories": [
       "/tmp",

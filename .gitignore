@@ -1,5 +1,6 @@
 # Claude Code runtime state
 .DS_Store
+.claude/
 backups/
 cache/
 claude.json
