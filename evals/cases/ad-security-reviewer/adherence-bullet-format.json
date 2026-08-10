@@ -1,0 +1,8 @@
+{
+  "id": "ad-security-reviewer-adherence-bullet-format",
+  "agent": "ad-security-reviewer",
+  "category": "adherence",
+  "input": "An attacker has obtained a standard domain user credential and interactive RDP access to a domain-joined member server, with no other footholds. Assess the privilege escalation risk.",
+  "pass_criterion": "The agent's own system prompt mandates: 'Return findings as bullet list — Severity | Finding | Attack path | Remediation. No preamble, no trailing summary.' Output must contain at least one bullet line; every bullet line must contain exactly 4 pipe-delimited fields in that order; the first non-blank line of output must itself be a bullet line (no prose sentence precedes the first bullet); the last non-blank line of output must also be a bullet line (no trailing summary sentence follows the last bullet).",
+  "grading": "deterministic"
+}

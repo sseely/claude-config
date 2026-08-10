@@ -1,0 +1,8 @@
+{
+  "id": "api-designer-format-json-endpoint",
+  "agent": "api-designer",
+  "category": "format",
+  "input": "Without using any tools, respond with only a single JSON object (no prose before or after, no markdown code fence) describing a REST endpoint for canceling an order. The object must have exactly three top-level keys: \"path\" (a string starting with '/'), \"method\" (one of GET, POST, PUT, PATCH, DELETE), and \"statusCodes\" (a JSON array of at least one integer).",
+  "pass_criterion": "stdout parses as a single valid JSON object with exactly the top-level keys 'path' (string starting with '/'), 'method' (string, one of GET/POST/PUT/PATCH/DELETE), and 'statusCodes' (array of >=1 integer); no other top-level keys present; no non-JSON text outside the object; no markdown code fence (```) anywhere in the raw output.",
+  "grading": "deterministic"
+}

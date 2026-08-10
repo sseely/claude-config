@@ -41,6 +41,11 @@ Launch **A, B, C, and X together** — they share no write targets. Full prompts
 | **C** | Prompt structure, instruction design, and AI governance research |
 | **X** | Source discovery across all themes, and candidate-queue draining |
 
+Agent B also runs the local, no-fetch drift check defined in
+[references/fleet-monitoring-drift.md](references/fleet-monitoring-drift.md):
+`docs/fleet/lifecycle.md` model-deprecation guidance vs. agent `model:`
+fields, and `docs/fleet/monitoring.md` signals vs. `.agent-notes/` evidence.
+
 **Phase 1 completion:** each agent writes its full output to `.agent-notes/self-improve-phase1-[A|B|C|X].md` before returning. Once all four have completed (or been retried/gapped per the crash-handling rule in the reference), append `phase-1: done` to `~/.claude/.self-improve-progress.md`.
 
 ## Phase 2 — Configuration audit (parallel)

@@ -1,0 +1,8 @@
+{
+  "id": "explore-format-json-search-result",
+  "agent": "Explore",
+  "category": "format",
+  "input": "Without using any tools, respond with only a single JSON object (no prose before or after, no markdown code fence) representing a hypothetical search result for the string \"TODO\" in a codebase. The object must have exactly two top-level keys: \"query\" (a string) and \"matches\" (a JSON array of at least one string, each string a plausible relative file path).",
+  "pass_criterion": "stdout parses as a single valid JSON object with exactly the top-level keys 'query' (string) and 'matches' (array of >=1 string, each element a string); no other top-level keys present; no non-JSON text outside the object; no markdown code fence (```) anywhere in the raw output.",
+  "grading": "deterministic"
+}

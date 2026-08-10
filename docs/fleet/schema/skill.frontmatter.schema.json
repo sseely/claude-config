@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://claude-config.local/docs/fleet/schema/skill.frontmatter.schema.json",
+  "title": "Skill frontmatter (skills/*/SKILL.md)",
+  "description": "Validates the YAML frontmatter of skill definition files (skills/*/SKILL.md). FD-1 cross-surface rule: 'allowed-tools' is a skill-only field and is NOT a capability restriction like the agent surface's 'tools'/'disallowedTools' fields (see agent.frontmatter.schema.json). 'allowed-tools' only pre-approves tools so no permission prompt appears during the turn that invokes the skill; the grant clears on the next user message. It never limits which tools the skill's own agent could otherwise use. This schema therefore rejects any document carrying 'tools' or 'disallowedTools', since those keys belong exclusively to agent frontmatter.",
+  "type": "object",
+  "required": [],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Skill identifier. Optional — defaults to the skill's directory name when omitted."
+    },
+    "description": {
+      "type": "string",
+      "description": "Recommended. What the skill does and when to invoke it; shown in the skill listing so the model can decide whether to call it."
+    },
+    "allowed-tools": {
+      "description": "NOT a capability restriction. Pre-approves these tools so no permission prompt appears during the turn that invokes this skill. The grant clears on the next user message — it is a blast-radius signal for that one turn, not a persistent allowlist like the agent surface's 'tools' field. Observed in the fleet exclusively as a single comma-separated string; this schema also accepts a YAML array for forward compatibility.",
+      "anyOf": [
+        { "type": "array", "items": { "type": "string" } },
+        { "type": "string" }
+      ]
+    },
+    "model": {
+      "type": "string",
+      "description": "Optional model override to run this skill's work on, e.g. an alias (sonnet/opus/haiku/fable) or full model ID."
+    },
+    "disable-model-invocation": {
+      "type": "boolean",
+      "description": "When true, the model cannot auto-invoke this skill from context; it can only be run explicitly (e.g. via slash command)."
+    },
+    "user-invocable": {
+      "type": "boolean",
+      "description": "When true, the skill is exposed as a user-facing slash command."
+    },
+    "license": {
+      "type": "string",
+      "description": "License identifier or note covering this skill's content."
+    },
+    "context": {
+      "type": "string",
+      "description": "Optional additional context string associated with the skill."
+    },
+    "memory": {
+      "type": "string",
+      "description": "Optional memory-surface reference used by the skill."
+    },
+    "clone-dir": {
+      "type": "string",
+      "description": "Optional target directory the skill clones/checks work out into, e.g. a repo working copy path."
+    }
+  },
+  "additionalProperties": false,
+  "not": {
+    "anyOf": [
+      { "required": ["tools"] },
+      { "required": ["disallowedTools"] }
+    ]
+  }
+}

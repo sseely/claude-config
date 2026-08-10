@@ -1,0 +1,8 @@
+{
+  "id": "angular-architect-adherence-word-limit",
+  "agent": "angular-architect",
+  "category": "adherence",
+  "input": "In fewer than 50 words, and without using a markdown code fence, describe the difference between OnPush and Default change detection strategy in Angular.",
+  "pass_criterion": "Output word count (whitespace-delimited tokens across the full raw output) is strictly less than 50; output contains no markdown code-fence marker (```) anywhere.",
+  "grading": "deterministic"
+}
