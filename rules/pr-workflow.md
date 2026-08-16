@@ -10,6 +10,11 @@
 
 Examples: `feature/add-oauth-pkce`, `fix/null-pointer-auth-handler`, `chore/bump-express-v5`
 
+## PR body attribution
+
+None. No `🤖 Generated with Claude Code` footer, no session link, no
+generated-by line of any kind. See `commits.md` — same rule, both surfaces.
+
 ## PR size
 
 - Preferred maximum: **400 lines changed** (diff stat, excluding generated files)
