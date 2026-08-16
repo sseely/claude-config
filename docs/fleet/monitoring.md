@@ -85,9 +85,10 @@ Errors surface in three places:
   not a silent one.
 - **`.agent-notes/` entries.** Error patterns and their root causes are an
   explicit category in `rules/memory.md`'s list of what to record.
-- **Commit history.** `Co-Authored-By` trailers disclose AI authorship on
-  commits produced with agent assistance — present on 49 of the last 50
-  commits in this repo, per the mission's own commit-log review.
+- **Commit history.** Conventional-commit types make corrections traceable
+  as a class: a `fix:` or `revert:` commit records that something was wrong
+  and what closed it, so the error and its remedy are linked in history
+  rather than only in the diff.
 
 No dedicated error-tracking system sits outside these three; this doc names
 where errors already surface rather than proposing a new one.

@@ -19,7 +19,8 @@ One commit per completed task; subject references the task ID —
 `feat(T3): add confirm endpoint`. Conventional Commits, `<type>(<scope>):
 <description>`, lowercase, no period, ≤72 chars. Full spec: `rules/commits.md`.
 No attribution: never add `Co-Authored-By: Claude`, `🤖 Generated with Claude
-Code`, or any generated-by line to a commit message or PR body.
+Code`, or any generated-by line to a commit message or PR body. A "Built with
+Claude Code" line in a project README is fine.
 ---
 ## Autonomous Restraint (restored)
 STOP brake: if the same location/approach fails the same check 3x
