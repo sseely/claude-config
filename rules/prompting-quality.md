@@ -29,25 +29,18 @@ request. Keep CLAUDE.md **under 200 lines**, per Anthropic's guidance at
 code.claude.com/docs/en/memory. Everything beyond that is dead weight on
 every token budget in every session.
 
-Audit periodically: remove instructions that are no longer relevant,
-consolidate duplicates, and move project-specific rules to project-level
-CLAUDE.md files rather than the global one.
+Audit periodically: drop stale instructions, consolidate duplicates, and
+push project-specific rules to project-level CLAUDE.md files.
 
-Per-file caps bound each file, but nothing caps the **aggregate resident
-footprint** of `rules/`, which is now the larger cost by a wide margin —
-several times CLAUDE.md itself, growing with every rule added. Every
-unscoped rule file is injected verbatim at session start, so this is a
-real, recurring per-session cost, not a theoretical one.
+Per-file caps bound each file, but the **aggregate resident footprint** of
+`rules/` is the larger cost — every rule file is injected verbatim at
+session start, a real recurring per-session cost. `paths:` frontmatter
+would scope loading, but it is not used here: a pilot came back RED and a
+gate enforces its absence. The mitigations are dedup across files and
+moving lookup depth to `docs/reference/`.
 
-The operative mitigation is `paths:` frontmatter, which loads a rule only
-when Claude reads a matching file. Apply it to rules with a genuine
-file-path correlate; for cross-cutting concerns a narrow glob would break
-the rule silently and a broad one saves nothing, so leave those
-unconditional. Then dedup cross-file repetition rather than restating it.
-
-Deliberately not stated here: the file count, byte total, or token
-estimate. Those re-stale on every rule addition, and a number that has
-drifted is worse than no number — it gets cited.
+Deliberately not stated: file count, byte total, or token estimate. Those
+re-stale on every rule addition, and a drifted number gets cited.
 
 ## File context discipline
 
@@ -109,12 +102,10 @@ result acted on.
 
 ## Scale-aware brevity constraints
 
-Per arxiv:2604.00025 (Hakim, 2026 — preprint): brevity constraints yield up to
-26pp accuracy gain on math/science benchmarks across 31 general LLMs (preprint,
-tested only on open models, not validated on planning tasks or Opus-tier
-agents specifically). Opus-tier models have been observed in practice to
-over-elaborate without explicit constraint — treat this as an operational
-heuristic, not an established finding.
+Per arxiv:2604.00025 (Hakim, 2026 — preprint, open models only, not validated
+on planning tasks or Opus-tier agents): brevity constraints yield up to 26pp
+accuracy gain on math/science benchmarks. Opus-tier models over-elaborate
+without explicit constraint — an operational heuristic, not a finding.
 
 - Every Opus agent prompt should include: "Return only the structured result —
   no preamble, no trailing summary."

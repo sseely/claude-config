@@ -119,10 +119,8 @@ evaluate, score, or format — not to create.
 > just the deepest multi-path decisions. Fable still owns the long-horizon
 > autonomous row.
 
-**Opus behavioral compensation:**
-
-When routing a task to Opus, add these constraints to the prompt to counteract
-known Opus tendencies (validated in production):
+**Opus behavioral compensation** — add to the prompt when routing to Opus,
+to counteract known tendencies (validated in production):
 
 - Do NOT infer unstated requirements — implement the simplest interpretation
 - Do NOT over-engineer — no speculative abstractions or extension points
@@ -132,10 +130,8 @@ known Opus tendencies (validated in production):
 - A spec, source being ported, or enumerated requirement list is NOT
   ambiguous scope — implement all of it; the above is not license to trim it
 
-**Fable behavioral compensation:**
-
-When routing to Fable (`claude-fable-5`), invert the Opus constraints — Fable's
-design is the opposite:
+**Fable behavioral compensation** — when routing to Fable
+(`claude-fable-5`), invert the Opus constraints; its design is the opposite:
 
 - Describe the outcome, not the steps — Fable derives the approach; over-
   prescriptive prompts/skills reduce output quality
