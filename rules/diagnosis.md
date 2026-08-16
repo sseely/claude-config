@@ -52,12 +52,9 @@ signal to instrument further, not to stop.
 
 ### Under autonomous execution
 
-`rules/autonomous-execution.md` caps quality-gate **fix attempts** at 2. That
-cap bounds edits, not inquiry — it does not license halting without a cause.
-Reaching it is a valid halt only when the decision-journal entry records the
-mechanism, the origin (`file:line`), the causal chain, and what was ruled out.
-Without that artifact the halt is incomplete work, exactly as above: spending
-the attempt budget is not a diagnosis.
+The 2-fix-attempt cap in `rules/autonomous-execution.md` bounds edits, not
+inquiry. Halting on a spent budget is valid only when the decision-journal
+entry carries the artifact above; spending the budget is not a diagnosis.
 
 ## Scope of change
 When you do apply a fix, prefer the change that addresses the **mechanism at its

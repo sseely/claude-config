@@ -30,15 +30,10 @@ Ask explicitly for deeper reasoning before acting:
 ## Thinking depth
 
 Set via the `effort` parameter in agent frontmatter or the `/effort` command.
-Default is `high` on Opus 4.8, Sonnet 5, and Sonnet 4.6; `xhigh` on Opus 4.7.
-Sonnet 5 supports the full `low`/`medium`/`high`/`xhigh`/`max` range (the first
-Sonnet-tier model with `xhigh`/`max`).
-Opus 4.8 also supports `xhigh` and `max` (they are just not its default) —
-raise to them for the hardest multi-path decisions.
-For one-off requests, say "Take as long as you need" to invoke deeper reasoning.
-Do NOT use `budget_tokens` — removed on Opus 4.8 and Sonnet 5 (400);
-deprecated on Opus 4.6 / Sonnet 4.6.
-See `parallelism.md` for the effort level table.
+Raise to `xhigh`/`max` for the hardest multi-path decisions. For one-off
+requests, say "Take as long as you need" to invoke deeper reasoning.
+See `parallelism.md` for the per-model effort table and the `budget_tokens`
+deprecation — do not restate them here.
 
 Do not request extended thinking for tasks that are already well-scoped
 or have an obvious single solution — it adds latency without benefit.

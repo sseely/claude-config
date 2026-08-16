@@ -83,17 +83,10 @@ If a quality gate fails:
    is spent. Investigation is not: continue diagnosing until you can
    state the mechanism, then STOP and log it.
 
-The 2-try cap bounds **fix attempts, not investigation.** Reaching it
-is a valid halt only if the STOP entry in the decision journal carries
-the full diagnosis artifact required by `rules/diagnosis.md`:
-
-- **Mechanism** — the specific cause, in one or two sentences
-- **Origin** — the `file:line` where it originates
-- **Causal chain** — why the observed failure follows from that cause
-- **Ruled out** — what you eliminated, and the evidence that did it
-
-Plus the full error output. A STOP entry that says only "two attempts
-failed" is incomplete work — "this is hard" is not a diagnosis.
+The 2-try cap bounds **fix attempts, not investigation.** Reaching it is
+a valid halt only if the STOP entry carries the full diagnosis artifact
+defined in `rules/diagnosis.md` — mechanism, origin, causal chain, ruled
+out — plus the error output. "Two attempts failed" is not a diagnosis.
 
 ### Quality Gate format (for mission briefs)
 

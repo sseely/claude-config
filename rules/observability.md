@@ -44,8 +44,8 @@ Every service boundary crossing must propagate trace context:
 In the context of observability, logs must be correlated:
 - Every log in a request path includes `trace_id` and `span_id`
 - Every background job log includes `job_id` and `attempt_number`
-- Error logs include enough context to reproduce without re-running:
-  relevant IDs, input parameters (sanitized), and the operation name
+
+`logging.md` owns field lists and error-log content requirements.
 
 ## Alerting
 

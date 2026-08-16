@@ -71,9 +71,8 @@ must be self-contained:
 8. **Boundaries** — three tiers: *Always do* (non-negotiables), *Ask first*
    (actions requiring approval), *Never do* (hard stops). Omit if all three
    tiers are empty.
-9. **Commit format** — One commit per completed task. Message format per
-   `~/.claude/rules/commits.md`: `type(scope): description` ≤72 chars, lowercase,
-   no period. Body explains why if >3 files change.
+9. **Commit format** — One commit per completed task, per
+   `~/.claude/rules/commits.md`. Body explains why if >3 files change.
 
 Omit sections that don't apply, but never omit context, task, or
 write-set. If the agent lacks enough information to do the work
