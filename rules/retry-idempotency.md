@@ -36,27 +36,5 @@ Operations that create or modify state must be safe to retry:
 
 ## Implementation pattern
 
-```typescript
-async function withRetry<T>(
-  fn: () => Promise<T>,
-  maxAttempts = 3,
-  baseDelayMs = 100,
-): Promise<T> {
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    try {
-      return await fn();
-    } catch (err) {
-      if (attempt === maxAttempts) throw err;
-      if (isNonRetryable(err)) throw err;
-      const delay = baseDelayMs * 2 ** (attempt - 1) * (0.8 + Math.random() * 0.4);
-      await new Promise(r => setTimeout(r, Math.min(delay, 5000)));
-    }
-  }
-  throw new Error('unreachable');
-}
-
-function isNonRetryable(err: unknown): boolean {
-  const status = (err as { status?: number }).status;
-  return status !== undefined && status >= 400 && status < 500 && status !== 429;
-}
-```
+A worked TypeScript `withRetry` implementing this policy, including the
+non-retryable classifier, is in `docs/reference/retry-idempotency.md`.
