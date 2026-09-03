@@ -83,10 +83,7 @@ If a quality gate fails:
    is spent. Investigation is not: continue diagnosing until you can
    state the mechanism, then STOP and log it.
 
-The 2-try cap bounds **fix attempts, not investigation.** Reaching it is
-a valid halt only if the STOP entry carries the full diagnosis artifact
-defined in `rules/diagnosis.md` — mechanism, origin, causal chain, ruled
-out — plus the error output. "Two attempts failed" is not a diagnosis.
+See `rules/diagnosis.md` for the diagnosis artifact that governs this cap.
 
 ### Quality Gate format (for mission briefs)
 
@@ -171,7 +168,8 @@ differently, log it.
 
 - Update task checkboxes in the mission brief file on disk as
   tasks complete
-- Use TodoWrite for granular sub-steps within a task
+- Track progress in the mission brief's checkboxes; use TodoWrite only if the
+  session exposes it
 - The mission brief's checkbox state is the canonical progress
   record
 
