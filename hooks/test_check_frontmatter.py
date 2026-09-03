@@ -181,5 +181,13 @@ def main():
     print(f"all {len(CASES)} cases passed")
 
 
+def test_all():
+    """pytest entry point — runs the same main() used by direct execution."""
+    try:
+        main()
+    except SystemExit as exc:
+        assert exc.code in (None, 0), f"main() exited with code {exc.code}"
+
+
 if __name__ == "__main__":
     main()

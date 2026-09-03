@@ -11,6 +11,11 @@ set -euo pipefail
 # Exit code 0 = all gates passed, non-zero = at least one failed.
 # Outputs a structured log to stdout.
 
+# Resolved from this script's own location (not $PWD) so the ~/.claude
+# fleet self-check gates below always target the real ~/.claude tree, even
+# when this script is invoked against a different $PROJECT_DIR.
+CLAUDE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
 PROJECT_DIR="${1:-.}"
 cd "$PROJECT_DIR"
 
@@ -31,10 +36,12 @@ run_gate() {
     if bash -c "$cmd" 2>&1; then
         echo "  Result: PASS"
         RESULTS="$(printf '%s\n| %s | PASS |' "$RESULTS" "$name")"
+        LAST_GATE_PASSED=1
     else
         echo "  Result: FAIL"
         RESULTS="$(printf '%s\n| %s | FAIL |' "$RESULTS" "$name")"
         FAILED=$((FAILED + 1))
+        LAST_GATE_PASSED=0
     fi
     echo ""
 }
@@ -114,6 +121,71 @@ else
         run_gate "dotnet-build" "dotnet build --no-restore"
         run_gate "dotnet-test" "dotnet test --no-build"
     fi
+fi
+
+# ~/.claude fleet self-check gates.
+# Anchored on this script's own location (not $PROJECT_DIR/cwd) so they
+# always check the real ~/.claude tree, matching code-review-tasks.md's
+# `[ "$(cat ~/.claude/rules/*.md | wc -l)" -le 2020 ]` check regardless of
+# which project directory quality-gate.sh was invoked against.
+if [[ -d "$CLAUDE_DIR/rules" ]]; then
+    RULES_LINES="$(cat "$CLAUDE_DIR"/rules/*.md | wc -l | tr -d ' ')"
+    export RULES_LINES CLAUDE_DIR
+    run_gate "rules-line-cap" '[ "$(cat "$CLAUDE_DIR"/rules/*.md | wc -l)" -le 2020 ]'
+
+    # Gate: every agents/**/*.md and skills/*/SKILL.md must pass
+    # check-frontmatter.py (invoked exactly as the PostToolUse hook is).
+    frontmatter_gate() {
+        local total=0 fails=0 out file abs
+        while IFS= read -r -d '' file; do
+            total=$((total + 1))
+            abs="$(cd "$(dirname "$file")" && pwd)/$(basename "$file")"
+            out="$(printf '{"tool_name":"Edit","tool_input":{"file_path":"%s"}}' "$abs" \
+                | "$CLAUDE_DIR/hooks/.venv/bin/python" "$CLAUDE_DIR/hooks/check-frontmatter.py")"
+            if [[ -n "$out" ]]; then
+                fails=$((fails + 1))
+                echo "  BLOCK: $file"
+                echo "    $out"
+            fi
+        done < <(
+            find "$CLAUDE_DIR/agents" -type f -name '*.md' -print0
+            find "$CLAUDE_DIR/skills" -mindepth 2 -maxdepth 2 -type f -name 'SKILL.md' -print0
+        )
+        echo "$((total - fails))/$total" > "$FRONTMATTER_TMP"
+        echo "frontmatter: $((total - fails))/$total passed"
+        [[ $fails -eq 0 ]]
+    }
+    FRONTMATTER_TMP="$(mktemp)"
+    export FRONTMATTER_TMP
+    export -f frontmatter_gate
+    run_gate "frontmatter" "frontmatter_gate"
+    FRONTMATTER_RESULT="$(cat "$FRONTMATTER_TMP" 2>/dev/null || echo "0/0")"
+    rm -f "$FRONTMATTER_TMP"
+
+    # Gate: the hook test suites, run directly, must both exit 0.
+    run_gate "hook-tests" \
+        "\"$CLAUDE_DIR/hooks/.venv/bin/python\" \"$CLAUDE_DIR/hooks/test_check_frontmatter.py\" && \"$CLAUDE_DIR/hooks/.venv/bin/python\" \"$CLAUDE_DIR/hooks/test_guard_bash.py\""
+    HOOK_TESTS_PASSED=$LAST_GATE_PASSED
+
+    # Gate: record today's fleet signals (rules budget, frontmatter parse
+    # rate, hook-test status) so MEASURE 2.4 has a live value each run.
+    fleet_signals_gate() {
+        local fs_file="$CLAUDE_DIR/.agent-notes/fleet-signals.md"
+        local hook_status="fail"
+        [[ "$HOOK_TESTS_PASSED" == "1" ]] && hook_status="pass"
+        mkdir -p "$CLAUDE_DIR/.agent-notes"
+        if [[ ! -f "$fs_file" ]]; then
+            {
+                echo "| Date | Rules Lines | Frontmatter Pass/Total | Hook Tests Pass |"
+                echo "|------|------------|------------------------|------------------|"
+            } > "$fs_file"
+        fi
+        echo "| $(date +%Y-%m-%d) | $RULES_LINES | $FRONTMATTER_RESULT | $hook_status |" >> "$fs_file"
+        echo "logged fleet signal to $fs_file"
+    }
+    export HOOK_TESTS_PASSED FRONTMATTER_RESULT
+    export -f fleet_signals_gate
+    run_gate "fleet-signals-log" "fleet_signals_gate"
 fi
 
 # Summary
