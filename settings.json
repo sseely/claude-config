@@ -256,6 +256,7 @@
     }
   },
   "effortLevel": "high",
+  "subagentPromptCacheTtl": "1h",
   "modelSettings": {
     "claude-opus-5": {
       "effortLevel": "medium"
