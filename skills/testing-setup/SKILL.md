@@ -8,7 +8,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch, WebSearch
 # /testing-setup
 
 Scaffold testing infrastructure into a Cloudflare Workers + Neon PostgreSQL +
-React/Vite project. Installs Vitest with the Workers pool, 80/80/80 coverage
+React/Vite project. Installs Vitest with the Workers pool, 90/90/90 coverage
 thresholds, Istanbul coverage (v8 is incompatible with Workerd), ESLint with
 TypeScript and React Hooks rules, Prettier, husky pre-commit hooks, shared
 test helpers with fixture builders, Docker Compose for local services, and a
@@ -357,7 +357,7 @@ completed step).**
 2. `npm run format:check` — confirm no Prettier violations.
 3. `npm run test` — confirm vitest finds the test file, runs it, and passes.
 4. `npm run test:coverage` — confirm coverage report generates; if below
-   80/80/80, note which files need tests (don't fail the setup).
+   90/90/90, note which files need tests (don't fail the setup).
 5. Offer to commit the changes. Push only with explicit user approval — confirm
    the CI workflow triggers and passes after push.
 
@@ -369,7 +369,7 @@ completed step).**
 ## testing-setup complete
 
 Test runner:   Vitest + @cloudflare/vitest-pool-workers
-Coverage:      Istanbul, 80/80/80 thresholds (lines / functions / branches)
+Coverage:      Istanbul, 90/90/90 thresholds (lines / functions / branches)
 Linter:        ESLint with typescript-eslint + react-hooks
 Formatter:     Prettier, enforced via husky pre-commit
 CI jobs:       test (coverage) <, i18n-audit> <, python-tests>

@@ -56,7 +56,7 @@ Mark any that appear already applied based on step 1.
 ```
 Which production skills do you want to add?
 
-  [ ] testing-setup     — Vitest + Workers pool, 80/80/80 coverage, ESLint, Prettier, husky, CI workflow
+  [ ] testing-setup     — Vitest + Workers pool, 90/90/90 coverage, ESLint, Prettier, husky, CI workflow
   [ ] i18n-setup        — i18next, 18 locales, Claude-powered translate script
   [ ] auth-setup        — OAuth (LinkedIn / Google / Microsoft), KV sessions
   [ ] payments-setup    — Stripe Checkout, session packs, coupon system
