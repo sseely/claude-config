@@ -1,328 +1,268 @@
-# Self-Improve Phase 2 — Agent D — Config Audit (2026-08-01)
+# Phase 2 — Agent D: Settings, Hooks, MCP Audit
+Run: 2026-09-02. Claude Code v2.1.259. Prior run: 2026-08-01 (merged
+chore/code-review-tasks-2026-08).
 
-Scope: read-only audit of ~/.claude settings/hooks/MCP config, Claude Code v2.1.220.
-Cross-checked against `plans/config-hardening-2026-07/README.md` (a prior
-self-improve mission on this exact repo, completed 2026-07-24, 29/29 tasks,
-26 commits) to avoid re-litigating settled decisions without new rationale.
-This file replaces a stale 2026-07-24 copy whose line numbers no longer
-match current disk state (settings.json has since grown to 257 lines with
-new forge/lizard/echo entries).
+## 1. Hook events
 
----
+Authoritative list fetched from https://code.claude.com/docs/en/hooks
+(confidence: HIGH, verified this run). 32 events exist; `phase2-audit-agents.md:27-28`
+lists only 9 and is stale — missing 23, including several directly relevant here.
 
-## 1. Hook events — wired vs. not
+Currently wired (any of the 4 settings files): SessionStart, UserPromptSubmit,
+PreCompact, PostCompact, PreToolUse, PostToolUse, InstructionsLoaded, Stop.
 
-Wired in `~/.claude/settings.json` hooks block: PreToolUse (190-200,
-rm-rf/sudo guard), PostToolUse (201-211, complexity check), PreCompact
-(180-189), PostCompact (170-179), InstructionsLoaded (212-222), SessionStart
-(143-153), Stop (223-233). All present, all reference existing scripts.
+Missing events with concrete value here:
+- **ConfigChange** (`~/.claude/settings.json`, new key) — "runs for each
+  settings-file change it detects" (docs, confirmed HIGH). Directly replaces
+  the passive/async SessionStart privilege check — see §9. Fix: add a
+  synchronous `ConfigChange` hook running `hooks/session-start.sh`'s
+  `check_privilege_elevation` logic. [human-applied]
+- **PermissionDenied** — no hook logs denied Bash/tool calls anywhere; would
+  let `fewer-permission-prompts` and this audit see real friction instead of
+  guessing from transcripts. Suggestion.
+- **PostToolUseFailure** — no hook captures tool failures; `logging.md`/
+  `error-handling.md` want failures logged, none of the 4 Python hooks or
+  4 settings files reference this event. Suggestion.
+- **SubagentStart/SubagentStop** — nothing tracks subagent spawn depth
+  against `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` (`rules/parallelism.md`).
+  Suggestion.
+- **StopFailure** — distinguishes a clean Stop from an API-error-terminated
+  turn; `notify-on-stop.sh` currently chimes the same way for both. Note.
 
-**Not wired:** Notification, SubagentStop, Elicitation, CwdChanged.
+## 2. Permission noise (settings.json)
 
-Note: `plans/config-hardening-2026-07/README.md:26` records prior decision
-**S9**: "wire Notification/SubagentStop/CwdChanged hooks — no concrete
-trigger; deliberately dropped" (confirmed still out of scope at README:102).
-Findings below reopen SubagentStop/Notification with a more specific
-rationale than the prior "no concrete trigger" — flagged as Suggestion, not
-Warning, out of respect for the standing decision; a maintainer should
-decide whether the new rationale clears the bar.
+One-off/stale entries in `~/.claude/settings.json:9-121` `permissions.allow`
+(uncommitted diff per `git status`, confirmed via `git diff` not re-shown
+here — matches orchestrator's prior observation):
+- `settings.json:117` `Bash(awk -F: 'length\($0\)-length\($1\)-1 > 80 ...')`
+  — one-off literal awk one-liner (~80-char-line checker), not a reusable
+  grant. Confidence 95. [human-applied] Remove; if the check is needed
+  again, keep it in a script under `hooks/` or `scripts/` and grant that
+  path instead.
+- `settings.json:118` `Bash(echo "--- drum refs above \(exit $?\) ---")`
+  — exact-literal echo grant (confirmed literal-not-wildcard match against
+  fetched settings docs example `Bash(npm run lint)`). Confidence 95.
+  [human-applied]
+- `settings.json:119` `Bash(echo "=== rc=$? ===")` — same class. Confidence
+  95. [human-applied]
+- `settings.json:120` `Bash(./sync-fork.sh dot-output *)` — relative-path
+  script grant; only valid when cwd is the specific repo containing
+  `sync-fork.sh`, useless (and misleading — implies a capability that
+  silently no-ops elsewhere) in every other project. Confidence 85.
+  [human-applied] Move to that repo's own `.claude/settings.json`.
+- `settings.json:98` `Bash(~/.claude/hooks/setup-complexity.sh)` — no
+  trailing `:*`, so this is an exact-argument-less grant; fine as-is, not
+  noise, confirming the repo does understand the exact-vs-wildcard
+  distinction elsewhere. Not a finding — included to calibrate confidence
+  on the three above.
 
-- `settings.json` (no SubagentStop hook) — Suggestion — severity: none of
-  autonomous-execution.md's mandatory per-task checks ("Verify no files
-  were modified outside the declared write-set... compare `git diff
-  --name-only` against the batch's file list") are automated; today they
-  depend on the orchestrator remembering. A SubagentStop hook running `git
-  diff --name-only` against a write-set file and printing a warning would
-  make that rule self-enforcing instead of advisory. Fix: add a
-  `SubagentStop` hook entry invoking a small script that diffs changed
-  files against the current task's declared write-set (new script,
-  e.g. `hooks/verify-write-set.sh`). Confidence 60.
-- `settings.json` (no Notification hook) — Suggestion — an autonomous run
-  blocked on a permission prompt currently gets no alert until `Stop`
-  fires — the user has no signal Claude is *stuck* vs. *thinking*. Fix:
-  add a `Notification` hook reusing `notify-on-stop.sh`'s osascript/
-  notify-send pattern with a distinct message ("Claude needs input").
-  Confidence 55.
-- Elicitation — not wired, **no concrete use, do not wire**: `.mcp.json`
-  defines only `serena` (list_dir/find_symbol/etc.), which never issues
-  elicitation requests. Confidence 80.
-- CwdChanged — not wired, **no concrete use, do not wire**:
-  `project-init.sh` already re-runs on every `UserPromptSubmit` (line
-  78-92 of settings.json) and is fully idempotent (file-exists guards at
-  project-init.sh:18,25,72,81-87), so a cwd change is already covered on
-  the next prompt with no added latency worth trading for a second hook
-  point. Confidence 70.
+Recurrence: this is the same finding class the prior run raised and the
+harness auto-mode classifier blocked (permission-file edits). It has
+recurred once already since (three new one-off grants added by hand in 24
+days). Systemic fix, not a one-off cleanup: [human-applied] add a
+`PreToolUse`/`ConfigChange`-adjacent guard, or a periodic lint, that flags
+any `Bash(echo "...")` or `Bash(./*)` literal grant added to
+`~/.claude/settings.json` — see §9 mechanism, same class of "silent because
+async" gap.
 
----
+## 3. Permission gaps
 
-## 2. Permission noise (global `~/.claude/settings.json`)
+`.claude/settings.local.json` carries no `permissions` key (only
+`disabledMcpjsonServers`), so there is nothing to diff there.
 
-- `settings.json:126` — Warning — `"Bash(echo \"forge lint exit=$?\")"` is
-  a literal single-command string with an un-expanded shell variable baked
-  into the pattern (permission patterns are matched literally, not
-  shell-evaluated) — it can only ever match that exact text again, i.e. a
-  debugging leftover with no reuse value. Fix: delete the line. Confidence 92.
-- `settings.json:125,127` — Warning — `"Bash(forge lint *)"` and
-  `"Bash(lizard src/shared/scrubSvg.ts)"` are hyper-specific, one-off
-  commands tied to a different project (Foundry/Solidity `forge`, and a
-  literal file path `src/shared/scrubSvg.ts` that does not exist in this
-  repo). These do not belong in global scope — confirmed added today
-  (commit `c987da5 chore(config): allow forge/lizard commands...`, plus
-  further uncommitted edits to this same file per current `git status`)
-  rather than being long-stale, but the classification is the same either
-  way. Fix: remove from global; if still needed, add to that project's own
-  `.claude/settings.local.json`. Confidence 90.
-- `settings.json:104-108` — Warning — `Edit/Write/Read/Glob/Grep(~/church/**)`
-  is a personal, unrelated-project absolute-path grant living in global
-  config alongside the two legitimate general-purpose grants (`~/git/**`,
-  `~/.claude/**`). Fix: move to a `.claude/settings.local.json` inside the
-  church project; remove from global. Confidence 85.
-- `settings.json:136-138` (`additionalDirectories`) — Suggestion — three
-  project-specific absolute paths (`phil-elevator/public/guides`,
-  `temp/github-study-guide`, `plantuml-js/.claude`) live in the global
-  `additionalDirectories` list. Lower risk than the Bash entries above
-  (grants file access only, not command execution), but still project-
-  specific state in a file meant to be project-agnostic. Fix: move to
-  each project's own `.claude/settings.local.json`. Confidence 55.
+`templates/autonomous-settings.json` grants many commands absent from
+global `~/.claude/settings.json`, all consistent with autonomous mode being
+intentionally broader (`Write(**)`/`Edit(**)`/`Read(**)`/`Glob(**)` vs.
+global's directory-scoped grants; `Bash(psql *:*)`,
+`Bash(docker-compose *:*)`, `Bash(uv pip install:*)`,
+`Bash(curl -s https://raw.githubusercontent.com/**:*)`). Not flagged as
+gaps — global intentionally stays narrower for interactive safety per
+`rules/security.md`. Note only: `curl` has zero grants anywhere in global
+`settings.json`; the one CLI HTTP client this repo's `code-principles.md`
+tolerates as a fetch fallback is ungranted outside autonomous mode, which
+is consistent, not a gap.
 
-**Assessment of the three flagged-by-the-brief entries:** `forge lint *`,
-the `echo` variant, and `lizard src/shared/scrubSvg.ts` are exactly the
-one-off noise this check exists to catch — none belong at global scope.
+`mcp__playwright__*` (5 grants, `templates/autonomous-settings.json:59-63`)
+present with **no playwright MCP server in `.mcp.json` or
+`.claude/.mcp.json`** (grepped both, confirmed absent) and **no longer
+present in `.claude/settings.autonomous.json`** (grepped, absent — prior
+run's note that it was in two files is now stale, it's in one).
+`webapp-testing/SKILL.md` references playwright but as the CLI/npx tool,
+not confirmed as this MCP form. Confidence 80 this is a dangling grant.
+Warning. Fix: either add a playwright MCP entry to `.mcp.json` (or a
+project-local one that mission briefs generate) or drop the 5 grants from
+the template. [human-applied]
 
----
+## 4. WebSearch/WebFetch syntax
 
-## 3. Permission gaps (present in local/template, absent from global)
-
-- `settings.json` has no `curl` permission at all vs.
-  `templates/autonomous-settings.json:39` /
-  `.claude/settings.local.json` — Warning — but see item 5: this curl grant
-  is scoped to `raw.githubusercontent.com`, which the already-global bare
-  `WebFetch` grant (settings.json:109) can already reach without shell-out.
-  Fix: prefer consolidating on `WebFetch` and drop the redundant `curl`
-  permission from the template/local files rather than adding it to
-  global. Confidence 60.
-- `settings.json:47-51` has only `gh api/repo/workflow list/auth/run` vs.
-  `templates/autonomous-settings.json:21` / `settings.local.json`'s broad
-  `Bash(gh *:*)` — **Critical/Warning** — this is a practical gap: this
-  same CLAUDE.md's own PR workflow instructs `gh pr create`, and the
-  `review-pr` skill and `pr-workflow.md` both depend on `gh pr`/`gh api`
-  operations the global list doesn't cover — every `gh pr create` in a
-  normal interactive session prompts for approval. Fix: add
-  `"Bash(gh pr:*)"`, `"Bash(gh issue:*)"`, `"Bash(gh release:*)"` to
-  global `settings.json`. Confidence 85.
-- `settings.json` lacks `Bash(docker-compose *:*)` and `Bash(psql *:*)`,
-  present at `templates/autonomous-settings.json:10,12` — Warning — global
-  only has `docker compose:*` (space form); the hyphenated legacy binary
-  and Postgres CLI are ungated in global but pre-approved in
-  local/autonomous/template. Fix: add both to global. Confidence 85.
-- `mcp__playwright__browser_navigate/snapshot/click/take_screenshot/
-  evaluate` present at `settings.local.json:59-63`,
-  `.claude/settings.autonomous.json:59-63`,
-  `templates/autonomous-settings.json:59-63` — absent from global
-  `settings.json` entirely — Warning — see item 5: these are currently
-  dead grants everywhere (no playwright MCP server is configured in
-  `.mcp.json`), so "add to global" is not the right fix until the server
-  itself exists. Confidence 70.
-
----
-
-## 4. WebSearch / WebFetch syntax — consistent, no defect
-
-Grepped all five requested files plus global:
-`settings.json:109-110`, `.claude/settings.json:46-47`,
-`.claude/settings.local.json:45-46`, `.claude/settings.autonomous.json:46-47`,
-`.claude/settings.pre-autonomous.json:44-45`,
-`templates/autonomous-settings.json:46-47` — **all six use the bare form**
-`"WebFetch"` / `"WebSearch"`, no `(*)` suffix anywhere.
-
-Per Claude Code's permission-rule model (confirmed via WebSearch
-cross-referencing code.claude.com/docs/en/permissions, direct WebFetch of
-the exact WebSearch/WebFetch rule table was inconclusive so this is
-MEDIUM confidence): a bare tool name matches every use of that tool;
-`WebSearch` has no specifier syntax at all, `WebFetch` optionally supports
-`WebFetch(domain:...)` to narrow scope but the bare form is valid and
-simply grants unrestricted use. **No inconsistency and no required-syntax
-violation** — bare form is correct and uniform across every file audited.
-Confidence 80.
-
----
+Consistent — grepped every `*.json` under `~/.claude` for `"WebSearch` and
+`"WebFetch`: only the bare form appears, in `settings.json:111-112` and
+`templates/autonomous-settings.json:46-47`. No `"WebSearch(*)"` variant
+exists anywhere in the repo. Not a finding. Confidence: HIGH on the grep
+(exhaustive), MEDIUM on "which form Claude Code requires" — the fetched
+settings/hooks docs did not state this explicitly this run; bare form is
+what every example in fetched docs used for named (non-Bash-style) tools.
 
 ## 5. MCP gaps
 
-- `.mcp.json:2-13` defines only `serena` (code navigation:
-  list_dir/find_symbol/find_referencing_symbols/etc., scoped to
-  `--project /Users/scottseely/.claude`). No GitHub, filesystem, or
-  playwright MCP server is configured anywhere in this repo.
-- **Serena disabled-but-still-granted, verified precisely:**
-  `.claude/settings.local.json:37-39` sets
-  `"disabledMcpjsonServers": ["serena"]`. Correction to the premise as
-  given: `settings.local.json` itself lists **zero** `mcp__serena__*`
-  permissions (its 34-entry allow list is all Bash git/npm/python) — so it
-  does not itself "still list serena permissions." The real inconsistency
-  is one layer up: `.claude/settings.json:48-58` (11 entries) and global
-  `settings.json:114-124` (11 entries) both still grant `mcp__serena__*`
-  tools, and because `.mcp.json` defines no server besides serena, the
-  local-level disable makes all 22 of those grants dead/no-op for this
-  project. Fix: either drop `disabledMcpjsonServers` from
-  `settings.local.json` (re-enabling serena, which `project-init.sh`
-  auto-provisions a `.serena/project.yml` for and expects to work), or
-  strip the redundant `mcp__serena__*` grants from `.claude/settings.json`
-  since they can't be exercised while local disables the server. Confidence 85.
-- Playwright permissions (5 tools) appear in `settings.local.json`,
-  `.claude/settings.autonomous.json`, and
-  `templates/autonomous-settings.json`, but no playwright server is
-  registered in `.mcp.json` — Warning — these are orphaned permission
-  entries right now. Fix: register a playwright MCP server in `.mcp.json`
-  if browser-driven testing (the `webapp-testing` skill implies this is
-  wanted) is actually in use, otherwise strip the dead entries from all
-  three files. Confidence 75.
-- GitHub MCP server — Suggestion, LOW-MEDIUM confidence (not doc-verified
-  this session) — would replace `gh api`/`gh pr`/`gh issue` shell calls
-  (heavily used per `pr-workflow.md` and the `review-pr` skill, which
-  parses `gh api repos/.../pulls/123/comments` output) with structured
-  JSON tool calls instead of CLI text parsing. Confidence 45 — recommend
-  verifying the server's existence/name before adding.
+- `gh api:*`, `gh repo:*`, `gh workflow list:*`, `gh auth:*`, `gh run:*`
+  (`settings.json:55-59`) — shell `gh` calls with no structured GitHub MCP
+  server configured anywhere (`.mcp.json` has only `forge`;
+  `.claude/.mcp.json` has only `serena`). A GitHub MCP server would give
+  typed PR/issue/workflow objects instead of parsing `gh` JSON output by
+  hand. Confidence: MEDIUM (no WebSearch run this pass to confirm current
+  official server status/name — flagging the gap, not a specific server).
+- `curl` (autonomous template only) — an MCP fetch server isn't a
+  structured win over `WebFetch`, which the repo already grants; no gap.
+- Local filesystem shell calls (`find`, `grep`, `cat`, `ls`) are already
+  superseded in-session by Serena's `find_file`/`search_for_pattern`
+  (`mcp__serena__*` wildcard-granted, `settings.json:116`) — no gap, this
+  is the intended path per `rules/lsp.md`.
 
----
+## 6. Hook quality — see §8 table for the full matrix. Highlights:
 
-## 6. Hook quality (one line each)
+- `hooks/guard-bash.py` and `hooks/nudge-search-tool.py` fail-open on
+  *any* exception with a bare `except: return`/`pass` and no error log —
+  by design (documented: "must not wedge the session"), but this means a
+  hook bug that silently stops guarding `rm -rf` is undetectable except by
+  reading logs that don't exist. Contrast with `project-init.sh` and
+  `setup-complexity.sh`, which both write to `logs/*.err` on failure.
+  Confidence 85. Suggestion: add a best-effort
+  `except Exception as e: log_to(...); return` — logging must not itself
+  risk blocking, so keep it inside its own try/except with a hard-coded
+  fallback of "do nothing further."
+- `hooks/log-instructions-loaded.sh` uses `set -uo pipefail` (no `-e`) —
+  intentional per its own comment ("never blocks"), not an oversight, but
+  it is the only hook script that deviates from the `set -euo pipefail`
+  convention `code-principles.md`/this audit's brief expects. Note.
 
-- `hooks/autonomous-toggle.sh` — `set -euo pipefail` ✓ (line 2); no
-  platform guard needed (pure file ops); idempotent ✓ (cmp guard, line 43,
-  prevents re-backing-up an already-autonomous state); error handling via
-  `exit 1` + echo, adequate for a manual/on-demand script. No defect.
-- `hooks/notify-on-stop.sh` — ✓ line 2; platform guard ✓ (line 25,
-  darwin/notify-send branch); error logging ✓ (lines 27, 30, failed
-  notification calls logged to stderr). No defect.
-- `hooks/project-init.sh` — ✓ line 5; idempotent ✓ (file-exists guards at
-  lines 18, 25, 72, 81-87); error logging ✓ (ERR trap, line 8, fail-safe
-  exit 0 so setup errors never block the prompt). No defect.
-- `hooks/quality-gate.sh` — ✓ line 2; error logging ✓ (ERR trap, line 18,
-  explicitly documented fail-closed at line 17). No defect.
-- `hooks/record-turn-start.sh` — ✓ line 2; trivial, no defect.
-- `hooks/session-start.sh` — ✓ line 2; idempotent ✓ (command -v/binary
-  checks before install, lines 25, 81); **gap** at line 84 —
-  `bash "$HOOKS_DIR/setup-complexity.sh"` has no error trap or logging,
-  unlike every other hook in this repo (`project-init.sh:8`,
-  `quality-gate.sh:18` both wrap with ERR traps). A failure here is a
-  SessionStart hook, so it fires silently with no record. Fix: wrap with
-  `|| echo "[session-start] setup-complexity.sh failed (exit $?)" >>
-  ~/.claude/logs/session-start.err 2>/dev/null`. Confidence 70. Suggestion.
-- `hooks/check-complexity.py` — fail-open exception handler ✓
-  (lines 136-143, logs unhandled exceptions to stderr, always exits 0).
-  No defect.
-- `hooks/setup-complexity.sh` — ✓ line 2; self-contained python3 guard
-  (line 11); idempotent ✓ (venv-exists check, line 20); explicit error
-  checks + exit 1 (lines 12-14, 32-35). No defect.
+## 7. Autonomous template completeness
 
----
+Hooks present in `~/.claude/settings.json` (user/global) but **absent from
+all three** of `.claude/settings.json`, `.claude/settings.autonomous.json`,
+`templates/autonomous-settings.json`:
+- `PreToolUse` → `guard-bash.py` (Bash matcher), `nudge-search-tool.py`
+  (Grep matcher)
+- `PostToolUse` → `check-frontmatter.py` (the second hook in the
+  `Write|Edit` group; `check-complexity.py` IS present in all four)
+- `InstructionsLoaded` → not present at all in the other three
 
-## 7. Autonomous template completeness (`templates/autonomous-settings.json` vs. global `settings.json`)
+**Correction to the orchestrator's framing of this as unmitigated risk:**
+per the fetched settings docs ("Lists merge instead of overriding" —
+confirmed HIGH, `settings` doc, hooks are a list key and not one of the 4
+named exceptions), Claude Code combines hook arrays across
+user/project/local scope rather than letting a project file replace the
+user file's hooks. So on *this* machine, under *this* user account, an
+autonomous session in any project still gets `guard-bash.py` merged in
+from `~/.claude/settings.json` — the omission is not an active
+`rm -rf`-guard gap here. It IS a real gap for **portability**: the
+autonomous template is designed to be copied into other repos
+(`autonomous-toggle.sh:31-40` sources from `$PROJECT_AUTONOMOUS` or
+`$GLOBAL_TEMPLATE`) which may run under a different user, a CI runner, or
+a sandboxed container (see `sandbox` skill) with no
+`~/.claude/settings.json` to merge from. Confidence 85. Warning, not
+Critical (downgraded from what the merge behavior would otherwise imply).
+Fix: add explicit `PreToolUse`/`guard-bash.py` and
+`PostToolUse`/`check-frontmatter.py` wiring to
+`templates/autonomous-settings.json` so the safety net travels with the
+profile instead of depending on an ambient user file. [human-applied]
 
-- **Missing `"Agent(*)"`** — global has it at `settings.json:111`; the
-  template has no `Agent` or `Skill` entry at all — **Critical** —
-  autonomous-execution.md's batch-execution procedure explicitly requires
-  "Launch parallel agents per `parallelism.md` rules" every batch. Without
-  `Agent(*)` pre-granted, the very first subagent dispatch in an
-  autonomous run stalls on a permission prompt with no human present to
-  answer it — this directly defeats the premise of autonomous mode. Fix:
-  add `"Agent(*)"` to `templates/autonomous-settings.json` permissions.
-  Confidence 88.
-- **Missing `"Bash(~/.claude/hooks/setup-complexity.sh)"`** — global has
-  it at `settings.json:90`; template lacks it, even though the template
-  wires the same `check-complexity.py` PostToolUse hook
-  (template line 114-123) that, per `check-complexity.py:107-114`, emits a
-  block asking the agent to "ask the user for permission to run" that
-  exact script when lizard isn't installed yet. A fresh machine running an
-  autonomous mission hits a human-approval wall on its first Write/Edit.
-  Fix: add the permission to the template. Confidence 85.
-- **Missing `"Bash(pip3 install:*)"`** — global has it (`settings.json:23`);
-  template only has `"Bash(pip install *:*)"` (line 19), a different
-  literal prefix that will not match a `pip3 install ...` invocation
-  (common on macOS). Fix: add `"Bash(pip3 install:*)"` to the template.
-  Confidence 65.
-- Missing `Bash(volta install:*)` (global `settings.json:66`) — Suggestion,
-  low priority, niche JS toolchain manager. Confidence 40.
-- Missing `Skill(update-config:*)` / `Skill(plan-mission:*)` (global
-  `settings.json:112-113`) — Suggestion, low priority since a mission
-  brief is normally pre-generated by `/plan-mission` before autonomous
-  execution starts, so skill invocation mid-mission is uncommon.
-  Confidence 40.
+## 8. Hook inventory
 
-Note: `.claude/settings.autonomous.json:116` still matches
-`"Write|Edit|MultiEdit"` while the template (line 116) and global
-(`settings.json:203`) both use `"Write|Edit"`. Per this repo's own recent
-commits ("drop MultiEdit" across agent folders, e.g. `81cfe7a`), `MultiEdit`
-has been retired project-wide — the deployed `.claude/settings.autonomous.json`
-is the stale one here, not the template. Harmless (matches a tool that no
-longer fires) but signals settings.autonomous.json has drifted from the
-template it's supposed to mirror. Confidence 75.
+| File | Wired (event/matcher) | set -euo | Platform guard | Idempotent | Error logging | Tests |
+|---|---|---|---|---|---|---|
+| `session-start.sh` | SessionStart, all 4 settings files, `async:true` | yes (`:2`) | yes (darwin/linux branches for brew/cargo install) | yes (checks before install) | yes, `.err` file via trap | none |
+| `record-turn-start.sh` | UserPromptSubmit, all 4, `async:true` | yes | n/a (portable) | yes (overwrites) | none (trivial, low risk) | none |
+| `project-init.sh` | UserPromptSubmit, all 4, `async:true` | yes | n/a | yes (`-f`/`-d` checks throughout) | yes, `.err` via trap | none |
+| `notify-on-stop.sh` | Stop, all 4, `async:true` | yes | yes (darwin `osascript` / linux `notify-send`) | yes | yes (stderr on osascript/notify-send failure) | none |
+| `guard-bash.py` | PreToolUse/Bash — **only in `~/.claude/settings.json`**, absent from other 3 (see §7) | n/a (Python; fail-open `try/except: return`) | n/a | yes (stateless) | **no** (§6) | `test_guard_bash.py`, runs green as standalone script only (§ below) |
+| `nudge-search-tool.py` | PreToolUse/Grep — **only in `~/.claude/settings.json`** | n/a, fail-open | n/a | yes | **no** | none |
+| `check-complexity.py` | PostToolUse/Write\|Edit — all 4 files | n/a, fail-open (documented) | n/a | yes (git-baseline ratchet, documented design) | fail-open by design | none found |
+| `check-frontmatter.py` | PostToolUse/Write\|Edit — **only in `~/.claude/settings.json`** | n/a, fail-open | n/a | yes | fail-open by design | `test_check_frontmatter.py`, green standalone only |
+| `log-instructions-loaded.sh` | **DEAD** — see below | `set -uo pipefail` (no `-e`, intentional) | n/a | yes (append-only) | swallows errors by design (`\|\| exit 0`) | none |
+| `quality-gate.sh` | not an event hook — Bash-permission-only CLI utility (`Bash(~/.claude/hooks/quality-gate.sh:*)` in `settings.json:97`), invoked manually/by mission briefs | yes | n/a | yes (read-only checks) | yes (trap ERR, fail-closed) | none |
+| `autonomous-toggle.sh` | not an event hook — Bash-permission-only CLI (`settings.json:99-100`) | yes | n/a | yes (guards: "already in autonomous mode", backup-before-overwrite, never deletes without a backup) | yes (explicit ERROR messages on restore failure, `:2`) | none |
+| `setup-complexity.sh` | not an event hook — invoked by `session-start.sh` and by permission grant `settings.json:98` | yes | n/a (relies on portable python3/venv) | yes (upgrades existing venv) | yes (ERROR to stderr) | none |
 
----
+**DEAD hook finding (Critical):** `settings.json:212-221` wires
+`InstructionsLoaded` to an inline command —
+`echo "[$(date ...)] InstructionsLoaded" >> ~/.claude/logs/instructions-loaded.log`
+— not to `hooks/log-instructions-loaded.sh`. `log-instructions-loaded.sh`
+is never invoked by any of the 4 settings files (grepped all 4 for its
+filename — zero matches outside its own file). Its own docstring
+(`log-instructions-loaded.sh:5-17`) states its purpose: log
+`session_id, cwd, hook_event_name, file_path, load_reason` per event so
+`paths:` frontmatter scoping can be proven to fire (or proven silently
+not to) — citing runbook
+`plans/code-review-tasks-2026-08/batch-2b/T13-paths-pilot.md`. The inline
+echo that actually runs captures only a bare timestamp with no
+`file_path`/`load_reason`, so it **cannot** fulfill that stated purpose:
+there is currently no evidence anywhere on disk of which files trigger
+`InstructionsLoaded` or why. Confidence 95 (grepped exhaustively, read
+both the wired command and the unwired script). Fix: replace
+`settings.json:217`'s command with
+`~/.claude/hooks/log-instructions-loaded.sh`. [human-applied]
 
-## 8. SPECIFIC CHECK — autonomous toggle state — CONFIRMED, CRITICAL, SCOPED
+**Test suite finding (Warning):** the task's canonical check —
+`hooks/.venv/bin/python -m pytest hooks/ -q` — was run and does **not**
+work: `hooks/.venv/bin/python: No module named pytest` (`requirements.txt`
+only lists `lizard`, `pyyaml`). Even with system `python3` (which has
+pytest 8.3.4 installed), `pytest hooks/` collects **0 items** for both
+`test_check_frontmatter.py` and `test_guard_bash.py` — neither file
+defines `def test_*` functions; both use a custom `main()`/`check_case()`
+runner under `if __name__ == "__main__":`. Run directly
+(`python3 test_check_frontmatter.py`, `python3 test_guard_bash.py`), both
+pass: 7/7 and 30/30 cases green, exit 0. So the tests are real and
+currently passing, but (a) named `test_*.py` in a way that implies pytest
+compatibility it doesn't have, misleading anyone who runs the standard
+invocation into believing "no tests exist" rather than "0 collected,
+check manually", and (b) not wired into any hook or CI step — nothing
+runs them automatically after a hook edit. Confidence 100 (ran both
+invocations, captured exit codes and output). Fix: either rename to
+`smoke_check_frontmatter.py`/`smoke_guard_bash.py` to stop implying pytest
+discovery, or add thin `def test_*` wrapper functions calling the existing
+`check_case` logic and add `pytest` to `requirements.txt`.
 
-**Verified via `diff` (not just size/date comparison):**
-`diff .claude/settings.json .claude/settings.autonomous.json` → **zero
-output, exit 0** — byte-identical. `diff .claude/settings.json
-.claude/settings.pre-autonomous.json` shows pre-autonomous.json is the
-genuinely different, narrower, hook-free "normal" state (58 lines vs. 137;
-no `hooks` key at all; no `fallbackModel`; scoped `Read(*)/Write(*)` instead
-of unrestricted `Read(**)/Write(**)`; no `mcp__playwright__*`).
+## 9. Autonomous-profile exposure — verdict
 
-**Toggle mechanic** (`hooks/autonomous-toggle.sh`): `on` backs up the
-current `settings.json` to `settings.pre-autonomous.json` (line 52) *then*
-overwrites `settings.json` (line 56). `off` restores by `mv`-ing
-`settings.pre-autonomous.json` back over `settings.json` (line 71) — an
-`mv`, which **deletes** the backup file on success. **The backup file
-`.claude/settings.pre-autonomous.json` still exists on disk** — proof `off`
-has never run since the last `on`.
+**Byte-identical files:** `.claude/settings.json` and
+`.claude/settings.autonomous.json` are still byte-identical (2429 B, mtime
+2026-08-09 17:43:46, `cmp` confirmed) — the state has now persisted **24
+days**, up from the prior run's 8-day observation. Confirmed HIGH.
 
-**Timeline, reconstructed from git history (ground truth, not inferred):**
-- `plans/config-hardening-2026-07/README.md` documents a mission that used
-  autonomous permissions, completing at commit `3fba52a` on
-  **2026-07-24 16:47** (29/29 tasks, 26 commits) — this is almost
-  certainly when/why `.claude/settings.json` was set to the autonomous
-  state (mtime Jul 24 15:36, just before the mission's work began).
-- The mission's own "Known issues / follow-ups" section does **not**
-  mention toggling back off after completion — this was missed, not
-  declined.
-- The branch then had **zero commits for 8 days** (2026-07-24 16:47 →
-  2026-08-01 19:07).
-- **Today**, two new commits landed (`73837bd`, `c987da5`) plus further
-  *uncommitted* edits to `settings.json`, `CLAUDE.md`, and rule files —
-  i.e., **normal interactive work is happening in this repo right now**,
-  under merged global + still-autonomous project permissions. This audit
-  agent's own invocation has cwd `/Users/scottseely/.claude`, the exact
-  directory affected.
+**Root cause of the silent check (mechanism, not guess):**
+`hooks/session-start.sh:100-115` defines `check_privilege_elevation`,
+which correctly detects this exact condition (`cmp -s "$live" "$auto"` —
+verified the boolean logic is right: identical files fall through to the
+warning, non-identical/missing files `return 0` and skip it). The function
+is called and its `echo` warnings go to stdout. The reason the warning
+never reaches the model: `settings.json:130-139` wires `SessionStart` with
+`"async": true`. Per the hooks doc fetched this run (HIGH confidence,
+direct quote): *"With `async: true`, even SessionStart output is
+discarded from Claude's context... this applies universally across all
+hook events"* and SessionStart's normal stdout-to-context exception
+applies **only when synchronous**. So the mechanism is: the check runs,
+detects the condition correctly, prints the warning to stdout — and that
+stdout is thrown away before the model ever sees it, every session, by
+design of `async: true`. This is not a bug in the check's logic; it is a
+wiring choice that silences a correctly-firing safety check.
 
-**Concrete risk (scoped correctly, not overstated):** this affects only
-sessions whose working directory is inside `/Users/scottseely/.claude`
-itself (the config repo, opened as a project) — not every Claude Code
-session everywhere. But that scope is exactly where today's interactive
-config-editing work (the work that produced the `forge lint`/`lizard`
-noise in item 2) is happening. In that scope, the effective permission set
-is global `settings.json` **unioned with** the autonomous project overlay:
-`Read(**)/Write(**)/Edit(**)/Glob(**)/Grep(**)` (unrestricted filesystem,
-not scoped to `~/git`, `~/.claude`, `~/church` the way global intends),
-`Bash(git *:*)`, `Bash(docker *:*)`, `Bash(gh *:*)`, `fallbackModel`
-opus→sonnet, and all `mcp__playwright__*` entries — all pre-approved with
-no per-command confirmation, for what should be guarded interactive work.
-The `PreToolUse` sudo/rm-rf-root guard (global `settings.json:190-200`)
-is unaffected — that hook lives in the always-applied global scope, so it
-still fires regardless of the project-level toggle state. Severity is
-"broad silent file/command access," not "safety-net bypass."
+**Verdict:** Critical. The check is not broken, but it is functionally
+inert — 24 days of unnoticed autonomous exposure is the direct,
+demonstrated cost. Two independent fixes, either sufficient alone:
+1. [human-applied] Drop `"async": true` from the `SessionStart` hook entry
+   at `settings.json:136` (loses the background-install non-blocking
+   benefit for the ast-grep/lizard setup paths — those already guard
+   themselves with `CLAUDE_AUTO_INSTALL_TOOLS` opt-in and a `trap ... exit
+   0`, so making the whole hook synchronous mainly costs a few hundred ms
+   of `command -v` checks per session start, not correctness).
+2. [human-applied] Add a synchronous `ConfigChange` hook (see §1) running
+   the same `check_privilege_elevation` check — fires exactly when
+   `.claude/settings.json` is written to match the autonomous file, rather
+   than only at the start of whatever session happens to run next, which
+   is a strictly earlier and more reliable trigger than SessionStart async
+   or sync.
 
-**Exact fix:**
-```
-~/.claude/hooks/autonomous-toggle.sh off /Users/scottseely/.claude
-```
-This restores `.claude/settings.pre-autonomous.json` over
-`.claude/settings.json` and removes the backup file (confirming the
-restore). Verify afterward with
-`diff .claude/settings.json .claude/settings.pre-autonomous.json` (should
-be identical) and `test -f .claude/settings.pre-autonomous.json` (should
-now fail — file consumed by the `mv`).
-
-Confidence: 95 (byte-identical diff + backup-file existence proof + full
-git-history reconstruction, not a single-signal guess).
+Recommend both: (1) makes the existing check actually reach the model;
+(2) closes the gap where nobody starts a *new* session for days after the
+toggle flips.

@@ -81,9 +81,13 @@ navigation — not the LSP tool (agents do not have it in their frontmatter):
 `find_symbol`, `get_symbols_overview`, `find_referencing_symbols`,
 `find_file`, `search_for_pattern`, `replace_symbol_body`,
 `insert_after/before_symbol`, `safe_delete_symbol`, `rename_symbol`.
-For structural code pattern searches, use `ast-grep`, not Grep.
-After edits, run the project's typecheck command (`tsc --noEmit`, `mypy`,
-etc.) as the quality bar instead of reading LSP diagnostics.
+For structural code pattern searches, use `ast-grep`, not Grep. After
+edits, run the project's typecheck command (`tsc --noEmit`, `mypy`, etc.)
+as the quality bar instead of reading LSP diagnostics.
+
+Both are shell commands, so they bind only agents whose frontmatter grants
+Bash. An agent without Bash uses Serena `search_for_pattern` for structural
+search and leaves the typecheck to the orchestrator's quality gate.
 
 Serena is registered at **user scope**, so these tools are available in
 every project, not just this repo. If `find_symbol` is missing, verify with

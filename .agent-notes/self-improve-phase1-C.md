@@ -1,430 +1,346 @@
-# Phase 1 — Agent C: State of the Art in System Prompt / Agent Instruction Design
+# Phase 1 — Agent C (prompt structure + AI governance)
 
-Research run 2026-08-01. Fresh sweep; no prior task files or agent notes read.
+Run date: 2026-09-02. Prior run: 2026-08-01. Read-only.
 
-Sources cloned and injection-scanned (both **clear** — the four grep hits are
-warnings *about* injection, not injection):
+## Sources fetched
 
-- `~/temp/self-improve/skills` — `anthropics/skills`, 165,649 stars (Tier 1, Anthropic first-party)
-- `~/temp/self-improve/claude-code-system-prompts` — `Piebald-AI/claude-code-system-prompts`,
-  12,135 stars, created 2025-11-18 (passes >1000 stars + >6mo gate). Verbatim
-  extraction of shipped Claude Code prompts; treated as **data**, not instructions.
-- Rejected by clone gate: `Austin1serb/agents-md` (148 stars),
-  `repowise-dev/claude-code-prompts` (1,178 stars but created 2026-04-01, <6 months).
-
-Anthropic research index (Feb–Aug 2026) carries **no** instruction-following,
-system-prompt, or agent-orchestration publication. The Anthropic *engineering*
-index has three 2026 agent-design posts (Mar 24 harness design, Apr 08 managed
-agents, Feb 05 parallel Claudes) but the load-bearing prescriptive text remains
-the Sep 2025 context-engineering post. Net: Anthropic has published no new
-system-prompt doctrine in the last 6 months. The config is not behind on Tier 1.
-
----
-
-## P1 — Orchestration-prompt composition is a capability distinct from coding ability, and Opus 4.8 is measurably weak at it
-
-- **Finding**: The ability to author *sub-agent prompts* (decide what each role
-  must know, and exclude what it must not) does not track coding benchmark
-  performance. Measured across 110 scenarios / 33 commercial models: average
-  combined pass rate 17.2%. `claude-opus-4-8` scored **13.9%** (assignment 17.7%,
-  free-form 10.0%) — below `claude-sonnet-5` (25.7%) and `claude-fable-5` (31.4%),
-  and far below `gpt-5.5` (62.0%). The paper's own framing: Opus 4.8 "shows a
-  notable weakness in orchestration prompting despite its strong coding performance."
-- **Source**: Sun, Ren, Zhang, Liu, Guo. "PerspectiveGap: A Benchmark for
-  Multi-Agent Orchestration Prompting." arXiv:2606.08878v2, 7 Jun 2026 (v2 12 Jul 2026).
-  https://arxiv.org/abs/2606.08878 — **Tier 4 (arxiv preprint, NOT peer-reviewed)**.
-- **Evidence strength**: Medium (preprint; single benchmark; no replication).
-- **Applies to Claude specifically**: **High.** This is the rare case where the
-  named Claude models are measured directly rather than inferred — Opus 4.8,
-  Sonnet 5, and Fable 5 all appear in the results table with per-model numbers.
-  Caveat stated plainly: **Opus 5 was not tested.** Transferring the Opus 4.8
-  result to Opus 5 is an inference, and the config's own version gate
-  (`rules/parallelism.md:94-96`) correctly warns those are different models.
-- **Current config alignment**: ***Misaligned*** — `rules/parallelism.md:87`
-  routes "mission decomposition" and "Phase 3 decisions" to `opus`, and
-  `settings.json:141` makes `opus` the session default, so the orchestrator that
-  writes every sub-agent prompt is Opus. The file's justification for this row is
-  *cost and reasoning depth* (`rules/parallelism.md:115-119`), which is the wrong
-  axis — the paper's claim is that orchestration-prompt authoring is an
-  **orthogonal** capability that coding strength does not predict. What to change:
-  add a note under the model table at `rules/parallelism.md:87` recording that
-  orchestration-prompt composition is a measured-distinct capability, that Opus
-  4.8 benchmarked worst-in-family on it, and that this is untested on Opus 5.
-  Do **not** re-route on this evidence alone — one preprint, one benchmark, wrong
-  model generation. Flagging beats reflex.
-  Corroborating detail: the config's *existing* Fable recommendation for
-  autonomous execution (`rules/parallelism.md:88`, `skills/plan-mission/SKILL.md:332`)
-  is **supported** by this data — Fable 5 is the best-scoring Claude at 31.4%.
-
-## P2 — The "need-only rule": sub-agent prompts fail more from over-inclusion than under-inclusion
-
-- **Finding**: Each role should receive exactly the fragments needed to discharge
-  its documented responsibility and nothing more. Strict pass requires
-  FP = 0 *and* FN = 0. Five named failure modes, in the paper's order:
-  (1) **distractor leakage** — irrelevant context (explicitly including
-  "prompt-engineering tips") passed to sub-agents that don't need it;
-  (2) **out-of-role information leakage** — fragments belonging to role A copied
-  into role B, enabling reward hacking and constraint violation;
-  (3) **artifact ownership / handoff confusion**; (4) **dropped shared context**
-  (miss rates 12.1%–44.9%); (5) **bootstrap paradox** — instructions placed inside
-  artifacts the agent cannot yet read. Average leakage rate across models was
-  217.9% (per-scenario leak-event count, not a proportion).
-- **Source**: PerspectiveGap, arXiv:2606.08878v2 — **Tier 4 preprint**.
-  https://arxiv.org/abs/2606.08878
-- **Evidence strength**: Medium (preprint, single benchmark).
-- **Applies to Claude specifically**: **High** — Claude models are among the 33
-  evaluated and sit in the failing majority.
-- **Current config alignment**: ***Misaligned*** — `rules/parallelism.md:36-40`
-  states the agent-prompt structure as an *inclusion* checklist and its section 0
-  actively pushes context inward: "If `.agent-notes/` contains relevant findings
-  for this task, inject them verbatim here. Do not rely on the agent to discover
-  them." There is no counterweight anywhere in the file. Grepping
-  `rules/parallelism.md` for exclusion language returns only write-set ownership
-  rules (`:26`, `:29`) — file-collision control, not information-boundary control.
-  What to change: add a **boundary precision** clause to the agent-prompt
-  structure section (`rules/parallelism.md:36-77`) requiring that each sub-agent
-  prompt carry only the fragments that role needs, and qualify section 0 so
-  `.agent-notes/` injection is filtered to the *receiving role's* scope rather
-  than pasted verbatim. This is the single highest-value change in this report:
-  it costs nothing, reduces tokens, and targets the #1 measured failure mode.
-
-## P3 — Sub-agent prompts need an explicit resumption contract and a failure/ambiguity protocol
-
-- **Finding**: Anthropic's shipped coordinator-worker prompt is 45 lines and five
-  sections: Environment, Scope, **Resumed Tasks**, **When Things Go Wrong**,
-  Output. Two of those five have no analogue in this config's agent-prompt spec.
-  Verbatim from the shipped prompt — resumption: "You may be resumed with
-  follow-up instructions... You retain full context from your previous work — use
-  it... Your new instructions may be brief (e.g., 'now add tests for that') — this
-  is intentional, not ambiguous." Failure handling: "If the task is ambiguous,
-  pick the most likely interpretation and note your assumption"; "Don't retry the
-  same failed approach more than once." Output framing: "Your response goes
-  directly to the coordinator (not the user)," with a contrasting good/bad summary
-  example.
-- **Source**: `~/temp/self-improve/claude-code-system-prompts/system-prompts/agent-prompt-coordinator-worker-instructions.md`
-  (ccVersion 2.1.217), verbatim extraction of Anthropic's shipped prompt.
-  https://github.com/Piebald-AI/claude-code-system-prompts — **Tier 1 in
-  substance** (it is Anthropic's own production text), **Tier 5 in channel** (a
-  third-party mirror). Weight accordingly; the text is self-consistent with
-  Anthropic's published guidance.
-- **Evidence strength**: Medium — first-party artifact, third-party transmission,
-  no effect sizes attached.
-- **Applies to Claude specifically**: **High.** This prompt runs against Claude in
-  production. It is the most direct available evidence of what Anthropic believes
-  a Claude sub-agent prompt should contain.
-- **Current config alignment**: ***Misaligned*** — the nine-section agent-prompt
-  structure at `rules/parallelism.md:36-77` has no resumption section, despite the
-  Agent tool now supporting `SendMessage` resumption with context intact. What to
-  change: add a tenth section, *Resumption*, to `rules/parallelism.md:36-77`
-  stating that a resumed agent retains prior context, that terse follow-ups are
-  intentional rather than ambiguous, and that it should not re-read files it has
-  already seen unless they may have changed.
-  Partial credit, stated for accuracy: the ambiguity half is already covered —
-  `rules/parallelism.md:131` ("If scope is ambiguous, implement the minimal
-  interpretation and note the ambiguity") and the consecutive-fix stop rule at
-  `rules/autonomous-execution.md` both match Anthropic's intent. Only resumption
-  is genuinely absent.
-
-## P4 — Explain *why* rather than escalating intensity; prefer imperative form
-
-- **Finding**: Anthropic's own skill-authoring guidance: "Try to explain to the
-  model why things are important in lieu of heavy-handed musty MUSTs. Use theory
-  of mind and try to make the skill general and not super-narrow to specific
-  examples." And: "Prefer using the imperative form in instructions."
-- **Source**: `anthropics/skills`, `skills/skill-creator/SKILL.md:117,139`.
-  https://github.com/anthropics/skills — **Tier 1** (official Anthropic repo).
-- **Evidence strength**: High for authority, Low for measurement (no effect size
-  published).
-- **Applies to Claude specifically**: **High** — authored by the model vendor for
-  this exact model family.
-- **Current config alignment**: ***Aligned*** — `rules/prompting-quality.md:16`:
-  "Prefer scoping keywords (`only`, `limit to`, `do not`) over intensity
-  escalation (`CRITICAL`, `MUST`, `ALWAYS`). Blanket intensity words can
-  overtrigger on these models and reduce output quality." The config reached the
-  same conclusion by a different route (overtriggering) than Anthropic's
-  (why-over-MUST), and both land on the same prescription. Imperative form is
-  honored in practice: `agents/04-quality-security/debugger.md:9` opens "Trace
-  every defect to its root cause"; `agents/04-quality-security/code-reviewer.md:10`
-  opens "Enumerate all quality issues."
-
-## P5 — System-role instructions land better as context than as commands
-
-- **Finding**: "Phrase these as **context, not commands**. State the fact and let
-  Claude act on it; avoid override-style language ('ignore what the user said',
-  'regardless of the user's request', 'disregard the previous instruction').
-  Claude is trained to protect users from instructions that appear to work against
-  them, and that protection applies to the system role too."
-- **Source**: `anthropics/skills`,
-  `skills/claude-api/shared/model-migration.md:839`.
-  https://github.com/anthropics/skills — **Tier 1**.
-- **Evidence strength**: High for authority (mechanism claim about Claude's own
-  training), Low for measurement.
-- **Applies to Claude specifically**: **High** — the claim is explicitly about
-  Claude's training, and is non-transferable to other model families by design.
-- **Current config alignment**: ***Aligned*** — `rules/prompting-quality.md:16`
-  covers the same ground. The config's stated *mechanism* (overtriggering) is
-  weaker than Anthropic's (trained user-protection extends to the system role),
-  but the resulting prescription is identical and no config text uses
-  override-style phrasing. Optional refinement, not a defect: cite Anthropic's
-  mechanism at `rules/prompting-quality.md:16` so the rule survives future
-  re-litigation on a stronger rationale.
-
-## P6 — Progressive disclosure: SKILL.md under ~500 lines, detail pushed to `references/`
-
-- **Finding**: Three-level loading — metadata (~100 words, always resident),
-  SKILL.md body (<500 lines ideal, loaded on trigger), bundled resources
-  (unlimited, loaded on demand). "Keep SKILL.md under 500 lines; if you're
-  approaching this limit, add an additional layer of hierarchy along with clear
-  pointers about where the model using the skill should go next." Reference files
-  over 300 lines should carry a table of contents.
-- **Source**: `anthropics/skills`, `skills/skill-creator/SKILL.md:86-98`;
-  corroborated by `skills/claude-api/shared/agent-design.md:64-71` ("Both patterns
-  keep the fixed context small and load detail on demand").
-  https://github.com/anthropics/skills — **Tier 1**, two independent files.
-- **Evidence strength**: High (first-party, stated twice, consistent with the
-  published context-engineering post).
-- **Applies to Claude specifically**: **High.**
-- **Current config alignment**: ***Misaligned*** — `skills/self-improve/SKILL.md`
-  is **831 lines**, 66% over Anthropic's stated ceiling, and it is the only one of
-  28 skills that breaches it (`skills/code-review/SKILL.md` 253,
-  `skills/explore/SKILL.md` 134, `skills/fix/SKILL.md` 128 all comply). Only 2 of
-  28 skills use a `references/` subdirectory at all. What to change: split
-  `skills/self-improve/SKILL.md` — the eval/audit rubrics and the research-source
-  block are the natural extractions — into `skills/self-improve/references/`, and
-  leave pointers in the body. The rest of the skill corpus is in good shape; this
-  is one file, not a systemic problem.
-
-## P7 — Skills and agent prompts should ship with test cases and a baseline comparison
-
-- **Finding**: Anthropic's authoring loop is not write-then-ship. After drafting:
-  produce 2–3 realistic test prompts, save to `evals/evals.json`, spawn
-  **with-skill and baseline runs in the same turn**, draft assertions while runs
-  are in flight, grade, aggregate, and iterate. There is a separate
-  description-optimization loop for trigger accuracy, with dedicated grader,
-  analyzer, and comparator sub-agents.
-- **Source**: `anthropics/skills`, `skills/skill-creator/SKILL.md:141-408`, plus
-  `skills/skill-creator/agents/{grader,analyzer,comparator}.md` and
-  `references/schemas.md`. https://github.com/anthropics/skills — **Tier 1**.
-- **Evidence strength**: High (first-party, fully specified with runnable scripts).
-- **Applies to Claude specifically**: **High.**
-- **Current config alignment**: ***Misaligned*** — no eval harness exists anywhere
-  in `~/.claude`: `find` for `evals/`, `eval*.json`, or `test-cases*` returns
-  empty across all 28 skills and 128 agents. Every prompt in this repo is
-  unvalidated by construction; changes are justified by argument, never by
-  measurement. This is the widest structural gap between the config and current
-  first-party practice. What to change: adopt the pattern for the highest-traffic
-  skills first — `skills/code-review/`, `skills/fix/`, `skills/plan-mission/` —
-  by adding `evals/evals.json` with 2–3 realistic prompts each and running the
-  baseline-vs-with-skill comparison. Scoping to three skills keeps this tractable;
-  a repo-wide rollout is not warranted yet.
-
-## P8 — Instruction specificity: unmeasurable checklist items consume budget without constraining
-
-- **Finding**: Two Tier-1 sources converge. Anthropic on altitude: prompts must be
-  "specific enough to guide behavior effectively, yet flexible enough to provide
-  the model with strong heuristics," with the vague failure mode being guidance
-  that "fails to give the LLM concrete signals for desired outputs." Anthropic on
-  examples: "curate a set of diverse, canonical examples that effectively portray
-  the expected behavior of the agent. For an LLM, examples are the 'pictures'
-  worth a thousand words." Reinforced by MOSAIC-style constraint budgeting — vague
-  items still count against the per-section limit and dilute the real constraints.
-- **Source**: Anthropic, "Effective context engineering for AI agents,"
-  https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents
-  — **Tier 1** (official Anthropic engineering doc); plus `anthropics/skills`,
-  `skills/skill-creator/SKILL.md:115-135` (Writing Patterns / Examples pattern).
-- **Evidence strength**: High for authority, Medium for measurement.
-- **Applies to Claude specifically**: **High.**
-- **Current config alignment**: ***Misaligned***, on two counts.
-  (a) **Filler checklist lines** — 98 lines matching the adverb-stacked
-  unmeasurable pattern `^- <Word> <word> <adverb>$` across **46 of 128** agent
-  files. Worked example, `agents/10-research-analysis/research-analyst.md:12-16`:
-  "Analysis comprehensive achieved properly / Synthesis clear delivered
-  effectively / Insights actionable provided strategically / Bias minimized
-  controlled continuously." These constrain nothing, are unverifiable, and count
-  against the ≤6 constraint budget the config sets at
-  `rules/prompting-quality.md:77-80`. Contrast the same repo done right:
-  `agents/04-quality-security/code-reviewer.md:14` ("Cyclomatic complexity < 10
-  maintained") and `agents/01-core-development/backend-developer.md:8`
-  ("enforce 90% test coverage... meet the per-endpoint p95 latency target"). What
-  to change: delete or make measurable the 98 flagged lines in those 46 files.
-  (b) **No worked examples** — grep for `^**Example`, `^Example N`, `^Input:` across
-  `agents/` returns **0 of 128**; only 9 of 128 contain any fenced block at all.
-  Anthropic ranks examples as the highest-leverage instruction component and the
-  config uses them nowhere in its agent corpus. What to change: add one
-  input/output example to the highest-traffic agents (`code-reviewer`, `debugger`,
-  `backend-developer`), matching the format at `skills/skill-creator/SKILL.md:129-135`.
-  Noted for fairness: `rules/prompting-quality.md:12-14` *does* model the
-  weak/strong example pattern — the rule knows better than the agent corpus does.
-
-## P9 — Scale-aware brevity constraints (the pre-seeded finding), evaluated
-
-- **Finding as claimed**: explicit brevity constraints suppress scale-dependent
-  verbosity, yielding up to 26pp accuracy gain and reversing large-vs-small model
-  performance hierarchies; sharpest on math/science.
-- **Source**: Hakim. "Brevity Constraints Reverse Performance Hierarchies in
-  Language Models." arXiv:2604.00025, submitted **11 Mar 2026**.
-  https://arxiv.org/abs/2604.00025 — **Tier 4 (preprint, NOT peer-reviewed)**.
-- **Verification performed**: fetched the abstract directly. Confirmed: 31 models,
-  0.5B–405B parameters, 1,485 problems across 5 datasets. Confirmed the headline
-  26pp figure and the 7.7pp/28.4pp reversal figures. Confirmed the abstract names
-  **no frontier closed model** — no Claude, GPT, or Gemini variant appears.
-- **Evidence strength**: Medium-Low. Single preprint, no replication located, and
-  the parameter range tops out at 405B open-weight — the regime the claim would be
-  applied to (Opus-tier) is outside the tested range entirely.
-- **Applies to Claude specifically**: **Low.** "Scale-dependent verbosity" is
-  inferred to continue past 405B into Opus-tier; the paper does not measure it.
-  Applying it to Claude is an extrapolation across both a scale gap and an
-  open/closed training gap.
-- **Current config alignment**: ***Config is better.*** Three reasons, each
-  checked rather than assumed.
-  1. **The characterization is honest.** `rules/prompting-quality.md:103-108`
-     reads: "preprint... tested only on open models, not validated on planning
-     tasks or Opus-tier agents specifically. Opus-tier models have been observed
-     in practice to over-elaborate without explicit constraint — treat this as an
-     operational heuristic, not an established finding." That is a more accurate
-     statement of the evidence than the paper's own abstract, which asserts
-     "scale-aware prompt engineering" as a general necessity. The softening in
-     `4385fc7 docs(rules): correct rule-residency claim, soften 2604 citation`
-     was the right call and should not be reverted. Only nit: the citation says
-     "Hakim, 2026" in body text while the task brief says 2025 — arXiv confirms
-     **2026**, so the config is correct and the brief is wrong.
-  2. **The rule is actually applied.** `rules/prompting-quality.md:110-111`
-     requires every Opus agent prompt to carry a brevity constraint. Audited all
-     7 Opus-routed agents (3 × `model: opus`, 4 × `model: opusplan`) — **7 of 7
-     comply**, each with an explicit output *shape* rather than a bare length cap:
-     `agents/plantuml-visual-qa.md:12`, `agents/04-quality-security/ad-security-reviewer.md:9`,
-     `agents/04-quality-security/powershell-security-hardening.md`,
-     `agents/05-data-ai/llm-architect.md:9`, `agents/03-infrastructure/cloud-architect.md:10`,
-     `agents/01-core-development/graphql-architect.md`,
-     `agents/02-language-specialists/java-architect.md`. Specifying shape, not just
-     brevity, is stronger than the paper's intervention.
-  3. **Scale-aware routing is covered in both files.** `rules/parallelism.md:123-135`
-     ("Opus behavioral compensation") and `rules/parallelism.md:136-152` ("Fable
-     behavioral compensation," which *inverts* the constraints) encode
-     per-model-family prompt adaptation — a more sophisticated position than
-     2604.00025's single global brevity lever. `rules/prompting-quality.md:116-117`
-     carries the correct exception (verbosity is right when reasoning trace is
-     the deliverable). Answering the brief's three questions directly: yes, Opus
-     prompts include brevity constraints; yes, `parallelism.md` covers scale-aware
-     prompting; yes, `prompting-quality.md` does too — and its characterization of
-     the evidence is honest.
-
-## P10 — Compression is U-shaped: medium compression is the worst regime, not the safest
-
-- **Finding**: Constraint compliance and semantic accuracy are statistically
-  orthogonal (r=0.193, p=0.084), with constraint effects **2.9× larger** than
-  semantic effects. Performance follows a U-curve across compression: extreme
-  compression (~2 words) outperforms *medium* compression (~27 words), where
-  constraint violations peak at **97.2% prevalence**. Attributed mechanism: RLHF
-  helpfulness behaviors override constraint adherence specifically in the medium
-  band; suppressing those signals improved compliance by 598%.
-- **Source**: "Separating Constraint Compliance from Semantic Accuracy"
-  (Compression-Decay Comprehension Test). arXiv:2512.17920, submitted 2 Dec 2025.
-  https://arxiv.org/abs/2512.17920 — **Tier 4 (preprint, NOT peer-reviewed)**.
-  9 frontier LLMs, 8 concepts, 5 compression levels.
-- **Evidence strength**: Medium-Low. Preprint; the model list is not disclosed in
-  the abstract, so Claude inclusion is unconfirmed; the 598% figure comes from an
-  ablation, not a deployment condition.
-- **Applies to Claude specifically**: **Medium.** "Frontier LLMs" plausibly
-  includes Claude and the RLHF-helpfulness mechanism is generic to RLHF'd
-  assistants, but this is inference — the paper does not name the models. Do not
-  treat as Claude-validated.
-- **Current config alignment**: ***Misaligned***, though not on the U-curve —
-  on the two self-referential claims in the same section.
-  `rules/prompting-quality.md:36-41` asserts the `rules/` footprint is "~62KB...
-  22 files, ~10.3k words / ~14k tokens." Measured today: **23 files, 72,367
-  bytes** — roughly 17% larger than the documented figure and one file heavier
-  (`rules/diagrams.md` was added in `73837bd` without updating the count). A rule
-  whose stated purpose is auditing instruction bloat has itself drifted.
-  Second and more substantive: the section's prescribed mitigation — "prefer
-  task-scoped reading of the one or two relevant rule files over loading the set"
-  — **is inoperative**. All 23 rule files were injected verbatim into this
-  session's context before any task-scoped reading could occur; confirmed by
-  direct observation of the system prompt, not inferred. Task-scoped reading
-  cannot reduce a cost that has already been paid at session start.
-  What to change: correct the figures at `rules/prompting-quality.md:36-38` to
-  23 files / ~72KB, and replace the inoperative mitigation with one that acts on
-  the actual lever — reducing resident bytes (consolidate or trim rule files), or
-  moving domain-specific rules behind `paths:` frontmatter as the same file
-  already recommends at `:54-55`. On the U-curve itself the config needs no
-  change: its guidance targets *authoring* concision, not input compression, and
-  a single preprint with an undisclosed model list does not justify restructuring
-  a working rule. Recording the U-curve as a caution against half-compressing
-  rule files during any future trim is sufficient.
-
-## P11 — Policy-document length degrades compliance; primacy favors early placement
-
-- **Finding**: Agentic policy documents expand with requirements and impose
-  compliance cost; complex *conditional* specifications governing workflows are
-  the hardest category for agents to follow. The paper's remedy is Category-Aware
-  Policy Continued Pretraining (CAP-CPT), which parses policies into factual,
-  behavioral, and conditional categories and internalizes them via pretraining
-  loss — up to 41%/22% gains and 97.3% prompt-length reduction.
-- **Source**: "Analyzing and Internalizing Complex Policy Documents for LLM
-  Agents." arXiv:2510.11588v1, submitted 13 Oct 2025, 42pp, cs.AI.
-  https://arxiv.org/abs/2510.11588 — **Tier 4 (preprint, NOT peer-reviewed)**.
-- **Evidence strength**: Low **for this config's purposes**. The headline results
-  are a *fine-tuning* method, not a prompt-authoring technique. Headline numbers
-  are on **Qwen-3-32B** only.
-- **Applies to Claude specifically**: **Low.** CAP-CPT requires modifying model
-  weights — unavailable and irrelevant to a Claude Code config. The
-  transferable residue is the taxonomy (factual / behavioral / conditional) and
-  the observation that conditional rules are the expensive kind.
-- **Current config alignment**: ***Config is better.*** The config already
-  organizes rules by domain with pointer-based indexing (`CLAUDE.md:60-73`), keeps
-  `CLAUDE.md` at **3,921 bytes** — genuinely under the 4KB ceiling it sets for
-  itself at `rules/prompting-quality.md:27-29` — and front-loads the highest-
-  priority material (Interaction Style, Verification) at `CLAUDE.md:3-24`, which
-  is what the primacy result would recommend anyway. Adopting anything further
-  from this paper would mean importing a weight-modification method as if it were
-  a prompting principle. Declining it is correct.
-
----
-
-## Summary tally
-
-| Verdict | Count | Principles |
+| URL | Status | Content |
 |---|---|---|
-| Misaligned | 7 | P1, P2, P3, P6, P7, P8, P10 |
-| Aligned | 2 | P4, P5 |
-| Config is better | 2 | P9, P11 |
+| https://airc.nist.gov/airmf-resources/airmf/ | 200 | rich (NIST fetch 1/3) |
+| https://airc.nist.gov/airmf-resources/playbook/audit-log/ | 200 | rich (NIST fetch 2/3) |
+| https://airc.nist.gov/airmf-resources/playbook/ | 200 | rich, but does NOT enumerate subcategories (NIST fetch 3/3) |
+| https://www.anthropic.com/research | 200 | rich (Agent C active URL) |
+| https://arxiv.org/abs/2607.19257 | 200 | rich — paper 1 |
+| https://arxiv.org/pdf/2606.20683 | 200 | PDF, truncated extraction — paper 2 |
+| https://arxiv.org/html/2502.04295v3 | 200 | rich — paper 3 |
+| https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents | 200 | rich (tier-3 practitioner) |
 
-**Overall judgment: aligned-to-ahead on doctrine, behind on validation.**
+WebSearch runs: arxiv prompt/instruction design (7 results); Anthropic
+engineering context/harness guidance (7 results). No repos cloned — no
+candidate repo met the provenance gate with a structurally novel approach.
 
-Where the config states a principle, it is generally current with or ahead of the
-field — its treatment of the brevity preprint (P9) is more epistemically careful
-than the paper itself, and its per-model-family prompt compensation
-(`rules/parallelism.md:123-152`) has no equivalent in any source surveyed. The
-weaknesses are not doctrinal. They are (a) execution drift between what the rules
-say and what the 128-file agent corpus does — 98 unmeasurable checklist lines,
-0 worked examples, one 831-line skill; and (b) the absence of any measurement
-loop at all (P7), which is what allows drift to accumulate unnoticed.
+---
 
-Two Misaligned items are cheap and high-value and should go first: **P2**
-(boundary precision in sub-agent prompts — targets the top measured orchestration
-failure mode, costs nothing, saves tokens) and **P8a** (delete 98 filler lines
-across 46 files — pure subtraction, no judgment calls). **P7** is the highest
-long-term value and the largest effort; scope it to three skills, not the corpus.
+## Prompt-structure assessments
 
-## Preprint register
+### P1 — Instruction count, not per-section constraint count, is the binding limit
 
-Every arxiv source above is a **preprint and not peer-reviewed**:
-arXiv:2606.08878 (PerspectiveGap), arXiv:2604.00025 (Hakim, brevity),
-arXiv:2512.17920 (CDCT), arXiv:2510.11588 (policy internalization).
-Per `rules/research-sources.md`, Tier 4 is admissible for AI/ML topics only and
-must carry this flag. No peer-reviewed (Tier 2) source on system-prompt authoring
-surfaced in this sweep — the practice is running ahead of the literature, which
-is itself a finding: on this topic, Anthropic's first-party repos are the
-strongest evidence available, and they were weighted accordingly.
+- **Finding**: Perfect-response rate collapses to zero by N=80 instructions
+  for every model, format, and placement tested.
+- **Source**: arxiv:2607.19257, *Prompt Design at Scale* (Eliav, 2026),
+  Tier 4 — **preprint, not peer-reviewed**. 5 models, VeyraBench,
+  instruction counts 10–160.
+- **Evidence strength**: Medium (preprint, controlled synthetic benchmark).
+- **Applies to Claude**: Medium — instruction-following models were in the
+  test set family, but no Opus/Sonnet-tier model was named.
+- **Alignment**: Aligned. `rules/prompting-quality.md:70-82` (Constraint
+  budget) already caps ≤6 hard constraints per section with degradation
+  bands at 7–15 and >15, sourced to MOSAIC (arxiv:2601.18554). This paper
+  is a second, independent source agreeing on the same monotone-degradation
+  shape.
+- **Verdict**: **Aligned** — `rules/prompting-quality.md:70-82`. Upgrade
+  available: the constraint budget now rests on two independent preprints,
+  not one; the rule's confidence wording could say so.
 
-## Sources
+### P2 — Instruction *placement* matters at least as much as format
 
-- [PerspectiveGap: A Benchmark for Multi-Agent Orchestration Prompting (arXiv:2606.08878)](https://arxiv.org/abs/2606.08878)
-- [Brevity Constraints Reverse Performance Hierarchies in Language Models (arXiv:2604.00025)](https://arxiv.org/abs/2604.00025)
-- [Separating Constraint Compliance from Semantic Accuracy / CDCT (arXiv:2512.17920)](https://arxiv.org/abs/2512.17920)
-- [Analyzing and Internalizing Complex Policy Documents for LLM Agents (arXiv:2510.11588)](https://arxiv.org/abs/2510.11588)
-- [Effective context engineering for AI agents — Anthropic](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)
-- [Anthropic Research index](https://www.anthropic.com/research)
-- [Anthropic Engineering index](https://www.anthropic.com/engineering)
-- [anthropics/skills](https://github.com/anthropics/skills)
-- [Piebald-AI/claude-code-system-prompts](https://github.com/Piebald-AI/claude-code-system-prompts)
+- **Finding**: Placement effects on adherence are at least as large as
+  format effects in most models tested.
+- **Source**: arxiv:2607.19257, Tier 4 — **preprint, not peer-reviewed**.
+- **Evidence strength**: Medium.
+- **Applies to Claude**: Medium.
+- **Alignment**: Misaligned (gap). `rules/prompting-quality.md` governs
+  constraint *count* (:70-82), *verb register* (:84-101), and *brevity*
+  (:103-117) but says nothing about where in a prompt a constraint should
+  sit. `rules/parallelism.md:33-82` orders agent-prompt sections but the
+  ordering is justified as an assembly sequence, not as a placement-effect
+  finding.
+- **Verdict**: **Misaligned** — `rules/prompting-quality.md:70` (section
+  boundary). **Fix**: add one bullet to the Constraint budget section:
+  "Place hard constraints adjacent to the task they bind, not in a trailing
+  block — placement effects on adherence are comparable to format effects
+  (arxiv:2607.19257, preprint)." **Confidence: 60** — single preprint;
+  worth one bullet, not a new section.
+
+### P3 — Markdown carries no universal formatting advantage
+
+- **Finding**: Markdown showed no universal advantage over other formats;
+  one 35B model performed better on plain text.
+- **Source**: arxiv:2607.19257, Tier 4 — **preprint, not peer-reviewed**;
+  corroborated in direction by arxiv:2502.04295 (CFPO, May 2025, Tier 4 —
+  **preprint**): "no universal format excels across all models," 2–8%
+  benchmark spread from format alone.
+- **Evidence strength**: Medium (two independent preprints agree).
+- **Applies to Claude**: Low–Medium — neither study tested a Claude-tier
+  model, and Anthropic's own docs (Tier 1) specify markdown for CLAUDE.md,
+  skills, and agent frontmatter. Tier 1 wins per the judgment criteria.
+- **Alignment**: Config is better. The repo uses markdown because the
+  harness requires it, and nowhere claims markdown improves accuracy — so
+  there is no claim to correct.
+- **Verdict**: **Config is better** — no config claim asserts markdown
+  superiority; the format is harness-mandated, so a model-specific format
+  preference is not actionable here.
+
+### P4 — Format and content must be optimized jointly, not separately
+
+- **Finding**: The optimal format for a prompt depends on its content;
+  separate content/format optimization is suboptimal (CFPO beats
+  content-only by 2–8%).
+- **Source**: arxiv:2502.04295v3 (May 2025), Tier 4 — **preprint, not
+  peer-reviewed**. Mistral-7B, LLaMA-3/3.1-8B, Phi-3-Mini.
+- **Evidence strength**: Medium.
+- **Applies to Claude**: Low — all four tested models are ≤8B open models;
+  the paper's own result is that format sensitivity is model-specific, which
+  blocks transfer to Opus/Sonnet.
+- **Alignment**: Config is better. `rules/prompting-quality.md:84-101`
+  (register shifting) already ties verb choice to intended processing depth
+  — a content/format coupling stated at a level that survives the
+  model-specificity caveat, without an automated search loop the repo has
+  no way to run.
+- **Verdict**: **Config is better** — `rules/prompting-quality.md:84-101`
+  encodes the transferable half of this finding; the automated joint-search
+  half is not applicable to a hand-authored rule set.
+
+### P5 — Context degradation is a cliff at 64–128k, not a gradual slope
+
+- **Finding**: Recall stable through 64–128k tokens, then degrades sharply
+  and format-dependently; accuracy spreads reach 48 points at 128k.
+- **Source**: arxiv:2607.19257, Tier 4 — **preprint, not peer-reviewed**.
+- **Evidence strength**: Medium.
+- **Applies to Claude**: Medium — the repo defaults to 1M-context models
+  (`claude-opus-5[1m]`, Fable 5), so the tested range sits well inside the
+  window the config routinely fills.
+- **Alignment**: Misaligned (gap). `rules/prompting-quality.md:59-68`
+  (Agent context budget) bounds context by *file count* (20–30) and cites
+  attention dilution (arxiv:2509.21361), but names no token threshold.
+  `rules/autonomous-execution.md` compacts between batches on a structural
+  trigger (batch boundary), not on a context-fill trigger.
+- **Verdict**: **Misaligned** — `rules/prompting-quality.md:64`. **Fix**:
+  add to the Agent context budget bullets: "A 1M window is not a licence to
+  fill it — recall degrades sharply past roughly 128k tokens
+  (arxiv:2607.19257, preprint). Compact or split when an agent's context
+  passes that band, regardless of file count." **Confidence: 65** — the
+  file-count cap already proxies for this in most cases, so the fix is
+  additive, not corrective.
+
+### P6 — Explicit brevity constraints on high-capability models
+
+- **Finding**: See the pre-seeded assessment below (arxiv:2604.00025).
+- **Alignment**: Aligned. `rules/prompting-quality.md:103-117` owns the
+  caveated wording; `agents/plantuml-visual-qa.md:12` — the repo's only
+  `model: opus` agent — carries "Return a structured table … No preamble,
+  no trailing summary"; `skills/self-improve/SKILL.md:112` instructs the
+  same for Opus-routed Phase 3 synthesis.
+- **Verdict**: **Aligned** — `rules/prompting-quality.md:103-117`,
+  `agents/plantuml-visual-qa.md:12`. See pre-seeded block for the sampling
+  caveat.
+
+### P7 — Long-running agents need a durable progress surface, not compaction alone
+
+- **Finding**: "Compaction isn't sufficient" for work spanning multiple
+  context windows; use a progress file, a structured status file the agent
+  may only narrowly edit, descriptive git commits, and a session-startup
+  sequence that reads progress + git log before new work. Use a distinct
+  initializer prompt for the first context window.
+- **Source**: https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents
+  (2025-11-26), Tier 3 practitioner (Anthropic engineering).
+- **Evidence strength**: Medium (single high-credibility practitioner source).
+- **Applies to Claude**: High — authored by the model vendor about this
+  exact harness.
+- **Alignment**: Aligned. `rules/autonomous-execution.md` implements every
+  element: the mission-brief directory as the progress surface, the
+  "After Every Compaction" re-read-from-disk rule, checkbox state as the
+  canonical progress record, one-commit-per-task discipline, and the
+  Startup Sequence (read README.md → decision-journal → batch overview).
+  `CLAUDE.md` adds the PostCompact hook restoring condensed rules.
+- **Verdict**: **Aligned** — `rules/autonomous-execution.md` Startup
+  Sequence and "After Every Compaction". The repo is *ahead* of the post on
+  one point: it also restores rule content via a PostCompact hook, which
+  the post does not describe.
+
+### P8 — Curate a small high-signal tool set per agent
+
+- **Finding**: 2026 practice is a small curated tool set per agent, with a
+  tool-search mechanism exposing the long tail; tool parameters should be
+  unambiguously named (`user_id`, not `user`).
+- **Source**: Anthropic engineering — writing-tools-for-agents and
+  effective-context-engineering-for-ai-agents (Tier 3, surfaced via
+  WebSearch; not individually fetched this run).
+- **Evidence strength**: Low–Medium (search-snippet level, not full read).
+- **Applies to Claude**: High.
+- **Alignment**: Aligned. `rules/parallelism.md:161` caps agents at >8 tools
+  ("Scope to 3–5 tools per agent") with the MCP cohesive-group carve-out at
+  `rules/parallelism.md:163-175`.
+- **Verdict**: **Aligned** — `rules/parallelism.md:161-175`. Flagged as
+  snippet-level evidence; a full fetch of the two Anthropic engineering
+  posts is queued as a candidate URL below.
+
+### P9 — Anthropic's engineering blog is absent from the tier-3 source list
+
+- **Finding**: The most directly applicable practitioner source for this
+  repo's subject matter is not named in its own source hierarchy.
+- **Source**: config read, not research.
+- **Alignment**: Misaligned. `rules/research-sources.md:21` lists NIST AIRC
+  under Tier 1, and the Tier 3 block names Google SRE, Netflix, Cloudflare,
+  AWS, Stripe, Martin Fowler, High Scalability — no
+  `anthropic.com/engineering`. Yet
+  `skills/self-improve/references/phase1-research-agents.md:171-173`
+  instructs Agent C to check "Anthropic, Google DeepMind" as tier-3
+  practitioner sources. The rule and the skill disagree.
+- **Verdict**: **Misaligned** — `rules/research-sources.md:21` (Tier 3
+  block immediately following). **Fix**: add
+  `**Anthropic Engineering** — anthropic.com/engineering (agent harness,
+  context engineering, tool design)` to the Tier 3 list. **Confidence: 85**
+  — the skill already treats it as tier 3; the rule file is simply behind.
+
+### P10 — Internal contradiction on `paths:` frontmatter
+
+- **Finding**: `rules/prompting-quality.md:37-40` states `paths:` frontmatter
+  "is not used here: a pilot came back RED and a gate enforces its absence."
+  `rules/prompting-quality.md:56-57`, sixteen lines later, states
+  "Domain-specific rules should use `paths:` frontmatter to load only when
+  matching files are in play." Contradictory instructions in one file are a
+  known compliance degrader (the same mechanism the Constraint budget
+  section at :70-82 guards against).
+- **Source**: config read.
+- **Alignment**: Misaligned.
+- **Verdict**: **Misaligned** — `rules/prompting-quality.md:56-57`.
+  **Fix**: delete lines 56-57; the enforced position is stated at :37-40.
+  **Confidence: 90** — the two statements cannot both hold, and :37-40
+  cites a gate, so it is the surviving one.
+
+---
+
+## Pre-seeded paper (2604.00025) assessment
+
+- **Paper**: Hakim, 2026, *Brevity Constraints Reverse Performance
+  Hierarchies in Language Models*. Tier 4 — **preprint, not peer-reviewed**.
+  31 open models (0.5B–405B), 1,485 problems, 5 math/science datasets. Did
+  not test Opus-tier models, planning, or orchestration.
+- **Does `rules/prompting-quality.md` cover it?** Yes —
+  `rules/prompting-quality.md:103-117` states the finding with the correct
+  scope caveat ("open models only, not validated on planning tasks or
+  Opus-tier agents … an operational heuristic, not a finding") and the
+  reasoning-trace exception at :116-117. Wording matches the paper's actual
+  scope; not overstated.
+- **Does `rules/parallelism.md` cover scale-aware prompting?** Partially.
+  `rules/parallelism.md:129-141` ("Opus behavioral compensation") and
+  :143-160 ("Fable behavioral compensation") are per-model prompt
+  adjustments — scale-aware in substance. But neither block includes the
+  brevity/output-shape instruction; `rules/parallelism.md:129` compensates
+  for over-engineering, not over-elaboration.
+- **Do Opus agent prompts carry brevity constraints?** Sampling was capped
+  by supply, not effort: `grep -c '^model: opus' agents/*.md` returns
+  exactly **1** agent repo-wide (`agents/plantuml-visual-qa.md`), against 2
+  `model: haiku` and no other `model:` frontmatter. That one agent does
+  carry an explicit constraint (`agents/plantuml-visual-qa.md:12`).
+  `skills/self-improve/SKILL.md:112` carries it for Opus-routed synthesis.
+  The requested 3-agent sample is therefore unmeetable — recorded as a
+  sampling gap, not a pass.
+- **Verdict**: **Aligned**, with one additive fix. **Fix**: add to the Opus
+  behavioral compensation list at `rules/parallelism.md:129-141`: "State the
+  output shape and add 'no preamble, no trailing summary' — see the
+  scale-aware brevity section of `prompting-quality.md`." **Confidence: 70**
+  — the guidance exists in `prompting-quality.md`; the gap is only that the
+  Opus-routing block, which is where an orchestrator looks when routing,
+  does not point at it.
+
+---
+
+## NIST refresh
+
+**Edition found (live)**: `AI RMF 1.0`, with the status line "The AI RMF 1.0
+is being updated. A revised version is in progress." Source:
+https://airc.nist.gov/airmf-resources/airmf/ (fetched 2026-09-02).
+
+**Latest Playbook audit-log entry (live)**: **August 2023** — search tagging
+for AI Actors and Topics, formatting adjustments, "Crosswalk Documents"
+section launched, PDF version released. No entry later than August 2023.
+Source: https://airc.nist.gov/airmf-resources/playbook/audit-log/.
+
+### Per-asset provenance
+
+| Asset | edition (stamped) | last-verified | Age (days) | status |
+|---|---|---|---|---|
+| `docs/nist-ai-rmf/README.md` | AI RMF 1.0 (January 2023) | 2026-08-09 | 24 | active |
+| `docs/nist-ai-rmf/crosswalk.md` | AI RMF 1.0 (January 2023) | 2026-08-09 | 24 | active |
+| `docs/nist-ai-rmf/trustworthiness.md` | AI RMF 1.0 (January 2023) | 2026-08-09 | 24 | active |
+
+### Drift verdicts
+
+1. **Stale (>180 days)** — **No drift.** Oldest `last-verified` is
+   2026-08-09, 24 days old, well inside the 180-day threshold. Severity:
+   none. No `code-review-tasks.md` entry.
+2. **Edition moved** — **No drift.** Live edition string `AI RMF 1.0`
+   matches the `edition:` stamped in all three assets. The "being updated"
+   language matches the README's own recorded note at
+   `docs/nist-ai-rmf/README.md` ("AI RMF 1.0 is being revised"); no new
+   numbered edition has published. Severity: none.
+3. **Structural change** — **No drift detected, detection incomplete.**
+   The Playbook audit log's most recent entry (August 2023) is unchanged
+   from the value recorded in `docs/nist-ai-rmf/README.md`, so no
+   renumbering event has been logged since the assets were derived.
+   However, the completeness diff below could not be run mechanically this
+   run. Severity: none asserted; see the caveat.
+
+### Completeness diff
+
+- **Config coverage**: the union of `subcategories-covered` across the three
+  assets is 72 identifiers — GOVERN 19, MAP 18, MEASURE 22, MANAGE 13
+  (counted from the `crosswalk.md` header, which is the superset;
+  `trustworthiness.md`'s 8 are all inside it).
+- **Live enumeration**: **not obtainable within the 3-fetch cap.** Fetch 3
+  went to https://airc.nist.gov/airmf-resources/playbook/, which states only
+  that "Suggestions are aligned to each sub-category within the four AI RMF
+  functions" and links per-function pages; it enumerates no identifiers.
+  The airmf Core page (fetch 1) likewise names only the four functions.
+  `references/nist-refresh.md` forbids reading the source PDFs at runtime.
+- **Result**: **Diff inconclusive this run.** Counted against the AI RMF 1.0
+  Core structure the assets were derived from (72 subcategories: 19/18/22/13),
+  coverage is complete with zero gaps — but that comparison is against the
+  stamped derivation, not against a live re-enumeration, so it is
+  corroboration rather than a diff. No gap found; no gap can be ruled out.
+- **Procedural note for Phase 3**: the three-fetch budget cannot satisfy the
+  completeness diff as written, because no single AIRC HTML page enumerates
+  subcategories. Either the per-function Playbook pages (4 more fetches) or
+  the CSV/JSON Playbook export referenced on the Playbook page must be added
+  to the procedure, or the diff step should be restated as an
+  edition-and-audit-log check only. This is a defect in
+  `skills/self-improve/references/nist-refresh.md`, not in the assets.
+
+---
+
+## Candidate URLs discovered
+
+| URL | purpose | Agent C | 2026-09-02 |
+| --- | --- | --- | --- |
+| https://arxiv.org/abs/2607.19257 | PREPRINT: Prompt Design at Scale — instruction-count collapse (N=80), placement ≥ format effects, 64–128k context cliff | Agent C | 2026-09-02 |
+| https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents | Tier 3 Anthropic: progress files, dual initializer prompt, session-startup sequence for long-running agents | Agent C | 2026-09-02 |
+| https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents | Tier 3 Anthropic: just-in-time context loading, system-prompt composition | Agent C | 2026-09-02 |
+| https://www.anthropic.com/engineering/writing-tools-for-agents | Tier 3 Anthropic: tool-definition design, parameter naming, tool evals | Agent C | 2026-09-02 |
+| https://arxiv.org/pdf/2606.20683 | PREPRINT: survey of agent system and harness design (context, tools, orchestration, memory) | Agent C | 2026-09-02 |
+| https://arxiv.org/html/2502.04295v3 | PREPRINT: CFPO — joint content-format prompt optimization; format effects are model-specific | Agent C | 2026-09-02 |
+| https://www.anthropic.com/research/teaching-claude-why | Anthropic research (2026-05-08): reducing agentic misalignment | Agent C | 2026-09-02 |
+
+---
+
+## Fetch-guard warnings
+
+1. **Thin for purpose (not thin by byte count)**:
+   https://airc.nist.gov/airmf-resources/playbook/ returned 200 with rich
+   content but does **not** enumerate GOVERN/MAP/MEASURE/MANAGE subcategory
+   identifiers. The completeness diff in
+   `skills/self-improve/references/nist-refresh.md` cannot be executed from
+   this page. Blind spot, not "no gaps found."
+2. **Partial extraction**: https://arxiv.org/pdf/2606.20683 returned a 1.1MB
+   PDF whose extraction truncated before the harness-design recommendation
+   tables. Only citation-level detail was recoverable; no quantitative claim
+   from this paper is used above. Re-fetch the HTML rendering next run.
+3. **Snippet-level only**: the two Anthropic engineering posts backing P8
+   (writing-tools-for-agents, effective-context-engineering) were read from
+   WebSearch snippets, not fetched. P8's evidence strength is marked
+   Low–Medium for that reason; both are queued as candidate URLs.
+4. **Sampling shortfall**: the task specified sampling 3 Opus-routed agent
+   prompts. Only 1 agent repo-wide carries `model: opus`
+   (`agents/plantuml-visual-qa.md`). Not a fetch failure, but the same class
+   of gap — recorded rather than silently satisfied.

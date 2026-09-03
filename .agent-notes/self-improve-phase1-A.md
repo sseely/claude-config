@@ -1,142 +1,110 @@
-# Self-Improve Phase 1 — Agent A Findings (2026-08-01)
+# Self-Improve Phase 1 — Agent A (Claude Code ecosystem) — 2026-09-02
 
-Installed Claude Code: 2.1.220. Supersedes the 2026-07-24 copy of this file.
+## Sources fetched
 
-## URLs fetched this run
-- **Fully read (200, rich content)**: changelog, hooks, settings, agent-teams,
-  routines, sub-agents, agent-view, memory, skills
-- **Skipped (priority 3, time budget)**: overview, mcp, tutorials, worktrees —
-  all four are already tracked as `active` in `research-urls.md` from the
-  2026-07-24 promotion, so re-fetching was low-value this run.
-- **Failed / thin**: none.
+| URL | Status | Chars | Coverage |
+|---|---|---|---|
+| https://code.claude.com/docs/en/changelog | 200 | ~36,000 (saved to file) | Fully read — 2.1.231 (Aug 12) through 2.1.258 (Sep 1, 2026), overlapping the 2026-08-01 prior-run boundary as instructed |
+| https://code.claude.com/docs/en/hooks | 200 | ~10,000 | Fully read — complete hook-event reference |
+| https://code.claude.com/docs/en/settings | 200 | ~28,000 | Fully read — precedence/scope page (the separate settings-reference key list is not in the Agent A URL table) |
+| https://code.claude.com/docs/en/memory | 200 | ~11,000 | Fully read |
+| https://code.claude.com/docs/en/sub-agents | 200 | ~5,000 | Fully read |
+| https://code.claude.com/docs/en/mcp | 200 | ~6,500 | Fully read |
+| https://code.claude.com/docs/en/overview | active, not fetched | — | Skipped this run — time-boxed to priority 1+2 pages per phase1-research-agents.md fetch order |
+| https://code.claude.com/docs/en/skills | active, not fetched | — | Skipped |
+| https://code.claude.com/docs/en/agent-teams | active, not fetched | — | Skipped (changelog 2.1.232 covers most of what changed here) |
+| https://code.claude.com/docs/en/agent-view | active, not fetched | — | Skipped |
+| https://code.claude.com/docs/en/routines | active, not fetched | — | Skipped |
+| https://code.claude.com/docs/en/worktrees | active, not fetched | — | Skipped |
+| https://code.claude.com/docs/en/tutorials | active, not fetched | — | Skipped |
+| https://www.anthropic.com/blog | active, not fetched | — | Secondary/optional per its own row; skipped, no topic gap found that required it |
 
-## Resolved since the 2026-07-24 audit (verified this run, not re-flagged)
-- **`MultiEdit` tool references removed from all agent files.**
-  `grep -rl "MultiEdit" agents/` → 0 matches (was 44 files on 2026-07-24).
-  Confirmed by recent commits in `git log` ("drop MultiEdit" across
-  category dirs). The background-subagent tool-resolution risk flagged
-  last run is closed.
-- **`~/.claude/agents/explore.md` and `plan.md` now exist**, overriding the
-  built-in Explore/Plan subagents' model inheritance. The 2026-07-24
-  cost-leak finding (exploration billing at session default model instead
-  of Haiku) is closed.
-- **`settings.json` `model` is now `"opus"`**, not `"fable"` as in the
-  2026-07-24 snapshot — see Model Routing Improvements below for why this
-  now matters differently (Opus 5 version gate).
-
-Several other 2026-07-24 findings remain open and are repeated below with
-fresh grep evidence rather than re-derived from scratch.
+No fetch failures this run — every page fetched returned 200 and well over the 1000-char thin-content bar. The 8 unfetched active URLs are a coverage gap from time-boxing, not fetch-guard failures; flag for next run if Phase 4 finds a gap traceable to skills/agent-teams/agent-view/routines/worktrees.
 
 ---
 
 ## New Features Unused
 
-- Feature: Path-scoped rules (`paths:` YAML frontmatter in `.claude/rules/*.md`) — loads a rule only when Claude touches matching files, instead of every session.
-- Config status: UNUSED — `grep -rln "^paths:" rules/` → empty across all rule files. **REPEAT finding**, open since at least the 2026-06-20 audit, confirmed unresolved across three subsequent audits including this one.
-- Recommendation: `api-design.md` → scope to `src/api/**`; `logging.md`/`error-handling.md`/`observability.md` → scope to source globs; `naming-conventions.md` → scope to source + test globs. Rules like `commits.md`, `pr-workflow.md`, `diagnosis.md`, `parallelism.md` are session-wide by nature and should stay unscoped. `prompting-quality.md` already documents this exact recommendation ("Domain-specific rules should use `paths:` frontmatter") — the rule file is telling the config to do this and it hasn't been done.
-- Confidence: 75
+- **Critical** — TodoWrite/TaskCreate/TaskCompleted/TaskUpdate/TaskList are **off by default** on Opus 4.8, Sonnet 5, Fable 5, Mythos 5, and newer (source: changelog 2.1.233, Aug 14 2026: "Todo/task-tracking tools ... are no longer available on Opus 4.8, Sonnet 5, Fable 5, Mythos 5, and newer models; set `CLAUDE_CODE_ENABLE_TODO_TOOLS=1` to bring them back"). Config evidence: `CLAUDE.md:44` ("Use TodoWrite to track progress") and `rules/autonomous-execution.md:174` ("Use TodoWrite for granular sub-steps within a task") both instruct use of the tool; `settings.json:128` pins `"model": "claude-fable-5-1[1m]"` and `rules/parallelism.md`'s whole model table routes to Sonnet 5/Opus 5/Fable 5 — every model this config uses. Grepped `settings.json`, `settings.local.json` for `CLAUDE_CODE_ENABLE_TODO_TOOLS`: not found. Confidence: 90. Fix: add `"env": {"CLAUDE_CODE_ENABLE_TODO_TOOLS": "1"}` to `settings.json`, or rewrite the two instructions to stop assuming TodoWrite exists.
 
-- Feature: Nested subagent spawn depth default raised 1 → 3 layers (v2.1.219); override via `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH`.
-- Config status: UNUSED (no override) — `grep -n "CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH" settings.json` → no match. The default behavioral change is live in this config with no explicit review.
-- Recommendation: Add a line to `rules/parallelism.md` noting the new 3-layer default so agent authors know nested delegation (e.g. a reviewer agent dispatching per-finding verifiers) is now possible without extra config, and that it increases the effective token/cost multiplier of a single Agent-tool call.
-- Confidence: 75
+- **Suggestion** — Built-in **"Concise" output style** (changelog 2.1.237, Aug 20 2026): "Claude leads with results and skips preamble and narration ... just as thoroughly." `rules/prompting-quality.md`'s "Scale-aware brevity constraints" section hand-writes the same effect per-prompt ("Return only the structured result — no preamble, no trailing summary"). Grepped config for `outputStyle`/`Concise`: not found. Confidence: 75. Fix: evaluate `outputStyle: "Concise"` in Opus-tier agent frontmatter as a native alternative/supplement to the hand-rolled brevity text, cutting per-prompt token overhead.
 
-- Feature: `isolation: worktree` subagent frontmatter/call field — runs a subagent in an isolated git worktree, auto-cleaned if no changes made.
-- Config status: UNUSED — `grep -rn "isolation: worktree\|isolation:worktree" agents/ rules/ skills/` → no matches outside `research-urls.md`'s own tracking table.
-- Recommendation: `rules/autonomous-execution.md`'s parallel-batch model relies on write-set discipline alone to avoid cross-file conflicts. For batches with any risk of accidental overlap, prefer `isolation: "worktree"` on the Agent tool call over trusting write-set bookkeeping.
-- Confidence: 60
+- **Suggestion** — Subagent `isolation: worktree` frontmatter (confirmed live on the sub-agents doc) is completely unused: `grep -rln "^isolation:" agents/` returns nothing. `rules/parallelism.md`'s file-ownership planning step exists specifically to avoid write conflicts between parallel agents — worktree isolation removes that need for agents that make speculative/exploratory edits. Confidence: 70. Fix: evaluate `isolation: worktree` for agents like `refactoring-specialist` or `legacy-modernizer` when spawned in parallel.
 
-- Feature: `fallbackModel` setting — ordered fallback list tried when the primary model is overloaded/unavailable.
-- Config status: UNUSED — `grep -n "fallbackModel" settings.json` → no match.
-- Recommendation: With `"model": "opus"` as the sole session model, an Opus outage/overload stalls interactive sessions with no automatic degrade path. Add `"fallbackModel": ["sonnet"]` to `settings.json`.
-- Confidence: 60
+- **Note** — `background: true` and `maxTurns` subagent frontmatter fields (maxTurns added 2.1.246, marks output partial at the limit) are unused (`grep -rln "maxTurns\|^background:" agents/` empty). `maxTurns` would let bounded iterative agents fail gracefully instead of silently exhausting turns. Confidence: 60. Fix: consider adding `maxTurns` to agents used inside the `/fix` skill's 5-iteration loop as a belt-and-suspenders cap.
+
+- **Note** — `Agent(worker, researcher)` tool-restriction syntax (whitelist which named subagents an agent may spawn) is unused (`grep -rn "^tools:.*Agent(" agents/` empty). Complements the global `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` cap in `rules/parallelism.md` with per-agent fan-out control. Confidence: 55. Fix: consider for autonomous-execution-heavy agents that should only ever spawn specific specialists.
+
+- **Note** — `CLAUDE_CODE_NEW_INIT=1` enables an interactive multi-phase `/init` (explores codebase via subagent, asks follow-ups, proposes CLAUDE.md/skills/hooks for review before writing). `hooks/project-init.sh` does not reference it. Confidence: 70. Fix: low priority; worth trying next time a new project is bootstrapped.
+
+---
 
 ## Hook Opportunities
 
-- Feature: New/still-unwired hook events — `SessionEnd`, `SubagentStop`, `TaskCreated`, `TaskCompleted`, `PostToolBatch`, `PermissionRequest`, `PermissionDenied`, `WorktreeCreate`/`WorktreeRemove`, `TeammateIdle`, `ConfigChange`, `StopFailure`, `PostToolUseFailure`.
-- Config status: UNUSED — `settings.json` hooks block wires only `SessionStart`, `UserPromptSubmit` (x2), `PreCompact`, `PostCompact`, `PreToolUse` (Bash), `PostToolUse` (Write|Edit), `InstructionsLoaded`, `Stop`. **REPEAT finding** across at least 3 prior audits (`self-improve-2026-07-01-R2.md` Finding 4.1, `self-improve-phase1-A.md` 2026-07-24 copy) — unactioned.
-- Recommendation: Highest-value single addition given `rules/autonomous-execution.md`'s quality-gate discipline: a `TaskCompleted` hook that blocks marking a mission-brief task complete without evidence a quality-gate command ran (exit 2 to reject + feedback). This mechanically enforces a rule currently enforced only by the model self-policing its own TodoWrite/README.md checkbox updates.
-- Confidence: 70
+Current wiring (`settings.json:129-234`): `SessionStart`, `UserPromptSubmit`, `PostCompact`, `PreCompact`, `PreToolUse` (Bash, Grep), `PostToolUse` (Write|Edit), `InstructionsLoaded`, `Stop`. The hooks doc (fully read) lists many event types not in this list: `SessionEnd`, `Setup`, `UserPromptExpansion`, `PostToolUseFailure`, `PermissionRequest`, `PermissionDenied`, `PostToolBatch`, `StopFailure`, `PreModelSwitch`/`PostModelSwitch` (added 2.1.251), `FileChanged`, `ConfigChange`, `CwdChanged`, `DirectoryAdded`, `WorktreeCreate`/`WorktreeRemove`, `SubagentStart`/`SubagentStop`, `TeammateIdle`, `TaskCreated`/`TaskCompleted`, `Notification` (now with granular `notification_type` values), `MessageDisplay`, `Elicitation`/`ElicitationResult`.
 
-- Feature: Subagent-frontmatter `hooks:` field — defines hooks scoped to only that agent's run (fires on `SubagentStop` etc. when the agent is dispatched as a subagent).
-- Config status: UNUSED — `grep -rln "^hooks:" agents/` → empty across all 128 agent files.
-- Recommendation: `code-reviewer.md` and `debugger.md` both carry `memory: user` for cross-session learning already — a scoped `PostToolUse` hook on `debugger.md` that re-runs the failing test after each edit would tighten the loop `skills/fix/SKILL.md` currently drives manually.
-- Confidence: 50
+- **Suggestion** — `SubagentStop` (can block via exit 2) is unused. `rules/autonomous-execution.md`'s Quality Gates procedure relies on the orchestrator remembering to run gates after each batch. Confidence: 65. Fix: prototype a `SubagentStop` hook matched to mission-brief agent types that runs the batch's quality-gate commands and blocks with `additionalContext` on failure.
 
-- Feature: Hook `if` field — scopes a hook to a specific permission-rule pattern (e.g. `"if": "Bash(rm *)"`) instead of the hook body doing its own filtering.
-- Config status: UNUSED — `grep -rn '"if"' . --include="*.json"` → no match anywhere in the repo. The current `PreToolUse` hook (`settings.json:190-200`) matches every `Bash` call and does inline Python regex to filter for `rm -rf /` and `sudo`.
-- Recommendation: Split into two hooks with `"if": "Bash(rm *)"` and `"if": "Bash(sudo *)"` so each only fires for commands that could match, instead of spawning a Python subprocess on every Bash call.
-- Confidence: 55
+- **Suggestion** — `ConfigChange` (matcher includes `skills`; fires when a settings file or skill changes mid-session) is unused. This very skill (`self-improve`) edits `research-urls.md` and could edit `rules/` files mid-run. Confidence: 55. Fix: add a `ConfigChange` hook appending `[timestamp] config changed: <source>` to a log, alongside the existing `hooks/log-instructions-loaded.sh`.
+
+- **Note** — `Notification` now carries `agent_needs_input`/`agent_completed`/`quota_auto_resume_*` types. `hooks/notify-on-stop.sh` only wires `Stop`, which won't fire for a background agent's completion. Confidence: 60. Fix: consider a `Notification` hook filtered to `agent_completed` for autonomous mission-brief runs using background agents.
+
+- **Note** — `PreModelSwitch`/`PostModelSwitch` (added 2.1.251) could log/block model drift, relevant given `settings.json:128` pins a specific model and `settings.json:253-257` overrides Opus-5 effort. Confidence: 50. Fix: low priority; only worth wiring if model-switch drift is observed as a problem.
+
+- **Note** — `PostToolUseFailure` (annotate via stderr after a tool fails) is unused; current `PostToolUse` (`settings.json:197-211`) only fires on success. Confidence: 50. No immediate action.
+
+---
 
 ## Model Routing Improvements
 
-- Feature: Claude Opus 5 (`claude-opus-5`) became the default Opus model at v2.1.219, with 1M context and new fast-mode pricing. `rules/parallelism.md` documents a version gate: `"opus"` alias resolves to Opus 5 only on Claude Code v2.1.219+.
-- Config status: USED — `settings.json:141` sets `"model": "opus"`; installed version 2.1.220 clears the documented gate.
-- Recommendation: None needed — confirms the routing-economics assumptions in `rules/parallelism.md` (Opus 5 ≈ Fable-class capability at ~half Opus 4.8 cost) are now live for this config's main-thread model, not aspirational.
-- Confidence: 85
+(Primarily Agent B's territory; noting only what this run's config reads directly surfaced.)
 
-- Feature: `effortLevel` persisted setting (`low`/`medium`/`high`/`xhigh`).
-- Config status: USED — `settings.json:252` sets `"effortLevel": "high"`, matching `rules/extended-thinking.md`'s stated default.
-- Recommendation: None — correctly configured.
-- Confidence: 90
+- **Warning** — `settings.json:128` sets `"model": "claude-fable-5-1[1m]"`. Changelog 2.1.257 (Sep 1, 2026): "Added Claude Fable 5.1 (`claude-fable-5-1`), now the default Fable model — 1M context ..." (native 1M, same architecture description Anthropic used for plain Fable 5). This skill's own pre-seeded Agent B guidance (`skills/self-improve/references/phase1-research-agents.md:72-73`) states Fable 5 has no `[1m]` variant because it already runs 1M natively and calls `claude-fable-5[1m]` invalid. Fable 5.1 is described the same way, so `claude-fable-5-1[1m]` is very likely the same class of invalid suffix, not merely stale routing. Confidence: 55 (needs Agent B verification against the model-config doc directly — outside this agent's primary source set). Fix: if confirmed invalid, change `settings.json:128` to `"claude-fable-5-1"` (no suffix).
+
+- **Note** — `CLAUDE_CODE_SUBAGENT_MODEL_FORCE` (added 2.1.257, forces every subagent onto one model, overriding per-agent `model:` frontmatter) is correctly **absent** from settings — setting it would silently break `rules/parallelism.md`'s whole per-role model table (Haiku for scoring, Sonnet for implementation, etc.). Confidence: 70. This is a "config is better" note, not a gap — no fix needed.
+
+---
 
 ## MCP Opportunities
 
-- Feature: Subagent-frontmatter `mcpServers:` field — lets an individual agent declare an MCP server inline, scoping its tool schema to only that agent's context instead of the whole session.
-- Config status: UNUSED — `grep -rln "^mcpServers:" agents/` → empty across all 128 agent files. Meanwhile `serena` is declared in project-scoped `.mcp.json` (`/Users/scottseely/.claude/.mcp.json`), so its tool descriptions load into every session's context, even though `rules/lsp.md` states Serena is for subagents only ("Subagents use Serena MCP tools — not the LSP tool").
-- Recommendation: **REPEAT finding** from 2026-07-24 (MCP Opportunities item 1), unactioned. Move the `serena` MCP definition from `.mcp.json` into `mcpServers:` frontmatter on the agents that actually use it (per `rules/lsp.md`'s subagent list), so its schema stops consuming main-session context budget.
-- Confidence: 65
+- **Note** — No `.mcp.json` or custom MCP server definitions exist under `~/.claude` (active servers — serena, webstorm, claude-in-chrome, forge — are registered outside the files this agent's read-set covers). `headersHelper`, per-tool `_meta.anthropic/maxResultSizeChars`, and `CLAUDE_CODE_MCP_AUTO_BACKGROUND_MS` (2-minute auto-background threshold for long MCP tool calls, added 2.1.212) are all unset/unused. Confidence: 50. Fix: no action for this repo now; revisit if MCP server startup latency or long-running tool calls become an observed problem.
 
-- Feature: Duplicate/stray `.claude/.mcp.json` with a `--project` path of `/Users/scottseely/.claude/.claude` (double `.claude` segment), distinct from the root `.mcp.json`'s correct `/Users/scottseely/.claude`.
-- Config status: Present but likely misconfigured — `cat .mcp.json .claude/.mcp.json` shows the two files point Serena at two different, inconsistent project roots.
-- Recommendation: Verify whether `.claude/.mcp.json` is a stray duplicate; if so, delete it. A Serena instance pointed at a non-existent project path could silently return empty symbol-lookup results to any agent that picks it up.
-- Confidence: 60
-
-- Feature: Official MCP plugin marketplace ships ready-to-enable servers (`github`, `playwright`, `gitlab`, `linear`, `terraform`, `context7`, `greptile`, `firebase`, etc.) alongside the LSP plugins already enabled.
-- Config status: PARTIAL — `enabledPlugins` in `settings.json:235-243` enables only LSP plugins + `claude-code-setup`; `ls plugins/marketplaces/claude-plugins-official/external_plugins/` confirms `github`/`playwright` are present in the marketplace but not enabled.
-- Recommendation: `skills/webapp-testing/SKILL.md` drives Playwright via hand-rolled `sync_playwright()` Python scripts rather than the `playwright` MCP plugin already sitting in the marketplace. Evaluate enabling `playwright@claude-plugins-official` for that skill.
-- Confidence: 45
+---
 
 ## Memory System Insights
 
-- Feature: Subagent persistent memory (`memory: user` frontmatter field).
-- Config status: PARTIAL, unchanged since 2026-07-24 — `grep -rln "^memory:" agents/` → only `code-reviewer.md` and `debugger.md` (2 of 128); `ls ~/.claude/agent-memory/` confirms both have populated directories and are working as intended.
-- Recommendation: Broader rollout still open — `security-auditor` and `architect-reviewer` were suggested previously and remain un-adopted. Both do repeat-invocation work (recurring false-positive patterns, prior architectural decisions) that would benefit from cross-session memory the way debugger.md already does.
-- Confidence: 45
+- **Suggestion** — Built-in **auto memory** (`autoMemoryEnabled: true`, `settings.json:259`) writes to `~/.claude/projects/<project>/memory/MEMORY.md` (200-line/25KB cap, machine-local, git-repo-scoped) automatically and is entirely separate from the project-local `.agent-notes/` system `rules/memory.md` defines. Nothing in `rules/memory.md` reconciles the two. Confidence: 70. Fix: add one sentence to `rules/memory.md`: `.agent-notes/` is for cross-session task handoffs committed to the repo; built-in auto memory is a separate, uncommitted, machine-local store Claude manages itself — do not duplicate entries between them.
 
-- Feature: `MEMORY.md` 200-line/25KB read budget with Claude Code now warning/erroring when a write pushes the file near or over the limit (v2.1.210+).
-- Config status: Unaudited this run — did not check actual line/byte counts of `~/.claude/projects/*/memory/MEMORY.md` files (out of this task's write-set; would require a dedicated read-only pass).
-- Recommendation: Flag for a follow-up audit: `wc -l`/`wc -c` every project `MEMORY.md` to confirm none are silently truncating content past the load limit.
-- Confidence: 35
+- **Note** — Subagent `memory: user|project|local` frontmatter (auto-grants Read/Write/Edit, loads a per-agent `MEMORY.md`) is **already adopted**: `agents/04-quality-security/code-reviewer.md` and `agents/04-quality-security/debugger.md` both set `memory:`, evidenced directly by populated `agent-memory/code-reviewer/` and `agent-memory/debugger/` directories. Confidence: 90 (observed directly). Config is aligned/ahead here — no fix needed for the feature itself, but per `gitStatus`, `agent-memory/` is currently **untracked** (`?? agent-memory/`), not gitignored. Fix: add `agent-memory/` to `.gitignore` since it is machine-local state, the same category as `.claude/agent-memory-local/`.
+
+- **Note** — `CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1` (loads CLAUDE.md/rules from `--add-dir` directories) is unset; `settings.json:122-126`'s `additionalDirectories` (`/tmp`, `/private/tmp`, `/Users/scottseely`) do not load their own CLAUDE.md/rules even if present there. Confidence: 60. No action needed unless those directories are expected to carry instructions.
+
+---
 
 ## Agent Design Patterns
 
-- Feature: Background-by-default subagents (v2.1.198) strip the built-in tool list to `Read, Grep, Glob, Bash, PowerShell, Edit, Write, NotebookEdit, WebFetch, WebSearch, TodoWrite, Skill, ToolSearch, EnterWorktree, ExitWorktree, Monitor, TaskStop, SendMessage, Artifact` — any other tool named in an agent's `tools:` frontmatter is dropped when that agent runs backgrounded, which is now the default.
-- Config status: Partially audited — the one known casualty (`MultiEdit`, 44 agents) was already fixed this cycle (see Resolved section above). Did not cross-check all 128 agents' full `tools:` lines against the background-safe allowlist for other non-background-safe tool names this run.
-- Recommendation: Follow-up audit: grep every `agents/*/*.md` `tools:` line for tools outside the documented background-safe set (e.g. any custom/plugin tool names) to catch a repeat of the MultiEdit issue before it ships.
-- Confidence: 40
+- **Suggestion** — Subagent forking (`subagent_type: "fork"`) has been on by default since 2.1.232 (Aug 13): non-teammate `Agent`-tool spawns in interactive sessions now background by default, and a fork subagent inherits the full parent conversation + prompt cache (this session's own `Agent` tool description already documents "the fork inherits your full conversation context"). `skills/explore/SKILL.md:5` declares `context: fork` (a skill-level setting), but `rules/parallelism.md`'s "Mechanism — resume, do not re-spawn" section (lines ~198-207) only documents `SendMessage`-to-resume vs. a fresh `Agent` call — it never mentions `subagent_type: "fork"` as a third option for read-heavy research that needs full context inheritance at near-zero extra cost (shared prompt cache). Confidence: 60. Fix: add one line to `rules/parallelism.md` distinguishing `subagent_type: "fork"` (full context inheritance, cache-cheap) from a fresh `Agent` call, next to the existing resume-vs-respawn guidance.
+
+- **Note** — Agent teams (`subagent_type: "agent-team"`) got a major build-out in 2.1.232 (per-member `team_model`, teammate `SendMessage` addressing, separated permissions) but remain unreferenced in `rules/` or `agents/` (`grep -rln "agent-team\|teammate"` matches only `research-urls.md` and one unrelated `internal-comms` example). `CLAUDE.md`'s Agents section says "Use Workflow ... for multi-step parallel orchestration" and "Prefer Agent tool for individual specialist delegation" but never places agent-teams (a third, distinct primitive: parallel teammates with live panes) relative to those two. Confidence: 65. Fix: if agent-teams is deliberately out of scope, no action; otherwise add one line to CLAUDE.md's Agents section naming it alongside Agent tool and Workflow.
+
+---
 
 ## Cost Optimization
 
-- Feature: Concurrent/per-session subagent spawn caps (`CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS` default 20, `CLAUDE_CODE_MAX_SUBAGENTS_PER_SESSION` default 200).
-- Config status: UNUSED (defaults) — `grep -n "CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS\|CLAUDE_CODE_MAX_SUBAGENTS_PER_SESSION" settings.json` → no match.
-- Recommendation: Defaults are generous relative to this repo's typical batch sizes (3-5 teammates per `rules/parallelism.md`). No action needed; confirmed-fine default.
-- Confidence: 40
+- **Suggestion** — `promptCacheTtl`/`subagentPromptCacheTtl` settings (added 2.1.243, Aug 25 — 1-hour main-conversation cache vs. default 5-minute subagent cache, independently) are unset (grepped, absent). This skill's own Phase 1 barrier spawns 4 parallel research agents per run (`phase1-research-agents.md`), and mission-brief batches run several sequential/parallel subagent calls within an hour — a longer subagent TTL could reduce prompt-cache misses across that pattern. Confidence: 55. Fix: evaluate `"subagentPromptCacheTtl": "1h"` in `settings.json`.
 
-- Feature: `autoMode` classifier-based permissions (replaces static allow/deny lists with live command classification).
-- Config status: UNUSED — no `autoMode` block in `settings.json`, which instead hand-maintains a ~50-entry `permissions.allow` array. **REPEAT finding**, open since at least 2026-07-24, despite MEMORY.md explicitly recording "User prefers broad pre-approved permission rules over repetitive per-call prompts" — auto mode is a closer structural fit to that stated preference than continued list maintenance.
-- Recommendation: Worth a deliberate trial (`"autoMode": {"allow": ["$defaults", ...]}`) rather than further manual list growth.
-- Confidence: 55
+- **Note** — `experimental.cacheTtl` per-agent frontmatter (added 2.1.248) offers the same TTL control scoped to one agent definition. No agent sets it (grepped). Complements the setting above for specific repeatedly-invoked agents (e.g. `code-reviewer`, `debugger`, which already carry `memory:`). Confidence: 50.
 
-## Fetch Warnings
+- **Note** — `/claude-api cost-optimize` (added 2.1.247) profiles a project's Claude API spend and walks cost levers (caching, token hygiene, batch, effort, model choice) one measured change at a time. Not a config change — a discoverable runtime tool, unreferenced in `rules/` or `CLAUDE.md`. Confidence: 45. Fix: none required; mention as available for a future cost audit.
 
-None. All 9 URLs fetched this run returned 200 with substantial content
-(smallest rendered response ~2.5KB, most 15-90KB raw before summarization).
+---
 
-## Candidate URLs Discovered
+## Candidate URLs discovered
 
-None. All feature areas surfaced this run (agent-teams, routines, worktrees,
-overview, mcp, tutorials, skills, sub-agents, agent-view) are already
-present in `skills/self-improve/research-urls.md`, several marked
-`PROMOTED 2026-07-24` / `active`. No new documentation pages outside the
-existing fetch list were discovered.
+None. This run used only the URLs already listed under the Agent A table in `research-urls.md`; no open-ended discovery was performed (that is Agent X's job this run).
+
+---
+
+## Fetch-guard warnings
+
+None. All 6 URLs fetched returned HTTP 200, on-domain, well over the 1000-char thin-content bar. The 8 active Agent A URLs not fetched this run (overview, skills, agent-teams, agent-view, routines, worktrees, tutorials, anthropic blog) are a **time-boxed coverage gap**, not fetch failures — they remain `active` with their existing `last-verified` dates in `research-urls.md` (not modified by this agent per its write-set).

@@ -1,68 +1,99 @@
-## Observation: Discovery run 2026-08-01
+# Self-Improve Phase 1 — Agent X (Discovery) — 2026-09-02
 
-### Candidate URLs
+## Discovery Summary
 
-| URL | Purpose | Discovery agent | Date |
-| --- | --- | --- | --- |
-| https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents | (rel: 97) Anthropic official: how to shape agent context — write/select/compress/isolate; directly informs context-mgmt and compaction rule design | Agent X | 2026-08-01 |
-| https://arxiv.org/pdf/2607.25398 | (rel: 92) PREPRINT: HANDBOOK.md — benchmark for long-context agentic instruction following; no model exceeds 25% strict pass@1, directly tests CLAUDE.md-style files | Agent X | 2026-08-01 |
-| https://dl.acm.org/doi/10.1145/3786304.3787891 | (rel: 88) Offscript (CHIIR 2026, peer-reviewed): agentic auditing methodology for instruction adherence to behavioral guidelines | Agent X | 2026-08-01 |
-| https://arxiv.org/abs/2606.10209 | (rel: 88) PREPRINT: Less Context, Better Agents — efficient context engineering for long-horizon tool-using agents; more context ≠ better | Agent X | 2026-08-01 |
-| https://arxiv.org/pdf/2603.24755 | (rel: 87) PREPRINT: SlopCodeBench — benchmarks how coding agents degrade over long-horizon iterative tasks; directly relevant to autonomous-execution quality gates | Agent X | 2026-08-01 |
-| https://arxiv.org/html/2603.20432v1 | (rel: 86) PREPRINT: Coding Agents are Effective Long-Context Processors — agents externalize context via files/tools instead of raw context stuffing | Agent X | 2026-08-01 |
-| https://www.anthropic.com/research/trustworthy-agents | (rel: 85) Anthropic official research on trustworthy agent design in production | Agent X | 2026-08-01 |
-| https://dl.acm.org/doi/10.1145/3748302 | (rel: 84) ACM TOIS (peer-reviewed): survey on memory mechanisms of LLM-based agents | Agent X | 2026-08-01 |
-| https://dl.acm.org/doi/10.1145/3728894 | (rel: 84) ACM PACMSE (peer-reviewed): LLM hallucinations in practical code generation — phenomena, mechanism, mitigation | Agent X | 2026-08-01 |
-| https://arxiv.org/pdf/2604.03515 | (rel: 83) PREPRINT: Inside the Scaffold — source-code taxonomy of coding agent architectures (harness design patterns) | Agent X | 2026-08-01 |
-| https://arxiv.org/pdf/2601.10343 | (rel: 83) PREPRINT: OctoBench — benchmarking scaffold-aware instruction following in repository-grounded agentic coding | Agent X | 2026-08-01 |
-| https://arxiv.org/pdf/2603.06847 | (rel: 82) PREPRINT: Characterizing Faults in Agentic AI — taxonomy of failure types/symptoms/root causes; feeds diagnosis.md / error-handling.md | Agent X | 2026-08-01 |
-| https://www.anthropic.com/research/measuring-agent-autonomy | (rel: 82) Anthropic official research on measuring AI agent autonomy in practice | Agent X | 2026-08-01 |
-| https://arxiv.org/html/2606.20683 | (rel: 81) PREPRINT: From Question Answering to Task Completion — survey on agent system and harness design | Agent X | 2026-08-01 |
-| https://dl.acm.org/doi/abs/10.1145/3806007.3810961 | (rel: 80) ACM workshop (peer-reviewed): MCP-SecLint — open-source static analyzer for vulnerabilities in LLM tool integrations | Agent X | 2026-08-01 |
-| https://ast-grep.github.io/advanced/prompting.html | (rel: 80) Official ast-grep docs: using ast-grep with AI tools/agents — extends existing lsp.md ast-grep coverage with agent-specific guidance | Agent X | 2026-08-01 |
-| https://www.anthropic.com/research/prompt-injection-defenses | (rel: 79) Anthropic official research: mitigating prompt injection risk in browser/agent use | Agent X | 2026-08-01 |
-| https://arxiv.org/pdf/2512.03549 | (rel: 78) PREPRINT: PARC — autonomous self-reflective coding agent for robust execution of long-horizon tasks | Agent X | 2026-08-01 |
-| https://arxiv.org/abs/2601.19752 | (rel: 77) PREPRINT: Agentic Design Patterns — system-theoretic framework for engineering robust AI agents | Agent X | 2026-08-01 |
-| https://arxiv.org/pdf/2607.01640 | (rel: 76) PREPRINT: AgentFlow — building agent dependency graphs for static analysis of agent programs | Agent X | 2026-08-01 |
-| https://arxiv.org/pdf/2510.18893 | (rel: 76) PREPRINT: CodeCRDT — observation-driven coordination for multi-agent LLM code generation; relevant to parallelism.md | Agent X | 2026-08-01 |
-| https://arxiv.org/pdf/2603.27277 | (rel: 75) PREPRINT: Codebase-Memory — tree-sitter-based knowledge graphs for LLM code exploration via MCP | Agent X | 2026-08-01 |
-| https://arxiv.org/pdf/2603.29231 | (rel: 74) PREPRINT: Beyond pass@1 — reliability science framework for long-horizon LLM agents | Agent X | 2026-08-01 |
-| https://arxiv.org/pdf/2606.19135 | (rel: 73) PREPRINT: A Technical Taxonomy of LLM Agent Communication Protocols | Agent X | 2026-08-01 |
-| https://mlsec.org/docs/2026-icse.pdf | (rel: 73) ICSE 2026 (peer-reviewed): LLM-based vulnerability discovery through the lens of code metrics | Agent X | 2026-08-01 |
-| https://arxiv.org/pdf/2606.22741 | (rel: 72) PREPRINT: GRADE — graph representation of LLM agent dependency and execution; dependency layer predicts agent failure | Agent X | 2026-08-01 |
-| https://doi.org/10.1145/3696630.3728702 | (rel: 72) ACM FSE 2025 (peer-reviewed): From Prompts to Properties — rethinking LLM code generation with property-based testing | Agent X | 2026-08-01 |
-| https://arxiv.org/abs/2506.18315 | (rel: 70) PREPRINT: using property-based testing to bridge LLM code generation and validation | Agent X | 2026-08-01 |
-| https://www.anthropic.com/research/agentic-misalignment | (rel: 70) Anthropic official research: how LLM agents could become insider threats under autonomy | Agent X | 2026-08-01 |
-| https://arxiv.org/pdf/2601.07190 | (rel: 70) PREPRINT: Active Context Compression — autonomous memory management in LLM agents (Focus agent, 22.7% token reduction) | Agent X | 2026-08-01 |
-| https://arxiv.org/pdf/2607.00692 | (rel: 69) PREPRINT: Self-GC — self-governing context for long-horizon LLM agents | Agent X | 2026-08-01 |
-| https://arxiv.org/pdf/2605.23135 | (rel: 68) PREPRINT: The Impact of AI Coding Assistants on Software Engineering — longitudinal study | Agent X | 2026-08-01 |
-| https://arxiv.org/pdf/2607.05677 | (rel: 66) PREPRINT: From Conversation to Contribution — characterizing coding agents in open-source software | Agent X | 2026-08-01 |
-| https://arxiv.org/pdf/2507.15003 | (rel: 65) PREPRINT: The Rise of AI Teammates in Software Engineering 3.0 | Agent X | 2026-08-01 |
+Ran all 84 discovery queries (via 5 parallel read-only forks covering the 13
+themes) against `research-sources.md` tier criteria. ~530 distinct search
+results evaluated across the forks; ~46 pages fetched to score
+relevance/novelty/actionability. 25 candidates added, spanning: Claude
+Code/Anthropic official docs (4: Opus 5 prompting guide, multiagent failure
+modes, Claude Code expertise study, `whats-new` digest), context
+compaction theory (3 arxiv), constraint expression/instruction-following (4:
+AGENTIF benchmark, compact constraint encoding, prompting inversion, prompt
+defect taxonomy), reliability/error-recovery (3: Snorkel error-recovery
+study, LLM-judge stability trap, proactive-assistant design), testing/code
+review (5: test-after-fault-injection risk, agentic PBT at scale, mutation
+testing practitioner guide, legacy-refactor case study, agentic review
+lifecycle), and tool-offloading (4: idempotent tool calls, agentic fitness
+functions, ast-grep Claude Code skill, task-aware MCP server selection),
+plus cross-language refactoring eval. Themes returning nothing useful: pure
+multi-agent-orchestration queries (fully saturated — every qualifying hit
+duplicated an existing candidate or fell below tier-3), MCP-catalog queries
+(only tier-5 awesome-lists, already represented), and "co-pilot programming
+patterns effectiveness" (near-100% tier-5 vendor content).
 
-### Discovery Summary
+## Candidates added
 
-- Queries run: 76 of 84 listed (skipped ~8 near-duplicate MCP-catalog phrasings already
-  saturated by existing candidates — e.g. "awesome MCP servers list" variants).
-- Results evaluated: ~600+ search results across 76 WebSearch calls, spanning all 12
-  theme sections in research-urls.md.
-- Candidates added: 34, themes — Anthropic official agent/context research (5),
-  long-horizon instruction-following & harness-degradation benchmarks (6), context
-  compaction/compression (4), agent failure taxonomies & reliability (5), multi-agent
-  coordination/design patterns (4), code-intelligence tooling for agents (4),
-  property-based testing for LLM code (2), security/MCP static analysis (2),
-  developer-productivity studies (2).
-- Absence signal: no qualifying new source on "hard vs soft constraint keywords" or
-  "constraint budget" effectiveness — searches return only general prompt-engineering
-  blogs (tier 5) or the already-covered CFPO/constraint-drift preprints; this theme
-  appears saturated for now, no new peer-reviewed or arxiv work found this pass.
-- Absence signal: MCP ecosystem catalog queries return only tier-5 blog roundups and
-  GitHub topic pages already represented by the existing awesome-mcp-servers/registry
-  candidates — no new authoritative catalog source surfaced.
-- Duplicate collisions caught and excluded (already in research-urls.md candidate
-  table): 2604.08290 (Tokalator), 2601.20404 and 2606.25257 (AGENTS.md studies),
-  2605.23574 (PushBench), 2605.10481 (constraint drift), 2509.25370 (AgentDebug),
-  2601.06112 (ReliabilityBench), 2607.01903 (HECATE), 2606.11672 (SAST vs agents),
-  2508.14419 (static-analysis feedback loop), 2502.04295 (CFPO),
-  blog.jetbrains.com efficient-context-management, partnershiponai.org
-  failure-detection PDF, martinfowler.com reliable-llm-bayer, blog.modelcontextprotocol.io
-  one-year-of-mcp anniversary post.
+25 rows appended to the Candidate URLs table (all `Agent X`, `2026-09-02`).
+Full purposes are in the file; summary by relevance:
+
+| URL | rel | Theme |
+|---|---|---|
+| platform.claude.com/.../prompting-claude-opus-5 | 95 | Claude Code/Anthropic |
+| anthropic.com/research/multiagent-systems | 90 | Claude Code/Anthropic |
+| arxiv.org/abs/2608.01326 | 90 | Compaction |
+| anthropic.com/research/claude-code-expertise | 88 | Claude Code/Anthropic |
+| arxiv.org/abs/2607.05139 | 88 | Testing |
+| arxiv.org/abs/2606.11213 | 85 | Compaction |
+| arxiv.org/abs/2505.16944 (AGENTIF) | 85 | Constraints |
+| arxiv.org/abs/2608.02645 | 85 | Tool-offloading |
+| code.claude.com/docs/en/whats-new | 85 | Claude Code/Anthropic |
+| arxiv.org/abs/2605.17304 | 84 | Compaction |
+| arxiv.org/abs/2510.22251 | 83 | Prompt structure |
+| arxiv.org/pdf/2604.07192 | 80 | Constraints |
+| arxiv.org/abs/2601.13118 | 80 | Prompt structure |
+| infoq.com/.../agentic-fitness-functions | 80 | Tool-offloading |
+| arxiv.org/html/2509.14404v1 | 79 | Prompt structure |
+| snorkel.ai/blog/.../recover | 78 | Reliability |
+| arxiv.org/abs/2604.03135 | 76 | Testing |
+| github.com/ast-grep/agent-skill | 76 | Tool-offloading |
+| arxiv.org/pdf/2601.11783 | 74 | Reliability |
+| arxiv.org/abs/2605.17548 | 74 | Testing |
+| arxiv.org/pdf/2604.17234 | 73 | Tool-offloading |
+| testdouble.com/.../mutation-testing | 72 | Testing |
+| arxiv.org/abs/2410.04596 | 70 | Human-AI collaboration |
+| arxiv.org/pdf/2510.09907 | 70 | Testing |
+| arxiv.org/abs/2511.21788 | 68 | Testing |
+
+## Queue drain
+
+Selected top 5 by relevance, weighted toward official Anthropic pages and
+peer-reviewed entries per instruction (skipped three same-tier arxiv
+preprints in favor of lower-scored ACM/Anthropic rows):
+
+| URL | Fetched chars | Verdict | Reason | Destination |
+|---|---|---|---|---|
+| anthropic.com/engineering/effective-context-engineering-for-ai-agents (rel 97) | ~12,500 | Promote | Rich, on-topic (context rot, altitude, JIT retrieval, compaction/note-taking/subagents) | Agent A — Claude Code ecosystem |
+| anthropic.com/research/trustworthy-agents (rel 85) | ~7,800 | Promote | Rich; 5 trustworthy-agent principles, Plan Mode, prompt-injection defenses | Agent A — Claude Code ecosystem |
+| dl.acm.org/doi/10.1145/3786304.3787891 — Offscript (rel 88) | 0 | Demote | HTTP 403 Forbidden (paywall) | left in candidate table, demoted note appended |
+| dl.acm.org/doi/10.1145/3748302 — ACM TOIS memory survey (rel 84) | 0 | Demote | HTTP 403 Forbidden (paywall) | left in candidate table, demoted note appended |
+| dl.acm.org/doi/10.1145/3728894 — ACM PACMSE hallucinations (rel 84) | 0 | Demote | HTTP 403 Forbidden (paywall) | left in candidate table, demoted note appended |
+
+Note: `arxiv.org/pdf/2607.25398` (rel 92, HANDBOOK.md) and `arxiv.org/abs/2606.10209`
+(rel 88, Less Context Better Agents) were passed over for the drain in favor
+of the Anthropic/peer-reviewed weighting instruction, despite higher raw
+relevance scores. All three ACM dl.acm.org DOIs hit the same paywall
+failure mode this run — future drains should prefer an arxiv/author-preprint
+mirror when one exists rather than the canonical ACM DOI (as Fork 3 did
+successfully for arxiv:2410.04596/CHI 2025).
+
+## Fetch-guard warnings
+
+- `resources.anthropic.com/hubfs/2026 Agentic Coding Trends Report.pdf` (Fork 1) —
+  fetched at 834.5KB but WebFetch could not extract readable text from the
+  PDF binary; content unverified, not added.
+- `dl.acm.org/doi/10.1145/3786304.3787891`, `.../10.1145/3748302`,
+  `.../10.1145/3728894` (queue drain, this agent) — all HTTP 403 Forbidden
+  (ACM paywall); demoted with reason recorded in the candidate table.
+- `dl.acm.org/doi/10.1145/3788284` (Fork 5, ACM Computing Surveys,
+  "Function Calling in LLMs: Industrial Practices") — HTTP 403, tier-2 and
+  topically strong but unverifiable; not added.
+- `arxiv.org/pdf/2502.04498` (Fork 4, "Verifiable Format Control for LLM
+  Generations") — returned unparseable PDF binary via WebFetch; excluded
+  rather than added on a thin/unverified basis.
+- `dl.acm.org/doi/10.1145/3706598.3714002` (Fork 3, canonical ACM CHI page) —
+  HTTP 403; substituted the author's arxiv preprint (2410.04596), which
+  fetched cleanly and was added instead.
+- `simonwillison.net/2026/Feb/23/agentic-engineering-patterns/` (Fork 1) —
+  Tier 3 but only a ~2,800-char stub previewing unwritten future chapters;
+  demoted on inspection, not added.

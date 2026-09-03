@@ -1,208 +1,150 @@
-# Self-Improve Phase 2 — Agent H: Tightening Audit
+# Phase 2 Agent H — Tightening Audit (2026-09-02)
 
-Generated 2026-08-01. Read-only audit of `~/.claude` for instruction bloat,
-cross-file redundancy, and verbose prose. Scope: CLAUDE.md,
-post-compact-context.md, all 23 rules/*.md, 5 sampled agents, 3 sampled
-skills. Supersedes the 2026-07-24 copy of this file.
+Prior run: 2026-08-01 / implemented 2026-08-07 (commits 48c162d, 44d23ae,
+cb0b38c, 37ee159 already compressed most bloat). This pass measures what
+remains post-compression.
 
-**Baseline measurements:**
-- CLAUDE.md: 3921 bytes (limit 4096 / 4KB)
-- post-compact-context.md: 30 lines (limit 120)
-- rules/: 23 files, 1766 lines, 72367 bytes total; largest by lines is
-  autonomous-execution.md (179), largest by bytes is parallelism.md (10610)
-- Sampled agents: 69–217 lines; none over the 300-line ceiling
+## Measurements
 
----
+| File | Lines | Bytes | Bar | Over/Under |
+|---|---|---|---|---|
+| CLAUDE.md | 69 | 3534 | <200 lines (rules/prompting-quality.md:28) | Under (66% margin) |
+| post-compact-context.md | 34 | 1810 | <=120 lines (Agent H spec) | Under |
+| rules/ aggregate | 1913 | 80616 | 2020-line cap (docs/fleet/monitoring.md:50, decision AD-2) | Under, 107 lines headroom |
+| rules/parallelism.md | 211 | 13541 | 200-line single-file flag (Agent H spec) | Over by 11 lines |
+| rules/autonomous-execution.md | 187 | 6890 | 200 | Under |
+| rules/architecture.md | 133 | 4785 | 200 | Under |
+| rules/prompting-quality.md | 126 | 5799 | 200 | Under |
+| rules/research-sources.md | 114 | 4797 | 200 | Under |
+| skills/plan-mission/SKILL.md | 389 | n/a | <500-line skill ceiling | Under, 111 lines headroom |
+| agents/*.md (5 sampled) | 23-75 | n/a | <300-line agent flag | All well under |
 
 ## Bloat
 
-No file breaches the hard thresholds in prompting-quality.md /
-self-improve's Agent H spec (CLAUDE.md ≤4KB, post-compact ≤120 lines,
-rule files ≤200 lines, agent files ≤300 lines). Two items worth tracking:
-
-- `CLAUDE.md:1-75` — Note — file is 3921/4096 bytes (95.7% of the 4KB
-  ceiling). No headroom left for future additions. Fix: no action now;
-  the next addition to CLAUDE.md must cut an equal or greater amount
-  elsewhere first (e.g. the `## Rules` file-list section, lines 64-74,
-  could drop to one line per bucket). Confidence 60.
-- `rules/parallelism.md:1-166` — Suggestion — largest rule file by both
-  line count (166) and bytes (10610, ~15% of the entire rules/ budget),
-  driven by the Model Selection section (2 tables + 4 prose blockquotes,
-  lines 96-160). Under the 200-line cap but the fastest-growing file
-  across the last several routing-economics updates. Fix: apply the
-  Verbose Prose rewrites below (#1, #2) to reclaim ~80 words without
-  losing the routing table or behavioral-compensation bullets.
-  Confidence 70.
-
----
+- **Suggestion** `rules/parallelism.md` (211 lines, 13541 bytes): exceeds
+  the 200-line single-rule-file flag by 11 lines and is 2.3x the size of
+  the next-largest rule file. Fix: split "Model Selection" (lines ~60-140,
+  the routing table + Opus/Fable behavioral compensation blocks) into
+  `rules/model-routing.md`; keep orchestration/parallelism planning rules
+  in `parallelism.md`. Two files under the 200-line bar instead of one over it.
+- **Note** `skills/plan-mission/SKILL.md` (389 lines) is at 78% of the
+  500-line skill ceiling stated in `skills/self-improve/references/phase2-audit-agents.md:1-3`.
+  No fix required now; flag for the next audit if it grows further.
 
 ## Redundancy
 
-- `agents/01-core-development/backend-developer.md:25-31` vs
-  `rules/security.md:3-12` — **Warning** — The "Security Standards"
-  bullet list restates content from a rule file the agent already pulls
-  in via `## Required Rules` line 66 (`security.md`). Location 1
-  (backend-developer.md:26): `"Input validation at all system
-  boundaries"`. Location 2 (security.md:5): `"Validate all input at
-  system boundaries — user input, external API responses, URL
-  parameters, request bodies, headers."` Same pattern at
-  backend-developer.md:27 (`"Parameterized queries — no SQL
-  interpolation"`) vs security.md's Common Injection Vectors bullet
-  (`"Use parameterized queries — never interpolate user input into
-  SQL"`). Cost: ~7 lines / ~45 words reloaded on every invocation of
-  this agent, indefinitely. Single source of truth: `security.md`. Fix:
-  replace backend-developer.md:25-31 with `Execute security
-  requirements per \`~/.claude/rules/security.md\`.` plus only the
-  genuinely backend-specific items not already in security.md (JWT
-  rotation, RBAC, encryption at rest — keep those three). Model this on
-  `architect-reviewer.md:13` (`"Execute per
-  ~/.claude/rules/architecture.md."`), which already uses the pointer
-  pattern instead of restating. Confidence 80.
-
-- `agents/01-core-development/backend-developer.md:50-51` vs
-  `rules/observability.md:29-33` and `rules/retry-idempotency.md`
-  (both already referenced at backend-developer.md:62,67) — **Suggestion**
-  — `"Distributed tracing with W3C traceparent"` (line 50) restates
-  observability.md:33 (`"Inject trace ID and span ID into outbound HTTP
-  headers (\`traceparent\` / W3C Trace Context...)"`) near-verbatim.
-  `"Idempotency guarantees on all queue consumers"` (line 51) restates
-  the idempotency-key mechanism already owned by retry-idempotency.md.
-  Fix: fold both into the same pointer sentence as the finding above;
-  keep only `"Dead letter queue handling with monitoring and
-  alerting"` (line 52) — genuinely new, not covered by either
-  referenced rule. Confidence 65.
-
-- `skills/self-improve/SKILL.md:361-364` vs
-  `skills/self-improve/SKILL.md:636-639` — **Suggestion** — the
-  "Agent-crash handling" paragraph is byte-identical in both locations
-  (4 lines / ~40 words each), inside one file that loads as a single
-  unit whenever `/self-improve` runs:
-  > `**Agent-crash handling:** If any agent in this phase returns no
-  > output (crashed, killed, or timed out), relaunch it once. If it
-  > fails again on retry, proceed without it and record the unaudited
-  > axis as an explicit gap in the Phase 4 report.`
-  Fix: state the policy once (e.g. a "## Agent-crash handling policy"
-  subsection right after Phase 0), then replace both inline copies with
-  `Agent-crash handling: see policy above.` Saves ~40 words per skill
-  load. Confidence 85.
-
-- `CLAUDE.md:58` vs `rules/commits.md:5-6` — **Note** — CLAUDE.md's
-  `"Subject \`<type>(<scope>): <desc>\` ≤72 chars, lowercase, no
-  period"` restates commits.md's Subject spec near-verbatim rather than
-  purely pointing to it. Low cost (1 line, ~15 words) and arguably
-  intentional — CLAUDE.md gives the one fact needed 90% of the time,
-  full spec is one hop away. Flagging for awareness only. Fix if
-  desired: `"Conventional Commits — see \`~/.claude/rules/commits.md\`
-  for format."` Confidence 40.
-
-**Checked and NOT flagged:** 119 of 128 agent files carry the identical
-line `"Read the referenced rule file before relying on it — subagents
-do not auto-load rules/."` This looks like mass duplication but is not
-a fixable redundancy: each agent file is loaded standalone by an
-isolated subagent that never sees `rules/parallelism.md` (where the
-policy is also stated once, for the orchestrator). Removing the
-per-agent line would silently break correctness for every subagent
-invocation. No action recommended.
-
----
+- **Warning** `rules/autonomous-execution.md:86-89` vs
+  `rules/diagnosis.md:53-57` — same rule stated at equal verbosity in both
+  files, each cross-referencing the other instead of one being canonical:
+  - autonomous-execution.md:86-89: "The 2-try cap bounds **fix attempts,
+    not investigation.** Reaching it is a valid halt only if the STOP
+    entry carries the full diagnosis artifact defined in
+    `rules/diagnosis.md` — mechanism, origin, causal chain, ruled out —
+    plus the error output. 'Two attempts failed' is not a diagnosis."
+  - diagnosis.md:53-57 ("### Under autonomous execution"): "The
+    2-fix-attempt cap in `rules/autonomous-execution.md` bounds edits,
+    not inquiry. Halting on a spent budget is valid only when the
+    decision-journal entry carries the artifact above; spending the
+    budget is not a diagnosis."
+  - Cost: ~2x40 words = ~110 tokens duplicated, injected every session
+    (both files load verbatim at session start).
+  - Single source of truth: `rules/diagnosis.md` (it owns the diagnosis
+    artifact definition the passage depends on). Fix: replace
+    autonomous-execution.md:86-89 with one line: "The 2-try cap bounds
+    fix attempts, not investigation — see `rules/diagnosis.md` § Under
+    autonomous execution for the halt condition."
+- No other cross-file restatements found at equal verbosity. CLAUDE.md's
+  Commit Messages (line 58), Multi-Agent Parallelism (line 54), and
+  Diagnosis (line 62) sections are all single-line pointers into their
+  rules/ files, not restatements — this pattern is already correctly
+  applied repo-wide post-2026-08-07 compression.
+- Sampled agents (backend-developer, api-designer, architect-reviewer,
+  code-reviewer, it-ops-orchestrator) all use one-line glosses in
+  `## Required Rules` and explicitly avoid restating rule bodies (e.g.
+  backend-developer.md:26-29: "Apply `~/.claude/rules/security.md` in
+  full ... are not restated here"). No restatement found in this sample.
 
 ## Verbose prose
 
-- `rules/parallelism.md:109-113` — **Suggestion** — 5-line/~58-word
-  blockquote leads with routing-economics narrative before its one
-  actionable clause. Rewrite (23 words, 60% shorter): `"Sonnet 5 ≈
-  near-Opus-4.8 quality at ~60% of Opus token cost — covers most
-  implementation and routine agentic work now. Default-to-Sonnet is
-  stronger, not weaker."` Confidence 65.
-
-- `rules/parallelism.md:115-121` — **Suggestion** — 7-line/~72-word
-  blockquote, same pattern for Opus 5. Rewrite (29 words, 60% shorter):
-  `"Opus 5 ≈ Fable-class capability at ~half Opus 4.8's token cost —
-  viable for more implementation/routine agentic work, not just deep
-  architectural decisions. Fable still owns long-horizon/mission-brief
-  execution (see table above)."` Confidence 65.
-
-- `post-compact-context.md:6-15` — **Warning** — "Autonomous Execution
-  Recovery" section runs 8 content lines (~73 words) — the only section
-  in this file over the 6-line flag threshold (target ≤4 lines/rule per
-  the Agent H spec). Rewrite (33 words, 55% shorter, all 5 steps
-  preserved): `"If a \`plans/\` mission brief is active: re-read
-  \`README.md\` and \`decision-journal.md\` from disk — not the
-  compacted summary — check \`[x]\`/\`[ ]\` task status, read the
-  current batch's \`overview.md\`, then resume from the first
-  incomplete task."` Confidence 80.
-
----
+No section met the >50%-compression-with-no-nuance-lost bar this pass.
+Checked rules/code-principles.md ("Build to the defined scope"),
+rules/architecture.md ("Blast radius", "Reversibility"),
+rules/observability.md ("SLO-first design"), rules/prompting-quality.md
+("Instruction bloat"), rules/autonomous-execution.md ("Consecutive-fix
+stop rule", "Quality Gates"), and skills/self-improve/SKILL.md (Phase
+0-1) — all are already bullet-first or dense multi-clause sentences with
+no filler paragraph preceding a redundant list. This dimension is clean
+post-2026-08-07 compression; nothing to report.
 
 ## Dead content
 
-- `rules/prompting-quality.md:36-37` — **Warning** — stale metrics:
-  `"...aggregate resident footprint of \`rules/\` (~62KB). All rule
-  files are injected verbatim every session — confirmed by direct
-  inspection (22 files, ~10.3k words / ~14k tokens)..."` Measured today:
-  23 files (`ls ~/.claude/rules/*.md | wc -l`), 72367 bytes (~70.7KB,
-  `wc -c ~/.claude/rules/*.md`), 1766 lines. The count is stale by
-  exactly one file — `rules/diagrams.md`, added 2026-08-01 per the
-  working tree (`?? rules/diagrams.md` in git status), is not yet
-  reflected. Fix: update to "23 files, ~72KB" or, to avoid re-staling,
-  replace the hardcoded numbers with an instruction to check current
-  footprint (`wc -c ~/.claude/rules/*.md | tail -1`). Confidence 90.
+Grepped whole repo (excluding projects/, agent-memory/, .agent-notes/,
+temp/) for `<!-- Code review`, TODO, REVISIT, FIXME, Opus 4.6, Sonnet
+4.6, claude-3, claude-4-:
 
-- Mermaid references — **Note** — `grep -rni "mermaid" ~/.claude
-  --include="*.md"` returned zero hits across rules/, agents/, skills/.
-  rules/diagrams.md's PlantUML-default policy (added 2026-08-01) has no
-  stragglers to clean up. No action needed — recording the clean result
-  per the task's explicit check. Confidence 95.
+- **Warning** `skills/self-improve/references/phase2-audit-agents.md:194,203` —
+  stale: "`prompting-quality.md` requires CLAUDE.md ≤ 4KB" and "CLAUDE.md
+  > 4KB → flag". The byte cap was retired 2026-08-07 (commit 37ee159);
+  current rule (`rules/prompting-quality.md:28`) is "under 200 lines".
+  Fix: replace both lines with the 200-line bar (CLAUDE.md is 69 lines,
+  well under either bar, so no downstream finding changes).
+- **Live, open** `rules/parallelism.md:95` — code-review comment dated
+  2026-08-01/corrected 2026-08-08 about PerspectiveGap orchestration
+  scores; explicit revisit condition "if Opus 5 orchestration data
+  appears" not yet met (Opus 5 cost/quality is discussed elsewhere in
+  this same file but not the specific orchestration-prompt-composition
+  benchmark the comment tracks). Not stale — condition genuinely unmet.
+  No fix; correctly left open.
+- **Live, open** `code-review-tasks.md:279,283` — same pattern, same
+  2026-08-01 dated comments, stated revisit conditions (Opus 5
+  orchestration data; candidate table passing 120 entries) not yet met.
+  No fix.
+- **Live, open** `code-review-tasks.md:32` — 2026-08-07 note: "the three
+  Criticals that stalled autonomous dispatch (T1, T3) could not be
+  implemented — the harness auto-mode classifier denies every edit to a
+  permissions file." Still unresolved per file's own "Already resolved"
+  section not listing it. No fix (outside this audit's write-set).
+- **Live, open** `agents/09-meta-orchestration/it-ops-orchestrator.md:7-11` —
+  ADR-N2 comment: agent's description promises routing to specialist
+  agents but frontmatter grants no `Agent`/`Task` tool. Verified current
+  frontmatter (line 4: `tools: Read, Write, Edit, Bash, Glob, Grep`) —
+  still no Agent tool, so the comment remains accurate, not stale. No fix
+  (explicitly awaiting user decision per its own text).
+- **Addressed, false positive** `settings.json:172`,
+  `templates/autonomous-settings.json:109` — literal string `'-- COMPACTING:
+  verify open TODOs are committed --'` is an echo command, not an actual
+  TODO marker. No fix needed.
+- Historical `.agent-notes/*.md` and `skills/self-improve/references/
+  phase1-research-agents.md` hits naming Opus 4.6/Sonnet 4.6 are
+  legitimate — they document the deprecated-model tier for comparison,
+  not a live claim that those models are current. Not flagged.
 
-- No open `<!-- Code review: ... -->` comments found (the only hit is
-  the literal pattern description inside self-improve/SKILL.md:601,
-  not an actual unresolved comment). No TODO/FIXME/REVISIT markers
-  found in rules/, CLAUDE.md, post-compact-context.md, or agents/. One
-  `ADR-N2` comment exists at
-  `agents/09-meta-orchestration/it-ops-orchestrator.md:7-11`, explicitly
-  flagged in-file as awaiting a user decision (not stale — correctly
-  self-documenting a deferred capability change). No fix needed.
-  Confidence 85.
+## Post-compact calibration
 
----
+`post-compact-context.md` (34 lines, 5 sections) — per-section content
+line counts (excluding header/separator):
+- Autonomous Execution Recovery (7-11): 5 lines
+- Model Routing (14-15): 2 lines
+- Commit Format (18-23): 6 lines
+- Autonomous Restraint (26-29): 4 lines
+- Batch Close-Out (32-34): 3 lines
 
-## post-compact calibration
-
-- `post-compact-context.md:6-15` "Autonomous Execution Recovery" — see
-  **Verbose prose** finding above (same location, same fix) — the only
-  section exceeding the ≤6-line flag / ≤4-line target.
-
-- All other sections are already well-calibrated: "Model Routing"
-  (17-19, 2 body lines), "Commit Format" (21, 1 line), "Autonomous
-  Restraint" (23-27, 4 body lines — exactly at the ≤4-line target), and
-  "Batch Close-Out" (29-30, 1 line) each restore a genuine behavioral
-  rule at or under the target length, condensed from — not copied
-  verbatim from — their source rule files
-  (autonomous-execution.md's Consecutive-fix stop rule and Quality
-  Gates sections, parallelism.md's Model Selection table). No further
-  compression recommended; further cuts would start losing the
-  triggering condition (the "3x consecutively" / "2 consecutive
-  failures" thresholds), which is exactly the kind of nuance
-  post-compact restoration exists to preserve. Confidence 75.
-
----
-
-## Summary of scored findings (≥70 confidence)
-
-| Finding | Severity | Confidence |
-|---|---|---|
-| backend-developer.md:25-31 restates security.md | Warning | 80 |
-| post-compact-context.md:6-15 over 6-line threshold | Warning | 80 |
-| prompting-quality.md:36-37 stale rules/ file count & size | Warning | 90 |
-| SKILL.md:361-364 / 636-639 byte-identical crash-handling text | Suggestion | 85 |
-| parallelism.md largest rule file, growing | Suggestion | 70 |
-| mermaid grep clean (no stragglers) | Note | 95 |
-
-Estimated per-session token savings if all rules/ and post-compact
-fixes are applied: ~80 words (~105 tokens) from parallelism.md
-Verbose-prose rewrites, recurring every session since rules/ loads
-verbatim every session; ~40 words (~50 tokens) from the
-post-compact-context.md rewrite, recurring every compaction event.
-Agent- and skill-level fixes (backend-developer.md, self-improve
-SKILL.md) save tokens only when that specific agent/skill is invoked,
-not on the per-session baseline.
+- **Note** `post-compact-context.md:18-23` (Commit Format section): 6
+  lines — at the hard flag threshold ("Flag any section > 6 lines", Agent
+  H spec dimension 5) and above the file's own softer 4-line-per-rule
+  target. This is a drift from the 2026-08-07 recalibration baseline
+  (prior observation states "5 sections, each <=5 lines" — no longer
+  true; likely grew when commit 37ee159 folded the attribution
+  consolidation into this section). Fix: trim to 5 lines by merging
+  lines 21-23 (the no-attribution rule) into one sentence: "No
+  attribution (Co-Authored-By, Generated-by) in commits/PRs; a 'Built
+  with Claude Code' README line is fine." Saves 1 line, brings the
+  section to the file's own target.
+- Autonomous Execution Recovery (7-11) at 5 lines also exceeds the
+  ≤4-line-per-rule target stated in the Agent H spec, but is under the
+  hard 6-line flag — no fix required, Suggestion-level only if tightened
+  further.
+- No section restates content CLAUDE.md already restores verbatim —
+  CLAUDE.md's "On Compaction" section (lines 34-37) only names the 5
+  section titles, it does not repeat their content. No merge candidates
+  among adjacent sections; each covers a distinct behavioral domain.
