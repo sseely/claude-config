@@ -8,6 +8,7 @@ description: >
 disable-model-invocation: false
 allowed-tools: Bash, Read, Grep, Glob, Agent, Write, Edit, TodoWrite
 ---
+<!-- Code review (2026-09-02): 389 lines, 78% of the 500-line skill ceiling. Revisit at the next audit if it has grown. -->
 
 # Plan Mission
 
@@ -67,6 +68,9 @@ through 6, and after Phase 7 finishes, write or update
 
 ## Phase 7: done
 Brief written to plans/[feature-name]/
+
+## Phase 8: done
+Pre-flight check passed
 ```
 
 Delete `.plan-mission-progress.md` once Phase 8 passes and the brief is
@@ -173,6 +177,9 @@ Present all decisions together and ask the user to approve or
 override each one. These become the "Architecture Decisions
 (pre-made)" section of the brief.
 
+When invoking Opus for this phase: "Return only the architecture decisions. Format: numbered ADR list, one sentence
+each for Context / Decision / Consequences. No prose introduction or trailing summary."
+
 ## Phase 4 — Operational readiness
 
 Before decomposing tasks, answer these questions and present the
@@ -260,6 +267,9 @@ Ask: **"Does this decomposition look right? Any tasks that should
 be split, merged, or reordered?"**
 
 Wait for user confirmation before proceeding.
+
+When invoking Opus for this phase: "Return only the task breakdown. Format: numbered task list with write-set,
+read-set, and acceptance criteria per task. No prose introduction or trailing summary."
 
 ## Phase 6 — Define stop conditions
 
@@ -357,7 +367,10 @@ Phase 7.
 
 ## Model Routing
 
-Use these defaults when invoking agents during brief generation:
+The general model-alias table (which alias maps to which model, and when to
+use each) lives in `~/.claude/rules/model-routing.md` — do not duplicate it
+here. Use these phase-specific defaults when invoking agents during brief
+generation:
 
 | Phase | Task | Model |
 |-------|------|-------|

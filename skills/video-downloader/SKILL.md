@@ -88,4 +88,5 @@ Uses yt-dlp for robust downloading; auto-installs if not present.
 - Downloads are saved to `~/Downloads/` by default
 - Video filename is automatically generated from the video title
 - The script handles installation of yt-dlp automatically
+<!-- Code review (2026-09-02): no failure path for private, age-restricted, or geo-blocked videos. Revisit on the first silent download failure. -->
 - Higher quality videos may take longer to download and use more disk space

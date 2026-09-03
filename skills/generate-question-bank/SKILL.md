@@ -112,6 +112,7 @@ Each `questions/<chapter-id>.json` is a JSON array. Each question has:
 - `content` — stem, options/items/blanks, correctAnswer, explanation, rationalePerOption, sourceQuote, sourceSection
 - `chapter_id`, `section_title`, `source_url`, `source_citation` — full traceability to the original textbook
 - `book_title`, `reviewed: false`, `created_by: "haiku-batch"`
+<!-- Code review (2026-09-02): the haiku-batch model choice is implicit in the output schema. Revisit if the batch model changes. -->
 
 The combined `question-bank.json` includes all questions plus a summary with `total_questions`, `chapters_covered`, and `questions_by_chapter`.
 
