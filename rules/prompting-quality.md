@@ -35,9 +35,10 @@ push project-specific rules to project-level CLAUDE.md files.
 Per-file caps bound each file, but the **aggregate resident footprint** of
 `rules/` is the larger cost — every rule file is injected verbatim at
 session start, a real recurring per-session cost. `paths:` frontmatter
-would scope loading, but it is not used here: a pilot came back RED and a
-gate enforces its absence. The mitigations are dedup across files and
-moving lookup depth to `docs/reference/`.
+would scope loading, but it is not used here: a pilot came back RED and
+review enforces its absence. The mitigations are dedup across files and
+moving lookup depth to `docs/reference/`. The aggregate cap itself is stated
+in `docs/fleet/charter.md` and checked in `hooks/quality-gate.sh`.
 
 Deliberately not stated: file count, byte total, or token estimate. Those
 re-stale on every rule addition, and a drifted number gets cited.
@@ -53,9 +54,6 @@ understanding the codebase. Prefer:
 Attaching 30+ files to a single prompt floods the context window, reduces
 cache hit rates, and makes it harder for the model to attend to what matters.
 
-Domain-specific rules should use `paths:` frontmatter to load only when
-matching files are in play, rather than resident every session.
-
 ## Agent context budget
 
 Research (arxiv:2509.21361) demonstrates attention dilution as a general principle
@@ -66,6 +64,8 @@ with added context. Apply this when constructing agent prompts:
 - If the read-set exceeds 30 files, that is a signal to split the task into two agents
 - The Sonnet 5 tokenizer emits ~1.3× the tokens of Sonnet 4.6 for the same text, so
   effective context fills faster — the file-count caps hold, but budget tokens accordingly
+- Recall degrades sharply past ~128k tokens (arxiv:2607.19257, preprint); compact
+  or split when context passes that band regardless of file count
 
 ## Constraint budget
 
