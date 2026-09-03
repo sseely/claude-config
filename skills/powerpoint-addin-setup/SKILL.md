@@ -5,6 +5,8 @@ user-invocable: true
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch, WebSearch
 ---
 
+Model routing: Sonnet for implementation steps; WebFetch verification steps need no routing.
+
 # /powerpoint-addin-setup
 
 Scaffold a PowerPoint Office Add-in into an existing Vite + React project.
@@ -360,6 +362,22 @@ re-run (Step 0 will resume from this step).**
 5. `npm run build` compiles without errors (both entry points included in output).
 
 On success, mark `- [x] verify` in `.powerpoint-addin-setup-progress.md`.
+
+---
+
+## Operational Readiness
+
+**SLIs to define before going live:**
+- Sideload success rate: % of `npm run dev` + sideload attempts where the task pane reaches "Task pane loaded" (target: >99%)
+- Dev-cert trust failure rate: % of dev-server starts where PowerPoint refuses `https://localhost` for an untrusted/expired cert (target: 0%)
+- Manifest validation pass rate against the current Office manifest schema at generation time (target: 100%)
+
+**Key failure modes:**
+- Dev certificate untrusted or expired → PowerPoint shows a blank pane instead of loading it; detected by Step 12's manual verify failing; mitigation: re-run the cert install step, document per-OS manual trust steps
+- Office manifest schema drift → sideload is rejected by PowerPoint; detected by Step 1b's schema check failing before generation; mitigation: re-fetch the schema before writing the manifest, pin a known-good manifest version
+- Stale `wef` sync → sideloaded add-in points at an old manifest/bundle, ribbon button missing or outdated; detected by the ribbon-button check in Step 12; mitigation: run the wef sync on every dev-server start, not just first setup
+
+**Rollback classification:** Reversible — manifest and cert artifacts are local/dev-only; no data migration; revert via git and re-run the cert/sideload steps.
 
 ---
 

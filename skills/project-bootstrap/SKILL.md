@@ -5,6 +5,8 @@ user-invocable: true
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
+Model routing: Sonnet for implementation steps; WebFetch verification steps need no routing.
+
 # /project-bootstrap
 
 Meta-skill that layers production concerns onto an existing

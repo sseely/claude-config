@@ -5,6 +5,8 @@ user-invocable: true
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch, WebSearch
 ---
 
+Model routing: Sonnet for implementation steps; WebFetch verification steps need no routing.
+
 # /analytics-setup
 
 Figure out what to instrument in PostHog for a Cloudflare Workers + Neon +

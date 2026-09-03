@@ -5,6 +5,8 @@ user-invocable: true
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
+Model routing: Sonnet for implementation steps; WebFetch verification steps need no routing.
+
 Scaffold full GDPR + CRA compliance features into this project. Templates live at
 `~/.claude/skills/compliance-setup/`. Work through each step in order.
 

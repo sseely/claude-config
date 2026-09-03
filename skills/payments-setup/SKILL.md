@@ -5,6 +5,8 @@ user-invocable: true
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch, WebSearch
 ---
 
+Model routing: Sonnet for implementation steps; WebFetch verification steps need no routing.
+
 # /payments-setup
 
 Scaffold Stripe Checkout + coupon system into a Cloudflare Workers + Neon

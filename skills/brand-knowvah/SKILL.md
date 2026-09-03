@@ -5,6 +5,8 @@ user-invocable: true
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
+Model routing: Sonnet for implementation steps; WebFetch verification steps need no routing.
+
 # brand-knowvah
 
 Apply the Knowvah "Warm Studio" visual identity and app shell to a new
@@ -352,6 +354,22 @@ re-run (Step 0 will resume from this step).**
 5. Click the hamburger — drawer should slide in with overlay.
 
 On success, mark `- [x] verify` in `.brand-knowvah-progress.md`.
+
+---
+
+## Operational Readiness
+
+**SLIs to define before going live:**
+- Theme-token load success rate: % of page loads where `index.css` custom properties resolve before first paint (target: 100%, no FOUC)
+- OS dark-mode sync correctness: % of sessions where the initial theme matches `prefers-color-scheme` or the stored override (target: 100%)
+- Sidebar state persistence rate: % of reloads where collapsed/expanded state matches the last `localStorage` value (target: 100%)
+
+**Key failure modes:**
+- CSS token file missing from the build output → app renders unstyled (no cream/charcoal theme); detected by visual diffing or unstyled-page reports; mitigation: verify `index.css` is included in the Vite build, add a build-time asset check
+- `ThemeContext` `localStorage` read throws (private browsing, storage disabled) → provider crashes on mount; detected by a client error-rate spike on mount; mitigation: wrap storage access in try/catch, fall back to system preference
+- Sidebar collapse state desyncs across open tabs → confusing UX, not a hard failure; detected via user reports; mitigation: known gap — add a `storage` event listener if cross-tab sync becomes a requirement
+
+**Rollback classification:** Reversible — brand-knowvah only writes CSS tokens, context, and component files scoped to this project; no data migration; revert via git.
 
 ---
 
