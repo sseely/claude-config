@@ -4,9 +4,12 @@
      Review each item, remove any you don't want, then run:
      /plan-mission implement the tasks in code-review-tasks.md
 
-     TICK THE BOXES as you implement. Phase 0 of the next run reconciles
-     this file against git and the files on disk; an unticked box that is
-     actually done costs the next run a re-derivation.
+     Implemented by plans/code-review-tasks-2026-09/ on 2026-09-02, branch
+     chore/code-review-tasks-2026-09 (20 task commits + 1 fix, merge commit to
+     main). Boxes ticked by T27 with (task, SHA); [human-applied] items were
+     verified by T2 against the user's uncommitted settings edits; the five
+     spike items stay unticked with their recommendation (D2). Resolved without
+     work: none beyond the two items under "Already resolved".
 
      [human-applied] marks fixes that touch a permissions file
      (settings.json, templates/autonomous-settings.json, .claude/settings*.json).
@@ -18,19 +21,19 @@
      contradiction reasoning recorded) and the nine phase1/phase2 notes. -->
 
 ## Already resolved during this run
-- [x] `rules/lsp.md:88-90` + `agents/04-quality-security/code-reviewer.md:4,7` —
+- [x] (T1, ab9ed1e) · `rules/lsp.md:88-90` + `agents/04-quality-security/code-reviewer.md:4,7` —
   the open STOP from 2026-08-01 (lsp.md mandates ast-grep and a typecheck; the
   two reviewer agents disallow Bash). At the user's direction: code-reviewer now
   grants Bash; lsp.md scopes the ast-grep/typecheck mandate to Bash-capable
   agents, with no-Bash agents using Serena `search_for_pattern` and leaving the
   typecheck to the orchestrator's gate. architect-reviewer keeps its read-only
   tools. Uncommitted — include in the next commit.
-- [x] `skills/self-improve/research-urls.md` — 13 active rows re-verified
+- [x] (T1, ab9ed1e) · `skills/self-improve/research-urls.md` — 13 active rows re-verified
   2026-09-02, 2 candidates promoted, 3 demoted (ACM 403 paywalls), 36 candidate
   rows added (25 Agent X + 11 Agent B/C), header updated. Uncommitted.
 
 ## Must fix (Critical)
-- [ ] `settings.json:136` (`SessionStart` hook has `"async": true`) +
+- [x] human-applied 2026-09-02, verified T2 run 3 (P1+P2); user's settings.json, uncommitted · `settings.json:136` (`SessionStart` hook has `"async": true`) +
   `hooks/session-start.sh:100-115` — the privilege-elevation check runs, but async
   hook stdout never reaches the model, so its warning is invisible. The
   autonomous permission profile has been live in `.claude/settings.json`
@@ -38,31 +41,31 @@
   the prior run. Fix: drop `"async": true` from that entry AND add a synchronous
   `ConfigChange` hook running the same check. Then run
   `hooks/autonomous-toggle.sh off /Users/scottseely/.claude`. [human-applied]
-- [ ] `settings.json:212-221` — `InstructionsLoaded` is wired to an inline `echo`
+- [x] human-applied, verified T2 (P3); uncommitted · `settings.json:212-221` — `InstructionsLoaded` is wired to an inline `echo`
   that records only a timestamp; `hooks/log-instructions-loaded.sh` (which logs
   `file_path`/`load_reason`) is invoked by none of the four settings files. The
   `paths:` pilot was RED for exactly this reason. Fix: replace the command at
   `settings.json:217` with `~/.claude/hooks/log-instructions-loaded.sh`.
   [human-applied]
-- [ ] `CLAUDE.md:44` + `rules/autonomous-execution.md:174` — both say "Use
+- [x] (T10, 4338d9f; T11, 1d01b60) rewrote both lines per D3; P7 env var also set by hand · `CLAUDE.md:44` + `rules/autonomous-execution.md:174` — both say "Use
   TodoWrite", but todo/task tools are off by default on Opus 4.8, Sonnet 5,
   Fable 5 and newer (changelog 2.1.233); `CLAUDE_CODE_ENABLE_TODO_TOOLS` is set
   nowhere, and this run's own session had no TodoWrite tool. Fix: add
   `"env": {"CLAUDE_CODE_ENABLE_TODO_TOOLS": "1"}` to settings.json
   [human-applied], or rewrite both lines to use the mission brief's checkbox
   state as the progress record.
-- [ ] `skills/doc-pdf/`, `skills/doc-xlsx/` — tracked in git despite
+- [x] (T4, f39ca70 + fix 3ba1b48) · `skills/doc-pdf/`, `skills/doc-xlsx/` — tracked in git despite
   `.gitignore:49,52` and the no-redistribution note at `.gitignore:47-48`; only
   doc-docx and doc-pptx are actually untracked. Fix:
   `git rm -r --cached skills/doc-pdf skills/doc-xlsx`, and correct the blanket
   "skills/doc-* are gitignored" claim at
   `skills/self-improve/references/phase0-recall.md:72-73`.
-- [ ] `skills/testing-setup/SKILL.md:11,360,372` +
+- [x] (T6, 86d1d7f) — follow-up: skills/testing-setup/config/vitest.config.ts:26-29 still 80 · `skills/testing-setup/SKILL.md:11,360,372` +
   `skills/project-bootstrap/SKILL.md:59` — scaffold 80/80/80 coverage thresholds
   against `rules/testing.md`'s 90/90/90 floor. This is a live CI gate on every
   scaffolded project, not prose drift. Fix: change all four to 90, or add an
   explicit deviation note stating why scaffolds start lower.
-- [ ] `templates/container-entrypoint.sh:24-28` vs `skills/sandbox/SKILL.md:160` —
+- [x] (T5, 7c3624b) bash -n verified; Docker smoke test skipped, pull stalled · `templates/container-entrypoint.sh:24-28` vs `skills/sandbox/SKILL.md:160` —
   the entrypoint writes `settings.json` into `/root/.claude`, which the skill
   bind-mounts read-only; under `set -euo pipefail` the EROFS write aborts the
   entrypoint before `claude` starts at line 53. The write is also pointless since
@@ -71,93 +74,93 @@
   lines 23-29.
 
 ## Should fix (Warning)
-- [ ] `hooks/quality-gate.sh` — the `rules/` 2020-line cap is stated in
+- [x] (T3, f89b5f5) · `hooks/quality-gate.sh` — the `rules/` 2020-line cap is stated in
   `docs/fleet/charter.md:41-42` and `docs/fleet/monitoring.md:49` but enforced by
   nothing; commit 37ee159 was a manual recovery from a breach. Currently 1917.
   Fix: add `[ "$(cat ~/.claude/rules/*.md | wc -l)" -le 2020 ]` to the gate.
-- [ ] `rules/prompting-quality.md:37-38` vs `:56-57` — line 37-38 says "a gate
+- [x] (T8, 9b15b90) · `rules/prompting-quality.md:37-38` vs `:56-57` — line 37-38 says "a gate
   enforces its absence" of `paths:` frontmatter (no such gate exists; commit
   48c162d added the claim); line 56-57 prescribes `paths:`. Fix: delete `:56-57`;
   change "a gate enforces" to "review enforces". Do not adopt `paths:` (pilot RED).
-- [ ] `skills/self-improve/references/phase2-audit-agents.md:194,203` — still
+- [x] (T16, 8cf3fe0) · `skills/self-improve/references/phase2-audit-agents.md:194,203` — still
   says "CLAUDE.md ≤ 4KB"; the rule at `rules/prompting-quality.md:28` is now
   "under 200 lines". Fix: replace both lines and switch `wc -c` to `wc -l`.
-- [ ] `skills/self-improve/research-urls.md` (Candidate URLs) — 125 rows, past the
+- [x] (T16, 8cf3fe0) D9 policy written into phase1-research-agents.md; queue itself drains next run · `skills/self-improve/research-urls.md` (Candidate URLs) — 125 rows, past the
   120-row revisit threshold the 2026-08-01 inline comment set. Agent X now drains
   5 per run but adds ~25, so the queue still grows 5x faster than it drains. Fix:
   raise the drain to 10 per run and cap additions at 10, or require Agent X to
   demote-in-place any candidate older than two runs that no agent has cited.
-- [ ] `CLAUDE.md:26` / `rules/memory.md:7` — the `.agent-notes/` duty is ambient;
+- [x] (T20, cfff569) · `CLAUDE.md:26` / `rules/memory.md:7` — the `.agent-notes/` duty is ambient;
   no sampled agent lists `memory.md` in Required Rules, so subagents never write
   observations. Fix: add `memory.md` to the Required Rules of the four
   write-capable sampled agents (backend-developer, microservices-architect,
   typescript-pro, it-ops-orchestrator) and any mission-brief executor.
-- [ ] `post-compact-context.md:32-34` — names the diagnosis artifact without its
+- [x] (T12, 277de78) · `post-compact-context.md:32-34` — names the diagnosis artifact without its
   four fields. Fix: append "mechanism, origin `file:line`, causal chain, what you
   ruled out".
-- [ ] `post-compact-context.md` — does not restore the write-set /
+- [x] (T12, 277de78) · `post-compact-context.md` — does not restore the write-set /
   one-writer-per-file rule (`rules/parallelism.md:33-39`,
   `rules/autonomous-execution.md:68-70`), the least recoverable rule to lose
   mid-batch. Fix: add a 6th section, ≤4 lines.
-- [ ] `docs/fleet/monitoring.md` MEASURE 2.4 item 3 — rules-budget figure stale
+- [x] (T3, f89b5f5; T21, 2ea836a) · `docs/fleet/monitoring.md` MEASURE 2.4 item 3 — rules-budget figure stale
   (says 2018, live 1917) and unmeasured for 2+ cycles. Fix: record the live count
   in `.agent-notes/` each run, or downgrade the item to "unverified intention".
-- [ ] `docs/fleet/monitoring.md` MEASURE 1.2 — coverage floor unmeasured 2+
+- [x] (T21, 2ea836a) downgraded per D11 · `docs/fleet/monitoring.md` MEASURE 1.2 — coverage floor unmeasured 2+
   cycles. Fix: measure once and record, or downgrade to "unverified intention".
-- [ ] `docs/fleet/monitoring.md` MEASURE 2.4 item 1 — frontmatter parse rate
+- [x] (T3, f89b5f5; T21, 2ea836a) · `docs/fleet/monitoring.md` MEASURE 2.4 item 1 — frontmatter parse rate
   unmeasured 2+ cycles (live: 159/159 pass). Fix: have `check-frontmatter.py`
   append its pass count to `.agent-notes/fleet-signals.md`, or downgrade.
-- [ ] `scripts/check-references.py:76-95,128-131` — validates agent/skill/hook
+- [x] (T21, 2ea836a) · `scripts/check-references.py:76-95,128-131` — validates agent/skill/hook
   names but not `docs/**/*.md` paths cited from five rule files. Fix: add a
   path-exists check for `docs/` references found in `rules/*.md`.
-- [ ] `settings.json:117-120` — four one-off literal grants
+- [x] human-applied, verified T2 (P4): all four grants gone; uncommitted · `settings.json:117-120` — four one-off literal grants
   (`Bash(echo "--- drum refs above…")`, `Bash(echo "=== rc=$? ===")`,
   `Bash(./sync-fork.sh dot-output *)`, and the awk one-liner), three added by hand
   in the last 24 days. Same finding class the prior run could not fix. Fix: delete
   the two echo grants; move sync-fork and awk to the project that uses them.
   [human-applied]
-- [ ] `templates/autonomous-settings.json` — omits `guard-bash.py`,
+- [x] human-applied, verified T2 (P5); uncommitted · `templates/autonomous-settings.json` — omits `guard-bash.py`,
   `nudge-search-tool.py`, `check-frontmatter.py`, and the `InstructionsLoaded`
   hook. Hook arrays merge across scopes, so this machine is covered, but the
   template is copied into CI, sandboxes, and other users' repos with no global
   settings to merge from. Fix: add the four hook registrations. [human-applied]
-- [ ] `templates/autonomous-settings.json:59-63` — five `mcp__playwright__*`
+- [x] human-applied, verified T2 (P6); uncommitted · `templates/autonomous-settings.json:59-63` — five `mcp__playwright__*`
   grants with no playwright MCP server in any `.mcp.json`. Prior run cancelled as
   blocked, not resolved. Fix: delete the five lines. [human-applied]
-- [ ] `skills/code-review/SKILL.md:203-204` — verdict table lets `Warning = 0`
+- [x] (T17, 841fa58) · `skills/code-review/SKILL.md:203-204` — verdict table lets `Warning = 0`
   satisfy both APPROVE and APPROVE WITH NITS. Fix: `Critical = 0 AND
   1 ≤ Warning < 3` for NITS, matching
   `skills/self-improve/references/output-formats.md:24`.
-- [ ] `skills/commit/SKILL.md:14-17,25` — restates `rules/commits.md`'s type list
+- [x] (T17, 841fa58) · `skills/commit/SKILL.md:14-17,25` — restates `rules/commits.md`'s type list
   and char limits verbatim. Fix: replace with a link to the rule.
-- [ ] `rules/parallelism.md` Model Selection table, Fable row — `claude-fable-5`
+- [x] (T9, eb77aa1) now in rules/model-routing.md · `rules/parallelism.md` Model Selection table, Fable row — `claude-fable-5`
   is stale; the `fable` alias resolves to `claude-fable-5-1` on v2.1.255+
   (installed v2.1.259). Fix: update the ID and note the version gate.
-- [ ] `skills/self-improve/references/phase1-research-agents.md:56,68-73,81-89` —
+- [x] (T16, 8cf3fe0) · `skills/self-improve/references/phase1-research-agents.md:56,68-73,81-89` —
   pre-seeded alias table predates Fable 5.1: no `claude-fable-5-1` row, the
   "no `fable[1m]`" note does not name `claude-fable-5-1[1m]` (the string live in
   settings.json), and the effort table omits Fable 5.1. Fix: update the four
   spans; state that the `/model` picker itself emits the `[1m]` form so docs and
   behavior disagree.
-- [ ] `rules/testability.md:21-24` — "more than 2-3 mocks" is a range; 3 is both
+- [x] (T13, d679078) · `rules/testability.md:21-24` — "more than 2-3 mocks" is a range; 3 is both
   at and over the limit. Fix: "more than 2 mocks".
-- [ ] `rules/observability.md:5-12` — "treat that as a design smell" has no stop
+- [x] (T13, d679078) · `rules/observability.md:5-12` — "treat that as a design smell" has no stop
   condition. Fix: "stop and define the SLI before writing the handler".
-- [ ] `rules/code-principles.md:33-42` — "provably so" has no test for what
+- [x] (T13, d679078) · `rules/code-principles.md:33-42` — "provably so" has no test for what
   counts as proof. Fix: "provable from a type, a caller contract quoted in a
   comment, or an assertion at the boundary".
-- [ ] `skills/upgrade-deps/SKILL.md:353` "3+ times" vs `:363` "2+ times" for the
+- [x] (T17, 841fa58) · `skills/upgrade-deps/SKILL.md:353` "3+ times" vs `:363` "2+ times" for the
   recurring-finding stop; `rules/autonomous-execution.md` says 3 or more. Fix:
   change `:363` to "3+".
-- [ ] `skills/self-improve/references/nist-refresh.md` (completeness diff) —
+- [x] (T16, 8cf3fe0) restated as edition + audit-log per D8 · `skills/self-improve/references/nist-refresh.md` (completeness diff) —
   unrunnable under the 3-fetch cap: no AIRC HTML page enumerates subcategory
   identifiers and the procedure forbids reading the PDFs. Fix: either point the
   diff at the per-function Playbook pages (one fetch each, within cap when
   rotated across runs) or restate the check as edition + audit-log only.
-- [ ] `skills/plan-mission/SKILL.md:47-69` — progress-file template stops at
+- [x] (T18, 312830b) · `skills/plan-mission/SKILL.md:47-69` — progress-file template stops at
   Phase 7 while `:71` and `:307` gate deletion on Phase 8. Fix: add the Phase 8
   line to the template.
-- [ ] `hooks/test_check_frontmatter.py`, `hooks/test_guard_bash.py` — collect 0
+- [x] (T3, f89b5f5) · `hooks/test_check_frontmatter.py`, `hooks/test_guard_bash.py` — collect 0
   items under pytest (custom `main()` runners, no `def test_*`), and
   `hooks/.venv` has no pytest. Run directly they pass 7/7 and 30/30, but nothing
   runs them after a hook edit. Fix: add `pytest` to `hooks/requirements.txt`,
@@ -165,81 +168,81 @@
   `hooks/quality-gate.sh`.
 
 ## Consider improving (Suggestion)
-- [ ] `post-compact-context.md:14-15` — restores "Opus→planning, Sonnet→
+- [x] (T12, 277de78) · `post-compact-context.md:14-15` — restores "Opus→planning, Sonnet→
   implementation", stale against `rules/parallelism.md:90,117-119` (Opus 5 covers
   implementation too). Fix: "Opus→planning and high-value implementation,
   Sonnet→routine implementation, Haiku→scoring/dedup".
-- [ ] `CLAUDE.md:3-6` — opens with Interaction Style; Diagnosis (`:60-63`) and
+- [x] (T11, 1d01b60) · `CLAUDE.md:3-6` — opens with Interaction Style; Diagnosis (`:60-63`) and
   Rules (`:65-69`) are last. Fix: reorder to Verification → Rules → Diagnosis →
   Complex Tasks → Agents → Parallelism → Session Notes → Commits → On Compaction
   → Interaction Style.
-- [ ] `rules/prompting-quality.md:41-42` — declines to state the cap it
+- [x] (T8, 9b15b90) · `rules/prompting-quality.md:41-42` — declines to state the cap it
   enforces; the 2020 figure lives only in `docs/fleet/charter.md:41`. Fix: add
   "The cap is stated in `docs/fleet/charter.md` and checked in quality-gate.sh".
-- [ ] `rules/research-sources.md:35-49` — Tier 3 omits `anthropic.com/engineering`
+- [x] (T13, d679078) · `rules/research-sources.md:35-49` — Tier 3 omits `anthropic.com/engineering`
   while `phase1-research-agents.md:171-173` already treats it as Tier 3 and Agent C
   cited it this run. Fix: add `**Anthropic Engineering** — anthropic.com/engineering
   (agent harness, context engineering, tool design)` after High Scalability.
-- [ ] `hooks/guard-bash.py`, `hooks/nudge-search-tool.py` — fail open on any
+- [x] (T7, 2cfe741) · `hooks/guard-bash.py`, `hooks/nudge-search-tool.py` — fail open on any
   exception with a bare `except` and no log, so a bug that stops guarding `rm -rf`
   is invisible. Fix: `except Exception as e:` write to `logs/<hook>.err` inside
   its own try, then return.
-- [ ] `skills/explore/SKILL.md:8`, `skills/review-pr/SKILL.md:12`,
+- [x] (T17, 841fa58) explore and review-pr; upgrade-deps kept its sentence — it has no Model Routing table · `skills/explore/SKILL.md:8`, `skills/review-pr/SKILL.md:12`,
   `skills/upgrade-deps/SKILL.md:14` — one-line model-routing sentence duplicated
   by a `## Model Routing` table ~10 lines below. Fix: delete the sentence.
-- [ ] `CLAUDE.md:19` vs `rules/research-sources.md:98-100` — CLAUDE.md's HIGH
+- [x] (T11, 1d01b60) · `CLAUDE.md:19` vs `rules/research-sources.md:98-100` — CLAUDE.md's HIGH
   ("verified via tool or cited source") admits a Tier-5 blog the rule bars. Fix:
   "**HIGH**: verified against a Tier 1-2 source retrieved this run".
-- [ ] `agents/` — `isolation: worktree` frontmatter unused anywhere; it removes
+- [ ] spike T22: defer — no documented merge-back; see plans/code-review-tasks-2026-09/spike/T22.md — `agents/` — `isolation: worktree` frontmatter unused anywhere; it removes
   the write-conflict problem parallelism.md's file-ownership planning exists for.
   Fix: evaluate on `refactoring-specialist` and `legacy-modernizer`.
-- [ ] `rules/autonomous-execution.md:86-89` vs `rules/diagnosis.md:53-57` — the
+- [x] (T10, 4338d9f) · `rules/autonomous-execution.md:86-89` vs `rules/diagnosis.md:53-57` — the
   same 2-fix-cap rule at equal verbosity, cross-referencing each other
   (consistent, not contradictory). Fix: keep diagnosis.md canonical; collapse the
   autonomous-execution copy to one pointer line (~110 tokens/session).
-- [ ] `.gitignore` — `agent-memory/` is untracked but not ignored; it is
+- [x] (T4, f39ca70) · `.gitignore` — `agent-memory/` is untracked but not ignored; it is
   machine-local per-agent memory. Fix: add `agent-memory/`.
-- [ ] `rules/api-design.md:36-40` — no defined shape for an error on a paginated
+- [x] (T14, a25244d) · `rules/api-design.md:36-40` — no defined shape for an error on a paginated
   endpoint under "Never mix envelopes". Fix: state that an error response
   replaces the list envelope entirely; the two never nest.
-- [ ] `rules/` — nothing governs cancellation, races, or shared mutable state
+- [x] (T15, aea098a) · `rules/` — nothing governs cancellation, races, or shared mutable state
   across awaits. Fix: a "Cancellation and shared state" section in
   `error-handling.md`, ≤30 lines against the 2020 cap.
-- [ ] `agents/` — `outputStyle: "Concise"` (built-in since 2.1.237) unused while
+- [ ] spike T23: adopt — stacks cleanly with the per-prompt rule; task line in spike/T23.md — `agents/` — `outputStyle: "Concise"` (built-in since 2.1.237) unused while
   `prompting-quality.md:103-117` hand-writes the same effect. Fix: evaluate in the
   7 Opus/opusplan agents' frontmatter as a native supplement.
-- [ ] `settings.json:128` — `"model": "claude-fable-5-1[1m]"`. Docs list `[1m]`
+- [ ] spike T26: harmless-but-redundant — docs say [1m] is accepted and a no-op on Fable; change to plain claude-fable-5-1 at leisure (human-applied) — `settings.json:128` — `"model": "claude-fable-5-1[1m]"`. Docs list `[1m]`
   only for sonnet/opus and say Fable is natively 1M, yet the `/model` picker
   wrote this string and this session runs on it with a 1M window. Fix: verify
   against model-config next run; do not treat as invalid. [human-applied]
-- [ ] `rules/architecture.md:73-86` — names migration patterns but nothing
+- [x] (T14, a25244d) · `rules/architecture.md:73-86` — names migration patterns but nothing
   governs running a backfill. Fix: three bullets — batch size, resumability,
   abort switch.
-- [ ] `rules/memory.md` — never reconciles `.agent-notes/` with built-in auto
+- [x] (T14, a25244d) · `rules/memory.md` — never reconciles `.agent-notes/` with built-in auto
   memory (`settings.json:259`). Fix: one sentence — `.agent-notes/` is the
   committed cross-session handoff; auto memory is machine-local and Claude-managed;
   do not duplicate.
-- [ ] `rules/parallelism.md` — 211 lines, 11 over the single-file flag, 2.3x the
+- [x] (T9, eb77aa1) 211 → 125 lines · `rules/parallelism.md` — 211 lines, 11 over the single-file flag, 2.3x the
   next-largest rule. Fix: split Model Selection + compensation blocks into
   `rules/model-routing.md`.
-- [ ] `rules/parallelism.md:129-141` (Opus compensation) — no pointer to the
+- [x] (T9, eb77aa1) · `rules/parallelism.md:129-141` (Opus compensation) — no pointer to the
   brevity guidance at `prompting-quality.md:103-117`. Low urgency: all 10
   Opus-routed prompts already comply. Fix: one pointer line.
-- [ ] `settings.json` hooks — `ConfigChange` unwired; it is the earlier, more
+- [x] human-applied, verified T2 (P2); uncommitted · `settings.json` hooks — `ConfigChange` unwired; it is the earlier, more
   reliable trigger for the privilege-elevation check and would also catch this
   skill's own mid-run registry edits. Fix: wire it. [human-applied]
-- [ ] `settings.json` hooks — `SubagentStop` unwired while the autonomous quality
+- [ ] optional pre-flight P8, not applied this run; human-applied when wanted — `settings.json` hooks — `SubagentStop` unwired while the autonomous quality
   gates rely on the orchestrator remembering to run them. Fix: prototype a
   `SubagentStop` hook matched to mission-brief agent types. [human-applied]
-- [ ] `rules/prompting-quality.md:59-68` — context budget is file-count only
+- [x] (T8, 9b15b90; T17, 841fa58 for code-review's split note) · `rules/prompting-quality.md:59-68` — context budget is file-count only
   (20-30), no token threshold; `skills/code-review/SKILL.md:87-95` hands 11 agents
   an uncapped inventory on "full project". `[frontier-lag]` arxiv:2607.19257
   (preprint): recall degrades sharply past ~128k tokens. Fix: add "compact or
   split when context passes ~128k tokens regardless of file count".
-- [ ] `rules/parallelism.md` ~:198-207 — resume-vs-respawn guidance never names
+- [x] (T9, eb77aa1) · `rules/parallelism.md` ~:198-207 — resume-vs-respawn guidance never names
   `subagent_type: "fork"` (inherits parent context and prompt cache). Fix: one
   line distinguishing SendMessage-resume, fork, and fresh Agent.
-- [ ] Prompt placement, 7 of 8 sampled files (`agents/backend-developer.md:58-75`,
+- [x] (T16, 8cf3fe0; T18, 312830b; T20, cfff569) D7 pilot, bounded to these 7 files · Prompt placement, 7 of 8 sampled files (`agents/backend-developer.md:58-75`,
   `fullstack-developer.md:210-219`, `security-auditor.md:120-127`,
   `qa-expert.md:120-126`, `it-ops-orchestrator.md:56-65`,
   `skills/plan-mission/SKILL.md:383-389`, `skills/self-improve/SKILL.md:112`) —
@@ -247,58 +250,58 @@
   arxiv:2607.19257 (preprint): placement effects ≥ format effects. Fix: duplicate
   each specific rule citation into the section it binds; keep the trailing block
   as the index.
-- [ ] `skills/file-organizer/SKILL.md:119-136` — destructive `mv`/delete with no
+- [x] (T18, 312830b) · `skills/file-organizer/SKILL.md:119-136` — destructive `mv`/delete with no
   undo log. Fix: write a manifest of planned and executed moves before starting.
-- [ ] `skills/changelog-generator/SKILL.md:13-22` — no handling for an empty
+- [x] (T18, 312830b) · `skills/changelog-generator/SKILL.md:13-22` — no handling for an empty
   commit range. Fix: "if no commits in range, report and stop".
-- [ ] `settings.json` hooks — `PermissionDenied` and `PostToolUseFailure` unwired;
+- [ ] optional pre-flight P8, not applied this run; human-applied when wanted — `settings.json` hooks — `PermissionDenied` and `PostToolUseFailure` unwired;
   nothing logs denied calls or tool failures. Fix: wire both to an append-only
   log. [human-applied]
-- [ ] `settings.json` — `subagentPromptCacheTtl` / `promptCacheTtl` (2.1.243)
+- [ ] spike T25: adopt global 1h — optional P9, not applied; human-applied — `settings.json` — `subagentPromptCacheTtl` / `promptCacheTtl` (2.1.243)
   unset while this skill runs 9 parallel agents per run and mission batches run
   several subagent calls per hour. Fix: evaluate `"subagentPromptCacheTtl": "1h"`.
   [human-applied]
-- [ ] Nine scaffolding skills (analytics-setup, auth-setup, brand-knowvah,
+- [x] (T19, 1e4f513) · Nine scaffolding skills (analytics-setup, auth-setup, brand-knowvah,
   compliance-setup, i18n-setup, payments-setup, powerpoint-addin-setup,
   project-bootstrap, testing-setup) — no model-routing guidance. Fix: one line —
   Sonnet for implementation, distinguishing WebFetch-verification steps.
-- [ ] `skills/brand-knowvah`, `skills/powerpoint-addin-setup` — no Operational
+- [x] (T19, 1e4f513) · `skills/brand-knowvah`, `skills/powerpoint-addin-setup` — no Operational
   Readiness section while five sibling `*-setup` skills have one. Fix: add it in
   the same format.
-- [ ] `CLAUDE.md` Agents section — places Agent tool and Workflow but never agent
+- [x] (T11, 1d01b60) · `CLAUDE.md` Agents section — places Agent tool and Workflow but never agent
   teams (`subagent_type: "agent-team"`, 2.1.232). Fix: name it in one line, or
   record that it is deliberately out of scope.
-- [ ] `settings.json:55-59` — five shell `gh` grants with no GitHub MCP server.
+- [ ] spike T24: adopt github-mcp-server (HTTP) — scope mapping still to do; keep gh auth; human-applied — `settings.json:55-59` — five shell `gh` grants with no GitHub MCP server.
   Fix: evaluate the official GitHub MCP server; confirm its current name first.
-- [ ] `settings.json` hooks — `PreModelSwitch`/`PostModelSwitch` (2.1.251)
+- [ ] not applied: low priority per the finding itself; human-applied when model drift is observed — `settings.json` hooks — `PreModelSwitch`/`PostModelSwitch` (2.1.251)
   unwired. Fix: low priority; wire only if model drift is observed. [human-applied]
 
 ## Inline comments to add (Notes)
-- [ ] `rules/retry-idempotency.md` (Retry policy) — add comment:
+- [x] (T14, a25244d) · `rules/retry-idempotency.md` (Retry policy) — add comment:
   `<!-- Code review (2026-09-02): timeout scope vs. retry envelope is unstated. Revisit if a caller reports a 3-attempt operation exceeding its stated timeout. -->`
-- [ ] `post-compact-context.md:18` — add comment:
+- [x] (T12, 277de78) · `post-compact-context.md:18` — add comment:
   `<!-- Code review (2026-09-02): Commit Format section is at the 6-line flag. Revisit if any other section also reaches 6 lines. -->`
-- [ ] `skills/fix/SKILL.md` (iteration loop) — add comment:
+- [x] (T18, 312830b) · `skills/fix/SKILL.md` (iteration loop) — add comment:
   `<!-- Code review (2026-09-02): no maxTurns cap on iterative agents. Revisit if a /fix run exhausts turns without reporting why. -->`
-- [ ] `evals/run_evals.py` (MODEL_ALIAS_FIX) — add comment:
+- [x] (T21, 2ea836a) · `evals/run_evals.py` (MODEL_ALIAS_FIX) — add comment:
   `# Code review (2026-09-02): MODEL_ALIAS_FIX may be obsolete — the haiku alias bug did not reproduce on v2.1.259. Revisit after a second independent probe; remove if it stays clean.`
-- [ ] `rules/parallelism.md` (Subagent spawn depth) — add comment:
+- [x] (T9, eb77aa1) · `rules/parallelism.md` (Subagent spawn depth) — add comment:
   `<!-- Code review (2026-09-02): no per-agent spawn whitelist (Agent(name,...) tool syntax unused). Revisit if an autonomous agent fans out to unexpected specialists. -->`
-- [ ] `hooks/log-instructions-loaded.sh:1-5` — add comment:
+- [x] (T7, 2cfe741) · `hooks/log-instructions-loaded.sh:1-5` — add comment:
   `# Code review (2026-09-02): intentional -e omission so the hook never blocks. Revisit if this script gains a failure path that must be surfaced.`
-- [ ] `hooks/notify-on-stop.sh` — add comment:
+- [x] (T7, 2cfe741) · `hooks/notify-on-stop.sh` — add comment:
   `# Code review (2026-09-02): Stop and StopFailure are not distinguished. Revisit if a failed turn is mistaken for a completed one.`
-- [ ] `skills/file-organizer/SKILL.md:71` — add comment:
+- [x] (T18, 312830b) · `skills/file-organizer/SKILL.md:71` — add comment:
   `<!-- Code review (2026-09-02): "ask before deleting" is weaker than the harness prohibition on permanent deletion. Revisit if a user reports Claude deleting files under this skill. -->`
-- [ ] `skills/plan-mission/SKILL.md:1` — add comment:
+- [x] (T18, 312830b) · `skills/plan-mission/SKILL.md:1` — add comment:
   `<!-- Code review (2026-09-02): 389 lines, 78% of the 500-line skill ceiling. Revisit at the next audit if it has grown. -->`
-- [ ] `skills/generate-question-bank/SKILL.md:114` — add comment:
+- [x] (T18, 312830b) · `skills/generate-question-bank/SKILL.md:114` — add comment:
   `<!-- Code review (2026-09-02): the haiku-batch model choice is implicit in the output schema. Revisit if the batch model changes. -->`
-- [ ] `skills/video-downloader/SKILL.md` — add comment:
+- [x] (T18, 312830b) · `skills/video-downloader/SKILL.md` — add comment:
   `<!-- Code review (2026-09-02): no failure path for private, age-restricted, or geo-blocked videos. Revisit on the first silent download failure. -->`
-- [ ] `hooks/project-init.sh:1-5` — add comment:
+- [x] (T7, 2cfe741) · `hooks/project-init.sh:1-5` — add comment:
   `# Code review (2026-09-02): CLAUDE_CODE_NEW_INIT=1 (interactive multi-phase /init) is unused. Revisit the next time a project is bootstrapped from scratch.`
-- [ ] `CLAUDE.md` (Complex Tasks) — add comment:
+- [x] (T11, 1d01b60) · `CLAUDE.md` (Complex Tasks) — add comment:
   `<!-- Code review (2026-09-02): /claude-api cost-optimize (2.1.247) exists but is unreferenced. Revisit when a cost audit is actually run. -->`
 
 ## Research-source follow-up
