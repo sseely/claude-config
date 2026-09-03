@@ -208,7 +208,7 @@
 - [x] (T15, aea098a) · `rules/` — nothing governs cancellation, races, or shared mutable state
   across awaits. Fix: a "Cancellation and shared state" section in
   `error-handling.md`, ≤30 lines against the 2020 cap.
-- [ ] spike T23: adopt — stacks cleanly with the per-prompt rule; task line in spike/T23.md — `agents/` — `outputStyle: "Concise"` (built-in since 2.1.237) unused while
+- [x] spike T23 adopted 2026-09-03 (d8300aa): outputStyle Concise on the 7 agents; schema gained the field — stacks cleanly with the per-prompt rule; task line in spike/T23.md — `agents/` — `outputStyle: "Concise"` (built-in since 2.1.237) unused while
   `prompting-quality.md:103-117` hand-writes the same effect. Fix: evaluate in the
   7 Opus/opusplan agents' frontmatter as a native supplement.
 - [ ] spike T26: harmless-but-redundant — docs say [1m] is accepted and a no-op on Fable; change to plain claude-fable-5-1 at leisure (human-applied) — `settings.json:128` — `"model": "claude-fable-5-1[1m]"`. Docs list `[1m]`
@@ -257,7 +257,7 @@
 - [ ] optional pre-flight P8, not applied this run; human-applied when wanted — `settings.json` hooks — `PermissionDenied` and `PostToolUseFailure` unwired;
   nothing logs denied calls or tool failures. Fix: wire both to an append-only
   log. [human-applied]
-- [ ] spike T25: adopt global 1h — optional P9, not applied; human-applied — `settings.json` — `subagentPromptCacheTtl` / `promptCacheTtl` (2.1.243)
+- [x] spike T25 adopted 2026-09-03 (ed59421): subagentPromptCacheTtl 1h in settings.json — optional P9, not applied; human-applied — `settings.json` — `subagentPromptCacheTtl` / `promptCacheTtl` (2.1.243)
   unset while this skill runs 9 parallel agents per run and mission batches run
   several subagent calls per hour. Fix: evaluate `"subagentPromptCacheTtl": "1h"`.
   [human-applied]
@@ -271,7 +271,7 @@
 - [x] (T11, 1d01b60) · `CLAUDE.md` Agents section — places Agent tool and Workflow but never agent
   teams (`subagent_type: "agent-team"`, 2.1.232). Fix: name it in one line, or
   record that it is deliberately out of scope.
-- [ ] spike T24: adopt github-mcp-server (HTTP) — scope mapping still to do; keep gh auth; human-applied — `settings.json:55-59` — five shell `gh` grants with no GitHub MCP server.
+- [ ] spike T24 adopted 2026-09-03 in .mcp.json (gitignored): remote server, PAT via ${GITHUB_MCP_PAT}, toolsets repos/actions/pull_requests/issues; pending user token + approval; the five gh grants stay until it is proven, gh auth stays for good — scope mapping still to do; keep gh auth; human-applied — `settings.json:55-59` — five shell `gh` grants with no GitHub MCP server.
   Fix: evaluate the official GitHub MCP server; confirm its current name first.
 - [ ] not applied: low priority per the finding itself; human-applied when model drift is observed — `settings.json` hooks — `PreModelSwitch`/`PostModelSwitch` (2.1.251)
   unwired. Fix: low priority; wire only if model drift is observed. [human-applied]
