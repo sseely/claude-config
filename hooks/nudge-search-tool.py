@@ -25,6 +25,8 @@ import json
 import os
 import re
 import sys
+from datetime import datetime, timezone
+from pathlib import Path
 
 # A bare identifier — no regex metacharacters, no whitespace. This is the
 # signature of "I am looking for a symbol", which is exactly what LSP and
@@ -215,10 +217,23 @@ def should_nudge(event):
     return not targets_non_code(tool_input)
 
 
+def log_error(hook_name, exc):
+    """Best-effort append of one error line to logs/<hook_name>.err."""
+    try:
+        log_dir = Path(__file__).resolve().parent.parent / "logs"
+        log_dir.mkdir(parents=True, exist_ok=True)
+        ts = datetime.now(timezone.utc).isoformat()
+        with open(log_dir / f"{hook_name}.err", "a") as f:
+            f.write(f"{ts} {hook_name}: {exc!r}\n")
+    except Exception:
+        pass  # Logging must never itself raise.
+
+
 def main():
     try:
         event = json.load(sys.stdin)
-    except Exception:
+    except Exception as e:
+        log_error("nudge-search-tool", e)
         return  # Fail open: a malformed event must never disrupt a search.
 
     try:
@@ -233,7 +248,8 @@ def main():
                 "additionalContext": build_nudge(lang),
             }
         }, sys.stdout)
-    except Exception:
+    except Exception as e:
+        log_error("nudge-search-tool", e)
         return
 
 
