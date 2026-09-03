@@ -21,14 +21,6 @@ fi
 # ── Configure gh CLI ─────────────────────────────────────────────────────────
 echo "$GITHUB_ORG_TOKEN" | gh auth login --with-token
 
-# ── Write settings.json into writable layer (shadows read-only mount) ────────
-mkdir -p /root/.claude
-cat > /root/.claude/settings.json << 'SETTINGS_EOF'
-{
-  "permissions": { "allow": ["*"] }
-}
-SETTINGS_EOF
-
 # ── Clone or resume ───────────────────────────────────────────────────────────
 WORK_DIR="${VOLUME_DIR:-/workspace}"
 mkdir -p /workspace-meta
