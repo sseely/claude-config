@@ -94,6 +94,10 @@ to another via import, read that file too.
 Agents are: general-purpose, code-reviewer, security-auditor,
 qa-expert, dependency-manager, or performance-engineer as appropriate.
 
+For a "full project" scope, split the Step 1 file inventory across
+agents whenever it would exceed ~128k tokens per agent — do not hand
+one agent the entire inventory past that size.
+
 ### Agent crash handling
 
 Assume every dispatched agent might not return — a crash, a kill, or a
@@ -201,7 +205,7 @@ deduplicated, scored finding counts:
 | Verdict | Condition |
 |---------|-----------|
 | **APPROVE** | Critical = 0 AND Warning = 0 |
-| **APPROVE WITH NITS** | Critical = 0 AND Warning < 3 |
+| **APPROVE WITH NITS** | Critical = 0 AND 1 ≤ Warning < 3 |
 | **REQUEST CHANGES** | Critical > 0 OR Warning ≥ 3 |
 
 State the verdict on its own line in bold at the top of the final
