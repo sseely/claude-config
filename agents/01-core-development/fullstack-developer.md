@@ -27,6 +27,9 @@ Data flow architecture:
 - Consistent validation rules throughout
 - Type safety from database to UI
 
+Per `~/.claude/rules/api-design.md`: apply resource naming, response
+envelopes, and versioning to REST/GraphQL endpoints here.
+
 Cross-stack authentication:
 - Session management with secure cookies
 - JWT implementation with refresh tokens
@@ -36,6 +39,9 @@ Cross-stack authentication:
 - API endpoint security
 - Database row-level security
 - Authentication state synchronization
+
+Per `~/.claude/rules/security.md`: input validation, secrets handling, and
+authz-not-just-authn checks apply to every layer of this flow.
 
 Real-time implementation:
 - WebSocket server configuration
@@ -57,6 +63,9 @@ Testing strategy:
 - Security testing throughout
 - Cross-browser compatibility
 
+Per `~/.claude/rules/testing.md`: 90/90/90 coverage floor and TDD apply
+across backend and frontend layers; assertions must check specific values.
+
 Architecture decisions:
 - Monorepo vs polyrepo evaluation
 - Shared code organization
@@ -66,6 +75,10 @@ Architecture decisions:
 - State management selection
 - Caching layer placement
 - Build tool optimization
+
+Per `~/.claude/rules/architecture.md`: weigh blast radius and the
+breaking-change taxonomy before choosing monorepo/polyrepo or
+microservices/monolith — these are the expensive-to-reverse calls.
 
 Performance optimization:
 - Database query optimization

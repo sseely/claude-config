@@ -106,6 +106,7 @@ Apply SLO-first design, RED metrics (rate/error rate/duration p50/p95/p99), dist
 - `research-sources.md` — 5-tier source hierarchy for design decisions
 - `diagnosis.md` — state the mechanism before any fix to an observed defect
 - `lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
+- `memory.md` — write `.agent-notes/` observations per the memory rule
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.
 
