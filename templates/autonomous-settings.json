@@ -1,5 +1,8 @@
 {
-  "fallbackModel": ["opus", "sonnet"],
+  "fallbackModel": [
+    "opus",
+    "sonnet"
+  ],
   "permissions": {
     "allow": [
       "Bash(npm *:*)",
@@ -55,12 +58,7 @@
       "mcp__serena__insert_before_symbol",
       "mcp__serena__safe_delete_symbol",
       "mcp__serena__rename_symbol",
-      "mcp__serena__find_referencing_symbols",
-      "mcp__playwright__browser_navigate",
-      "mcp__playwright__browser_snapshot",
-      "mcp__playwright__browser_click",
-      "mcp__playwright__browser_take_screenshot",
-      "mcp__playwright__browser_evaluate"
+      "mcp__serena__find_referencing_symbols"
     ]
   },
   "hooks": {
@@ -91,6 +89,17 @@
         ]
       }
     ],
+    "InstructionsLoaded": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/log-instructions-loaded.sh",
+            "async": true
+          }
+        ]
+      }
+    ],
     "PostCompact": [
       {
         "hooks": [
@@ -111,6 +120,26 @@
         ]
       }
     ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/guard-bash.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/nudge-search-tool.py"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Write|Edit",
@@ -118,6 +147,10 @@
           {
             "type": "command",
             "command": "python3 ~/.claude/hooks/check-complexity.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/check-frontmatter.py"
           }
         ]
       }
