@@ -12,9 +12,11 @@ batch's `overview.md`. Then (5) resume at the first incomplete task.
 ---
 ## Model Routing (restored)
 Fable→long-horizon autonomous execution (mission briefs, multi-hour runs)
-Opus→planning/architecture decisions, Sonnet→implementation, Haiku→scoring/dedup.
+Opus→planning/architecture and high-value implementation, Sonnet→routine
+implementation, Haiku→scoring/dedup.
 ---
 ## Commit Format (restored)
+<!-- Code review (2026-09-02): Commit Format section is at the 6-line flag. Revisit if any other section also reaches 6 lines. -->
 One commit per completed task; subject references the task ID —
 `feat(T3): add confirm endpoint`. Conventional Commits, `<type>(<scope>):
 <description>`, lowercase, no period, ≤72 chars. Full spec: `rules/commits.md`.
@@ -31,4 +33,9 @@ abstractions; if scope is ambiguous, do the minimal reading and note it.
 ## Batch Close-Out (restored)
 Run the mission brief's quality gates between every batch. After 2 failed fix
 attempts on the same gate, stop *editing* — but keep investigating until you can
-state the mechanism, then STOP and log the full diagnosis artifact.
+state the mechanism, then STOP and log the full diagnosis artifact:
+mechanism, origin `file:line`, causal chain, what you ruled out.
+---
+## Write-Set Discipline (restored)
+Each file has exactly one writer per batch. A task that must write outside its
+declared write-set stops and logs to the decision journal; it does not proceed.
