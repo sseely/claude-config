@@ -11,7 +11,9 @@ Two metrics are under active review:
 
 - **Test coverage floor.** `rules/testing.md`, "Coverage — 90/90/90 rule":
   90% line, 90% branch, 90% function coverage, treated as a floor, not a
-  ceiling.
+  ceiling. Downgraded to unverified intention (D11): this repo scaffolds
+  test setups for other projects; it has no defined subject of its own to
+  measure coverage against.
 - **Complexity limits.** `rules/code-principles.md`, "Complexity limits
   (hook-enforced)": file length ≤500 lines, function length ≤30 NLOC,
   cyclomatic complexity ≤10 CCN, ≤5 parameters. Enforced mechanically by
@@ -40,15 +42,21 @@ repo itself. "Drift" here means three concrete, checkable signals:
 
 1. **Frontmatter parse rate.** Every `agents/**/*.md` and `skills/*/SKILL.md`
    frontmatter block must parse as YAML. The floor is 159/159 files; any
-   file that fails to parse is drift.
+   file that fails to parse is drift. `hooks/quality-gate.sh` (T3) appends
+   each run's pass count to `.agent-notes/fleet-signals.md`'s
+   `Frontmatter Pass/Total` column (row format: `| Date | Rules Lines |
+   Frontmatter Pass/Total | Hook Tests Pass |`).
 2. **Inventory divergence.** A generated fleet inventory is checked against
    source via a `--check` regeneration gate, landing as
    `scripts/gen-fleet-inventory.py` (per decision FD-7). This gate does not
    exist yet — labeled here as unverified intention until that script lands.
 3. **Rules budget.** The aggregate line count across `rules/*.md`
-   (`cat rules/*.md | wc -l`) is capped at 2020 lines, currently sitting at
-   2018 — two lines of headroom. Per decision AD-2, the answer to running out
-   of room is a new file under `docs/`, not raising the cap.
+   (`cat rules/*.md | wc -l`) is capped at 2020 lines. `hooks/quality-gate.sh`
+   (T3) appends the current count to `.agent-notes/fleet-signals.md`'s
+   `Rules Lines` column on every run — read the newest row there for the
+   live count rather than trusting a number in this document (1958 as of
+   2026-09-02). Per decision AD-2, the answer to running out of room is a
+   new file under `docs/`, not raising the cap.
 
 ## MEASURE 3.1 — risk tracking
 
