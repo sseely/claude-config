@@ -46,6 +46,10 @@
       "type": "string",
       "description": "Reasoning effort level for this agent, e.g. low/medium/high/xhigh/max, model-dependent."
     },
+    "outputStyle": {
+      "type": "string",
+      "description": "Output style applied to the subagent's system prompt: a built-in name (Default, Explanatory, Learning, Concise) or a custom style name. Added 2026-09-03 after spike T23 found Concise stacks cleanly with the per-prompt brevity rule in rules/prompting-quality.md."
+    },
     "memory": {
       "type": "string",
       "description": "Observed in production on agent frontmatter (e.g. 'memory: user') even though this key is also documented on the skill surface — see skill.frontmatter.schema.json. Kept optional-string on both surfaces per FD-2 (schema must validate real frontmatter as it lives in git) rather than rejecting a key already in use."
