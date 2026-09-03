@@ -23,6 +23,9 @@ statsig/
 tasks/
 todos/
 
+# Per-agent memory (machine-local, not synced)
+agent-memory/
+
 # Hook runtime state (turn timestamps, etc.)
 .runtime/
 
