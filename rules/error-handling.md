@@ -60,3 +60,20 @@ Every call to an external service (HTTP, DB, queue, cache) must have:
   an error type
 
 A hung external call with no timeout hangs the caller indefinitely.
+
+## Cancellation and shared state
+
+- **Cancellation propagation.** When an operation is cancelled (abort,
+  timeout, cancel token), every downstream `await` it triggered must
+  observe the cancellation and stop — don't let work continue silently
+  after the caller has moved on.
+- **Race conditions across awaits.** State read before an `await` can
+  be stale by the time execution resumes — another concurrent call may
+  have run in between. Re-check invariants after the `await`, or use a
+  lock, compare-and-swap, or optimistic version check to close the gap.
+- **Shared mutable state.** Prefer immutable data passed through the
+  call chain over shared mutable state touched from multiple
+  concurrent paths. Where shared mutable state is unavoidable (cache,
+  connection pool, in-memory counter), document the concurrency
+  contract at the declaration — what guarantees ordering, and what
+  happens under concurrent access.
