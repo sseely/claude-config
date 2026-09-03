@@ -20,7 +20,7 @@ are *written*.
 
 3. **Observe, don't mock.** Prefer designs where the thing under test
    *returns* observable data rather than *calls* a collaborator. If a
-   test requires more than 2-3 mocks, treat that as a design smell and
+   test requires more than 2 mocks, treat that as a design smell and
    restructure before writing more tests.
 
 4. **Eliminate temporal coupling.** If function B must run after function
