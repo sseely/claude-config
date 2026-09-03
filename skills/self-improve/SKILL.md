@@ -64,6 +64,8 @@ Launch **D, E, F, G, and H together** — all read-only, no shared write targets
 
 ## Phase 3 — Synthesize and deduplicate
 
+Route this synthesis to Opus (adaptive thinking) if there are >20 raw findings; Sonnet suffices for smaller sets. When routing to Opus, instruct: "Return only the deduplicated, scored findings list — no preamble, no trailing summary" (see the scale-aware brevity section of `~/.claude/rules/prompting-quality.md`).
+
 Run a single dedup pass across all agent outputs (A through H, plus Agent X's Discovery Summary):
 
 1. Group findings that describe the same root issue.

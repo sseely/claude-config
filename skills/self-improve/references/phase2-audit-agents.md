@@ -191,16 +191,16 @@ cat ~/.claude/skills/code-review/SKILL.md
 
 #### 1. File size vs. prompting-quality.md limits
 
-`prompting-quality.md` requires CLAUDE.md ≤ 4KB. Check:
+`prompting-quality.md` requires CLAUDE.md under 200 lines. Check:
 
 ```bash
-wc -c ~/.claude/CLAUDE.md
+wc -l ~/.claude/CLAUDE.md
 wc -l ~/.claude/post-compact-context.md
 wc -l ~/.claude/rules/*.md | sort -rn | head -10
 ```
 
 Report any file that exceeds its natural utility ceiling:
-- CLAUDE.md > 4KB → flag
+- CLAUDE.md > 200 lines → flag
 - `post-compact-context.md` > 120 lines → flag (goal: condensed restoration, not full rules)
 - Any single rule file > 200 lines → flag as candidate for splitting
 - Any agent file > 300 lines → flag as candidate for trimming
