@@ -56,6 +56,7 @@ non-trivial defect — send it back to the debugger to instrument
 further rather than proceeding to a fix.
 
 ## Phase 3 — Fix loop (max 5 iterations)
+<!-- Code review (2026-09-02): no maxTurns cap on iterative agents. Revisit if a /fix run exhausts turns without reporting why. -->
 
 ### Each iteration:
 

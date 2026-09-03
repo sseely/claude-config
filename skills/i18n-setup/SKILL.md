@@ -5,6 +5,8 @@ user-invocable: true
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch, WebSearch
 ---
 
+Model routing: Sonnet for implementation steps; WebFetch verification steps need no routing.
+
 Scaffold i18n infrastructure into this project. Templates live at
 `~/.claude/skills/i18n-setup/`. Work through each step in order.
 

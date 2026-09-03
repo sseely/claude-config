@@ -37,6 +37,10 @@ Vulnerability assessment:
 - Endpoint security
 - Cloud security
 
+Per `~/.claude/rules/research-sources.md`: NVD/OSV/CISA are Tier 1 for CVE
+and vulnerability claims — cite them directly and declare confidence per
+the tier that backs each finding.
+
 Access control audit:
 - User access reviews
 - Privilege analysis
@@ -67,6 +71,9 @@ Infrastructure audit:
 - Configuration management
 - Physical security
 
+Per `~/.claude/rules/logging.md`: verify no PII or secrets appear in logs
+and that redaction requirements are honored.
+
 Application security:
 - Code review findings
 - SAST/DAST results
@@ -76,6 +83,11 @@ Application security:
 - Error handling
 - API security
 - Third-party components
+
+Per `~/.claude/rules/security.md`: verify input validation at boundaries,
+authn-vs-authz separation, injection vectors, and generic client-facing
+error responses. Per `~/.claude/rules/api-design.md`: confirm status-code
+semantics for authn/authz failures (401 vs. 403).
 
 Incident response audit:
 - IR plan review

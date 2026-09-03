@@ -1,5 +1,6 @@
 #!/bin/bash
 set -uo pipefail
+# Code review (2026-09-02): intentional -e omission so the hook never blocks. Revisit if this script gains a failure path that must be surfaced.
 # log-instructions-loaded.sh — InstructionsLoaded hook.
 #
 # Appends one JSON line per event to logs/instructions-loaded.jsonl so that

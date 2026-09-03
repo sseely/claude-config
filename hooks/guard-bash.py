@@ -18,6 +18,8 @@ import json
 import os
 import re
 import sys
+from datetime import datetime, timezone
+from pathlib import Path
 
 SEGMENT_SPLIT = re.compile(r"[;&|]+|\n")
 
@@ -106,10 +108,23 @@ def check_sudo(cmd):
     return None
 
 
+def log_error(hook_name, exc):
+    """Best-effort append of one error line to logs/<hook_name>.err."""
+    try:
+        log_dir = Path(__file__).resolve().parent.parent / "logs"
+        log_dir.mkdir(parents=True, exist_ok=True)
+        ts = datetime.now(timezone.utc).isoformat()
+        with open(log_dir / f"{hook_name}.err", "a") as f:
+            f.write(f"{ts} {hook_name}: {exc!r}\n")
+    except Exception:
+        pass  # Logging must never itself raise.
+
+
 def main():
     try:
         cmd = json.load(sys.stdin).get("tool_input", {}).get("command", "")
-    except Exception:
+    except Exception as e:
+        log_error("guard-bash", e)
         return  # Fail open: a malformed event must not wedge the session.
     if not isinstance(cmd, str):
         return

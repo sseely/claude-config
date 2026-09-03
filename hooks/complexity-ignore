@@ -13,3 +13,13 @@
 # Graphviz TypeScript port — consumed as a dependency, not owned here.
 ~/git/graphviz-ts
 /Users/scottseely/git/plantuml-ts/src/diagrams/class/class-notes.ts
+
+# ASCIIMath -> LaTeX converter, a faithful transcription of upstream's
+# math/ASCIIMathTeXImg.java (1032 lines) and math/AsciiMath.java. Upstream's
+# structure -- one long symbol table plus a recursive-descent parser whose
+# functions exceed every limit -- must be preserved character for character;
+# restructuring it would make divergences undetectable against the Java.
+/Users/scottseely/git/knowvah/plantuml-ts/src/core/math/ASCIIMathTeXImg.ts
+/Users/scottseely/git/knowvah/plantuml-ts/src/core/math/ASCIIMathTeXImgSymbols.ts
+/Users/scottseely/git/knowvah/plantuml-ts/src/core/math/AsciiMath.ts
+

@@ -69,7 +69,8 @@ Before doing any new work, check what's already known:
    the next run; the file on disk is the handoff.
 
    **A missing commit is not proof of non-implementation.** When the target
-   is gitignored — `.mcp.json`, `.claude/`, the Anthropic-proprietary
-   `skills/doc-*` — a task can be genuinely complete with no commit to find.
+   is gitignored — check `.gitignore` for the current list (e.g. `.mcp.json`,
+   `.claude/`, and any Anthropic-proprietary `skills/doc-*` entries it
+   matches) — a task can be genuinely complete with no commit to find.
    Check the file on disk before concluding anything, and record how each
    item was verified.

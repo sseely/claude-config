@@ -9,8 +9,6 @@ description: >
 disable-model-invocation: false
 ---
 
-Model routing: Sonnet for implementation; Haiku for verification/scoring; Opus only for explicit architectural decisions.
-
 # Review PR
 
 Run a full code review on a GitHub PR and post the findings as inline

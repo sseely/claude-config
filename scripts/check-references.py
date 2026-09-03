@@ -52,6 +52,7 @@ FRONTMATTER_NAME_RE = re.compile(r"^name:\s*(.+?)\s*$", re.MULTILINE)
 AGENT_PATH_RE = re.compile(r"agents/([\w./-]+\.md)")
 SKILL_PATH_RE = re.compile(r"skills/([\w-]+)/SKILL\.md")
 HOOK_PATH_RE = re.compile(r"hooks/([\w.-]+\.py)")
+DOCS_PATH_RE = re.compile(r"docs/([\w./-]+\.md)")
 SUBAGENT_TYPE_RE = re.compile(
     r"subagent_type[\"']?\s*[:=]\s*[\"']([a-zA-Z0-9_-]+)[\"']"
 )
@@ -92,7 +93,13 @@ def discover_fleet():
         for path in hooks_dir.glob("*.py"):
             hook_names.add(path.name)
 
-    return agent_paths, agent_names, skill_names, hook_names
+    docs_paths = set()
+    docs_dir = ROOT / "docs"
+    if docs_dir.is_dir():
+        for path in docs_dir.rglob("*.md"):
+            docs_paths.add(path.relative_to(ROOT).as_posix())
+
+    return agent_paths, agent_names, skill_names, hook_names, docs_paths
 
 
 def referencing_files():
@@ -143,13 +150,29 @@ def _pattern_checks(agent_paths, agent_names, skill_names, hook_names):
     ]
 
 
+def _docs_pattern_check(docs_paths):
+    """(regex, valid_ids, id_from_match, label_from_id) for docs refs.
+
+    Scoped by scan_file() to rules/*.md callers only: agent and skill
+    prompts legitimately describe generic docs/...md paths for the target
+    projects this repo builds, which are not references into this repo.
+    """
+    return (
+        DOCS_PATH_RE, docs_paths,
+        lambda m: "docs/" + m.group(1),
+        lambda rel: f"dangling docs path reference: {rel}",
+    )
+
+
 def scan_file(path, fleet):
     """Return a list of (line, message) dangling-reference findings."""
+    agent_paths, agent_names, skill_names, hook_names, docs_paths = fleet
     text = path.read_text(errors="replace")
+    checks = _pattern_checks(agent_paths, agent_names, skill_names, hook_names)
+    if path.relative_to(ROOT).as_posix().startswith("rules/"):
+        checks = checks + [_docs_pattern_check(docs_paths)]
     findings = []
-    for pattern, valid_ids, id_from_match, label_from_id in _pattern_checks(
-        *fleet
-    ):
+    for pattern, valid_ids, id_from_match, label_from_id in checks:
         findings.extend(
             _check_pattern(text, pattern, valid_ids, id_from_match,
                             label_from_id)
@@ -158,7 +181,8 @@ def scan_file(path, fleet):
 
 
 def main() -> int:
-    fleet = discover_fleet()  # (agent_paths, agent_names, skill_names, hook_names)
+    # (agent_paths, agent_names, skill_names, hook_names, docs_paths)
+    fleet = discover_fleet()
 
     any_findings = False
     for path in referencing_files():

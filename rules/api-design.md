@@ -35,7 +35,10 @@ All error responses use:
 ```
 
 Never mix envelopes — all endpoints in a service must use the same
-convention.
+convention. On a paginated endpoint an error response replaces the list
+envelope entirely; the two never nest. There is no
+`{ "data": [...], "error": ... }` shape — an error is always the flat
+`{ "error", "message" }` object, with no list metadata.
 
 ## Versioning
 

@@ -35,7 +35,7 @@ script: no hook, no gate, no CI job.
    - `settings.json` — hook entries under `hooks.*` reference `hooks/*.py`
      by literal command string. A retired hook's entry must be removed from
      every matcher block it appears in, not just the top-level list.
-   - `rules/parallelism.md` — the model routing table and any worked
+   - `rules/model-routing.md` — the model routing table and any worked
      examples that name a specific agent or skill by its identifier.
    - `CLAUDE.md` — the top-level pointers under "Agents" and "Rules"; a
      retired agent or skill mentioned there by name leaves a dangling
@@ -76,7 +76,7 @@ honest shape for a check that structurally cannot be made a gate.
 Retiring a fleet file is one kind of drift. The other kind this document
 is responsible for naming is content going stale in place — specifically,
 model IDs, aliases, and pricing assumptions baked into agent frontmatter
-and `rules/parallelism.md`'s routing table as Anthropic ships new models.
+and `rules/model-routing.md`'s routing table as Anthropic ships new models.
 This lifecycle doc does not build a second mechanism to watch for that; one
 already exists.
 
@@ -98,7 +98,7 @@ the write-destination is defined once, in `SKILL.md`, for all four Phase 1
 agents alike.) Agent B's own report line names the deliverable directly:
 "recommended model routing table."
 
-**The hazard, named plainly:** `rules/parallelism.md`'s model routing table
+**The hazard, named plainly:** `rules/model-routing.md`'s model routing table
 carries specific model IDs, aliases, and per-tier pricing commentary. That
 content goes stale the moment Anthropic ships a model this repo hasn't
 routed to yet — Agent B's job is to notice; updating the table from that

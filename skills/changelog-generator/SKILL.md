@@ -21,6 +21,9 @@ git describe --tags --abbrev=0   # find latest tag
 git log <tag>..HEAD --oneline    # commits since that tag
 ```
 
+If no commits exist in the requested range, report that and stop —
+do not generate an empty changelog.
+
 ## Phase 2 — Fetch and filter commits
 
 ```bash

@@ -1,6 +1,7 @@
 {
   "env": {
-    "ENABLE_TOOL_SEARCH": "auto"
+    "ENABLE_TOOL_SEARCH": "auto",
+    "CLAUDE_CODE_ENABLE_TODO_TOOLS": "1"
   },
   "attribution": {
     "commit": "",
@@ -113,8 +114,7 @@
       "Agent(*)",
       "Skill(update-config:*)",
       "Skill(plan-mission:*)",
-      "mcp__serena__*",
-      "Bash(awk -F: 'length\\($0\\)-length\\($1\\)-1 > 80 {print length\\($0\\)\": \"$0}')"
+      "mcp__serena__*"
     ],
     "additionalDirectories": [
       "/tmp",
@@ -122,15 +122,24 @@
       "/Users/scottseely"
     ]
   },
-  "model": "fable",
+  "model": "claude-fable-5-1[1m]",
   "hooks": {
+    "ConfigChange": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/session-start.sh"
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/session-start.sh",
-            "async": true
+            "command": "~/.claude/hooks/session-start.sh"
           }
         ]
       }
@@ -211,7 +220,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo \"[$(date -u +%Y-%m-%dT%H:%M:%SZ)] InstructionsLoaded\" >> ~/.claude/logs/instructions-loaded.log 2>/dev/null || true",
+            "command": "~/.claude/hooks/log-instructions-loaded.sh",
             "async": true
           }
         ]
@@ -247,6 +256,11 @@
     }
   },
   "effortLevel": "high",
+  "modelSettings": {
+    "claude-opus-5": {
+      "effortLevel": "medium"
+    }
+  },
   "tui": "fullscreen",
   "autoMemoryEnabled": true,
   "agentPushNotifEnabled": true

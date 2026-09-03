@@ -360,7 +360,7 @@ If a RECURRING finding has appeared 3+ times without resolution, stop and report
   - Pass them back to the relevant language agent(s) for fixes
   - Re-run `code-reviewer` (increment N)
 - After 4 iterations without APPROVE:
-  - Identify any RECURRING findings (same issue appeared 2+ times)
+  - Identify any RECURRING findings (same issue appeared 3+ times)
   - Present to user: "The following items could not be resolved after
     4 iterations. Please advise: [list with file:line and description]"
   - Stop and wait for user input

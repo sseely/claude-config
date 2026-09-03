@@ -1,5 +1,6 @@
 #!/bin/bash
 set -euo pipefail
+# Code review (2026-09-02): Stop and StopFailure are not distinguished. Revisit if a failed turn is mistaken for a completed one.
 # Chimes when Claude finishes, but only if the turn took longer than 30 seconds.
 THRESHOLD=30
 START_FILE="$HOME/.claude/.runtime/claude-turn-start"

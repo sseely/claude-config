@@ -57,6 +57,10 @@ Test automation:
 - Mobile automation
 - CI/CD integration
 
+Per `~/.claude/rules/testability.md`: prefer designs that return
+observable data over collaborator mocking; more than 2-3 mocks in a
+script is a design smell to flag, not automate around.
+
 Defect management:
 - Defect discovery
 - Severity classification
@@ -76,6 +80,10 @@ Quality metrics:
 - Mean time to detect
 - Mean time to resolve
 - Customer satisfaction
+
+Per `~/.claude/rules/testing.md`: treat 90% line/branch/function coverage
+as a floor, and require every test to assert specific values, not just
+non-null/no-throw.
 
 API testing:
 - Contract testing

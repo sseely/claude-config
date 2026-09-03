@@ -11,10 +11,9 @@ Stage and commit changes following Conventional Commits.
 
 1. Run `git status` to see what's changed. If nothing is staged or modified, stop and report.
 2. Run `git diff --stat HEAD` to understand the scope of changes.
-3. Draft a commit subject following Conventional Commits:
-   - Format: `<type>(<scope>): <description>` — lowercase, no trailing period
-   - Types: `feat`, `fix`, `chore`, `refactor`, `test`, `docs`, `style`, `perf`, `ci`
-   - Subject must be ≤72 characters total
+3. Draft a commit subject following Conventional Commits — see
+   `~/.claude/rules/commits.md` for the type list, subject format, and
+   character limits.
 4. Stage changed files with `git add` (specific files, not `-A`). Do not stage `.env`, credentials, or secrets.
 5. Commit using a heredoc to preserve formatting:
 
@@ -22,7 +21,7 @@ Stage and commit changes following Conventional Commits.
 git commit -m "$(cat <<'EOF'
 <subject line>
 
-<optional body, wrapped at 80 chars>
+<optional body — see rules/commits.md for wrap width and content>
 EOF
 )"
 ```

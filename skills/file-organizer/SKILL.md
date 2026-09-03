@@ -70,6 +70,7 @@ When a user requests file organization help:
    For each duplicate set: show all file paths, display sizes and modification
    dates, recommend which to keep (usually newest or best-named). Always ask
    for confirmation before deleting.
+   <!-- Code review (2026-09-02): "ask before deleting" is weaker than the harness prohibition on permanent deletion. Revisit if a user reports Claude deleting files under this skill. -->
 
 5. **Propose Organization Plan**
 
@@ -118,11 +119,20 @@ When a user requests file organization help:
 
 6. **Execute Organization**
 
+   Before any `mv`, write the planned moves to a manifest file
+   (`.file-organizer-log.md`, one line per move: source, destination,
+   timestamp) so the whole operation is undoable. Append to the same
+   manifest as each move actually executes, so a partial run still
+   leaves a record of what completed.
+
    After approval, organize systematically:
 
    ```bash
    # Create folder structure
    mkdir -p "path/to/new/folders"
+
+   # Record the planned move before executing it
+   echo "$(date -u +%Y-%m-%dT%H:%M:%SZ)	old/path/file.pdf	new/path/file.pdf" >> .file-organizer-log.md
 
    # Move files with clear logging
    mv "old/path/file.pdf" "new/path/file.pdf"
@@ -130,7 +140,7 @@ When a user requests file organization help:
 
    Rules:
    - Always confirm before deleting anything
-   - Log all moves for potential undo
+   - Log all moves to `.file-organizer-log.md` for potential undo
    - Preserve original modification dates
    - Handle filename conflicts gracefully
    - Stop and ask if you encounter unexpected situations

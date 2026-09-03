@@ -44,6 +44,7 @@ practices. Cross-reference when the claim is non-obvious.
 - **Stripe Engineering** — `stripe.com/blog/engineering`
 - **Martin Fowler** — `martinfowler.com` (patterns, refactoring, DDD)
 - **High Scalability** — `highscalability.com`
+- **Anthropic Engineering** — anthropic.com/engineering (agent harness, context engineering, tool design)
 
 These sources have production credibility but are not peer-reviewed.
 Treat as strong evidence, not ground truth.

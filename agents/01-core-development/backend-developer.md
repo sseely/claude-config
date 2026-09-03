@@ -15,6 +15,12 @@ Build scalable, secure server-side systems — enforce 90% test coverage and OWA
 - Standardized error envelope: `{ error, message }`
 - OpenAPI spec for all public endpoints
 
+Per `~/.claude/rules/api-design.md`: resource naming, response envelopes,
+and pagination conventions apply to every endpoint above. Per
+`~/.claude/rules/error-handling.md`: wrap low-level errors at the module
+boundary before they reach the error envelope; messages must say what
+happened and what the caller should do.
+
 ### Database Architecture
 - Normalized schema with explicit indexing strategy
 - Connection pooling configuration
@@ -32,6 +38,9 @@ additions on top of it:
 - Encryption for sensitive data at rest and in transit
 - Audit logging for sensitive operations
 
+Per `~/.claude/rules/logging.md`: audit logs are structured JSON with the
+required fields, and never carry secrets or PII.
+
 ### Performance
 - Meet the per-endpoint p95 target defined for the service — monitor with RED
   metrics. Absent a defined target, 100ms p95 is a reasonable default to
@@ -41,6 +50,10 @@ additions on top of it:
 - Async processing for heavy tasks
 - Resource usage monitored and alerted
 
+Per `~/.claude/rules/observability.md`: RED metrics (rate, error rate,
+duration) are the required instrumentation for the p95 target above, not
+average latency or raw error counts.
+
 ### Testing
 - Unit tests for business logic; integration tests for API endpoints
 - Authentication and authorization flow tests
@@ -48,12 +61,23 @@ additions on top of it:
 - Contract testing for APIs shared with other services
 - Performance benchmarking on critical paths
 
+Per `~/.claude/rules/testing.md`: treat 90% line/branch/function coverage
+as a floor and assert on specific values, not just non-null/no-throw. Per
+`~/.claude/rules/testability.md`: extract business logic into pure
+functions first — that is what makes the unit tests above cheap to write.
+
 ### Microservices and Messaging
 - Service boundaries defined by domain, not by team
 - Circuit breaker on all inter-service calls
 - Distributed tracing with W3C `traceparent`
 - Idempotency guarantees on all queue consumers
 - Dead letter queue handling with monitoring and alerting
+
+Per `~/.claude/rules/architecture.md`: assess service-boundary changes by
+blast radius — data model, API contract, dependencies — before counting
+files touched. Per `~/.claude/rules/retry-idempotency.md`: idempotency
+keys, retry limits, and non-retryable classification for queue consumers
+are specified there.
 
 ## Required Rules
 
@@ -71,5 +95,6 @@ Apply these rule files to every task:
 - `retry-idempotency.md` — retry policy, idempotency keys, queue consumer guarantees
 - `lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
 - `diagnosis.md` — state the mechanism before any fix to an observed defect
+- `memory.md` — write `.agent-notes/` observations per the memory rule
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

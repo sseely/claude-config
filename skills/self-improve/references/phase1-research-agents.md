@@ -53,7 +53,7 @@ model IDs. The following are ALL valid `model:` values in agent frontmatter and
 | `sonnet` | Latest Sonnet for daily coding tasks |
 | `opus` | Latest Opus for complex reasoning |
 | `haiku` | Fast, efficient Haiku for simple tasks |
-| `fable` | **Valid alias**: latest Fable for long-horizon agentic/autonomous work (access-gated) |
+| `fable` | **Valid alias**: latest Fable for long-horizon agentic/autonomous work (access-gated); resolves to `claude-fable-5-1` on v2.1.255+ |
 | `sonnet[1m]` | Sonnet with 1M token context window |
 | `opus[1m]` | Opus with 1M token context window |
 | `opusplan` | **Valid alias**: uses `opus` in plan mode, switches to `sonnet` for execution |
@@ -69,8 +69,10 @@ Full Anthropic API model IDs (`claude-opus-4-8`, `claude-opus-5`,
 `claude-sonnet-5`, `claude-haiku-4-5-20251001`, `claude-fable-5`) are also
 valid (the `sonnet` alias now resolves to Sonnet 5; `claude-sonnet-4-6`
 remains a valid pinned ID).
-Note: Fable 5 runs 1M context natively — there is NO `fable[1m]` variant, so
-`claude-fable-5[1m]` is invalid; use plain `fable` / `claude-fable-5`.
+Note: Fable runs 1M context natively — there is NO `fable[1m]` variant, so
+`claude-fable-5[1m]` and `claude-fable-5-1[1m]` are invalid; use plain
+`fable` / `claude-fable-5-1`. The `/model` picker itself emits the
+`claude-fable-5-1[1m]` form, so docs and behavior disagree here.
 `sonnetplan` is NOT a documented alias. When auditing agent `model:`
 frontmatter, check against this list before flagging a value as invalid.
 
@@ -78,15 +80,16 @@ Effort levels (set via `effort:` frontmatter or `/effort` command):
 
 | Level | Supported on | Notes |
 |-------|-------------|-------|
-| `low` | Opus 5, Opus 4.8, 4.7, 4.6, Sonnet 5, Sonnet 4.6, Fable 5 | Fastest/cheapest |
+| `low` | Opus 5, Opus 4.8, 4.7, 4.6, Sonnet 5, Sonnet 4.6, Fable 5/5.1 | Fastest/cheapest |
 | `medium` | Same | |
-| `high` | Same | Default on Opus 4.8, Opus 4.6, Sonnet 5, Sonnet 4.6, Fable 5 |
-| `xhigh` | Opus 5, Opus 4.8, Opus 4.7, Sonnet 5, Fable 5 | Default on Opus 4.7 |
-| `max` | Opus 5, Opus 4.8, Opus 4.7, Sonnet 5, Fable 5 | Session-only; not saved to settings |
+| `high` | Same | Default on Opus 4.8, Opus 4.6, Sonnet 5, Sonnet 4.6, Fable 5/5.1 |
+| `xhigh` | Opus 5, Opus 4.8, Opus 4.7, Sonnet 5, Fable 5/5.1 | Default on Opus 4.7 |
+| `max` | Opus 5, Opus 4.8, Opus 4.7, Sonnet 5, Fable 5/5.1 | Session-only; not saved to settings |
 
-Note: Fable 5 (`claude-fable-5`) supports the full `low`–`max` effort range
-(previously omitted from this table) — it is the autonomous/mission-brief
-execution model, not merely a research-agent alias.
+Note: Fable (`claude-fable-5`, and `claude-fable-5-1` on v2.1.255+) supports
+the full `low`–`max` effort range (previously omitted from this table) — it
+is the autonomous/mission-brief execution model, not merely a research-agent
+alias.
 
 Note: `ultracode` is **not** an effort level — it is a Workflow opt-in keyword
 (standing authorization to author/run multi-agent workflows). Do not list it as
@@ -279,7 +282,8 @@ Run all queries. Fetch promising results. Be thorough.
      a rule, agent prompt, or skill? If the content is descriptive but
      not actionable, skip it.
 
-4. Keep candidates with relevance ≥ 65 and tier ≤ 3 (or tier 4 for AI/ML).
+4. Keep candidates with relevance ≥ 75 and tier ≤ 3 (or tier 4 for AI/ML),
+   capped at 10 added per run.
 
 5. Deduplicate against current active and candidate entries in
    `research-urls.md`. Do not add a URL already present under any status.
@@ -308,7 +312,7 @@ entries were ever promoted. The cause: Phase 6 promotes only URLs "fetched
 this run," and Agents A/B/C each fetch from their own *active* list, so no
 agent ever fetched a candidate. Nothing consumed the queue.
 
-Agent X therefore fetches the top 5 candidate URLs by relevance to this
+Agent X therefore fetches the top 10 candidate URLs by relevance to this
 run's themes, and records an outcome for each:
 
 - **Promote** — content is substantive (≥1000 chars for an Agent A-class
@@ -317,6 +321,8 @@ run's themes, and records an outcome for each:
 - **Demote** — unreachable, thin, redirected off-domain, or no longer
   relevant. Leave it in the candidate table and append a `Demoted:` note
   with the date and reason.
+- **Demote (uncited)** — a candidate not cited by any agent after two runs
+  is demoted in place, following the same `Demoted:` note convention.
 
 Never delete a candidate. Promotion and demotion are both recorded
 outcomes; silent deletion destroys the evidence that the queue was worked.

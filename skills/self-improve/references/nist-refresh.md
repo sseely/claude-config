@@ -43,19 +43,21 @@ Each condition names its detection and the severity of the
    affects — content, not just the header, may now be wrong.
 3. **Structural change** — GOVERN/MAP/MEASURE/MANAGE subcategories
    renumbered, added, or removed in the live Core (Tables 1–4, §5 of
-   NIST AI 100-1). Detection: the completeness diff below. Produces a
-   **Must-fix** task *and* a recommendation to run `/plan-mission` —
-   a structural change invalidates the crosswalk's row structure
-   itself, which is re-planning work, not a single edit.
+   NIST AI 100-1). Detection: not automated — surfaced by the edition-move
+   trigger (condition 2) via the human PDF re-derivation described below.
+   Produces a **Must-fix** task *and* a recommendation to run
+   `/plan-mission` — a structural change invalidates the crosswalk's row
+   structure itself, which is re-planning work, not a single edit.
 
 ## The completeness diff
 
-Enumerate subcategories from the live AI RMF Core and compare against
-the `subcategories-covered` union across all `docs/nist-ai-rmf/`
-assets. Report any live subcategory with no matching row anywhere as a
-gap. This is the mechanical form of SLI 2 and the reason AD-8 made a
-crosswalk the central asset — completeness is a diff, not a judgment
-call.
+Per D8: no AIRC HTML page enumerates subcategory identifiers, and this
+procedure never reads the PDFs (see below), so a per-subcategory diff
+cannot run under the 3-fetch cap. The completeness diff Agent C actually
+runs is the edition-string and Playbook-audit-log comparison already
+described in "What Agent C checks" above. The per-subcategory diff moves
+to the human PDF re-derivation that an edition move (condition 2) already
+triggers.
 
 ## The 3-fetch-per-run cap
 

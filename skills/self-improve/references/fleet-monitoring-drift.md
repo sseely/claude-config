@@ -46,7 +46,7 @@ severity pattern in [nist-refresh.md](nist-refresh.md#the-three-drift-conditions
    between the deprecated set (lifecycle.md guidance ∩ Agent B's alias
    table) and every `agents/**/*.md` frontmatter `model:` value. Produces a
    **Must-fix** task: update the agent's `model:` field to a current alias
-   or ID, per the routing table in `rules/parallelism.md`. Must-fix because
+   or ID, per the routing table in `rules/model-routing.md`. Must-fix because
    a deprecated model reference can fail at dispatch time, not just read as
    stale.
 2. **Monitoring signal unmeasured for >1 cycle** — a signal

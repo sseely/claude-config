@@ -37,7 +37,8 @@ High-level modules shouldn't import low-level implementation details.
 ## Defensive code
 
 Don't write guards for states that genuinely cannot occur — but
-"cannot occur" means provably so, not merely "shouldn't."
+"cannot occur" means provable from a type, a caller contract quoted in a
+comment, or an assertion at the boundary, not merely "shouldn't."
 
 - No error handling or fallbacks for states that cannot occur given
   surrounding invariants — trust internal code and framework guarantees

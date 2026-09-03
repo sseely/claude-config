@@ -1,6 +1,9 @@
 # Agent Memory System
 
 Session-local observations live in `.agent-notes/` (per project).
+`.agent-notes/` is the committed, cross-session handoff; built-in auto memory
+(`autoMemoryEnabled` in `settings.json`) is machine-local and Claude-managed.
+Do not duplicate content between them.
 
 ## Before Starting Any Task
 

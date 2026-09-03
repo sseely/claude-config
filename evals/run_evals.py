@@ -60,6 +60,9 @@ DEFAULT_TIMEOUT_S = 120
 
 # Frontmatter model alias -> resolved --model value. Only entries that
 # diverge from a straight pass-through need to be listed here.
+# Code review (2026-09-02): MODEL_ALIAS_FIX may be obsolete — the
+# haiku alias bug did not reproduce on v2.1.259. Revisit after a second
+# independent probe; remove if it stays clean.
 MODEL_ALIAS_FIX = {
     "haiku": "claude-haiku-4-5-20251001",
 }

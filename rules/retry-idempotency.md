@@ -9,6 +9,8 @@
   - Attempt 3: ~200ms
 - **Jitter:** add ±20% random jitter to prevent thundering herd
 
+<!-- Code review (2026-09-02): timeout scope vs. retry envelope is unstated. Revisit if a caller reports a 3-attempt operation exceeding its stated timeout. -->
+
 ## When NOT to retry
 
 - **4xx errors** (except 429): the request is broken; retrying won't help

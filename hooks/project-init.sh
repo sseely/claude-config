@@ -3,6 +3,7 @@
 # Runs as an async UserPromptSubmit hook; all operations are idempotent.
 
 set -euo pipefail
+# Code review (2026-09-02): CLAUDE_CODE_NEW_INIT=1 (interactive multi-phase /init) is unused. Revisit the next time a project is bootstrapped from scratch.
 mkdir -p ~/.claude/logs
 # Fail-safe: setup errors must never block the user's prompt.
 trap 'echo "[project-init] error at line $LINENO — see ~/.claude/logs/project-init.err" >> ~/.claude/logs/project-init.err 2>/dev/null; exit 0' ERR
