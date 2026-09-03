@@ -3,6 +3,7 @@ name: plantuml-visual-qa
 description: Visual quality assurance agent for plantuml-js. Use when asked to check rendering accuracy, compare output against plantuml.com, or identify visual regressions. Generates side-by-side comparison reports using pre-saved reference images — no plantuml.com traffic during comparison.
 tools: Bash, Read, Write, Edit, Glob
 model: opus
+outputStyle: Concise
 ---
 
 # plantuml-js Visual QA Agent

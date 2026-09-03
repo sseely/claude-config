@@ -49,6 +49,8 @@ to counteract known tendencies (validated in production):
   ambiguous scope — implement all of it; the above is not license to trim it
 - End the prompt per `prompting-quality.md`'s scale-aware brevity section:
   "Return only the structured result — no preamble, no trailing summary."
+- The seven Opus/opusplan agents also set `outputStyle: Concise` in frontmatter;
+  it sets tone at the system level and stacks with the per-prompt shape rule.
 
 **Fable behavioral compensation** — when routing to Fable
 (`claude-fable-5-1`), invert the Opus constraints; its design is the opposite:
