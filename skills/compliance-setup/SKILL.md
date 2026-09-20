@@ -19,11 +19,18 @@ in the working directory.
 
 **If it exists:**
 1. Read it.
-2. If `collected_inputs: true` is present, extract the stored inputs — do not
+2. Compare its `repo_root` line to `git rev-parse --show-toplevel`. If it
+   differs or is missing, the file came from another project or an older
+   version of this skill: print `Discarding stale progress file`, delete
+   it, and continue to Step 1 as a fresh run.
+3. Print the `started` date and the checked items, then ask: "Resume from
+   [first unchecked item], or start over?" On "start over", delete the
+   file and continue to Step 1.
+4. If `collected_inputs: true` is present, extract the stored inputs — do not
    re-ask any question whose answer is already recorded.
-3. Find the first step checkbox that is still `[ ]` (unchecked).
-4. Print: `Resuming from [step name].`
-5. Skip Steps 1–2 entirely and jump directly to the first unchecked step.
+5. Find the first step checkbox that is still `[ ]` (unchecked).
+6. Print: `Resuming from [step name].`
+7. Skip Steps 1–2 entirely and jump directly to the first unchecked step.
 
 **If it does not exist:** continue to Step 1 as normal.
 
@@ -50,6 +57,8 @@ working directory before doing any further work:
 
 ```
 # Compliance-Setup Progress
+repo_root: <output of git rev-parse --show-toplevel>
+started: <ISO 8601 timestamp>
 collected_inputs: true
 
 ## Inputs
@@ -384,3 +393,12 @@ On success, mark `- [x] verify` in `.compliance-setup-progress.md`.
 - Consent flag not persisted → users re-prompted on every session; detected by repeated consent events per user; mitigation: verify DB write in handlePostConsent
 
 **Rollback classification:** Mixed — consent/export/feedback routes are reversible. Account deletion (Step 3f) is irreversible once executed — deleted user data cannot be recovered. See IRREVERSIBLE note at Step 3e.
+
+---
+
+## Cleanup
+
+After the final summary is printed, delete `.compliance-setup-progress.md`. It is a
+crash-recovery checkpoint, not a record of the run: left behind, the next
+invocation of this skill in this project would offer to resume into a
+finished run. Do not commit it.

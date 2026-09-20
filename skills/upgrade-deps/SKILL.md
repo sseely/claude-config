@@ -28,12 +28,19 @@ in the working directory.
 
 **If it exists:**
 1. Read it.
-2. Find the first phase entry that is still `[ ]` (unchecked).
-3. If a phase is marked `[x]`, its output (e.g. detected languages, research
+2. Compare its `repo_root` line to `git rev-parse --show-toplevel`. If it
+   differs or is missing, the file came from another project or an older
+   version of this skill: print `Discarding stale progress file`, delete
+   it, and continue to Phase 1 as a fresh run.
+3. Print the `started` date and the checked items, then ask: "Resume from
+   [first unchecked item], or start over?" On "start over", delete the
+   file and continue to Phase 1.
+4. Find the first phase entry that is still `[ ]` (unchecked).
+5. If a phase is marked `[x]`, its output (e.g. detected languages, research
    findings) should be recorded in the file under `## Saved State` — extract
    and use those values instead of re-running that phase.
-4. Print: `Resuming from [phase name].`
-5. Jump directly to the first unchecked phase.
+6. Print: `Resuming from [phase name].`
+7. Jump directly to the first unchecked phase.
 
 **If it does not exist:** continue to Phase 1 as normal.
 
@@ -75,6 +82,8 @@ Write `.upgrade-deps-progress.md` (or update it if it exists):
 
 ```
 # Upgrade-Deps Progress
+repo_root: <output of git rev-parse --show-toplevel>
+started: <ISO 8601 timestamp>
 
 ## Phases
 - [x] phase-1-detect-languages
@@ -384,3 +393,12 @@ chore(deps): upgrade all dependencies to latest stable
 ```
 
 On success, mark `- [x] phase-7-summary` in `.upgrade-deps-progress.md`.
+
+---
+
+## Cleanup
+
+After the final summary is printed, delete `.upgrade-deps-progress.md`. It is a
+crash-recovery checkpoint, not a record of the run: left behind, the next
+invocation of this skill in this project would offer to resume into a
+finished run. Do not commit it.

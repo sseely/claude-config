@@ -25,11 +25,18 @@ in the working directory.
 
 **If it exists:**
 1. Read it.
-2. If `collected_inputs: true` is present, extract the stored inputs (and the
+2. Compare its `repo_root` line to `git rev-parse --show-toplevel`. If it
+   differs or is missing, the file came from another project or an older
+   version of this skill: print `Discarding stale progress file`, delete
+   it, and continue to Step 1 as a fresh run.
+3. Print the `started` date and the checked items, then ask: "Resume from
+   [first unchecked item], or start over?" On "start over", delete the
+   file and continue to Step 1.
+4. If `collected_inputs: true` is present, extract the stored inputs (and the
    approved event plan, if recorded) — do not re-ask or re-derive them.
-3. Find the first step checkbox that is still `[ ]` (unchecked).
-4. Print: `Resuming from [step name].`
-5. Skip Step 1 entirely and jump directly to the first unchecked step.
+5. Find the first step checkbox that is still `[ ]` (unchecked).
+6. Print: `Resuming from [step name].`
+7. Skip Step 1 entirely and jump directly to the first unchecked step.
 
 **If it does not exist:** continue to Step 1 as normal.
 
@@ -65,6 +72,8 @@ working directory before doing any implementation work:
 
 ```
 # Analytics Setup Progress
+repo_root: <output of git rev-parse --show-toplevel>
+started: <ISO 8601 timestamp>
 collected_inputs: true
 
 ## Inputs
@@ -433,3 +442,12 @@ Next steps:
   - In PostHog: create a funnel from <event_1> → <event_2> → <event_3>
   - In PostHog: create a retention chart on <core_action>_completed
 ```
+
+---
+
+## Cleanup
+
+After the final summary is printed, delete `.analytics-setup-progress.md`. It is a
+crash-recovery checkpoint, not a record of the run: left behind, the next
+invocation of this skill in this project would offer to resume into a
+finished run. Do not commit it.
