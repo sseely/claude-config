@@ -3,6 +3,12 @@
 # ADAPT: update POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD to match
 #        your DATABASE_URL in vitest.config.ts and globalSetup.ts.
 # ADAPT: remove the stripe-mock service if not using payments-setup.
+#
+# Host ports are overridable via TEST_PG_PORT / TEST_STRIPE_MOCK_PORT so this
+# stack doesn't collide with another project's containers on the same
+# machine. test/globalSetup.ts, test/helpers/db.ts and vitest.config.ts all
+# derive their default DATABASE_URL / STRIPE_BASE_URL from the same two
+# variables — set them once and every file follows.
 
 services:
   postgres:
@@ -12,9 +18,13 @@ services:
       POSTGRES_USER:     dev         # ADAPT: match DATABASE_URL user
       POSTGRES_PASSWORD: devpass     # ADAPT: match DATABASE_URL password
     ports:
-      - "5432:5432"
+      - "${TEST_PG_PORT:-5432}:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      # postgres:18+ stores data in a major-version subdirectory and expects
+      # the mount at /var/lib/postgresql. Mounting /var/lib/postgresql/data
+      # (the pre-18 convention) makes the entrypoint abort with an "unused
+      # mount/volume" error. See docker-library/postgres#1259.
+      - postgres_data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U dev -d myapp"]  # ADAPT
       interval: 5s
@@ -25,9 +35,13 @@ services:
   stripe-mock:
     image: stripe/stripe-mock:latest
     ports:
-      - "12111:12111"
+      - "${TEST_STRIPE_MOCK_PORT:-12111}:12111"
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--spider", "http://localhost:12111"]
+      # stripe-mock answers an unauthenticated request with 401, and
+      # `wget --spider` treats any non-2xx as failure — so probing without a
+      # key marks a perfectly healthy container unhealthy forever. stripe-mock
+      # accepts any bearer token, so send a dummy one.
+      test: ["CMD-SHELL", "wget -q -O /dev/null --header='Authorization: Bearer sk_test_123' http://localhost:12111/v1/charges"]
       interval: 5s
       timeout: 5s
       retries: 10

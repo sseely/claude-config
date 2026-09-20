@@ -1,6 +1,6 @@
 ---
 name: testing-setup
-description: Scaffold Vitest with the Cloudflare Workers pool, Istanbul coverage, ESLint, Prettier, husky pre-commit hooks, shared test helpers, Docker Compose for local services, and a GitHub Actions CI workflow into a Cloudflare Workers + Neon + React/Vite project.
+description: Scaffold Vitest with the Cloudflare Workers testing plugin, Istanbul coverage, ESLint, Prettier, husky pre-commit hooks, shared test helpers, Docker Compose for local services, and a GitHub Actions CI workflow into a Cloudflare Workers + Neon + React/Vite project.
 user-invocable: true
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch, WebSearch
 disable-model-invocation: true
@@ -11,8 +11,8 @@ Model routing: Sonnet for implementation steps; WebFetch verification steps need
 # /testing-setup
 
 Scaffold testing infrastructure into a Cloudflare Workers + Neon PostgreSQL +
-React/Vite project. Installs Vitest with the Workers pool, 90/90/90 coverage
-thresholds, Istanbul coverage (v8 is incompatible with Workerd), ESLint with
+React/Vite project. Installs Vitest with the Workers testing plugin, 90/90/90
+coverage thresholds, Istanbul coverage (v8 is incompatible with Workerd), ESLint with
 TypeScript and React Hooks rules, Prettier, husky pre-commit hooks, shared
 test helpers with fixture builders, Docker Compose for local services, and a
 GitHub Actions CI workflow.
@@ -54,9 +54,10 @@ Ask all of the following before doing any work:
    `STRIPE_BASE_URL` and Stripe bindings go in `vitest.config.ts`. Yes/No.
 3. **Does the project use KV?** (from `auth-setup`) — determines what goes
    in `miniflare.kvNamespaces`. If yes, list the binding names.
-4. **Does the project use Durable Objects?** — determines `isolatedStorage`
-   in the Vitest config. If yes, do the DOs write state that must be isolated
-   per test? Yes/No.
+4. **Does the project use Durable Objects?** — the Workers testing plugin
+   isolates storage per test file by default, so no config is needed for the
+   common case. If yes, do any tests need to *share* DO or KV state across
+   test files (not just within one file)? Yes/No.
 5. **Is there a Python service?** — determines whether the CI workflow needs
    a `python-tests` job. If yes, what is the path to the service and its
    `requirements.txt`?
@@ -99,19 +100,22 @@ collected_inputs: true
 
 ---
 
-## Step 1b — Verify Vitest and Cloudflare Workers pool against current docs
+## Step 1b — Verify Vitest and the Cloudflare Workers testing plugin against current docs
 
-Vitest's config surface and `@cloudflare/vitest-pool-workers` drift together,
-and the pool package tracks Workers runtime changes closely. Before templating
-config, WebFetch the current docs and confirm the pool package name, the
-`defineWorkersConfig` entry point, the `miniflare` options block, and the
+Vitest's config surface and `@cloudflare/vitest-plugin` drift together, and
+the plugin tracks Workers runtime changes closely. Before templating config,
+WebFetch the current docs and confirm the plugin package name, the
+`cloudflareTest()` entry point, the `miniflare` options block, and the
 coverage provider settings the templates use:
 
 - Vitest config — https://vitest.dev/config/
-- Workers pool — https://developers.cloudflare.com/workers/testing/vitest-integration/
+- Workers testing — https://developers.cloudflare.com/workers/testing/vitest-integration/
 
-If an option has been renamed or removed, update the templated values before
-relying on them.
+`@cloudflare/vitest-pool-workers` and its `defineWorkersConfig` /
+`poolOptions.workers` config are the predecessor API — that package dropped
+its `./config` export, so `defineWorkersConfig` no longer exists. If the docs
+show further renames or removals, update the templated values before relying
+on them.
 
 ---
 
@@ -134,8 +138,11 @@ understand what's already installed and what env var names to use.
 ## Step 3 — Install dependencies
 
 ```bash
-# Test runner and Workers pool
-npm install --save-dev vitest @cloudflare/vitest-pool-workers @vitest/coverage-istanbul
+# Test runner and Workers testing plugin. Both @cloudflare/vitest-plugin and
+# its predecessor peer on vitest ^4.1.0 — vitest 5 is not yet supported by
+# either, so pin the major explicitly rather than letting a bare `vitest`
+# install pull in a newer major.
+npm install --save-dev vitest@^4.1.0 @cloudflare/vitest-plugin @vitest/coverage-istanbul
 
 # ESLint
 npm install --save-dev eslint typescript-eslint eslint-plugin-react-hooks
@@ -147,9 +154,12 @@ npm install --save-dev prettier husky lint-staged
 npm install --save-dev pg @types/pg
 ```
 
-After installing, check if `@cloudflare/vitest-pool-workers` is already
-present — skip that package if so. Same for ESLint if an `eslint.config.*`
-already exists.
+After installing, check if `@cloudflare/vitest-plugin` is already present —
+skip that package if so. Same for ESLint if an `eslint.config.*` already
+exists. If the project already has `@cloudflare/vitest-pool-workers`
+installed, that is the predecessor package — replace it with
+`@cloudflare/vitest-plugin` (`npm uninstall @cloudflare/vitest-pool-workers`)
+rather than installing both.
 
 On success, mark `- [x] install-dependencies` in `.testing-setup-progress.md`.
 
@@ -165,10 +175,19 @@ adapting:
   values during tests.
 - Update `miniflare.kvNamespaces` with the binding names from step 1 Q3.
   Remove the array if there are no KV namespaces.
-- Set `isolatedStorage: true` if step 1 Q4 said DOs write state.
-  Leave `false` if DOs are stateless — this avoids unresolvable storage frames.
+- The plugin isolates storage per test file by default — no config needed
+  for the common case. If step 1 Q4 said tests must *share* DO or KV state
+  across test files, uncomment `maxWorkers: 1` and `isolate: false` in the
+  `test` block (Cloudflare's documented pattern for shared state; CLI
+  equivalents: `--max-workers=1 --no-isolate`).
 - Remove the `STRIPE_BASE_URL` and Stripe bindings if step 1 Q2 was No.
-- Update the `DATABASE_URL` default to match the credentials from step 1 Q9.
+- Update the `DATABASE_URL` default to match the credentials from step 1 Q9
+  and the `TEST_PG_PORT` chosen in Step 7 (default 5432). Same for
+  `STRIPE_BASE_URL` and `TEST_STRIPE_MOCK_PORT` (default 12111).
+- Add `@cloudflare/vitest-plugin/types` to the project's `tsconfig.json`
+  `compilerOptions.types` array, alongside `@cloudflare/workers-types` —
+  this provides the ambient `cloudflare:test` module types that the
+  `env` / `SELF` imports in test files resolve against.
 
 On success, mark `- [x] vitest-config` in `.testing-setup-progress.md`.
 
@@ -178,7 +197,8 @@ On success, mark `- [x] vitest-config` in `.testing-setup-progress.md`.
 
 Write `test/globalSetup.ts` from `test/globalSetup.ts`, adapting:
 
-- Update the `DATABASE_URL` default string to match step 1 Q9 credentials.
+- Update the `DATABASE_URL` default string to match step 1 Q9 credentials
+  and the `TEST_PG_PORT` chosen in Step 7 (default 5432).
 - Remove `stripe-mock` from the `docker compose up` command if step 1 Q2 was No.
 - Update the sentinel table name in the schema-check query if the project
   doesn't have a `users` table.
@@ -193,7 +213,8 @@ On success, mark `- [x] global-test-setup` in `.testing-setup-progress.md`.
 
 Write `test/helpers/db.ts` from `test/helpers/db.ts`, adapting:
 
-- Update `DATABASE_URL` default to match step 1 Q9 credentials.
+- Update `DATABASE_URL` default to match step 1 Q9 credentials and the
+  `TEST_PG_PORT` chosen in Step 7 (default 5432).
 - Update the `TRUNCATE` table list (and order) using the tables from step 1 Q8.
   If the user said "read it from the schema file", read the schema now and
   extract all table names, ordering children before parents.
@@ -218,6 +239,15 @@ root from `docker/docker-compose.yml`, adapting:
 - Update `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` to match step 1 Q9.
 - Update the healthcheck command to use those same credentials.
 - Remove the `stripe-mock` service if step 1 Q2 was No.
+
+**Host ports:** the template publishes Postgres and stripe-mock on
+`${TEST_PG_PORT:-5432}` and `${TEST_STRIPE_MOCK_PORT:-12111}` rather than
+hardcoded host ports, so this stack doesn't collide with another project's
+containers on the same machine. `test/globalSetup.ts`, `test/helpers/db.ts`
+and `vitest.config.ts` all derive their default `DATABASE_URL` /
+`STRIPE_BASE_URL` from these same two variables — set `TEST_PG_PORT` /
+`TEST_STRIPE_MOCK_PORT` once (shell env or `.env.local`) to move every file
+together. Leave the defaults as-is unless a collision is reported.
 
 If a `docker-compose.yml` already exists, merge the new services into it
 rather than replacing the file.
@@ -380,7 +410,7 @@ completed step).**
 ```
 ## testing-setup complete
 
-Test runner:   Vitest + @cloudflare/vitest-pool-workers
+Test runner:   Vitest + @cloudflare/vitest-plugin
 Coverage:      Istanbul, 90/90/90 thresholds (lines / functions / branches)
 Linter:        ESLint with typescript-eslint + react-hooks
 Formatter:     Prettier, enforced via husky pre-commit

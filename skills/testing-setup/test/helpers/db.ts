@@ -17,7 +17,8 @@ export const BASE_URL = 'http://localhost:8787';
 // Connects directly to Docker Compose PostgreSQL for test setup/teardown.
 const pool = new Pool({
   connectionString:
-    process.env.DATABASE_URL ?? 'postgresql://dev:devpass@localhost:5432/myapp', // ADAPT
+    process.env.DATABASE_URL ??
+    `postgresql://dev:devpass@localhost:${process.env.TEST_PG_PORT ?? '5432'}/myapp`, // ADAPT
 });
 
 /**
@@ -42,7 +43,11 @@ export async function query<T = Record<string, unknown>>(
   sql: string,
   params?: unknown[]
 ): Promise<{ rows: T[] }> {
-  return pool.query(sql, params);
+  // pg's QueryResult is not assignable to a bare generic T[] (interfaces
+  // without index signatures, e.g. a project's User type, don't satisfy
+  // QueryResultRow) — cast internally so callers get a clean T[].
+  const result = await pool.query(sql, params);
+  return { rows: result.rows as T[] };
 }
 
 // ---------------------------------------------------------------------------
