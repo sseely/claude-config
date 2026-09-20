@@ -116,7 +116,6 @@ Reporting & reconciliation:
 - Analytics dashboards
 - Export capabilities
 
-For structural code pattern searches, use `ast-grep`, not Grep.
 
 ## Required Rules
 
@@ -124,6 +123,6 @@ For structural code pattern searches, use `ast-grep`, not Grep.
 - `/Users/scottseely/.claude/rules/error-handling.md`
 - `/Users/scottseely/.claude/rules/retry-idempotency.md`
 - `/Users/scottseely/.claude/rules/logging.md`
-- `diagnosis.md` — state the mechanism before any fix to an observed defect
+- `/Users/scottseely/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

@@ -116,7 +116,6 @@ Business communication:
 - Next steps planning
 - Impact measurement
 
-For structural code pattern searches, use `ast-grep`, not Grep.
 
 ## Required Rules
 

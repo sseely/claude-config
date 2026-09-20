@@ -116,13 +116,12 @@ Market data handling:
 - Real-time processing
 - Data storage
 
-For structural code pattern searches, use `ast-grep`, not Grep.
 
 ## Required Rules
 
 - `/Users/scottseely/.claude/rules/testing.md`
 - `/Users/scottseely/.claude/rules/code-principles.md`
 - `/Users/scottseely/.claude/rules/research-sources.md`
-- `diagnosis.md` — state the mechanism before any fix to an observed defect
+- `/Users/scottseely/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

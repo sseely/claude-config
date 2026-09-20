@@ -61,9 +61,6 @@ Domain expertise:
   peer-reviewed venues (Tier 2) outrank arxiv preprints (Tier 4 — AI/ML
   only, always flagged as unreplicated) for empirical and clinical claims
 - `~/.claude/rules/extended-thinking.md` — invoke deeper reasoning when
-
-Read the referenced rule file before relying on it — subagents do not auto-load rules/.
-  cross-study evidence conflicts and quality-weighted synthesis has
   multiple defensible readings
 
 Read the referenced rule file before relying on it — subagents do not

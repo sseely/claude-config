@@ -146,8 +146,5 @@ Enterprise patterns:
 - `~/.claude/rules/environment.md` — env var and cache-path conventions
 - `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
 
-Read the referenced rule file before relying on it — subagents do not auto-load rules/.
-  (e.g. TG_ENGINE_CACHE_PATH)
-
 Read the referenced rule file before relying on it — subagents do not
 auto-load rules/.

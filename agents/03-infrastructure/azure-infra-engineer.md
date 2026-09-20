@@ -53,7 +53,5 @@ Design and implement scalable, secure Azure architectures — always validate de
 - `~/.claude/rules/observability.md` — monitoring, metrics, and alert design
 - `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
 
-Read the referenced rule file before relying on it — subagents do not auto-load rules/.
-
 Read the referenced rule file before relying on it — subagents do not
 auto-load rules/.

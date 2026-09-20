@@ -127,7 +127,5 @@ Performance optimization:
 - `~/.claude/rules/lsp.md` — Serena MCP navigation for subagents; ast-grep for structural searches
 - `~/.claude/rules/diagrams.md` — PlantUML is the default for every generated diagram; pick the type with the rubric rather than defaulting to prose or ASCII
 
-Read the referenced rule file before relying on it — subagents do not auto-load rules/.
-
 Read the referenced rule file before relying on it — subagents do not
 auto-load rules/.

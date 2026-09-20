@@ -116,7 +116,6 @@ DevOps & deployment:
 - Environment management
 - Monitoring setup
 
-For structural code pattern searches, use `ast-grep`, not Grep.
 
 ## Required Rules
 

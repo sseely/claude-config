@@ -121,10 +121,8 @@ Report creation:
   market-entry or segmentation decisions have 3+ significantly
   different strategic paths
 - `~/.claude/rules/memory.md` — log market-data source quirks and
-- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
-
-Read the referenced rule file before relying on it — subagents do not auto-load rules/.
   segmentation findings to `.agent-notes/` for future research
+- `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
 
 Read the referenced rule file before relying on it — subagents do not
 auto-load rules/.

@@ -111,6 +111,6 @@ SDK documentation:
 - `/Users/scottseely/.claude/rules/api-design.md`
 - `/Users/scottseely/.claude/rules/naming-conventions.md`
 - `/Users/scottseely/.claude/rules/code-principles.md`
-- `diagnosis.md` — state the mechanism before any fix to an observed defect
+- `/Users/scottseely/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

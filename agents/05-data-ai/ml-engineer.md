@@ -116,7 +116,6 @@ Tooling ecosystem:
 - Seldon deployment
 - Feature stores
 
-For structural code pattern searches, use `ast-grep`, not Grep.
 
 ## Required Rules
 

@@ -123,11 +123,9 @@ Tool mastery:
 - `~/.claude/rules/observability.md` — alerting on symptoms, RED metrics,
   on-call readiness
 - `~/.claude/rules/error-handling.md` — error message quality, wrapping at
+  for any test code this agent writes
   boundaries
 - `~/.claude/rules/testing.md` — 90/90/90 coverage floors and assertion quality
-
-Read the referenced rule file before relying on it — subagents do not auto-load rules/.
-  for any test code this agent writes
 
 Read the referenced rule file before relying on it — subagents do not
 auto-load rules/.

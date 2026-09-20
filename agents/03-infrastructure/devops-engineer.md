@@ -125,7 +125,5 @@ Automation development:
 - `~/.claude/rules/environment.md` — env var conventions, startup validation
 - `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
 
-Read the referenced rule file before relying on it — subagents do not auto-load rules/.
-
 Read the referenced rule file before relying on it — subagents do not
 auto-load rules/.

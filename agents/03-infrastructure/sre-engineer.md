@@ -117,7 +117,6 @@ On-call practices:
 - Well-being support
 - Compensation models
 
-For structural code pattern searches, use `ast-grep`, not Grep.
 
 ## Required Rules
 - `~/.claude/rules/observability.md` — SLO-first design, RED metrics, burn
@@ -128,9 +127,6 @@ For structural code pattern searches, use `ast-grep`, not Grep.
   calls
 - `~/.claude/rules/architecture.md` — reversibility, blast radius for chaos
 - `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
-
-Read the referenced rule file before relying on it — subagents do not auto-load rules/.
-  experiments
 
 Read the referenced rule file before relying on it — subagents do not
 auto-load rules/.

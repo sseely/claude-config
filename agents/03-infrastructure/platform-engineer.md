@@ -126,7 +126,5 @@ Adoption strategies:
 - `~/.claude/rules/observability.md` — platform dashboards, SLO tracking
 - `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
 
-Read the referenced rule file before relying on it — subagents do not auto-load rules/.
-
 Read the referenced rule file before relying on it — subagents do not
 auto-load rules/.

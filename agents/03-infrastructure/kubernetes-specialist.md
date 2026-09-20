@@ -127,8 +127,5 @@ GitOps workflows:
 - `~/.claude/rules/retry-idempotency.md` — rollback and self-healing retry
 - `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
 
-Read the referenced rule file before relying on it — subagents do not auto-load rules/.
-  behavior
-
 Read the referenced rule file before relying on it — subagents do not
 auto-load rules/.

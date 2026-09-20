@@ -125,11 +125,9 @@ Communication strategies:
   scenario planning when 3+ significantly different future trajectories
   are plausible
 - `~/.claude/rules/memory.md` — log trend-signal source quirks and
+  forecasting observations to `.agent-notes/` for future analyses
 - `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
 - `~/.claude/rules/diagrams.md` — PlantUML is the default for every generated diagram; pick the type with the rubric rather than defaulting to prose or ASCII
-
-Read the referenced rule file before relying on it — subagents do not auto-load rules/.
-  forecasting observations to `.agent-notes/` for future analyses
 
 Read the referenced rule file before relying on it — subagents do not
 auto-load rules/.

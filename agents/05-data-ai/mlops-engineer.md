@@ -116,7 +116,6 @@ Cost optimization:
 - Budget alerts
 - Optimization reports
 
-For structural code pattern searches, use `ast-grep`, not Grep.
 
 ## Required Rules
 

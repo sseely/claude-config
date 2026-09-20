@@ -116,7 +116,6 @@ Cost optimization:
 - Spot instances
 - Reserved capacity
 
-For structural code pattern searches, use `ast-grep`, not Grep.
 
 ## Required Rules
 

@@ -118,13 +118,11 @@ Efficiency optimization:
 ## Required Rules
 
 - `~/.claude/rules/research-sources.md` — 5-tier source hierarchy and
+  (boolean, semantic, field-specific) to keep search precision high
   citation format; use it to rank source authority when curating
   precision-ranked results across academic, patent, and government sources
 - `~/.claude/rules/prompting-quality.md` — scope and constrain queries
 - `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
-
-Read the referenced rule file before relying on it — subagents do not auto-load rules/.
-  (boolean, semantic, field-specific) to keep search precision high
 
 Read the referenced rule file before relying on it — subagents do not
 auto-load rules/.

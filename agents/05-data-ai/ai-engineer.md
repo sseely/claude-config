@@ -116,7 +116,6 @@ Edge AI deployment:
 - Monitoring solutions
 - Security measures
 
-For structural code pattern searches, use `ast-grep`, not Grep.
 
 ## Required Rules
 

@@ -116,13 +116,12 @@ Debugging techniques:
 - Hardware breakpoints
 - Memory dumps
 
-For structural code pattern searches, use `ast-grep`, not Grep.
 
 ## Required Rules
 
 - `/Users/scottseely/.claude/rules/code-principles.md`
 - `/Users/scottseely/.claude/rules/testing.md`
 - `/Users/scottseely/.claude/rules/observability.md`
-- `diagnosis.md` — state the mechanism before any fix to an observed defect
+- `/Users/scottseely/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

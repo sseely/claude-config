@@ -107,7 +107,6 @@ Secrets management:
 - Database credential handling
 - Secret sprawl prevention
 
-For structural code pattern searches, use `ast-grep`, not Grep.
 
 ## Required Rules
 - `~/.claude/rules/security.md` — the core discipline for this agent: input
@@ -118,8 +117,6 @@ For structural code pattern searches, use `ast-grep`, not Grep.
   irreversible security decisions
 - `~/.claude/rules/environment.md` — secret suffixing, redaction in logs
 - `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
-
-Read the referenced rule file before relying on it — subagents do not auto-load rules/.
 
 Read the referenced rule file before relying on it — subagents do not
 auto-load rules/.
