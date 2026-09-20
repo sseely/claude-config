@@ -1,6 +1,6 @@
 # Fleet Charter
 
-This is the "why" document for the 130 agents, 29 skills, 12 hooks, and 24
+This is the "why" document for the 130 agents, 29 skills, 12 hooks, and 25
 rule files under `~/.claude` (baseline captured 2026-08-09). It exists
 because `docs/nist-ai-rmf/crosswalk.md` carried three rows — MAP 1.3, MAP
 1.4, MAP 3.4 — that named the same gap three ways: nothing stated the
@@ -56,6 +56,18 @@ or hook that verifies it) or **unverified intention** (no check exists yet).
   `docs/nist-ai-rmf/crosswalk.md`'s "Completeness" section).
 - A batch's file changes match what it declared it would touch — checked by
   `git diff --name-only` against the declared write-set.
+- `hooks/quality-gate.sh`'s `~/.claude` fleet self-check block
+  (rules-line-cap, frontmatter, hook-tests, fleet-inventory-check,
+  fleet-signals-log) — checked by running the script itself. This gate runs
+  only when manually invoked via the pre-approved Bash pattern
+  (`Bash(~/.claude/hooks/quality-gate.sh:*)` in `settings.json`); no event
+  hook, git hook, or CI trigger runs it. Its `hook-tests` sub-gate runs
+  `hooks/test_check_frontmatter.py`, `hooks/test_guard_bash.py`,
+  `hooks/test_check_complexity.py`, and `scripts/test_check_references.py`
+  directly with `hooks/.venv/bin/python` / `python3` — this is also the
+  only place `hooks/requirements.txt`'s `pytest` dependency is exercised,
+  since these files are pytest-compatible but are invoked here as plain
+  scripts rather than through an actual `pytest` run.
 
 **Unverified intention (no check exists yet):**
 

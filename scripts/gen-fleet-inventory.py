@@ -38,6 +38,7 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 VENV_PYTHON = REPO_ROOT / "hooks" / ".venv" / "bin" / "python"
+SETUP_SCRIPT = REPO_ROOT / "hooks" / "setup-complexity.sh"
 OUTPUT_PATH = REPO_ROOT / "docs" / "fleet" / "inventory.md"
 GENERATOR_COMMAND = "python3 scripts/gen-fleet-inventory.py"
 _REEXEC_MARKER = "_FLEET_INVENTORY_REEXEC"
@@ -53,14 +54,30 @@ def _reexec_into_venv_python_if_needed() -> None:
     venv` typically symlinks the venv's binary to the base
     interpreter, so both interpreters report the same realpath even
     though only the venv one has PyYAML on its `sys.path`.
+
+    If the venv itself is missing, fail with the same actionable message
+    `hooks/check-frontmatter.py` and `hooks/check-complexity.py` give
+    (F125) instead of letting a bare `ModuleNotFoundError: No module named
+    'yaml'` surface from the system interpreter.
     """
     if os.environ.get(_REEXEC_MARKER):
         return
     venv_dir = VENV_PYTHON.parent.parent.resolve()
     already_venv = Path(sys.prefix).resolve() == venv_dir
-    if VENV_PYTHON.exists() and not already_venv:
-        os.environ[_REEXEC_MARKER] = "1"
-        os.execv(str(VENV_PYTHON), [str(VENV_PYTHON), __file__, *sys.argv[1:]])
+    if already_venv:
+        return
+    if not VENV_PYTHON.exists():
+        print(
+            "Fleet inventory generation requires PyYAML in the shared "
+            "hooks venv, which is not installed.\n\n"
+            f"Please ask the user for permission to run:\n  {SETUP_SCRIPT}\n\n"
+            "This installs into ~/.claude/hooks/.venv and does not affect "
+            "any project dependencies.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    os.environ[_REEXEC_MARKER] = "1"
+    os.execv(str(VENV_PYTHON), [str(VENV_PYTHON), __file__, *sys.argv[1:]])
 
 
 _reexec_into_venv_python_if_needed()
