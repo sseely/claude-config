@@ -11,12 +11,17 @@
 
       - name: Install syft
         # ADAPT: verify the pinned version/checksum against
-        # https://github.com/anchore/syft/releases before use
+        # https://github.com/anchore/syft/releases before use.
+        # anchore publishes signed checksums for release BINARIES
+        # (syft_<ver>_checksums.txt), not for install.sh, so the hash below
+        # is self-derived (curl the immutable tag's install.sh | shasum -a
+        # 256) rather than vendor-published. Recompute it on every version
+        # bump: `curl -sSfL https://raw.githubusercontent.com/anchore/syft/<tag>/install.sh | shasum -a 256`.
         run: |
-          curl -sSfL https://raw.githubusercontent.com/anchore/syft/v1.18.0/install.sh \
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/v1.52.0/install.sh \
             -o install-syft.sh
-          echo "<pin the published sha256 for v1.18.0 here>  install-syft.sh" | sha256sum -c -
-          sh install-syft.sh -b /usr/local/bin v1.18.0
+          echo "ea054f8b6754db17d34129482ecda1ab733cadab57c1c9202bbe98eb5fe18d24  install-syft.sh" | sha256sum -c -
+          sh install-syft.sh -b /usr/local/bin v1.52.0
 
       - name: Generate SBOM
         run: |

@@ -244,6 +244,14 @@ if (path === '/auth/linkedin/callback') return handleLinkedInCallback(request, e
 if (path === '/auth/logout' && method === 'POST') return handleLogout(request, env);
 ```
 
+Do not hoist a shared error `Response` (e.g. a 401) to module scope, even
+though multiple route branches below will need one. A `new Response(...)`
+built once at module scope binds its body stream to the first request's I/O
+context; Workers rejects reuse from a later request with "Cannot perform I/O
+on behalf of a different request", and `.clone()` does not detach it. Build
+error responses inside a function — see the `unauthorized()` helper in
+Step 10 — so each call gets a fresh instance.
+
 ---
 
 ## Step 10 — `/api/me` endpoint
@@ -268,10 +276,18 @@ If the endpoint already exists, verify it returns these fields. If not, add:
 ```typescript
 import { requireAuth } from './middleware/auth';
 
+// Build a fresh 401 per call: a Response built once at module scope binds
+// its body stream to the first request's I/O context, and Workers rejects
+// reuse from another request ("Cannot perform I/O on behalf of a different
+// request").
+function unauthorized(): Response {
+  return new Response('Unauthorized', { status: 401 });
+}
+
 // In the router:
 if (path === '/api/me' && method === 'GET') {
   const user = await requireAuth(request, env);
-  if (!user) return new Response('Unauthorized', { status: 401 });
+  if (!user) return unauthorized();
   return Response.json({
     id:          user.id,
     name:        user.name,

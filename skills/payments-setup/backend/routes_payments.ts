@@ -26,7 +26,6 @@ function createStripeClient(env: Env): Stripe {
   if (env.STRIPE_BASE_URL && env.ENVIRONMENT === 'production') {
     throw new Error('STRIPE_BASE_URL must not be set in production');
   }
-  // @ts-expect-error — stripe-mock runs an older API; suppress version mismatch in tests
   const config: Stripe.StripeConfig = { apiVersion: STRIPE_API_VERSION };
   if (env.STRIPE_BASE_URL) {
     const url = new URL(env.STRIPE_BASE_URL);

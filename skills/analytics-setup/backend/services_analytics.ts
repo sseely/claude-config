@@ -1,10 +1,15 @@
 // Backend analytics service — fire-and-forget PostHog capture.
-// No initialization needed; sends directly to PostHog's /capture/ endpoint.
+// No initialization needed; sends directly to PostHog's documented
+// single-event capture endpoint.
 // Safe to call from any route handler: exits immediately if POSTHOG_API_KEY is
 // unset, or if the caller has not confirmed analytics consent.
 // ADAPT: update the Env import path to match your project layout.
 
 import { Env } from '../types';
+
+// Per posthog.com/docs/api/capture — the documented path for a single event.
+// (/batch/ is the separate documented path for multiple events.)
+const CAPTURE_PATH = '/i/v0/e/';
 
 export interface CaptureEventOptions {
   /** Optional key/value metadata for segmentation. */
@@ -42,7 +47,7 @@ export function captureEvent(
 
   const { properties = {}, ctx } = options;
   const host = env.POSTHOG_HOST ?? 'https://us.i.posthog.com';
-  const req = fetch(`${host}/capture/`, {
+  const req = fetch(`${host}${CAPTURE_PATH}`, {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({

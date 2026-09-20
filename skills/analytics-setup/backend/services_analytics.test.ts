@@ -44,7 +44,7 @@ describe('captureEvent', () => {
     await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
 
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(url).toBe('https://posthog.test/capture/');
+    expect(url).toBe('https://posthog.test/i/v0/e/');
     const body = JSON.parse(init.body as string);
     expect(body).toEqual({
       api_key: 'phc_test_key',
