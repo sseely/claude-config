@@ -2,6 +2,7 @@
 name: auth-setup
 description: Scaffold OAuth authentication (LinkedIn, Google, Microsoft) into a Cloudflare Workers + Neon PostgreSQL + React/Vite project using KV-backed sessions and HMAC-signed stateless OAuth state.
 user-invocable: true
+disable-model-invocation: true
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch, WebSearch
 ---
 
@@ -126,6 +127,9 @@ Template files:
 - `backend/utils_oauth.ts`
 - `backend/middleware_auth.ts`
 - `backend/routes_auth.ts`
+- `backend/logger.ts`
+- `backend/routes_auth.test.ts`
+- `backend/middleware_auth.test.ts`
 - `frontend/OAuthProviderIcons.tsx`
 - `frontend/LoginPage.tsx`
 - `frontend/AuthContext.tsx`
@@ -176,10 +180,14 @@ Merge `backend/types_auth.ts` into `src/types.ts` (or create it):
 
 ---
 
-## Step 6 — OAuth utilities
+## Step 6 — OAuth utilities and logger
 
 Write `src/utils/oauth.ts` from `backend/utils_oauth.ts`. No provider-specific
 adaptation needed — the utilities are provider-agnostic.
+
+Write `src/logger.ts` from `backend/logger.ts` (or merge into it if the
+project already has a logger) — `middleware/auth.ts` and `routes/auth.ts`
+both import from it. Update `SERVICE_NAME` to the project's service name.
 
 ---
 
@@ -262,14 +270,14 @@ import { requireAuth } from './middleware/auth';
 
 // In the router:
 if (path === '/api/me' && method === 'GET') {
-  const auth = await requireAuth(request, env);
-  if (!auth.user) return new Response('Unauthorized', { status: 401 });
+  const user = await requireAuth(request, env);
+  if (!user) return new Response('Unauthorized', { status: 401 });
   return Response.json({
-    id:          auth.user.id,
-    name:        auth.user.name,
-    email:       auth.user.email,
-    profile_url: auth.user.profile_url,
-    is_admin:    auth.user.is_admin,
+    id:          user.id,
+    name:        user.name,
+    email:       user.email,
+    profile_url: user.profile_url,
+    is_admin:    user.is_admin,
   });
 }
 ```
@@ -400,10 +408,18 @@ Also add `http://localhost:8787/auth/<provider>/callback` for local dev.
 
 ## Step 14b — Write tests
 
-Write at minimum:
-- **Happy-path test**: call `GET /api/me` with a valid session token — assert 200 and expected user fields.
-- **Rejection test**: call `GET /api/me` with no session — assert 401 redirect to `/login`.
-- **Protected route test**: access a protected route without session — assert redirect with `returnTo` param.
+Write `test/routes/auth.test.ts` and `test/middleware/auth.test.ts` from
+`backend/routes_auth.test.ts` and `backend/middleware_auth.test.ts`, using
+testing-setup's Vitest helpers (`test/helpers/db.ts`'s `createUser`/
+`createUserWithSession`). Update the relative import paths in each file to
+match where it actually lands in the project's `test/` directory. Cover, at
+minimum:
+
+- **Happy path**: `GET /api/me` with a valid session cookie — assert 200 and
+  the expected user fields.
+- **401**: `GET /api/me` with no session cookie — assert 401.
+- **Tampered OAuth state**: `GET /auth/<provider>/callback` with a tampered
+  `state` query param — assert 400 `Invalid callback`.
 
 ## Step 15 — Verify
 

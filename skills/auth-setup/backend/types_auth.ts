@@ -35,4 +35,10 @@ export interface User {
 
   // Only present if storing LinkedIn tokens for API posting
   linkedin_access_token: string | null;
+
+  // ADAPT: these two require compliance-setup's migration
+  // 001_consent_fields.sql. Remove both lines (and requireAuth's
+  // deleted_at filter) if compliance-setup has not been run.
+  deleted_at: string | null;
+  has_recovery_backup: boolean;
 }

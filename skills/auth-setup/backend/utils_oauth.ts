@@ -1,5 +1,5 @@
 import { Env } from '../types';
-import { STATE_EXPIRY_MS, SESSION_TTL_SECONDS } from '../constants';
+import { STATE_EXPIRY_MS, SESSION_TTL_SECONDS, SESSION_INDEX_PREFIX } from '../constants';
 
 // ---------------------------------------------------------------------------
 // OAuth state signing
@@ -75,12 +75,18 @@ export async function exchangeCode(opts: {
       client_secret: opts.clientSecret,
       redirect_uri: opts.redirectUri,
     }),
+    signal: AbortSignal.timeout(5000),
   });
   if (!res.ok) {
     const category = res.status < 500 ? 'client' : 'provider';
     throw new Error(`Token exchange failed (${category} error ${res.status})`);
   }
-  const data = (await res.json()) as Record<string, unknown>;
+  let data: Record<string, unknown>;
+  try {
+    data = (await res.json()) as Record<string, unknown>;
+  } catch {
+    throw new Error('Token exchange response was not valid JSON');
+  }
   if (typeof data.access_token !== 'string') {
     throw new Error('Token exchange response missing access_token');
   }
@@ -91,12 +97,20 @@ export async function fetchUserProfile(
   url: string,
   accessToken: string
 ): Promise<{ sub: string; email: string; name: string; picture?: string }> {
-  const res = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+    signal: AbortSignal.timeout(5000),
+  });
   if (!res.ok) {
     const category = res.status < 500 ? 'client' : 'provider';
     throw new Error(`Profile fetch failed (${category} error ${res.status})`);
   }
-  const data = (await res.json()) as Record<string, unknown>;
+  let data: Record<string, unknown>;
+  try {
+    data = (await res.json()) as Record<string, unknown>;
+  } catch {
+    throw new Error('Profile response was not valid JSON');
+  }
   if (typeof data.sub !== 'string' || typeof data.email !== 'string') {
     throw new Error('Profile response missing required fields (sub, email)');
   }
@@ -115,6 +129,10 @@ export async function fetchUserProfile(
 
 export async function storeSession(env: Env, token: string, userId: string): Promise<void> {
   await env.SESSION_STORE.put(token, userId, { expirationTtl: SESSION_TTL_SECONDS });
+  // Index entry so all of a user's sessions are enumerable (see revokeAllSessions).
+  await env.SESSION_STORE.put(`${SESSION_INDEX_PREFIX}${userId}:${token}`, '1', {
+    expirationTtl: SESSION_TTL_SECONDS,
+  });
 }
 
 export async function getSessionUserId(env: Env, token: string): Promise<string | null> {
@@ -123,4 +141,24 @@ export async function getSessionUserId(env: Env, token: string): Promise<string 
 
 export async function deleteSession(env: Env, token: string): Promise<void> {
   await env.SESSION_STORE.delete(token);
+}
+
+/**
+ * Revoke every session for a user (used by compliance-setup's
+ * handleDeleteAccount — see backend/routes_me.ts).
+ * Interface contract: Env -> userId -> void; safe to call when the
+ * user has zero sessions.
+ */
+export async function revokeAllSessions(env: Env, userId: string): Promise<void> {
+  const prefix = `${SESSION_INDEX_PREFIX}${userId}:`;
+  let cursor: string | undefined;
+  do {
+    const list = await env.SESSION_STORE.list({ prefix, cursor });
+    await Promise.all(list.keys.map(async (k) => {
+      const token = k.name.slice(prefix.length);
+      await env.SESSION_STORE.delete(token);
+      await env.SESSION_STORE.delete(k.name);
+    }));
+    cursor = list.list_complete ? undefined : list.cursor;
+  } while (cursor);
 }

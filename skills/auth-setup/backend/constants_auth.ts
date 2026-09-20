@@ -20,6 +20,9 @@ export const STATE_EXPIRY_MS = 10 * 60 * 1000; // 10 minutes
 /** Session TTL in seconds — used by both KV storage and cookie Max-Age */
 export const SESSION_TTL_SECONDS = 30 * 24 * 60 * 60; // 30 days
 
+/** KV key prefix for the per-user session index (see revokeAllSessions) */
+export const SESSION_INDEX_PREFIX = 'by-user:';
+
 export const OAUTH = {
   // ADAPT: delete providers you are not using
   linkedin: {
