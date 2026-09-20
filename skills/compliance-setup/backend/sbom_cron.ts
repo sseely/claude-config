@@ -9,15 +9,46 @@
 
 import { createDbClient } from '../db/client';
 import { Env } from '../types';
+import { log } from '../logger';
+
+type DbClient = Awaited<ReturnType<typeof createDbClient>>;
 
 const SBOM_EXPIRY_HOURS = 48;
 const SECONDS_PER_HOUR = 3600;
 const SBOM_BATCH_LIMIT = 100;
+const SENDGRID_TIMEOUT_MS = 5000;
+
+interface PendingSbomRequest {
+  id: string;
+  user_id: string;
+  email: string;
+}
+
+interface DeliveredSbomRequest {
+  id: string;
+  urls: string;
+  expiresAt: Date;
+}
+
+/** Thrown by generateR2PresignedUrl until it is replaced with a real
+ * implementation. Never retryable — a forged-URL placeholder must never
+ * reach production silently, so this is always a terminal delivery failure. */
+class PresignedUrlUnavailableError extends Error {}
+
+/**
+ * Thrown by sendSbomEmail. Per rules/retry-idempotency.md: a 4xx response is
+ * non-retryable (terminal); a 5xx should be retried by the next cron tick.
+ */
+class SendGridDeliveryError extends Error {
+  constructor(message: string, public readonly status: number) {
+    super(message);
+  }
+}
 
 export async function processPendingSbomRequests(env: Env): Promise<void> {
   const db = await createDbClient(env);
   try {
-    const { rows: pending } = await db.query<{ id: string; user_id: string; email: string }>(
+    const { rows: pending } = await db.query<PendingSbomRequest>(
       `SELECT sr.id, sr.user_id, u.email
        FROM sbom_requests sr
        JOIN users u ON u.id = sr.user_id
@@ -28,76 +59,98 @@ export async function processPendingSbomRequests(env: Env): Promise<void> {
 
     if (pending.length === 0) return;
 
-    const delivered: { id: string; urls: string; expiresAt: Date }[] = [];
+    const delivered: DeliveredSbomRequest[] = [];
     const failed: string[] = [];
 
     for (const req of pending) {
       try {
-        const expiresAt = new Date(Date.now() + SBOM_EXPIRY_HOURS * SECONDS_PER_HOUR * 1000);
-        let spdxUrl = '';
-        let cdxUrl = '';
-
-        if (env.R2_ENDPOINT && env.R2_ACCESS_KEY_ID && env.R2_SECRET_ACCESS_KEY) {
-          // ADAPT: replace PROJECT_NAME with your SBOM filename prefix
-          // ADAPT: replace R2_SBOM_PREFIX with the R2 path prefix (e.g. 'sbom/latest')
-          spdxUrl = await generateR2PresignedUrl(
-            env,
-            'R2_SBOM_PREFIX/sbom.PROJECT_NAME.spdx.json',
-            SBOM_EXPIRY_HOURS * SECONDS_PER_HOUR
-          );
-          cdxUrl = await generateR2PresignedUrl(
-            env,
-            'R2_SBOM_PREFIX/sbom.PROJECT_NAME.cdx.json',
-            SBOM_EXPIRY_HOURS * SECONDS_PER_HOUR
-          );
-        }
-
-        if (env.SENDGRID_API_KEY && spdxUrl && cdxUrl) {
-          await sendSbomEmail(env, req.email, spdxUrl, cdxUrl);
-        }
-
-        delivered.push({
-          id: req.id,
-          urls: JSON.stringify({ spdx: spdxUrl, cyclonedx: cdxUrl }),
-          expiresAt,
-        });
+        delivered.push(await deliverSbomRequest(env, req));
       } catch (err) {
-        console.error(`[sbom] delivery failed for request ${req.id}:`, err);
-        failed.push(req.id);
+        recordSbomFailure(req.id, err, failed);
       }
     }
 
-    // Batch UPDATE for delivered requests
-    if (delivered.length > 0) {
-      const ids = delivered.map((d) => d.id);
-      const urls = delivered.map((d) => d.urls);
-      const expires = delivered.map((d) => d.expiresAt);
-      await db.query(
-        `UPDATE sbom_requests
-         SET status = 'delivered',
-             delivered_at = NOW(),
-             download_urls = data.urls::jsonb,
-             download_expires_at = data.expires_at
-         FROM (SELECT unnest($1::uuid[]) AS id,
-                      unnest($2::text[])  AS urls,
-                      unnest($3::timestamptz[]) AS expires_at) data
-         WHERE sbom_requests.id = data.id`,
-        [ids, urls, expires]
-      );
-    }
+    await markSbomDelivered(db, delivered);
+    await markSbomFailed(db, failed);
 
-    // Batch UPDATE for failed requests
-    if (failed.length > 0) {
-      await db.query(
-        `UPDATE sbom_requests SET status = 'failed' WHERE id = ANY($1::uuid[])`,
-        [failed]
-      );
-    }
-
-    console.info(`[sbom] processed ${pending.length}: ${delivered.length} delivered, ${failed.length} failed`);
+    log('info', 'sbom cron tick complete', {
+      total: pending.length,
+      delivered: delivered.length,
+      failed: failed.length,
+    });
   } finally {
     await db.end();
   }
+}
+
+/** Generate both SBOM URLs and (optionally) email them. Throws on any
+ * failure so the caller can classify retryable vs. terminal errors. */
+async function deliverSbomRequest(
+  env: Env,
+  req: PendingSbomRequest
+): Promise<DeliveredSbomRequest> {
+  const expiresAt = new Date(Date.now() + SBOM_EXPIRY_HOURS * SECONDS_PER_HOUR * 1000);
+  let spdxUrl = '';
+  let cdxUrl = '';
+
+  if (env.R2_ENDPOINT && env.R2_ACCESS_KEY_ID && env.R2_SECRET_ACCESS_KEY) {
+    // ADAPT: replace PROJECT_NAME with your SBOM filename prefix
+    // ADAPT: replace R2_SBOM_PREFIX with the R2 path prefix (e.g. 'sbom/latest')
+    const ttl = SBOM_EXPIRY_HOURS * SECONDS_PER_HOUR;
+    spdxUrl = await generateR2PresignedUrl(env, 'R2_SBOM_PREFIX/sbom.PROJECT_NAME.spdx.json', ttl);
+    cdxUrl = await generateR2PresignedUrl(env, 'R2_SBOM_PREFIX/sbom.PROJECT_NAME.cdx.json', ttl);
+  }
+
+  if (env.SENDGRID_API_KEY && spdxUrl && cdxUrl) {
+    await sendSbomEmail(env, req.email, spdxUrl, cdxUrl);
+  }
+
+  return { id: req.id, urls: JSON.stringify({ spdx: spdxUrl, cyclonedx: cdxUrl }), expiresAt };
+}
+
+/** Classify a delivery failure and either queue it as terminal (`failed`)
+ * or leave it untouched so the next cron tick retries it (`pending`). */
+function recordSbomFailure(requestId: string, err: unknown, failed: string[]): void {
+  const error = err instanceof Error ? err.message : String(err);
+  const terminal =
+    err instanceof PresignedUrlUnavailableError ||
+    (err instanceof SendGridDeliveryError && err.status < 500);
+
+  if (terminal) {
+    log('error', 'sbom delivery failed permanently', { requestId, error });
+    failed.push(requestId);
+    return;
+  }
+
+  // on-call: if SBOM deliveries pile up in `pending` with repeated log
+  // entries, check SendGrid status; this path retries indefinitely on
+  // 5xx/network errors. Runbook: see this skill's Operational Readiness
+  // section in SKILL.md.
+  log('warn', 'sbom delivery failed transiently, retrying next tick', { requestId, error });
+}
+
+async function markSbomDelivered(db: DbClient, delivered: DeliveredSbomRequest[]): Promise<void> {
+  if (delivered.length === 0) return;
+  const ids = delivered.map((d) => d.id);
+  const urls = delivered.map((d) => d.urls);
+  const expires = delivered.map((d) => d.expiresAt);
+  await db.query(
+    `UPDATE sbom_requests
+     SET status = 'delivered',
+         delivered_at = NOW(),
+         download_urls = data.urls::jsonb,
+         download_expires_at = data.expires_at
+     FROM (SELECT unnest($1::uuid[]) AS id,
+                  unnest($2::text[])  AS urls,
+                  unnest($3::timestamptz[]) AS expires_at) data
+     WHERE sbom_requests.id = data.id`,
+    [ids, urls, expires]
+  );
+}
+
+async function markSbomFailed(db: DbClient, failed: string[]): Promise<void> {
+  if (failed.length === 0) return;
+  await db.query(`UPDATE sbom_requests SET status = 'failed' WHERE id = ANY($1::uuid[])`, [failed]);
 }
 
 /**
@@ -113,15 +166,12 @@ async function generateR2PresignedUrl(
   key: string,
   expiresInSeconds: number
 ): Promise<string> {
-  // ADAPT: replace with real presigned URL generation before production use.
-  // Example with @aws-sdk/s3-request-presigner:
-  //   import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
-  //   import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-  //   const s3 = new S3Client({ region: 'auto', endpoint: env.R2_ENDPOINT, credentials: {...} });
-  //   return getSignedUrl(s3, new GetObjectCommand({ Bucket: env.R2_BUCKET, Key: key }), { expiresIn: expiresInSeconds });
-  const endpoint = env.R2_ENDPOINT ?? '';
-  const expiresAt = new Date(Date.now() + expiresInSeconds * 1000);
-  return `${endpoint}/${key}?X-Expires=${expiresAt.toISOString()}`;
+  // ADAPT: replace with real presigned URL generation before production use —
+  // see @aws-sdk/s3-request-presigner example above. This throws so a
+  // forged-URL placeholder can never reach production silently.
+  throw new PresignedUrlUnavailableError(
+    'generateR2PresignedUrl is a placeholder — implement real R2 presigned URLs before enabling SBOM delivery.'
+  );
 }
 
 async function sendSbomEmail(
@@ -148,8 +198,9 @@ async function sendSbomEmail(
         },
       ],
     }),
+    signal: AbortSignal.timeout(SENDGRID_TIMEOUT_MS),
   });
   if (!res.ok) {
-    throw new Error(`SendGrid email failed: ${res.status} ${res.statusText}`);
+    throw new SendGridDeliveryError(`SendGrid email failed: ${res.status} ${res.statusText}`, res.status);
   }
 }

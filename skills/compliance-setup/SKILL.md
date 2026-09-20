@@ -2,6 +2,7 @@
 name: compliance-setup
 description: Scaffold GDPR + CRA compliance features into a Cloudflare Workers + Neon + React/Vite project. Covers consent gate, data export, account deletion/restore, user feedback (star rating), SBOM request/delivery, Termly policy pages, Canny feedback widget, and CI jobs (SBOM generation + i18n audit).
 user-invocable: true
+disable-model-invocation: true
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -51,6 +52,14 @@ Ask the user for all of the following before writing any files:
 | `CANNY_APP_ID` | Canny app ID (optional — skip if not using Canny) | `abc123` or blank |
 | `CANNY_URL` | Canny public board URL (optional) | `https://feedback.myapp.com` |
 | `R2_SBOM_PREFIX` | R2 path prefix for SBOM files | `sbom/latest` |
+
+Also confirm:
+
+10. **Does your `src/db/client.ts` already exist (exporting
+    `createDbClient`)?** Every backend template in this skill imports it.
+    If missing, stop and scaffold it first before continuing — none of the
+    `*-setup` skills in this fleet create it; it is assumed to already be
+    part of the base Cloudflare Workers + Neon prototype.
 
 After all inputs are collected, write `.compliance-setup-progress.md` in the
 working directory before doing any further work:
@@ -118,6 +127,9 @@ the correct prefix. Do not modify the SQL — it is already idempotent.
 
 3. Read `~/.claude/skills/compliance-setup/migrations/003_sbom_requests.sql`
    → write as `src/db/migrations/NNN_sbom_requests.sql`
+
+4. Read `~/.claude/skills/compliance-setup/migrations/004_audit_logs.sql`
+   → write as `src/db/migrations/NNN_audit_logs.sql`
 
 If these columns/tables already exist in `src/db/schema.sql`, skip the corresponding
 migration and note it.
@@ -195,8 +207,7 @@ In the scheduled handler, add a cleanup block that hard-deletes users whose
 `recovery_backup_expires_at` has passed and `has_recovery_backup = true`:
 
 ```sql
-UPDATE users
-SET deleted_at = NULL  -- or DELETE if you prefer hard delete
+DELETE FROM users
 WHERE deleted_at IS NOT NULL
   AND recovery_backup_expires_at < NOW()
   AND has_recovery_backup = true
@@ -353,10 +364,20 @@ On success, mark `- [x] ci-jobs` in `.compliance-setup-progress.md`.
 
 ## Step 6b — Write tests
 
-Write at minimum:
+Using testing-setup's Vitest helpers (`test/helpers/db.ts` — `truncateAll`,
+`createUserWithSession`, `query`), write:
+
+- `~/.claude/skills/compliance-setup/backend/routes_me.test.ts` →
+  `test/routes/me.test.ts`: export returns 200 with the expected payload
+  shape; delete soft-deletes the row (`deleted_at` set) and calls
+  `revokeAllSessions` (assert via `getSessionUserId` returning `null` for
+  the prior session token); restore un-deletes the row and clears
+  `has_recovery_backup` / `recovery_backup_expires_at`.
+- `~/.claude/skills/compliance-setup/backend/routes_sbom.test.ts` →
+  `test/routes/sbom.test.ts`: a first request returns 201; a second request
+  inside the 30-day window returns 429; the status endpoint reflects the
+  most recent request.
 - **Consent gate test**: call a data endpoint without consent cookie — assert the appropriate gate response.
-- **Data export test**: call `GET /api/me/export` — assert the response contains expected user fields.
-- **Account deletion test**: call `DELETE /api/me` — assert the account is marked inactive and data is cleared.
 
 On success, mark `- [x] write-tests` in `.compliance-setup-progress.md`.
 
@@ -368,9 +389,12 @@ and re-run (Step 0 will resume from this step).**
 
 1. Run `npx tsc --noEmit` — fix any type errors before proceeding.
 2. Run `npm run build` (or equivalent) and confirm TypeScript compiles cleanly.
-3. If compliance test files exist (`test/me.test.ts`, `test/feedback.test.ts`,
-   `test/sbom.test.ts`), run them.
-4. Summarise:
+3. If compliance test files exist (`test/routes/me.test.ts`,
+   `test/feedback.test.ts`, `test/routes/sbom.test.ts`), run them.
+4. Confirm `generateR2PresignedUrl` has been replaced with a real
+   implementation before this project's first production SBOM delivery —
+   the template throws until it is.
+5. Summarise:
    - What was created
    - What ADAPT comments remain and need manual attention
    - What env vars / secrets need to be set before the feature is live

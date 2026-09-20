@@ -2,6 +2,8 @@ import { createDbClient } from '../db/client';
 import { Env, User } from '../types';
 import { logAuditEvent, AuditAction } from '../services/audit';
 import { COOKIE, COOKIE_MAX_AGE } from '../constants';
+import { revokeAllSessions } from '../utils/oauth';
+import { log } from '../logger';
 
 const ACCOUNT_RECOVERY_WINDOW_DAYS = 30;
 
@@ -137,12 +139,7 @@ export async function handleDeleteAccount(
   }
 
   const payload = await buildExportPayload(user.id, env);
-
-  if (env.R2_USER_BACKUPS) {
-    await env.R2_USER_BACKUPS.put(`user-backups/${user.id}.json`, JSON.stringify(payload), {
-      httpMetadata: { contentType: 'application/json' },
-    });
-  }
+  await backupUserData(env, user.id, payload);
 
   const recoveryExpiry = new Date(Date.now() + ACCOUNT_RECOVERY_WINDOW_DAYS * 24 * 60 * 60 * 1000);
 
@@ -164,6 +161,18 @@ export async function handleDeleteAccount(
     await db.end();
   }
 
+  // Best-effort: the Postgres write above is already committed and is the
+  // source of truth for the deletion. A revocation failure here must not
+  // fail the request — log it for a reconciliation job to pick up (F046).
+  try {
+    await revokeAllSessions(env, user.id);
+  } catch (err) {
+    log('error', 'failed to revoke sessions after account deletion', {
+      userId: user.id,
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
+
   ctx.waitUntil(logAuditEvent(env, ctx, {
     actorId: user.id,
     action: AuditAction.USER_DELETED,
@@ -179,6 +188,26 @@ export async function handleDeleteAccount(
       'Set-Cookie': `${COOKIE.SESSION}=; HttpOnly; Secure; SameSite=Lax; Max-Age=${COOKIE_MAX_AGE.CLEAR}; Path=/`,
     },
   });
+}
+
+/** Best-effort backup of the export payload before deletion. Failure here
+ * must not block account deletion (F046) — logged for reconciliation. */
+async function backupUserData(
+  env: Env,
+  userId: string,
+  payload: Record<string, unknown>
+): Promise<void> {
+  if (!env.R2_USER_BACKUPS) return;
+  try {
+    await env.R2_USER_BACKUPS.put(`user-backups/${userId}.json`, JSON.stringify(payload), {
+      httpMetadata: { contentType: 'application/json' },
+    });
+  } catch (err) {
+    log('error', 'failed to write R2 account backup before deletion', {
+      userId,
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -198,9 +227,7 @@ export async function handleRestoreAccount(
     return Response.json({ error: 'No recovery backup available' }, { status: 409 });
   }
 
-  if (env.R2_USER_BACKUPS) {
-    await env.R2_USER_BACKUPS.delete(`user-backups/${user.id}.json`);
-  }
+  await deleteUserBackup(env, user.id);
 
   const db = await createDbClient(env);
   try {
@@ -225,4 +252,19 @@ export async function handleRestoreAccount(
   }));
 
   return Response.json({ restored: true });
+}
+
+/** Best-effort cleanup of the R2 backup after a successful restore.
+ * Failure here must not block the restore (F046) — logged for
+ * reconciliation. */
+async function deleteUserBackup(env: Env, userId: string): Promise<void> {
+  if (!env.R2_USER_BACKUPS) return;
+  try {
+    await env.R2_USER_BACKUPS.delete(`user-backups/${userId}.json`);
+  } catch (err) {
+    log('error', 'failed to delete R2 account backup after restore', {
+      userId,
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
 }

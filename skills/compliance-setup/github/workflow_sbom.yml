@@ -7,10 +7,16 @@
     name: Generate SBOMs (SPDX + CycloneDX)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install syft
-        run: curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+        # ADAPT: verify the pinned version/checksum against
+        # https://github.com/anchore/syft/releases before use
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/v1.18.0/install.sh \
+            -o install-syft.sh
+          echo "<pin the published sha256 for v1.18.0 here>  install-syft.sh" | sha256sum -c -
+          sh install-syft.sh -b /usr/local/bin v1.18.0
 
       - name: Generate SBOM
         run: |
@@ -22,7 +28,7 @@
             -o cyclonedx-json=sbom.PROJECT_NAME.cdx.json
 
       - name: Upload SBOMs as artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: sbom
           path: 'sbom.*.json'
