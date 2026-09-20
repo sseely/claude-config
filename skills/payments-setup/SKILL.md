@@ -2,6 +2,7 @@
 name: payments-setup
 description: Scaffold Stripe Checkout, session pack credits, idempotent webhook handling, and an admin coupon management system into a Cloudflare Workers + Neon PostgreSQL + React/Vite project.
 user-invocable: true
+disable-model-invocation: true
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch, WebSearch
 ---
 
@@ -110,7 +111,7 @@ collected_inputs: true
 ## Step 2 — Install the Stripe SDK
 
 ```bash
-npm install stripe
+npm install stripe@22.6.2
 ```
 
 Verify the installed version and update `STRIPE_API_VERSION` in constants
@@ -145,8 +146,11 @@ Read all templates in this skill directory before writing any code:
 - `backend/constants_payments.ts`
 - `backend/types_payments.ts`
 - `backend/utils_code_generation.ts`
+- `backend/logger.ts`
 - `backend/routes_payments.ts`
 - `backend/routes_coupons.ts`
+- `backend/routes_payments.test.ts`
+- `backend/routes_coupons.test.ts`
 - `frontend/api_payments.ts`
 - `frontend/BuyPacksSection.tsx`
 - `frontend/RedeemCouponSection.tsx`
@@ -211,6 +215,14 @@ Update the import in `routes_coupons.ts` to match the actual utility path.
 
 ---
 
+## Step 7b — Logger
+
+Write `src/logger.ts` from `backend/logger.ts` (or merge into it if the
+project already has one, e.g. from `/auth-setup`) — `routes/payments.ts` and
+`routes/coupons.ts` both import from it. Update `SERVICE_NAME` if merging.
+
+---
+
 ## Step 8 — Payment routes
 
 Write `src/routes/payments.ts` from `backend/routes_payments.ts`, adapting:
@@ -250,9 +262,9 @@ import {
 
 // Payments
 if (path === '/api/buy' && method === 'POST') {
-  const auth = await requireAuth(request, env);
-  if (!auth.user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
-  return handleBuyPack(request, env, auth.user);
+  const user = await requireAuth(request, env);
+  if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  return handleBuyPack(request, env, user);
 }
 if (path === '/stripe/webhook' && method === 'POST')
   return handleStripeWebhook(request, env, ctx);
@@ -321,7 +333,7 @@ Adapt:
 - Update the `navigate` path for coupon detail (default: `/admin/coupons/:id`).
 - Update `AdminCoupon` import path.
 - Pass the `api` prop from the router or use a module-level import.
-- Update `VALID_PACK_SIZES` and `MAX_COUPON_USES` imports to the shared
+- Update `VALID_PACK_SIZES` and `MAX_COUPON_COUNT` imports to the shared
   constants location.
 - Replace `t()` with hardcoded strings if i18n is not set up.
 
@@ -338,69 +350,8 @@ Protect these routes: only render them when `user.is_admin` is true.
 
 ## Step 14 — i18n keys
 
-If `/i18n-setup` has been run, add these keys to `locales/en/dashboard.json`:
-
-```json
-{
-  "buySessions": {
-    "heading":       "Buy Sessions",
-    "subtitle":      "Credits never expire.",
-    "session":       "{{count}} session",
-    "session_other": "{{count}} sessions",
-    "redirecting":   "Redirecting…",
-    "checkoutError": "Checkout failed. Please try again."
-  },
-  "coupon": {
-    "heading":     "Redeem a Coupon",
-    "placeholder": "XXXX-XXXX",
-    "redeem":      "Redeem",
-    "redeeming":   "Redeeming…",
-    "success":     "{{count}} session added!",
-    "success_other": "{{count}} sessions added!",
-    "error":       "Failed to redeem coupon."
-  },
-  "adminCoupons": {
-    "pageTitle":      "Coupon Management",
-    "createHeading":  "Issue a Coupon",
-    "listHeading":    "All Coupons",
-    "noResults":      "No coupons yet.",
-    "session":        "{{count}} session",
-    "session_other":  "{{count}} sessions",
-    "unrestricted":   "Any",
-    "expired":        "Expired",
-    "usageCount":     "{{used}} / {{max}}",
-    "colCode":        "Code",
-    "colPack":        "Pack",
-    "colEmail":       "Email",
-    "colStatus":      "Status",
-    "colExpires":     "Expires",
-    "colCreated":     "Created",
-    "detailBack":     "← All Coupons",
-    "detailPack":     "Pack",
-    "detailMaxUses":  "Max Uses",
-    "detailStatus":   "Status",
-    "detailExpires":  "Expires",
-    "detailCreated":  "Created",
-    "detailRestrictedTo": "Restricted To",
-    "detailRedemptions":  "Redemptions",
-    "detailNoRedemptions": "No redemptions yet.",
-    "detailColName":       "Name",
-    "detailColEmail":      "Email",
-    "detailColRedeemedAt": "Redeemed At"
-  },
-  "issueCoupon": {
-    "packLabel":        "Pack Size",
-    "maxUsesLabel":     "Max Redemptions",
-    "expiresLabel":     "Expires",
-    "emailLabel":       "Restrict to Email (optional)",
-    "emailPlaceholder": "user@example.com",
-    "issue":            "Issue Coupon",
-    "issuing":          "Issuing…",
-    "result":           "Generated code:",
-    "error":            "Failed to issue coupon."
-  }
-}
-```
+If `/i18n-setup` has been run, read `references/i18n-keys.md` for the full
+key block and merge it into `locales/en/dashboard.json`.
 
 ---
 
@@ -411,9 +362,15 @@ Add to `wrangler.toml`:
 ```toml
 [vars]
 # APP_URL already set by auth-setup — confirm it points to your domain
+ENVIRONMENT = "production"
 
 # No plaintext vars needed for Stripe — all secrets
 ```
+
+`ENVIRONMENT` must be set to `production` in prod (`wrangler.toml [vars]` or
+the Workers dashboard for that environment) — `createStripeClient` refuses a
+`STRIPE_BASE_URL` override when `ENVIRONMENT === 'production'`, so a leaked
+stripe-mock URL can never simulate a free purchase in prod.
 
 Set secrets:
 
@@ -441,10 +398,28 @@ STRIPE_BASE_URL=http://localhost:12111 npx wrangler dev
 
 ## Step 15b — Write tests
 
-Write at minimum:
-- **Happy-path test**: simulate a `checkout.session.completed` webhook — assert `session_packs` row created.
-- **Idempotency test**: send the same webhook event twice — assert only one `session_packs` row exists (ON CONFLICT DO NOTHING).
-- **Auth rejection test**: call a payment endpoint without a session — assert 401.
+Write `src/routes/payments.test.ts` from `backend/routes_payments.test.ts` and
+`src/routes/coupons.test.ts` from `backend/routes_coupons.test.ts`, using
+testing-setup's Vitest helpers (`test/helpers/db.ts`). Adapt import paths the
+same way you adapted the route files themselves in Steps 8–9.
+
+`routes_payments.test.ts` covers, at minimum:
+- **Happy-path test**: simulate a `checkout.session.completed` webhook —
+  assert `session_packs` row created.
+- **Idempotency test**: send the same webhook event twice — assert only one
+  `session_packs` row exists (ON CONFLICT DO NOTHING).
+- **Auth rejection test**: call a payment endpoint without a session —
+  assert 401.
+- **Tampered signature test**: send the webhook with a missing or invalid
+  `stripe-signature` header — assert 400.
+
+`routes_coupons.test.ts` covers, at minimum:
+- **Redeem happy path**: a valid, unexpired, under-capacity coupon redeems
+  successfully.
+- **Expired coupon**: redeeming a coupon past `expires_at` returns 410.
+- **Already-redeemed**: the same user redeeming a coupon twice returns 409.
+- **Non-admin guard**: a non-admin user calling `/api/admin/coupons` returns
+  403.
 
 ## Step 16 — Verify
 

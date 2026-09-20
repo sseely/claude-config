@@ -2,17 +2,17 @@
 // ADAPT: update api import to match your project's API client.
 // ADAPT: update navigate path for coupon detail (/admin/coupons/:id) if different.
 // ADAPT: replace t() calls with hardcoded strings if i18n-setup has not been run.
-// ADAPT: update MAX_COUPON_USES and VALID_PACK_SIZES imports to your constants.
+// ADAPT: update MAX_COUPON_COUNT and VALID_PACK_SIZES imports to your constants.
 
 import { useEffect, useState } from 'react';
 import type React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AdminCoupon } from '../types/shared'; // ADAPT: update import path
+import { MAX_COUPON_COUNT } from '../constants'; // ADAPT: update import path
 
 // ADAPT: import from your project's constants
 const VALID_PACK_SIZES = [1, 3, 10] as const;
-const MAX_COUPON_USES = 100;
 
 function defaultExpiresAt(): string {
   const d = new Date();
@@ -101,11 +101,11 @@ export default function AdminCouponsPage({ api }: Props) {
           <label style={{ fontSize: 14, color: 'var(--text-secondary)' }}>
             {t('issueCoupon.maxUsesLabel')}
             <input
-              type="number" min={1} max={MAX_COUPON_USES}
+              type="number" min={1} max={MAX_COUPON_COUNT}
               value={issueMaxUses}
               onChange={(e) => setIssueMaxUses(Number(e.target.value))}
               onBlur={(e) => setIssueMaxUses(
-                Math.max(1, Math.min(MAX_COUPON_USES, Number(e.target.value) || 1))
+                Math.max(1, Math.min(MAX_COUPON_COUNT, Number(e.target.value) || 1))
               )}
               style={inputStyle}
             />
