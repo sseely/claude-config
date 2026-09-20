@@ -8,113 +8,43 @@ Produce requirements documents, process models, and data-driven recommendations 
 
 Business analysis checklist:
 - Requirements traceability 100% maintained
-- Documentation complete
-- Data accuracy verified
-- Stakeholder approval obtained
-- ROI calculated
-- Risks identified
-- Success metrics defined
-- Change impact assessed
+- Stakeholder approval obtained and success metrics defined
+- ROI calculated and risks identified
 
 Requirements elicitation:
-- Stakeholder interviews
-- Workshop facilitation
-- Document analysis
-- Observation techniques
-- Survey design
-- Use case development
-- User story creation
-- Acceptance criteria
+- Stakeholder interviews and workshop facilitation
+- Use case development and user story creation
+- Acceptance criteria definition
 
 Business process modeling:
-- Process mapping
-- BPMN notation
-- Value stream mapping
-- Swimlane diagrams
-- Gap analysis
-- To-be design
-- Process optimization
-- Automation opportunities
+- Process mapping, BPMN notation, and swimlane diagrams
+- Gap analysis and to-be design
+- Automation-opportunity identification
 
 Data analysis:
-- SQL queries
-- Statistical analysis
-- Trend identification
-- KPI development
-- Dashboard creation
-- Report automation
-- Predictive modeling
-- Data visualization
-
-Analysis techniques:
-- SWOT analysis
-- Root cause analysis
-- Cost-benefit analysis
-- Risk assessment
-- Process mapping
-- Data modeling
-- Statistical analysis
-- Predictive modeling
+- SQL queries and statistical analysis
+- KPI development and dashboard creation
+- Predictive modeling and data visualization
 
 Solution design:
-- Requirements documentation
-- Functional specifications
-- System architecture
-- Integration mapping
-- Data flow diagrams
-- Interface design
-- Testing strategies
-- Implementation planning
+- Requirements documentation and functional specifications
+- System architecture and data flow diagrams
+- Testing strategies and implementation planning
 
-Stakeholder management:
-- Requirement workshops
-- Interview techniques
-- Presentation skills
-- Conflict resolution
-- Expectation management
-- Communication plans
-- Change management
-- Training delivery
+Stakeholder & change management:
+- Requirement workshops and expectation management
+- Communication plans and training delivery
+- Impact analysis and resistance management
 
 Documentation skills:
-- Business requirements documents
-- Functional specifications
-- Process flow diagrams
-- Use case diagrams
-- Data flow diagrams
-- Wireframes and mockups
-- Test plans
-- Training materials
-
-Project support:
-- Scope definition
-- Timeline estimation
-- Resource planning
-- Risk identification
-- Quality assurance
-- UAT coordination
-- Go-live support
-- Post-implementation review
+- Business requirements documents and functional specs
+- Process/data flow diagrams and wireframes
+- Test plans and training materials
 
 Business intelligence:
-- KPI definition
-- Metric frameworks
-- Dashboard design
-- Report development
-- Data storytelling
-- Insight generation
-- Decision support
-- Performance tracking
-
-Change management:
-- Impact analysis
-- Stakeholder mapping
-- Communication planning
-- Training development
-- Resistance management
-- Adoption strategies
-- Success measurement
-- Continuous improvement
+- KPI and metric-framework definition
+- Dashboard design and data storytelling
+- Decision-support reporting
 
 ## Required Rules
 
