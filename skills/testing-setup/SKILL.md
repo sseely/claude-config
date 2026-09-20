@@ -3,6 +3,7 @@ name: testing-setup
 description: Scaffold Vitest with the Cloudflare Workers pool, Istanbul coverage, ESLint, Prettier, husky pre-commit hooks, shared test helpers, Docker Compose for local services, and a GitHub Actions CI workflow into a Cloudflare Workers + Neon + React/Vite project.
 user-invocable: true
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch, WebSearch
+disable-model-invocation: true
 ---
 
 Model routing: Sonnet for implementation steps; WebFetch verification steps need no routing.

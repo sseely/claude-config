@@ -23,10 +23,10 @@ export default defineWorkersConfig({
       // ADAPT: add any generated or pure-type files that should be excluded
       exclude: ['src/types.ts'],
       thresholds: {
-        lines:      80,
-        functions:  80,
-        branches:   80,
-        statements: 80,
+        lines:      90,
+        functions:  90,
+        branches:   90,
+        statements: 90,
       },
       reporter: ['text', 'html'],
     },

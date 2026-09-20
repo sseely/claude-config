@@ -30,7 +30,6 @@ export async function truncateAll(): Promise<void> {
     TRUNCATE
       audit_logs,
       user_feedback,
-      votes,
       session_packs,
       coupon_codes,
       users
@@ -102,6 +101,10 @@ export async function createSessionPack(
  * @param kvEnv  The env object from the test — contains the KV binding.
  */
 export async function createUserWithSession(
+  // Typed as unknown, not Env, so this test helper has no compile-time
+  // dependency on any specific project's Env shape — callers pass their
+  // project's KV binding object; storeSession's own signature validates
+  // it at the call site.
   kvEnv: unknown,
   overrides?: Parameters<typeof createUser>[0]
 ): Promise<{ id: string; email: string; cookie: string }> {

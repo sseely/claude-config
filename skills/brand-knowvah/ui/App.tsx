@@ -44,12 +44,12 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
   if (loading) return <div style={{ padding: 40 }}>Loading…</div>;
   if (!user) return <Navigate to={`${ROUTES.LOGIN}?returnTo=${encodeURIComponent(location.pathname)}`} replace />;
   // ADAPT: remove this line if there's no consent gate
-  if ((user as { consent_required?: boolean }).consent_required) return <Navigate to={ROUTES.CONSENT} replace />;
+  if (user.consent_required) return <Navigate to={ROUTES.CONSENT} replace />;
   const AppID = import.meta.env['VITE_CANNY_APP_ID'] as string | undefined;
   return (
     <>
       {/* ADAPT: remove CannyFeedback if compliance-setup was not run */}
-      {AppID && <CannyFeedback user={{ id: user.id, name: user.name, email: (user as { email?: string }).email }} />}
+      {AppID && <CannyFeedback user={{ id: user.id, name: user.name, email: user.email }} />}
       {children}
     </>
   );

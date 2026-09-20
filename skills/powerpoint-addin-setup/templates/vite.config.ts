@@ -13,7 +13,7 @@
 // ADAPT: update proxy targets if your Worker runs on a different port.
 // ADAPT: remove manualChunks entries that don't apply to your project.
 
-import { defineConfig, type UserConfig } from 'vite';
+import { defineConfig, type UserConfig, type ServerOptions } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import path from 'path';
@@ -23,8 +23,7 @@ export default defineConfig(async ({ command }): Promise<UserConfig> => {
 
   // Office Add-ins require HTTPS even on localhost.
   // Run `npx office-addin-dev-certs install` once per machine.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let httpsOptions: any = undefined;
+  let httpsOptions: ServerOptions['https'] = undefined;
   if (!isBuild) {
     try {
       const devCerts = await import('office-addin-dev-certs');

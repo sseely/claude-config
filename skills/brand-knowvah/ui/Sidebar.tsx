@@ -70,7 +70,7 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: Side
       {/* Credits badge — ADAPT: remove this block if the app has no credits model */}
       {user && !collapsed && (
         <div className="mx-3 mt-3 px-3 py-2 rounded-md bg-[var(--sidebar-surface)] text-[var(--sidebar-text)] text-xs">
-          {t('credits.remaining', { count: (user as { credits_available?: number }).credits_available ?? 0 })}
+          {t('credits.remaining', { count: user.credits_available ?? 0 })}
         </div>
       )}
 
@@ -87,7 +87,7 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: Side
           />
         ))}
         {/* Admin section — ADAPT: remove if no admin role */}
-        {(user as { is_admin?: boolean })?.is_admin && (
+        {user?.is_admin && (
           <>
             {!collapsed && (
               <p className="px-3 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-widest text-[var(--sidebar-text)] opacity-50">
@@ -107,7 +107,7 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: Side
             onClick={onMobileClose}
             className="flex items-center gap-3 rounded-md px-3 py-2.5 text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover)] hover:text-[var(--sidebar-text-active)] transition-colors no-underline"
           >
-            <Avatar profileUrl={(user as { profile_url?: string }).profile_url} name={user.name} size="sm" />
+            <Avatar profileUrl={user.profile_url} name={user.name} size="sm" />
             {!collapsed && (
               <span className="text-sm font-medium truncate">{user.name}</span>
             )}
