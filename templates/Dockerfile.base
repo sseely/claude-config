@@ -1,4 +1,10 @@
-FROM node:20-slim
+FROM node:24-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6
+
+# Fail a piped command if any stage of the pipe fails (not just the last).
+# Without this, a truncated `curl | ...` can exit 0 on empty stdin. Applies
+# to every subsequent RUN in this file and in the language fragments
+# appended after it (they carry no FROM of their own).
+SHELL ["/bin/bash", "-c", "-o", "pipefail"]
 
 # ── System packages ──────────────────────────────────────────────────────────
 # Install base utilities and the GitHub CLI via the official apt repository.
@@ -30,11 +36,24 @@ RUN mkdir -p /workspace /workspace-meta
 WORKDIR /workspace
 
 # ── Git identity ──────────────────────────────────────────────────────────────
-RUN git config --global user.name "Claude Sandbox" \
-    && git config --global user.email "claude-sandbox@noreply"
+# --system (not --global) writes /etc/gitconfig, so it applies regardless of
+# which user runs git at container-run time (root here, sandbox at runtime).
+RUN git config --system user.name "Claude Sandbox" \
+    && git config --system user.email "claude-sandbox@noreply"
 
 # ── Entrypoint ────────────────────────────────────────────────────────────────
 COPY templates/container-entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
+
+# ── Non-root user ─────────────────────────────────────────────────────────────
+# Everything above runs as root (package installs, entrypoint setup). From
+# here on the container runs as an unprivileged user.
+# uid/gid 1001, not 1000: the upstream node:24-slim image already ships a
+# built-in "node" user/group at 1000 (verified: `docker run node:24-slim cat
+# /etc/passwd` shows `node:x:1000:1000:...`), so 1000 is taken.
+RUN groupadd --gid 1001 sandbox \
+    && useradd --uid 1001 --gid sandbox --shell /bin/bash --create-home sandbox \
+    && chown -R sandbox:sandbox /workspace /workspace-meta
+USER sandbox
 
 ENTRYPOINT ["/entrypoint.sh"]

@@ -2,13 +2,25 @@
 set -euo pipefail
 
 # ── Required env var validation ─────────────────────────────────────────────
-required_vars=(REPO_URL TASK_PROMPT GITHUB_ORG_TOKEN ATLASSIAN_API_TOKEN ATLASSIAN_EMAIL ATLASSIAN_BASE_URL)
+required_vars=(REPO_URL TASK_PROMPT GITHUB_ORG_TOKEN)
 for var in "${required_vars[@]}"; do
   if [[ -z "${!var:-}" ]]; then
     echo "[entrypoint] ERROR: required env var $var is not set" >&2
     exit 1
   fi
 done
+
+# Atlassian/Jira integration is optional: only validate its vars when a
+# ticket is actually supplied.
+if [[ -n "${JIRA_TICKET:-}" ]]; then
+  atlassian_vars=(ATLASSIAN_API_TOKEN ATLASSIAN_EMAIL ATLASSIAN_BASE_URL)
+  for var in "${atlassian_vars[@]}"; do
+    if [[ -z "${!var:-}" ]]; then
+      echo "[entrypoint] ERROR: JIRA_TICKET is set but required env var $var is not set" >&2
+      exit 1
+    fi
+  done
+fi
 
 # At least one AI credential set must be present
 if [[ -z "${ANTHROPIC_API_KEY:-}" ]]; then
@@ -33,12 +45,6 @@ else
   git clone "$REPO_URL" "$WORK_DIR"
 fi
 
-# ── Post Jira start comment ───────────────────────────────────────────────────
-if [[ -n "${JIRA_TICKET:-}" ]]; then
-  python3 /root/.claude/tools/jira/jira_client.py comment \
-    "$JIRA_TICKET" "Sandbox execution started for ticket $JIRA_TICKET" || true
-fi
-
 # ── Invoke claude ─────────────────────────────────────────────────────────────
 cd "$WORK_DIR"
 set +e
@@ -46,18 +52,5 @@ claude --dangerously-skip-permissions -p "$TASK_PROMPT" \
   2>&1 | tee -a /workspace-meta/sandbox.log
 EXIT_CODE=${PIPESTATUS[0]}
 set -e
-
-# ── Post completion/failure comment ──────────────────────────────────────────
-if [[ -n "${JIRA_TICKET:-}" ]]; then
-  if [[ $EXIT_CODE -eq 0 ]]; then
-    python3 /root/.claude/tools/jira/jira_client.py comment \
-      "$JIRA_TICKET" "Sandbox execution completed successfully" || true
-  else
-    python3 /root/.claude/tools/jira/jira_client.py comment \
-      "$JIRA_TICKET" "Sandbox execution failed (exit $EXIT_CODE) — check sandbox.log" || true
-    python3 /root/.claude/tools/jira/jira_client.py add-label \
-      "$JIRA_TICKET" "Needs Input" || true
-  fi
-fi
 
 exit $EXIT_CODE
