@@ -60,7 +60,7 @@ indicators. Build a roster of detected languages:
 | `package.json` + `react` (no Next) | `react-specialist` |
 | `package.json` + `vue` | `vue-expert` |
 | `package.json` + `@angular/core` | `angular-architect` |
-| `*.csproj` / `*.sln` (.NET 5+) | `dotnet-core-expert` |
+| `*.csproj` / `*.sln` (.NET 5+) | `csharp-developer` |
 | `*.csproj` (.NET Framework 4.x) | `dotnet-framework-4.8-expert` |
 | `pom.xml` + Spring Boot | `spring-boot-engineer` |
 | `pom.xml` / `build.gradle` (no Spring) | `java-architect` |

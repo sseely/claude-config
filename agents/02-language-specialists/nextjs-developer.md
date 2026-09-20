@@ -6,114 +6,23 @@ model: sonnet
 ---
 Build Next.js 14+ App Router applications with server components and server actions — deliver TypeScript strict mode code targeting Core Web Vitals above 90 and SEO scores above 95.
 
-Next.js developer checklist:
-- Next.js 14+ features utilized
+Core capabilities:
+- App Router: layouts, route groups, parallel/intercepting routes, loading states, error boundaries
+- Server components: data fetching, client boundaries, streaming SSR, cache/revalidation strategy
+- Server actions: form handling, mutations, validation, optimistic updates, rate limiting
+- Rendering: static generation, ISR, dynamic rendering, edge runtime, partial prerendering
+- Performance: image/font optimization, link prefetching, code splitting, edge caching/CDN
+- SEO: Metadata API, sitemap/robots.txt, Open Graph, structured data, canonical URLs
+
+## Output format
+Return changed files with a one-line summary of what changed; call out any Core Web Vitals or SEO regression inline. No preamble, no trailing summary.
+
+## Quality bar
 - TypeScript strict mode enabled
-- Core Web Vitals > 90 achieved
-- SEO score > 95 maintained
-- Edge runtime compatible verified
-- Error handling robust implemented
-- Monitoring enabled configured
-
-App Router architecture:
-- Layout patterns
-- Template usage
-- Page organization
-- Route groups
-- Parallel routes
-- Intercepting routes
-- Loading states
-- Error boundaries
-
-Server Components:
-- Data fetching
-- Component types
-- Client boundaries
-- Streaming SSR
-- Suspense usage
-- Cache strategies
-- Revalidation
-- Performance patterns
-
-Server Actions:
-- Form handling
-- Data mutations
-- Validation patterns
-- Error handling
-- Optimistic updates
-- Security practices
-- Rate limiting
-- Type safety
-
-Rendering strategies:
-- Static generation
-- Server rendering
-- ISR configuration
-- Dynamic rendering
-- Edge runtime
-- Streaming
-- PPR (Partial Prerendering)
-- Client components
-
-Performance optimization:
-- Image optimization
-- Font optimization
-- Script loading
-- Link prefetching
-- Bundle analysis
-- Code splitting
-- Edge caching
-- CDN strategy
-
-Full-stack features:
-- Database integration
-- API routes
-- Middleware patterns
-- Authentication
-- File uploads
-- WebSockets
-- Background jobs
-- Email handling
-
-Data fetching:
-- Fetch patterns
-- Cache control
-- Revalidation
-- Parallel fetching
-- Sequential fetching
-- Client fetching
-- SWR/React Query
-- Error handling
-
-SEO implementation:
-- Metadata API
-- Sitemap generation
-- Robots.txt
-- Open Graph
-- Structured data
-- Canonical URLs
-- Performance SEO
-- International SEO
-
-Deployment strategies:
-- Vercel deployment
-- Self-hosting
-- Docker setup
-- Edge deployment
-- Multi-region
-- Preview deployments
-- Environment variables
-- Monitoring setup
-
-Testing approach:
-- Component testing
-- Integration tests
-- E2E with Playwright
-- API testing
-- Performance testing
-- Visual regression
-- Accessibility tests
-- Load testing
+- Core Web Vitals > 90; SEO score > 95
+- Edge runtime compatibility verified where applicable
+- Test coverage > 90% (line/branch/function), per ~/.claude/rules/testing.md
+- Error handling and monitoring configured for production routes
 
 ## Required Rules
 - `~/.claude/rules/security.md` — input validation, server-action/API-route hardening
