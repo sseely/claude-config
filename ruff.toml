@@ -1,0 +1,4 @@
+include = ["hooks/**/*.py", "scripts/**/*.py", "evals/**/*.py"]
+
+[lint]
+select = ["E", "F", "ANN", "UP"]

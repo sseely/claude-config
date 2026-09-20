@@ -112,10 +112,18 @@ Shell scripts triggered by Claude Code lifecycle events.
 
 | Hook | Event | Description |
 |------|-------|-------------|
+| `session-start.sh` | `SessionStart`, `ConfigChange` | Prints working directory and checks CLI tool availability (git, node, python3, gh, docker, ast-grep, lizard) |
 | `record-turn-start.sh` | `UserPromptSubmit` | Writes a Unix timestamp to `~/.claude/.runtime/claude-turn-start` |
+| `project-init.sh` | `UserPromptSubmit` | Initializes memory and Serena for the current project (idempotent, async) |
+| `guard-bash.py` | `PreToolUse` (matcher: `Bash`) | Blocks catastrophic Bash commands — recursive deletes aimed at a protected root |
+| `nudge-search-tool.py` | `PreToolUse` (matcher: `Grep`) | Nudges toward LSP/Serena/ast-grep on symbol-shaped Grep calls; never blocks |
+| `check-complexity.py` | `PostToolUse` (matcher: `Write\|Edit`) | Blocks a Write/Edit that introduces or worsens a code-complexity violation |
+| `check-frontmatter.py` | `PostToolUse` (matcher: `Write\|Edit`) | Validates agent/skill YAML frontmatter after Write/Edit |
+| `log-instructions-loaded.sh` | `InstructionsLoaded` | Appends one JSON line per event to `logs/instructions-loaded.jsonl` so `paths:`-scoped rules can be proven to fire |
 | `notify-on-stop.sh` | `Stop` | macOS notification with elapsed time if the turn took >30 seconds |
 | `quality-gate.sh` | Manual | Runs project-specific quality checks — reads `.claude-quality-gates` or auto-detects (Node, Python, Go, Rust, .NET) |
 | `autonomous-toggle.sh` | Manual | Copies autonomous permissions into a project's `.claude/settings.json` (with backup/restore) for unattended sessions |
+| `log-hook-event.sh` | `PermissionDenied`, `PostToolUseFailure`, `SubagentStop`, `PostModelSwitch` | Generic append-only logger for events without a dedicated script; appends to `logs/hook-events.jsonl` |
 
 ### `templates/`
 
