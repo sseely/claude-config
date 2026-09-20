@@ -30,6 +30,7 @@ from __future__ import annotations
 import argparse
 import difflib
 import os
+import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -238,18 +239,42 @@ def build_skill_entry(
 # --- Discovery ------------------------------------------------------------
 
 
+def _drop_git_ignored(repo_root: Path, paths: list[Path]) -> list[Path]:
+    """Remove paths that .gitignore excludes (e.g. skills/synced/, the
+    no-redistribution doc skills). The inventory documents the committed
+    fleet, so an on-disk file git ignores is not part of it. Fails open
+    when git is unavailable."""
+    if not paths:
+        return paths
+    rel = [str(p.relative_to(repo_root)) for p in paths]
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(repo_root), "check-ignore", "--stdin", "-z"],
+            input="\0".join(rel) + "\0",
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return paths
+    ignored = {entry for entry in proc.stdout.split("\0") if entry}
+    return [p for p, r in zip(paths, rel) if r not in ignored]
+
+
 def discover_agent_paths(repo_root: Path) -> list[Path]:
     """Find every agent frontmatter file, at any depth under agents/.
 
     The fleet has two layouts: agents/NN-category/name.md (the norm)
     and a handful of files loose at agents/ root — rglob catches both.
     """
-    return sorted((repo_root / "agents").rglob("*.md"))
+    found = sorted((repo_root / "agents").rglob("*.md"))
+    return _drop_git_ignored(repo_root, found)
 
 
 def discover_skill_paths(repo_root: Path) -> list[Path]:
-    """Find every skill frontmatter file: skills/*/SKILL.md."""
-    return sorted((repo_root / "skills").rglob("SKILL.md"))
+    """Find every skill frontmatter file: skills/*/SKILL.md, minus ignored."""
+    found = sorted((repo_root / "skills").rglob("SKILL.md"))
+    return _drop_git_ignored(repo_root, found)
 
 
 # --- Rendering --------------------------------------------------------
