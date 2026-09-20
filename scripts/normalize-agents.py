@@ -92,13 +92,28 @@ F071_FILES = frozenset(
     }
 )
 
+# Header every Opus-compensation block starts with, whatever bullets follow.
+# Detection keys on this line only, so a block refreshed by hand from the
+# current rules/model-routing.md text is recognized and left alone.
+F071_HEADER = "**Opus behavioral compensation**"
+
+# Inserted verbatim when a file has no block at all; mirrors the current
+# two-section text in rules/model-routing.md.
 F071_BLOCK = (
     "**Opus behavioral compensation** (per `rules/model-routing.md`):\n"
+    "\n"
+    "**Scope discipline:**\n"
     "- Do NOT infer unstated requirements — implement the simplest interpretation\n"
     "- Do NOT over-engineer — no speculative abstractions or extension points\n"
     "- Do NOT spawn subagents unless the task explicitly requires it\n"
-    "- If scope is ambiguous, implement the minimal interpretation and note the\n"
-    "  ambiguity; do not silently expand\n"
+    "- If scope is ambiguous, implement the minimal interpretation and note it;\n"
+    "  do not silently expand\n"
+    "\n"
+    "**Output shape:**\n"
+    "- A spec, ported source, or enumerated requirement list is NOT ambiguous\n"
+    "  scope — implement all of it; the above is not license to trim it\n"
+    "- End the prompt per `prompting-quality.md`'s brevity section: \"Return\n"
+    "  only the structured result — no preamble, no trailing summary.\"\n"
 )
 
 INCOMPLETE_LAST_WORDS = frozenset(
@@ -328,7 +343,7 @@ def fix_f083(text: str) -> tuple[str, int]:
 def fix_f071(text: str, rel_path: str) -> tuple[str, int]:
     if rel_path not in F071_FILES:
         return text, 0
-    if F071_BLOCK.strip() in text:
+    if F071_HEADER in text:
         return text, 0
     m = FRONTMATTER_RE.match(text)
     if not m:
