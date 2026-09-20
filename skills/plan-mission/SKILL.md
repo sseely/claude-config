@@ -8,7 +8,7 @@ description: >
 disable-model-invocation: false
 allowed-tools: Bash, Read, Grep, Glob, Agent, Write, Edit, TodoWrite
 ---
-<!-- Code review (2026-09-02): 389 lines, 78% of the 500-line skill ceiling. Revisit at the next audit if it has grown. -->
+<!-- Re-run `wc -l skills/plan-mission/SKILL.md` before trusting a line count in this comment; do not hardcode one. -->
 
 # Plan Mission
 
@@ -339,7 +339,7 @@ Print the path to the generated brief and tell the user:
 > To start autonomous execution:
 > 1. `~/.claude/hooks/autonomous-toggle.sh on .`
 > 2. "Execute the mission brief at plans/[name]/README.md"
-> Recommended execution model: `claude-fable-5` (long-horizon, native 1M context). Enable with `~/.claude/hooks/autonomous-toggle.sh on`.
+> Recommended execution model: `fable` (long-horizon, native 1M context). Enable with `~/.claude/hooks/autonomous-toggle.sh on`.
 > Note: the interactive planning phases you just went through (Phases 1-6, 8) ran on Opus 5, the session's default `opus` alias — this recommendation covers autonomous mission execution only.
 
 ## Rules
@@ -374,18 +374,17 @@ generation:
 
 | Phase | Task | Model |
 |-------|------|-------|
-| Brief execution (autonomous) | Long-horizon autonomous execution (this brief) | `claude-fable-5` — native 1M context; use via autonomous-toggle |
+| Brief execution (autonomous) | Long-horizon autonomous execution (this brief) | `fable` — native 1M context; use via autonomous-toggle |
 | Phase 3 | Architecture decisions (multiple competing trade-offs) | Opus + adaptive thinking |
 | Phase 4 | Operational readiness questions | Sonnet |
 | Phase 5 | Task decomposition | Opus + adaptive thinking |
 | Phase 7 | Brief file generation (mechanical writing) | Sonnet |
-| Parallel review agents in Phase 2 | File-by-file analysis | Sonnet |
 
 > **Known tension, retained deliberately.** PerspectiveGap (arXiv:2606.08878,
 > preprint, not peer-reviewed) scores `claude-opus-4-8` at 13.9% on
 > orchestration-prompt composition — the Phase 3 and Phase 5 tasks above.
 > Not worst-in-family: `claude-haiku-4-5` scores 5.7%. But Table 8 does test
-> two Claude 5 models, and both roughly double it — `claude-fable-5` 31.4%,
+> two Claude 5 models, and both roughly double it — `fable` 31.4%,
 > `claude-sonnet-5` 25.7% — while `claude-opus-4-7` (19.1%) outscores 4.8.
 > Opus 5 itself is untested, which is what `opus` resolves to on v2.1.219+,
 > so the routing stands. Revisit if Opus 5 orchestration data appears.

@@ -6,6 +6,7 @@ description: >
   (refactors, test changes, CI), and produces customer-friendly release
   notes grouped by category.
   Usage: /changelog-generator [since] — e.g. "since v2.4.0" or "past 7 days"
+  Not for internal commit summaries or single-commit explanations.
 ---
 
 # Changelog Generator

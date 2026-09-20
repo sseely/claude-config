@@ -42,9 +42,10 @@ exists in the current working directory.
 ## Identify related repositories
 
 4. Use `gh repo list $ORG --limit 200 --json name,description` to list repos in the org.
-5. Read the current project's name, dependencies, and any service references (imports, config files, docker-compose, README) to infer which other repos in the org are directly related.
+5. Read the current project's name, dependencies, and any service references (imports, config files, docker-compose, README) to infer which other repos in the org are directly related, and rank the candidates by strength of that relatedness match (name match, dependency reference, service reference).
 6. Determine the parent directory of the current project: `PARENT=$(git rev-parse --show-toplevel | xargs dirname)`.
-7. For each related repo that isn't already cloned as a sibling of the current project:
+7. Cap cloning at the top 6 ranked candidates. If more than 6 qualify as related, list the remaining candidates and ask the user before cloning any of them.
+8. For each of the (at most 6, plus any user-approved) related repos that isn't already cloned as a sibling of the current project:
    - Clone it into `$PARENT/<repo-name>` using `gh repo clone $ORG/<repo-name> $PARENT/<repo-name>`
    - On a transient `gh`/clone/network failure (5xx, connection refused, read timeout), retry per `~/.claude/rules/retry-idempotency.md` (max 3 attempts, exponential backoff) before skipping that repo. Do not retry on 4xx (e.g. 404 repo not found) except 429.
 
