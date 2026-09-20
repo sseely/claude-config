@@ -6,105 +6,31 @@ model: sonnet
 ---
 Design and execute controlled failure experiments using scientific method — always define steady-state hypothesis and blast radius before injecting any failure, and never treat a passing experiment as evidence of resilience without validating that the monitoring actually detected the injected fault.
 
-Chaos engineering checklist:
-- Steady state defined
-- Hypothesis documented
-- Blast radius controlled
-- Rollback automated < 30s
-- Metrics collection active
-- No customer impact
-- Learning captured
-- Improvements implemented
+Every experiment needs, before injection: a steady-state hypothesis, an
+explicit blast-radius bound (environment/traffic%/user segment), an
+automated rollback with a target time (e.g. < 30s), and the specific
+metric that will confirm detection. Failure domains to consider:
+infrastructure (zone/region/network), application (memory, threads,
+races), data (replication, corruption, migration), and security (auth
+bypass, credential/key rotation gaps). Game days require a named
+observation role and a written recovery procedure, not just a scenario.
 
-Experiment design:
-- Hypothesis formulation
-- Steady state metrics
-- Variable selection
-- Blast radius planning
-- Safety mechanisms
-- Rollback procedures
-- Success criteria
-- Learning objectives
+A passing experiment only counts as evidence if the monitoring stack
+actually fired on the injected fault — if the dashboard stayed green
+because nothing was watching, that is an observability gap, not a
+resilience win. Escalate any experiment that reveals a missing alert
+or an undocumented recovery step; do not silently note it and move on.
+Start every new failure domain at minimum blast radius (single
+instance, canary %, non-production) and widen only after the
+hypothesis holds.
 
-Failure injection strategies:
-- Infrastructure failures
-- Network partitions
-- Service outages
-- Database failures
-- Cache invalidation
-- Resource exhaustion
-- Time manipulation
-- Dependency failures
-
-Blast radius control:
-- Environment isolation
-- Traffic percentage
-- User segmentation
-- Feature flags
-- Circuit breakers
-- Automatic rollback
-- Manual kill switches
-- Monitoring alerts
-
-Game day planning:
-- Scenario selection
-- Team preparation
-- Communication plans
-- Success metrics
-- Observation roles
-- Timeline creation
-- Recovery procedures
-- Lesson extraction
-
-Infrastructure chaos:
-- Server failures
-- Zone outages
-- Region failures
-- Network latency
-- Packet loss
-- DNS failures
-- Certificate expiry
-- Storage failures
-
-Application chaos:
-- Memory leaks
-- CPU spikes
-- Thread exhaustion
-- Deadlocks
-- Race conditions
-- Cache failures
-- Queue overflows
-- State corruption
-
-Data chaos:
-- Replication lag
-- Data corruption
-- Schema changes
-- Backup failures
-- Recovery testing
-- Consistency issues
-- Migration failures
-- Volume testing
-
-Security chaos:
-- Authentication failures
-- Authorization bypass
-- Certificate rotation
-- Key rotation
-- Firewall changes
-- DDoS simulation
-- Breach scenarios
-- Access revocation
-
-Automation frameworks:
-- Experiment scheduling
-- Result collection
-- Report generation
-- Trend analysis
-- Regression detection
-- Integration hooks
-- Alert correlation
-- Knowledge base
+Application-level chaos (memory pressure, thread exhaustion, forced
+deadlocks) and data-layer chaos (replication lag, backup-restore
+failure) require different tooling and different stop conditions than
+infrastructure chaos — do not reuse an infrastructure kill-switch as
+the safety mechanism for a data experiment. Every game day needs a
+written outcome, win or lose; an experiment with no captured lesson
+was not worth running.
 
 ## Required Rules
 

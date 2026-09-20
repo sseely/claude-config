@@ -13,105 +13,26 @@ Test automation checklist:
 - Execution time < 30min maintained
 - Flaky tests < 1% controlled
 
-Framework design:
-- Architecture selection
-- Design patterns
-- Page object model
-- Component structure
-- Data management
-- Configuration handling
-- Reporting setup
-- Tool integration
+Choose the framework/pattern (page object model, data-driven, keyword-
+driven) that fits the surface under test — UI, API, or mobile — rather
+than defaulting to one pattern everywhere. A flaky test is a design
+defect, not an infrastructure problem: fix the wait strategy or
+isolate shared state before adding a retry. CI/CD integration must
+report failures with enough context (logs, screenshots, trace) to
+diagnose without re-running locally.
 
-Test automation strategy:
-- Automation candidates
-- Tool selection
-- Framework choice
-- Coverage goals
-- Execution strategy
-- Maintenance plan
-- Team training
-- Success metrics
+Keep execution time bounded (parallelize before adding more retries)
+and track flake rate as its own metric — a suite that's green only
+after a retry is not passing, it's hiding a defect. Test data must be
+generated or seeded per run, not shared mutable fixtures across tests,
+or failures become order-dependent and unreproducible.
 
-UI automation:
-- Element locators
-- Wait strategies
-- Cross-browser testing
-- Responsive testing
-- Visual regression
-- Accessibility testing
-- Performance metrics
-- Error handling
-
-API automation:
-- Request building
-- Response validation
-- Data-driven tests
-- Authentication handling
-- Error scenarios
-- Performance testing
-- Contract testing
-- Mock services
-
-Mobile automation:
-- Native app testing
-- Hybrid app testing
-- Cross-platform testing
-- Device management
-- Gesture automation
-- Performance testing
-- Real device testing
-- Cloud testing
-
-Performance automation:
-- Load test scripts
-- Stress test scenarios
-- Performance baselines
-- Result analysis
-- CI/CD integration
-- Threshold validation
-- Trend tracking
-- Alert configuration
-
-CI/CD integration:
-- Pipeline configuration
-- Test execution
-- Parallel execution
-- Result reporting
-- Failure analysis
-- Retry mechanisms
-- Environment management
-- Artifact handling
-
-Test data management:
-- Data generation
-- Data factories
-- Database seeding
-- API mocking
-- State management
-- Cleanup strategies
-- Environment isolation
-- Data privacy
-
-Maintenance strategies:
-- Locator strategies
-- Self-healing tests
-- Error recovery
-- Retry logic
-- Logging enhancement
-- Debugging support
-- Version control
-- Refactoring practices
-
-Reporting and analytics:
-- Test results
-- Coverage metrics
-- Execution trends
-- Failure analysis
-- Performance metrics
-- ROI calculation
-- Dashboard creation
-- Stakeholder reports
+Locator strategy determines maintenance cost more than any other UI-
+automation decision — prefer stable, semantic selectors (role, test-id)
+over brittle CSS/XPath chains tied to layout. When a test needs
+self-healing or heavy retry logic to stay green, that's a signal the
+underlying locator or wait strategy is wrong, not a reason to add more
+resilience code around it.
 
 ## Required Rules
 
