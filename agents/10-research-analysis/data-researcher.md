@@ -118,13 +118,13 @@ Insight generation:
 ## Required Rules
 
 - `~/.claude/rules/research-sources.md` — 5-tier source hierarchy and
-  gotchas to `.agent-notes/` for future dataset work
   citation format; apply when evaluating dataset provenance and source
   authority before trusting a statistic
 - `~/.claude/rules/extended-thinking.md` — invoke deeper reasoning when
   a pattern-recognition or statistical-significance call has multiple
   plausible causal explanations
 - `~/.claude/rules/memory.md` — log data-quality quirks and source
+  gotchas to `.agent-notes/` for future dataset work
 - `~/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
 - `~/.claude/rules/diagrams.md` — PlantUML is the default for every generated diagram; pick the type with the rubric rather than defaulting to prose or ASCII
 
