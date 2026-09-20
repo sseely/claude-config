@@ -1,71 +1,28 @@
 # Code Navigation with LSP
 
 LSP plugins are installed: typescript-lsp, pyright-lsp, rust-analyzer-lsp,
-csharp-lsp, jdtls-lsp, clangd-lsp. No LSP is installed for Go, PHP, Ruby,
-or PowerShell — use Serena or ast-grep there.
-These provide semantic navigation that is faster and more precise than
-text search.
+csharp-lsp, jdtls-lsp, clangd-lsp. No LSP is installed for Go, PHP,
+Ruby, or PowerShell — use Serena or ast-grep there. These provide
+semantic navigation that is faster and more precise than text search.
 
 **Priority order for code search:**
 1. **LSP** — symbol is known; use go-to-definition, find-references, hover
-2. **ast-grep** — pattern is structural; use when shape matters, not just text
-3. **Grep/Glob** — last resort: non-code content, unknown symbol name, unsupported file type
+2. **ast-grep** — pattern is structural; use when shape matters, not
+   just text
+3. **Grep/Glob** — last resort: non-code content, unknown symbol name,
+   unsupported file type
 
-> **Subagent scope:** This rule governs the orchestrator only. Subagents use Serena MCP tools — see the Subagent note section below.
+> **Subagent scope:** This rule governs the orchestrator only. Subagents
+> use Serena MCP tools — see the Subagent note section below.
 
-## When to use LSP (not Grep)
+## When to use LSP vs. ast-grep vs. Grep
 
-Use LSP for any task where you know the symbol name:
-
-| Task | Use LSP | Avoid |
-|------|---------|-------|
-| Find where a function is defined | go to definition | Grep or ast-grep for function name |
-| Find all callers of a function | find references | Grep or ast-grep for function name |
-| Find where a variable is declared | go to definition | Grep or ast-grep for var name |
-| Find all usages of a variable | find references | Grep or ast-grep for var name |
-| Find all implementations of an interface | find implementations | Grep or ast-grep |
-| Get type signature of a symbol | hover info | Read the file |
-| List all symbols in a file | symbol listing | Read + scan manually |
-| Trace a call chain | call hierarchy | Grep repeatedly |
-
-## When to use ast-grep (not Grep)
-
-`ast-grep` understands code structure via tree-sitter. Use `ast-grep`, not
-Grep, for any search that involves code shape rather than exact text.
-Claude Code does not detect these cases on its own — invoke `ast-grep` explicitly:
-
-| Task | Use ast-grep | NOT Grep |
-|------|-------------|----------|
-| Find all `await` calls not inside `try/catch` | structural pattern | regex guess |
-| Find function calls with a specific argument shape | `ast-grep run -p 'fn($A, null)'` | brittle regex |
-| Find all `if` statements missing an `else` | structural query | impossible cleanly |
-| Detect interpolated SQL / command injection patterns | AST pattern | regex false-positives |
-| Find deprecated API call patterns | pattern with wildcards | text search |
-| Locate all `catch` blocks that swallow errors silently | structural match | noisy regex |
-
-**Quick reference:**
-```bash
-# Search for a pattern in a language
-ast-grep run -p 'console.log($$$)' --lang ts
-
-# Run a named rule file
-ast-grep scan --rule rules/no-promise-all-settled.yaml
-
-# Rewrite: rename a function call
-ast-grep run -p 'foo($A)' -r 'bar($A)' --lang ts
-```
-
-Wildcards: `$VAR` matches a single node; `$$$ARGS` matches zero-or-more nodes.
-
-## When to use Grep/Glob (not LSP or ast-grep)
-
-Use Grep/Glob only for non-code content or when ast-grep doesn't support
-the file type:
-
-- Searching for a string literal in comments, docs, or config files
-- Discovering which files contain a topic or term (initial orientation)
-- File types without tree-sitter grammar support in ast-grep
-- Initial discovery when you don't yet know the symbol name
+Full task-by-task tables (which LSP action for which task, which
+ast-grep pattern for which structural search) live in
+`docs/reference/lsp.md`. Use Grep/Glob only for non-code content or
+file types ast-grep doesn't support: string literals in comments/docs,
+discovering which files mention a topic, or initial discovery when the
+symbol name is unknown.
 
 ## Diagnostics
 
@@ -76,20 +33,11 @@ before moving on.
 
 ## Subagent note
 
-When dispatched via the Agent tool, use Serena MCP tools for all symbol
-navigation — not the LSP tool (agents do not have it in their frontmatter):
-`find_symbol`, `get_symbols_overview`, `find_referencing_symbols`,
-`find_file`, `search_for_pattern`, `replace_symbol_body`,
-`insert_after/before_symbol`, `safe_delete_symbol`, `rename_symbol`.
-For structural code pattern searches, use `ast-grep`, not Grep. After
-edits, run the project's typecheck command (`tsc --noEmit`, `mypy`, etc.)
-as the quality bar instead of reading LSP diagnostics.
-
-Both are shell commands, so they bind only agents whose frontmatter grants
-Bash. An agent without Bash uses Serena `search_for_pattern` for structural
-search and leaves the typecheck to the orchestrator's quality gate.
-
-Serena is registered at **user scope**, so these tools are available in
-every project, not just this repo. If `find_symbol` is missing, verify with
-`claude mcp list` before falling back to Grep — a silent fallback to text
-search is the failure this section exists to prevent.
+Agents lack the LSP tool. Use Serena MCP tools instead: `find_symbol`,
+`get_symbols_overview`, `find_referencing_symbols`, `find_file`,
+`search_for_pattern`, `replace_symbol_body`, `insert_after/before_symbol`,
+`safe_delete_symbol`, `rename_symbol`. Use `ast-grep` (not Grep) for
+structural searches. After edits, run the project's typecheck command
+(`tsc --noEmit`, `mypy`, etc.) as the quality bar. Serena is registered
+at user scope, so it's available in every project — if `find_symbol` is
+missing, verify with `claude mcp list` before falling back to Grep.

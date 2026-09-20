@@ -20,40 +20,18 @@ is far more dangerous than one that touches 30 files internally.
 
 ## Architecture Decision Records (ADRs)
 
-Write an ADR when a decision:
-- Affects multiple services or teams
-- Changes a data model or API contract
-- Introduces a new dependency or technology
-- Is expensive or painful to reverse
-- Contradicts an existing pattern in the codebase
-
-ADR format:
-
-```markdown
-# ADR-NNN: <short title>
-
-## Status
-Proposed | Accepted | Superseded by ADR-NNN
-
-## Context
-What problem are we solving? What constraints apply?
-
-## Decision
-What did we decide?
-
-## Consequences
-What becomes easier? What becomes harder? What new risks are introduced?
-```
-
-Keep ADRs short — 1 page maximum. The goal is to record the reasoning,
-not to write a design doc.
+Write an ADR for a decision that affects multiple services/teams,
+changes a data model or API contract, introduces a new dependency, is
+expensive to reverse, or contradicts an existing pattern. Format
+(Status/Context/Decision/Consequences) and a 1-page-max guideline:
+`docs/reference/architecture.md`.
 
 ## Fitness functions
 
-Fitness functions: automated tests verifying architectural invariants in CI.
-Examples: 'no cross-handler imports', 'auth middleware on all handlers', 'no direct
-DB access outside repository/'.
-Express every architectural constraint as a lint/import check/test — not code review.
+Fitness functions: automated tests verifying architectural invariants in
+CI. Examples: 'no cross-handler imports', 'auth middleware on all
+handlers', 'no direct DB access outside repository/'. Express every
+architectural constraint as a lint/import check/test — not code review.
 
 ## Reversibility
 
@@ -67,54 +45,17 @@ Mark irreversible decisions explicitly:
 // See ADR-042 for the decision rationale.
 ```
 
-Irreversible changes require:
-- An ADR
-- An explicit rollback plan documented in the PR
-- Staged rollout (dark launch or feature flag) where possible
+Irreversible changes require an ADR, an explicit rollback plan
+documented in the PR, and staged rollout (dark launch or feature flag)
+where possible.
 
-## Backwards compatibility
+## Backwards compatibility and migrations
 
-### Non-breaking (safe to deploy without coordination)
-- Adding a new optional field to a response
-- Adding a new endpoint
-- Relaxing a validation (accepting more values)
-- Adding a new enum value a client can ignore
-
-### Breaking (requires versioning or coordinated migration)
-- Removing or renaming a field
-- Changing a field's type or nullability
-- Removing an endpoint
-- Changing HTTP method or status codes
-- Tightening a validation (rejecting previously-accepted values)
-- Reordering positional parameters
-
-For breaking changes: version the API (`/v2/`), dual-write during
-migration, then deprecate with a sunset date. Never silently break
-consumers.
-
-## Migration patterns
-
-| Pattern | When to use |
-|---------|-------------|
-| Strangler fig | Replacing a large component incrementally; new and old coexist |
-| Expand-contract | Schema migration: add new column/field, migrate data, drop old |
-| Feature flag | New behavior with uncertain rollout; enables instant rollback |
-| Blue-green | Full environment swap; costly but clean cutover |
-| Dark launch | New path receives production traffic but results are discarded |
-
-Choose the pattern before writing migration code. Write the rollback
-path before the forward path.
-
-Any backfill must have:
-- **Batch size** — bounded batches, never an unbounded table scan
-- **Resumability** — a failure partway restarts from where it stopped, not
-  from zero
-- **Abort switch** — a way to stop an in-flight backfill without leaving data
-  half-migrated
-
-For AI-feature decommissioning (GOVERN 1.7/MANAGE 2.4) and third-party
-contingency (GOVERN 6.2/MANAGE 3.1) mapped to these patterns, see
-`docs/nist-ai-rmf/crosswalk.md`.
+Non-breaking vs. breaking-change taxonomy, versioning guidance, the
+migration-pattern table (strangler fig, expand-contract, feature flag,
+blue-green, dark launch), and backfill requirements (batch size,
+resumability, abort switch) are in `docs/reference/architecture.md`.
+Choose the pattern and write the rollback path before the forward path.
 
 ## Evolutionary architecture
 

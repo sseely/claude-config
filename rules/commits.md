@@ -15,7 +15,8 @@ chars. Required for:
 - Any change touching more than 3 files
 - Security-related changes
 - Breaking changes
-- Non-obvious design decisions
+- Non-obvious design decisions (concrete test: would a reasonable
+  teammate reading the diff alone ask "why this approach?")
 
 The body explains *why*, not *what* — the diff shows what changed.
 

@@ -16,13 +16,9 @@ happen," throw it.
 
 Catch and re-wrap low-level errors (DB driver errors, HTTP client
 errors, filesystem errors) before they cross module boundaries.
-Callers should not need to know the underlying library's error types.
+Callers should not need to know the underlying library's error types:
 
 ```typescript
-// Wrong: leaks pg.DatabaseError to the caller
-const row = await pool.query(sql);
-
-// Right: wrap at the repository boundary
 try {
   const row = await pool.query(sql);
 } catch (err) {

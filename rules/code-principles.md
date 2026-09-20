@@ -19,20 +19,16 @@ unused," and inventing an unrequested one because it "might help."
 
 ## SOLID
 
-**Single Responsibility** — A module, class, or function does one
-thing. If you need "and" to describe what it does, split it.
-
-**Open/Closed** — Extend behavior by adding code, not by modifying
-existing code. Prefer composition over inheritance.
-
-**Liskov Substitution** — Subtypes must be substitutable for their
-base types without breaking callers.
-
-**Interface Segregation** — Prefer narrow, focused interfaces over
-fat ones. Callers shouldn't depend on methods they don't use.
-
-**Dependency Inversion** — Depend on abstractions, not concretions.
-High-level modules shouldn't import low-level implementation details.
+- **Single Responsibility** — a module, class, or function does one
+  thing. If you need "and" to describe what it does, split it.
+- **Open/Closed** — extend behavior by adding code, not modifying
+  existing code. Prefer composition over inheritance.
+- **Liskov Substitution** — subtypes must be substitutable for their
+  base types without breaking callers.
+- **Interface Segregation** — prefer narrow, focused interfaces over fat
+  ones. Callers shouldn't depend on methods they don't use.
+- **Dependency Inversion** — depend on abstractions, not concretions.
+  High-level modules shouldn't import low-level implementation details.
 
 ## Defensive code
 
@@ -84,28 +80,20 @@ See `pr-workflow.md` — Pre-existing violations section.
 
 ## Complexity limits (hook-enforced)
 
-These are not advisory. `hooks/check-complexity.py` runs as a `PostToolUse`
-hook on every `Write` and `Edit` and **blocks** the write when a threshold is
-exceeded. Write to them from the start rather than discovering them by being
-blocked.
-
-| Limit | Value | Measures |
-|-------|-------|----------|
-| File length | 500 lines | Total lines in the file |
-| Function length | 30 NLOC | Lines of *code* — excludes comments, docblocks, and blanks, so documenting a function never pushes it over |
-| Cyclomatic complexity | 10 CCN | Independent paths through a single function |
-| Parameters | 5 | Parameters in a single signature |
+These are not advisory. `hooks/check-complexity.py` runs as a
+`PostToolUse` hook on every `Write`/`Edit` and **blocks** the write when
+a threshold is exceeded (500-line files, 30 NLOC functions, CCN 10,
+5 params) — not restated here. Write to the limits from the start rather
+than discovering them by being blocked.
 
 Checked for `.py`, `.js`, `.ts`, `.jsx`, `.tsx`, `.go`, `.rs`, `.java`,
 `.cs`, `.cpp`, `.c`, `.h`, `.swift`, `.kt`, `.rb`, `.php`. Test, fixture,
-mock, vendor, and build directories are skipped.
-
-The file-length check is self-contained. The three function-level checks need
-`lizard`; when it is absent the hook blocks and asks permission to run
-`hooks/setup-complexity.sh`, which installs it into `hooks/.venv` without
-touching any project's dependencies.
+mock, vendor, and build directories are skipped. The file-length check is
+self-contained; the function-level checks need `lizard` — when it is
+absent the hook blocks and asks permission to run
+`hooks/setup-complexity.sh`, which installs it into `hooks/.venv`.
 
 For code we port but do not own — where upstream's structure must be
-preserved — add a path prefix or glob to `hooks/complexity-ignore`, one per
-line. That file is for faithful-port discipline, not for silencing an
-inconvenient limit in code we do own.
+preserved — add a path prefix or glob to `hooks/complexity-ignore`, one
+per line. That file is for faithful-port discipline, not for silencing
+an inconvenient limit in code we do own.
