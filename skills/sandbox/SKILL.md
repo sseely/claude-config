@@ -212,7 +212,7 @@ docker run --rm \
   -e AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-}" \
   -e AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-}" \
   "${JIRA_ARGS[@]}" \
-  --mount type=bind,source="$PROFILE_DIR",target=/root/.claude,readonly \
+  --mount type=bind,source="$PROFILE_DIR",target=/home/sandbox/.claude,readonly \
   --mount type=volume,source="claude-sandbox-${SESSION_NAME}",target=/workspace \
   --mount type=volume,source="claude-sandbox-${SESSION_NAME}-meta",target=/workspace-meta \
   "claude-sandbox-${SESSION_NAME}"
