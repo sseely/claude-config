@@ -3,8 +3,10 @@ name: sandbox
 description: >
   Run a Claude Code mission brief or task prompt inside an isolated Docker
   container with --dangerously-skip-permissions. Retrieves secrets from
-  macOS Keychain, assembles a task-specific Dockerfile, mounts ~/.claude/
-  read-only, and uses a persistent named volume for resumability.
+  macOS Keychain, assembles a task-specific Dockerfile, stages and mounts a
+  minimal ~/.claude profile read-only (CLAUDE.md, rules/, hooks/,
+  templates/ — never the full fleet or session transcripts), and uses a
+  persistent named volume for resumability.
   Usage: /sandbox [session-name] [repo-url] [task-prompt or brief-path]
 disable-model-invocation: false
 allowed-tools: Bash, Read, Write, Glob
@@ -66,6 +68,14 @@ security add-generic-password -a "$USER" -s "KEY_NAME" -w "value"
 ```
 Report all missing keys at once, then STOP.
 
+**Optional — Jira ticket linking:** if `JIRA_TICKET` is already set in the
+shell environment (exported by the user before invoking `/sandbox` — this
+skill does not parse it as a positional argument in Phase 1), validate the
+3 Atlassian Keychain secrets using the same pattern as above:
+`ATLASSIAN_API_TOKEN`, `ATLASSIAN_EMAIL`, `ATLASSIAN_BASE_URL`. If
+`JIRA_TICKET` is unset, skip Atlassian validation entirely — do not check
+or report on these 3 secrets.
+
 Store all retrieved values as shell variables for use in Phase 7.
 
 ## Phase 3 — Detect languages in target repo
@@ -116,6 +126,32 @@ Missing template: ~/.claude/templates/Dockerfile.base
 The sandbox requires this base template to build the container image.
 ```
 
+### Stage the minimal `.claude` profile
+
+Before Phase 5's `docker build`, assemble a narrow profile directory. Do
+not mount `$HOME/.claude` (or any subpath containing `projects/`) into the
+container — session transcripts and the full skills/agents fleet must
+never enter it:
+
+```bash
+PROFILE_DIR="/tmp/claude-sandbox-profile-${SESSION_NAME}"
+rm -rf "$PROFILE_DIR"
+mkdir -p "$PROFILE_DIR"
+cp ~/.claude/CLAUDE.md "$PROFILE_DIR/CLAUDE.md"
+cp -R ~/.claude/rules "$PROFILE_DIR/rules"
+cp -R ~/.claude/hooks "$PROFILE_DIR/hooks"
+cp -R ~/.claude/templates "$PROFILE_DIR/templates"
+jq '{hooks: .hooks}' ~/.claude/settings.json > "$PROFILE_DIR/settings.json"
+echo "Staged minimal profile at $PROFILE_DIR"
+```
+
+The staged directory contains exactly `CLAUDE.md`, `rules/`, `hooks/`,
+`templates/`, and `settings.json` (hooks wiring only — no
+`additionalDirectories`, no autonomous-mode permission grants). It
+excludes `agents/`, `skills/`, `docs/`, `plans/`, `.agent-notes/`,
+`logs/`, and `projects/`. Phase 7 mounts `$PROFILE_DIR`, not
+`$HOME/.claude`.
+
 ## Phase 5 — Build image
 
 ```bash
@@ -145,11 +181,29 @@ reused — this is the resumability mechanism. Do not delete existing volumes.
 
 ## Phase 7 — Run container
 
+Build the optional Atlassian/Jira arguments first. Only include them when
+`JIRA_TICKET` is set — never pass an empty-valued `-e` flag for any of the
+3 Atlassian vars or for `JIRA_TICKET` itself:
+
+```bash
+JIRA_ARGS=()
+if [[ -n "${JIRA_TICKET:-}" ]]; then
+  JIRA_ARGS=(
+    -e "ATLASSIAN_API_TOKEN=$ATLASSIAN_API_TOKEN"
+    -e "ATLASSIAN_EMAIL=$ATLASSIAN_EMAIL"
+    -e "ATLASSIAN_BASE_URL=$ATLASSIAN_BASE_URL"
+    -e "JIRA_TICKET=$JIRA_TICKET"
+  )
+fi
+```
+
 Print the `docker run` command with secrets redacted (`***`), then
 execute with real values. The command shape:
 
 ```bash
 docker run --rm \
+  --name "claude-sandbox-run-${SESSION_NAME}" \
+  --memory=4g --cpus=2 --cap-drop ALL \
   -e REPO_URL="$REPO_URL" \
   -e TASK_PROMPT="$TASK_PROMPT" \
   -e GITHUB_ORG_TOKEN="$GITHUB_ORG_TOKEN" \
@@ -157,7 +211,8 @@ docker run --rm \
   -e AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-}" \
   -e AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-}" \
   -e AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-}" \
-  --mount type=bind,source="$HOME/.claude",target=/root/.claude,readonly \
+  "${JIRA_ARGS[@]}" \
+  --mount type=bind,source="$PROFILE_DIR",target=/root/.claude,readonly \
   --mount type=volume,source="claude-sandbox-${SESSION_NAME}",target=/workspace \
   --mount type=volume,source="claude-sandbox-${SESSION_NAME}-meta",target=/workspace-meta \
   "claude-sandbox-${SESSION_NAME}"
@@ -192,6 +247,8 @@ Based on `EXIT_CODE`:
   volume preserves workspace state.
 - To start fresh: `docker volume rm claude-sandbox-SESSION_NAME`
 - Full log: `docker run --rm -v claude-sandbox-SESSION_NAME-meta:/m alpine cat /m/sandbox.log`
+- To stop a running sandbox: `docker kill claude-sandbox-run-SESSION_NAME`
+  (the container is named `claude-sandbox-run-${SESSION_NAME}` per Phase 7).
 - Secrets are never written to disk or baked into the image — they are injected
   at `docker run` time only.
 - Consider setting `sandbox.credentials` in the sandboxed run's settings.json
@@ -200,4 +257,9 @@ Based on `EXIT_CODE`:
   available; on-disk credential files (e.g. `~/.aws/credentials`, `~/.claude.json`)
   become unreadable — defense-in-depth for `--dangerously-skip-permissions` runs.
   Verify the exact key name/shape against `code.claude.com/docs/en/settings`
-  before wiring it, since this skill mounts `~/.claude/` read-only.
+  before wiring it, since this skill mounts a staged profile directory (not
+  `~/.claude/` directly) read-only.
+- Network egress from the container is not restricted by this skill (no
+  allowlist, no network policy). That is deferred to the `egress-allowlist`
+  spike (decisions.md D9/D11), tracked under batch-5's T32 — this is a
+  pointer, not a fix.
