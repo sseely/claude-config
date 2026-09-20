@@ -2,6 +2,21 @@
 set -euo pipefail
 # Code review (2026-09-02): Stop and StopFailure are not distinguished. Revisit if a failed turn is mistaken for a completed one.
 # Chimes when Claude finishes, but only if the turn took longer than 30 seconds.
+HOOKS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=./_hooklib.sh
+source "$HOOKS_DIR/_hooklib.sh"
+
+# F212: record one structured row per Stop event (event, session id,
+# timestamp) so on-call can see turn-end volume alongside deny/ask rows.
+LOG_DIR="$HOME/.claude/logs"
+LOG_FILE="$LOG_DIR/hook-events.jsonl"
+mkdir -p "$LOG_DIR" 2>/dev/null || true
+hook_read_payload
+if [[ -n "$HOOK_PAYLOAD" ]]; then
+    hook_rotate_log "$LOG_FILE"
+    hook_append_jsonl "Stop" "$HOOK_PAYLOAD" "$LOG_FILE"
+fi
+
 THRESHOLD=30
 START_FILE="$HOME/.claude/.runtime/claude-turn-start"
 

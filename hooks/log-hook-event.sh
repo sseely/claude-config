@@ -21,32 +21,17 @@ set -uo pipefail
 EVENT="${1:-unknown}"
 LOG_DIR="$HOME/.claude/logs"
 LOG_FILE="$LOG_DIR/hook-events.jsonl"
+HOOKS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# shellcheck source=./_hooklib.sh
+source "$HOOKS_DIR/_hooklib.sh"
 
 mkdir -p "$LOG_DIR" 2>/dev/null || exit 0
 
-payload=""
-if ! IFS= read -r -t 5 -d '' payload; then
-    :
-fi
-[[ -n "$payload" ]] || exit 0
+hook_read_payload
+[[ -n "$HOOK_PAYLOAD" ]] || exit 0
 
-if command -v python3 >/dev/null 2>&1; then
-    python3 -c '
-import json, sys, datetime
-event_name, raw, path = sys.argv[1], sys.argv[2], sys.argv[3]
-try:
-    event = json.loads(raw)
-    if not isinstance(event, dict):
-        event = {"raw": raw}
-except Exception:
-    event = {"raw": raw}
-event["event"] = event_name
-event["logged_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
-with open(path, "a", encoding="utf-8") as fh:
-    fh.write(json.dumps(event, separators=(",", ":")) + "\n")
-' "$EVENT" "$payload" "$LOG_FILE" 2>/dev/null || printf '{"event":"%s","raw":%s}\n' "$EVENT" "$payload" >> "$LOG_FILE" 2>/dev/null
-else
-    printf '%s\n' "$payload" >> "$LOG_FILE" 2>/dev/null
-fi
+hook_rotate_log "$LOG_FILE"
+hook_append_jsonl "$EVENT" "$HOOK_PAYLOAD" "$LOG_FILE"
 
 exit 0

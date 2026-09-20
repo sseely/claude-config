@@ -81,6 +81,7 @@ fi
 if [[ ! -x "$LIZARD_BIN" ]]; then
     echo ""
     echo "Setting up lizard complexity checker..."
+    mkdir -p ~/.claude/logs 2>/dev/null
     trap 'echo "[session-start] error at line $LINENO — see ~/.claude/logs/session-start.err" >> ~/.claude/logs/session-start.err 2>/dev/null; exit 0' ERR
     bash "$HOOKS_DIR/setup-complexity.sh"
     trap - ERR
