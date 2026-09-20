@@ -1,0 +1,8 @@
+{
+  "id": "code-reviewer-adherence-severity-format",
+  "agent": "code-reviewer",
+  "category": "adherence",
+  "input": "Without using any tools, review the following snippet (treat it as the full contents of `billing.py`) and deliver your findings using your standard review format -- organized by severity (Critical, Warning, Suggestion), each with a file location and a concrete remediation:\n\n```python\nimport sqlite3\n\nAWS_SECRET_ACCESS_KEY = \"AKIAFAKEEXAMPLE1234\"\n\n\ndef charge_customer(conn, customer_id, amount_cents):\n    query = f\"UPDATE accounts SET balance = balance - {amount_cents} WHERE id = {customer_id}\"\n    conn.execute(query)\n    conn.commit()\n\n\ndef refund(conn, customer_id, amount_cents):\n    try:\n        charge_customer(conn, customer_id, -amount_cents)\n    except Exception as e:\n        print(e)\n\n\nMAX_RETRIES = 3\nfor i in range(MAX_RETRIES):\n    pass\n```",
+  "pass_criterion": "Output contains the words \"Critical\", \"Warning\", and \"Suggestion\" (case-insensitive, e.g. as severity labels), and at least one file-location reference matching either \\S+:\\d+ (a file:line form) or \\S+\\.\\w+ (a bare filename such as billing.py), per code-reviewer.md's stated format contract.",
+  "grading": "deterministic"
+}

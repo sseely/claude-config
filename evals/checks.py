@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import json
 import re
-from typing import Callable
+from collections.abc import Callable
 
 
 def _check_json_object(
@@ -31,11 +31,17 @@ def _check_json_object(
     except json.JSONDecodeError as exc:
         return False, f"not valid JSON ({exc}); raw output: {stripped[:300]!r}"
     if not isinstance(data, dict):
-        return False, f"expected a JSON object, got {type(data).__name__}: {stripped[:300]!r}"
+        return (
+            False,
+            f"expected a JSON object, got {type(data).__name__}: {stripped[:300]!r}",
+        )
     got_keys = set(data.keys())
     want_keys = set(required_keys.keys())
     if got_keys != want_keys:
-        return False, f"expected exactly keys {sorted(want_keys)}, got {sorted(got_keys)}"
+        return (
+            False,
+            f"expected exactly keys {sorted(want_keys)}, got {sorted(got_keys)}",
+        )
     for key, validator in required_keys.items():
         if not validator(data[key]):
             return False, f"key {key!r} failed validation; value: {data[key]!r}"
@@ -97,11 +103,20 @@ def check_ad_security_bullets(text: str) -> tuple[bool, str]:
 
     bullets = [line for line in lines if is_bullet(line)]
     if not bullets:
-        return False, f"no bullet line matches 'A | B | C | D' shape; output: {text[:300]!r}"
+        return (
+            False,
+            f"no bullet line matches 'A | B | C | D' shape; output: {text[:300]!r}",
+        )
     if not is_bullet(lines[0]):
-        return False, f"first non-blank line is not a bullet (prose precedes it): {lines[0]!r}"
+        return (
+            False,
+            f"first non-blank line is not a bullet (prose precedes it): {lines[0]!r}",
+        )
     if not is_bullet(lines[-1]):
-        return False, f"last non-blank line is not a bullet (trailing summary): {lines[-1]!r}"
+        return (
+            False,
+            f"last non-blank line is not a bullet (trailing summary): {lines[-1]!r}",
+        )
     return True, f"ok: {len(bullets)} bullet line(s)"
 
 
@@ -115,10 +130,32 @@ def check_angular_word_limit(text: str) -> tuple[bool, str]:
     return True, f"ok: {word_count} words"
 
 
+def check_code_reviewer_severity_format(text: str) -> tuple[bool, str]:
+    """Case: code-reviewer-adherence-severity-format.
+
+    code-reviewer.md's own format contract: findings organized by
+    severity -- Critical, Warning, Suggestion -- with a file location for
+    each. Checks the words are present (case-insensitive) and at least
+    one location reference matches `\\S+:\\d+` (file:line) or `\\S+\\.\\w+`
+    (a bare filename)."""
+    lower = text.lower()
+    missing = [w for w in ("critical", "warning", "suggestion") if w not in lower]
+    if missing:
+        return False, f"missing severity word(s) {missing}; output: {text[:300]!r}"
+    if not re.search(r"\S+:\d+|\S+\.\w+", text):
+        return (
+            False,
+            "no file-location reference (\\S+:\\d+ or \\S+.\\w+) found; "
+            f"output: {text[:300]!r}",
+        )
+    return True, "ok"
+
+
 CHECKS: dict[str, Callable[[str], tuple[bool, str]]] = {
     "explore-format-json-search-result": check_explore_json,
     "plan-format-json-plan": check_plan_json,
     "ad-security-reviewer-adherence-bullet-format": check_ad_security_bullets,
     "angular-architect-adherence-word-limit": check_angular_word_limit,
     "api-designer-format-json-endpoint": check_api_designer_json,
+    "code-reviewer-adherence-severity-format": check_code_reviewer_severity_format,
 }

@@ -5,39 +5,33 @@ Loads case files under evals/cases/<agent>/*.json (schema: docs/fleet/tevv.md
 sec. "Case specification"), invokes the target agent headlessly via the
 `claude` CLI, grades deterministic-category cases (format, adherence)
 against a per-case check function, and appends one JSON line per case-run
-to evals/results.jsonl (append-only, git-committed; no database — FD-4).
+to evals/results.jsonl (append-only, git-committed; no database -- FD-4).
 
 Plain stdlib only: json, subprocess, argparse. No test framework, no
-third-party deps (system python3 has no pyyaml, hence JSON case files
-rather than YAML).
+third-party deps (system python3 has no pyyaml, hence JSON case files).
 
 DETERMINISM WARNING: model output varies across runs of the same case.
-Every deterministic check in CHECKS below asserts format conformance or
-constraint adherence (valid JSON with an exact key set, word count, absence
-of a code fence, bullet-line shape) -- never string-equality against a
-golden response. `accuracy` and `refusal` cases are `judgment`-graded per
-tevv.md and are recorded as outcome "ungraded", never a guessed pass/fail.
+Every deterministic check in CHECKS asserts format conformance or
+constraint adherence -- never string-equality against a golden response.
+`accuracy` and `refusal` cases are `judgment`-graded per tevv.md;
+`accuracy` is scored by grade_accuracy() (F058), `refusal` is recorded as
+"ungraded" (no grader built for it yet -- never a guessed pass/fail).
 
-INVOCATION MECHANISM: each case is scored by running
+INVOCATION MECHANISM: each case runs
     claude -p --system-prompt <agent body> --model <resolved model>
            --permission-mode plan --output-format json
            --strict-mcp-config --tools "" --setting-sources ""
            <case input>
-`--tools ""` disables every tool for the invocation (the evaluated agent
-cannot read, write, or execute anything -- a hard read-only-safe boundary,
-stronger than relying on --permission-mode alone). `--strict-mcp-config`
-and `--setting-sources ""` skip this repo's CLAUDE.md/hooks/MCP-server
-loading, which otherwise gets attached to every headless call's system
-prompt and inflates cost ~30-60x with no bearing on a text-only format/
-adherence check (see .agent-notes for the measurement). The agent's own
-markdown body (frontmatter stripped) becomes --system-prompt verbatim, so
-the case is scored against that agent's actual instructions, not a proxy.
+`--tools ""` disables every tool (a hard read-only-safe boundary).
+`--strict-mcp-config`/`--setting-sources ""` skip this repo's CLAUDE.md/
+hooks/MCP loading, which otherwise inflates cost ~30-60x with no bearing
+on a text-only check. The agent's own markdown body (frontmatter
+stripped) becomes --system-prompt verbatim.
 
-KNOWN CLI QUIRK: `--model haiku` (the alias) silently resolves to
-claude-sonnet-5 rather than a haiku model or an error, on the CLI version
-in use at authoring time (2026-08-09). MODEL_ALIAS_FIX below substitutes
-the full canonical model name for "haiku" to route correctly; "sonnet" and
-"opus" aliases resolve correctly and are left as-is.
+F195 (2026-09-20, v2.1.278): re-probed the `--model haiku` alias bug
+reported 2026-09-02 -- `claude -p --model haiku ...` now reports
+`modelUsage: {"claude-haiku-4-5-20251001": ...}`, an actual haiku model.
+The bug did not reproduce; the MODEL_ALIAS_FIX workaround was removed.
 """
 
 from __future__ import annotations
@@ -58,19 +52,14 @@ AGENTS_DIR = REPO_ROOT / "agents"
 
 DEFAULT_TIMEOUT_S = 120
 
-# Frontmatter model alias -> resolved --model value. Only entries that
-# diverge from a straight pass-through need to be listed here.
-# Code review (2026-09-02): MODEL_ALIAS_FIX may be obsolete — the
-# haiku alias bug did not reproduce on v2.1.259. Revisit after a second
-# independent probe; remove if it stays clean.
-MODEL_ALIAS_FIX = {
-    "haiku": "claude-haiku-4-5-20251001",
-}
 DEFAULT_MODEL = "sonnet"  # used when frontmatter has no `model:` (inherit)
 
 REQUIRED_CASE_FIELDS = ("id", "agent", "category", "input", "pass_criterion", "grading")
 VALID_CATEGORIES = {"format", "adherence", "accuracy", "refusal"}
 VALID_GRADINGS = {"deterministic", "judgment"}
+
+# agent name -> (frontmatter model, system-prompt body)
+AgentIndex = dict[str, tuple[str | None, str]]
 
 
 class CaseError(Exception):
@@ -96,6 +85,19 @@ def load_case(path: Path) -> dict:
         raise CaseError(f"{path}: invalid category {data['category']!r}")
     if data["grading"] not in VALID_GRADINGS:
         raise CaseError(f"{path}: invalid grading {data['grading']!r}")
+    # F110: enforce the category/grading pairing tevv.md describes --
+    # format is always deterministic, accuracy/refusal are always
+    # judgment. adherence is exempt (tevv.md allows either for it).
+    if data["category"] == "format" and data["grading"] != "deterministic":
+        raise CaseError(
+            f"{path}: category 'format' requires grading 'deterministic', "
+            f"got {data['grading']!r}"
+        )
+    if data["category"] in ("accuracy", "refusal") and data["grading"] != "judgment":
+        raise CaseError(
+            f"{path}: category {data['category']!r} requires grading "
+            f"'judgment', got {data['grading']!r}"
+        )
     return data
 
 
@@ -144,10 +146,10 @@ def parse_agent_frontmatter(md_path: Path) -> tuple[str | None, str | None, str]
     return name, model, body
 
 
-def build_agent_index(agents_dir: Path) -> dict[str, tuple[str | None, str]]:
+def build_agent_index(agents_dir: Path) -> AgentIndex:
     """Map agent name -> (model, system-prompt body) for every agent .md
     file under agents_dir (recursive)."""
-    index: dict[str, tuple[str | None, str]] = {}
+    index: AgentIndex = {}
     for path in agents_dir.rglob("*.md"):
         name, model, body = parse_agent_frontmatter(path)
         if name:
@@ -156,10 +158,11 @@ def build_agent_index(agents_dir: Path) -> dict[str, tuple[str | None, str]]:
 
 
 def resolve_model(frontmatter_model: str | None) -> str:
-    """Apply the documented haiku-alias workaround and the inherit default."""
+    """Apply the inherit default (F195: no alias workaround needed as of
+    v2.1.278 -- see module docstring)."""
     if not frontmatter_model or frontmatter_model == "inherit":
         return DEFAULT_MODEL
-    return MODEL_ALIAS_FIX.get(frontmatter_model, frontmatter_model)
+    return frontmatter_model
 
 
 def _build_claude_cmd(system_prompt: str, model: str, case_input: str) -> list[str]:
@@ -183,72 +186,72 @@ def _build_claude_cmd(system_prompt: str, model: str, case_input: str) -> list[s
     ]
 
 
-def _run_claude_subprocess(cmd: list[str], timeout_s: int) -> tuple[dict | None, dict | None]:
+def _result(ok: bool, text: str, duration_ms: int, detail: str) -> dict:
+    return {"ok": ok, "text": text, "duration_ms": duration_ms, "detail": detail}
+
+
+def _timeout_failure(timeout_s: int) -> dict:
+    detail = f"claude invocation timed out after {timeout_s}s (retried once)"
+    return _result(False, "", timeout_s * 1000, detail)
+
+
+def _missing_binary_failure(exc: Exception) -> dict:
+    return _result(False, "", 0, f"claude CLI not found: {exc} (retried once)")
+
+
+def _run_claude_subprocess(
+    cmd: list[str], timeout_s: int
+) -> tuple[dict | None, subprocess.CompletedProcess[str] | None]:
     """Run cmd; return (failure_dict, completed_process). Exactly one is
     None: failure_dict is set for a timeout or missing binary, otherwise
-    the CompletedProcess is returned for the caller to inspect."""
-    try:
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout_s)
-    except subprocess.TimeoutExpired:
-        return (
-            {
-                "ok": False,
-                "text": "",
-                "duration_ms": timeout_s * 1000,
-                "detail": f"claude invocation timed out after {timeout_s}s",
-            },
-            None,
-        )
-    except FileNotFoundError as exc:
-        return (
-            {"ok": False, "text": "", "duration_ms": 0, "detail": f"claude CLI not found: {exc}"},
-            None,
-        )
-    return None, proc
+    the CompletedProcess is returned for the caller to inspect.
+
+    F191: retries once (bounded, no backoff -- these calls already run
+    inside a per-case timeout) on a timeout or missing binary, the two
+    failure modes most likely to be transient rather than a real defect
+    in the invocation itself."""
+    last_timeout = False
+    last_missing: Exception | None = None
+    for _attempt in range(2):
+        try:
+            return None, subprocess.run(
+                cmd, capture_output=True, text=True, timeout=timeout_s
+            )
+        except subprocess.TimeoutExpired:
+            last_timeout = True
+        except FileNotFoundError as exc:
+            last_missing = exc
+    if last_missing is not None:
+        return _missing_binary_failure(last_missing), None
+    assert last_timeout
+    return _timeout_failure(timeout_s), None
 
 
 def _payload_to_result(payload: dict) -> dict:
     """Turn a decoded claude JSON payload into the normalized result dict."""
     duration_ms = int(payload.get("duration_ms", 0))
     if payload.get("is_error"):
-        return {
-            "ok": False,
-            "text": "",
-            "duration_ms": duration_ms,
-            "detail": f"claude reported is_error=true: {payload.get('result')!r}",
-        }
-    return {
-        "ok": True,
-        "text": payload.get("result", ""),
-        "duration_ms": duration_ms,
-        "detail": "",
-    }
+        detail = f"claude reported is_error=true: {payload.get('result')!r}"
+        return _result(False, "", duration_ms, detail)
+    return _result(True, payload.get("result", ""), duration_ms, "")
 
 
-def _parse_claude_stdout(proc) -> dict:
+def _parse_claude_stdout(proc: subprocess.CompletedProcess[str]) -> dict:
     """Turn a completed `claude -p --output-format json` process into the
     normalized invoke_agent() result dict."""
     if proc.returncode != 0:
-        return {
-            "ok": False,
-            "text": "",
-            "duration_ms": 0,
-            "detail": (
-                f"claude exited {proc.returncode}; stderr: {proc.stderr.strip()[:2000]}"
-            ),
-        }
+        detail = (
+            f"claude exited {proc.returncode}; stderr: {proc.stderr.strip()[:2000]}"
+        )
+        return _result(False, "", 0, detail)
     try:
         payload = json.loads(proc.stdout)
     except json.JSONDecodeError as exc:
-        return {
-            "ok": False,
-            "text": "",
-            "duration_ms": 0,
-            "detail": (
-                f"could not parse claude stdout as JSON: {exc}; stdout: "
-                f"{proc.stdout.strip()[:2000]}"
-            ),
-        }
+        detail = (
+            f"could not parse claude stdout as JSON: {exc}; stdout: "
+            f"{proc.stdout.strip()[:2000]}"
+        )
+        return _result(False, "", 0, detail)
     return _payload_to_result(payload)
 
 
@@ -267,6 +270,41 @@ def invoke_agent(
     if failure is not None:
         return failure
     return _parse_claude_stdout(proc)
+
+
+JUDGE_SYSTEM_PROMPT = (
+    "Respond with exactly one line: PASS, FAIL, or UNCERTAIN, then a "
+    "one-sentence reason. Use UNCERTAIN if the criterion can't be checked "
+    "from the given output."
+)
+
+
+def grade_accuracy(
+    output_text: str, pass_criterion: str, timeout_s: int
+) -> tuple[str, str]:
+    """F058: LLM-judge grader for `accuracy`-category cases. Runs a second
+    headless `claude -p` call (the judge) against the case's pass_criterion
+    and the agent's raw output text.
+
+    Returns (outcome, detail) where outcome is one of "pass", "fail",
+    "ungraded", "error" -- never a bare bool, so run_case() can write it
+    straight into the results record. UNCERTAIN and a judge-call failure
+    both map to "ungraded": this never guesses a pass or fail."""
+    judge_input = f"Pass criterion:\n{pass_criterion}\n\nAgent output:\n{output_text}"
+    cmd = _build_claude_cmd(JUDGE_SYSTEM_PROMPT, DEFAULT_MODEL, judge_input)
+    failure, proc = _run_claude_subprocess(cmd, timeout_s)
+    if failure is not None:
+        return "error", failure["detail"]
+    result = _parse_claude_stdout(proc)
+    if not result["ok"]:
+        return "error", result["detail"]
+    verdict = result["text"].strip()
+    first_line = verdict.splitlines()[0].strip().upper() if verdict else ""
+    if first_line.startswith("PASS"):
+        return "pass", verdict
+    if first_line.startswith("FAIL"):
+        return "fail", verdict
+    return "ungraded", verdict or "judge returned no parseable verdict"
 
 
 def next_run_id(results_path: Path) -> str:
@@ -302,21 +340,35 @@ def _base_record(case: dict, run_id: str) -> dict:
     }
 
 
-def _score_deterministic_case(
-    case: dict, agent_index: dict[str, tuple[str | None, str]], timeout_s: int
-) -> tuple[str, str, int]:
-    """Run a deterministic-grading case. Returns (outcome, detail,
-    duration_ms)."""
+def _resolve_and_invoke(
+    case: dict, agent_index: AgentIndex, timeout_s: int
+) -> tuple[dict | None, str, int]:
+    """Resolve a case's agent + model and invoke it. Returns (invocation,
+    error_detail, duration_ms). `invocation` is None only when no agent
+    markdown matched -- in that case error_detail carries the message and
+    duration_ms is 0; otherwise error_detail is "" and the caller must
+    still check invocation["ok"]."""
     if case["agent"] not in agent_index:
+        agent_name = case["agent"]
         return (
-            "error",
-            f"no agent markdown file found with name {case['agent']!r} under agents/",
+            None,
+            f"no agent markdown file found with name {agent_name!r} under agents/",
             0,
         )
     frontmatter_model, system_prompt = agent_index[case["agent"]]
     model = resolve_model(frontmatter_model)
-
     invocation = invoke_agent(system_prompt, model, case["input"], timeout_s)
+    return invocation, "", invocation["duration_ms"]
+
+
+def _score_deterministic_case(
+    case: dict, agent_index: AgentIndex, timeout_s: int
+) -> tuple[str, str, int]:
+    """Run a deterministic-grading case. Returns (outcome, detail,
+    duration_ms)."""
+    invocation, err, duration_ms = _resolve_and_invoke(case, agent_index, timeout_s)
+    if invocation is None:
+        return "error", err, duration_ms
     if not invocation["ok"]:
         return "error", invocation["detail"], invocation["duration_ms"]
 
@@ -333,24 +385,52 @@ def _score_deterministic_case(
     return ("pass" if passed else "fail"), full_detail, invocation["duration_ms"]
 
 
-def run_case(
-    case: dict, agent_index: dict[str, tuple[str | None, str]], run_id: str, timeout_s: int
-) -> dict:
+def _score_accuracy_case(
+    case: dict, agent_index: AgentIndex, timeout_s: int
+) -> tuple[str, str, int]:
+    """F058: run an `accuracy`-category case -- invoke the agent normally,
+    then grade its output with grade_accuracy() as an LLM judge. Returns
+    (outcome, detail, duration_ms); outcome is never guessed -- a judge
+    UNCERTAIN or judge-call failure is "ungraded", not "pass"/"fail"."""
+    invocation, err, duration_ms = _resolve_and_invoke(case, agent_index, timeout_s)
+    if invocation is None:
+        return "error", err, duration_ms
+    if not invocation["ok"]:
+        return "error", invocation["detail"], invocation["duration_ms"]
+
+    pass_criterion = case["pass_criterion"]
+    output_text = invocation["text"]
+    outcome, judge_detail = grade_accuracy(output_text, pass_criterion, timeout_s)
+    raw = output_text.strip()[:300]
+    return outcome, f"{judge_detail} | raw: {raw!r}", invocation["duration_ms"]
+
+
+def _finalize(base_record: dict, outcome: str, detail: str, duration_ms: int) -> dict:
+    return {
+        **base_record,
+        "outcome": outcome,
+        "detail": detail,
+        "duration_ms": duration_ms,
+    }
+
+
+def run_case(case: dict, agent_index: AgentIndex, run_id: str, timeout_s: int) -> dict:
     """Execute one case end-to-end and return its results.jsonl record."""
     base_record = _base_record(case, run_id)
 
-    if case["grading"] == "judgment":
-        return {
-            **base_record,
-            "outcome": "ungraded",
-            "detail": (
-                "grading=judgment (accuracy/refusal category); no grader "
-                "exists yet per tevv.md -- recorded as ungraded, not scored"
-            ),
-        }
+    if case["category"] == "accuracy":
+        outcome, detail, ms = _score_accuracy_case(case, agent_index, timeout_s)
+        return _finalize(base_record, outcome, detail, ms)
 
-    outcome, detail, duration_ms = _score_deterministic_case(case, agent_index, timeout_s)
-    return {**base_record, "outcome": outcome, "detail": detail, "duration_ms": duration_ms}
+    if case["grading"] == "judgment":
+        detail = (
+            "grading=judgment (refusal category); no grader exists yet "
+            "per tevv.md -- recorded as ungraded, not scored"
+        )
+        return _finalize(base_record, "ungraded", detail, 0)
+
+    outcome, detail, ms = _score_deterministic_case(case, agent_index, timeout_s)
+    return _finalize(base_record, outcome, detail, ms)
 
 
 def _build_arg_parser() -> argparse.ArgumentParser:

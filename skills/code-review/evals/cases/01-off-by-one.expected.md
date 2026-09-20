@@ -23,7 +23,7 @@ Dimension: **Correctness**
   guard `pageSize <= 0`. A zero or negative size yields an empty or reversed
   slice with no error.
 
-- **Suggestion — line 14.** `page` is unvalidated. A negative page produces a
+- **Suggestion — line 15.** `page` is unvalidated. A negative page produces a
   negative `start`, and `Array.slice` interprets that as an offset from the
   end — returning data from the wrong end of the set rather than an error.
 
