@@ -6,7 +6,7 @@ description: >
   finding as an inline review comment on the PR (without submitting —
   the human submits). Accepts a PR URL or number as $ARGUMENTS; if
   omitted, infers from the current branch.
-disable-model-invocation: false
+disable-model-invocation: true
 ---
 
 # Review PR
@@ -80,7 +80,8 @@ Check whether `/tmp/review-pr-findings.md` exists.
 1. Get the list of changed files with their patches:
    ```bash
    gh api repos/{owner}/{repo}/pulls/{number}/files --paginate \
-     --jq '[.[] | {filename, status, patch}]' > /tmp/pr_files.json
+     --jq '[.[] | {filename, status, patch}]' \
+     > /tmp/review-pr-{owner}-{repo}-{number}-{head_sha}-files.json
    ```
 2. **Verify the local checkout matches the PR head.** Run
    `git rev-parse HEAD` and compare it to `head_sha`.
@@ -154,9 +155,10 @@ A comment can only be anchored to a line that appears in the PR
 diff. For each Critical or Warning finding with a `file:line`
 reference, decide whether it is anchorable:
 
-1. Look up the file's `patch` in `/tmp/pr_files.json`. A finding on
-   a file that is not in the PR (an agent followed an import) is not
-   anchorable.
+1. Look up the file's `patch` in
+   `/tmp/review-pr-{owner}-{repo}-{number}-{head_sha}-files.json`. A
+   finding on a file that is not in the PR (an agent followed an
+   import) is not anchorable.
 2. Parse each hunk header `@@ -a,b +c,d @@`. The new-side range is
    lines `c` through `c + d - 1` inclusive (a missing `,d` means one
    line). The finding is anchorable if its line falls inside any
@@ -178,7 +180,7 @@ Build a single review payload and submit it via one API call:
 ```bash
 gh api repos/{owner}/{repo}/pulls/{number}/reviews \
   --method POST \
-  --input /tmp/review_payload.json \
+  --input /tmp/review-pr-{owner}-{repo}-{number}-{head_sha}-payload.json \
   --jq '.id, .state'
 ```
 
@@ -240,8 +242,9 @@ Severity labels: `Critical`, `Warning`.
 
 After the API call returns `PENDING`, delete
 `/tmp/review-pr-findings.md`, `/tmp/code-review-findings.md`,
-`/tmp/pr_files.json`, and `/tmp/review_payload.json`. A checkpoint
-that outlives its run is the next run's contamination.
+`/tmp/review-pr-{owner}-{repo}-{number}-{head_sha}-files.json`, and
+`/tmp/review-pr-{owner}-{repo}-{number}-{head_sha}-payload.json`. A
+checkpoint that outlives its run is the next run's contamination.
 
 ---
 
