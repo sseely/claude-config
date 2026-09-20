@@ -10,12 +10,62 @@
  *   ANTHROPIC_API_KEY=sk-... npx tsx scripts/translate.ts --force        # overwrite existing
  *
  * ADAPT: keep NAMESPACES in sync with src/i18n/index.ts and scripts/i18n-audit.ts.
+ *        `npm run i18n:check-namespaces` (scripts/check-namespaces.ts) verifies
+ *        this automatically — it cannot be a straight import because
+ *        src/i18n/index.ts runs browser-only side effects at module load time.
  */
 import Anthropic from '@anthropic-ai/sdk';
 import fs from 'node:fs';
 import path from 'node:path';
 
 const LOCALES_DIR = path.resolve(import.meta.dirname, '../src/i18n/locales');
+
+interface RetryableError {
+  status?: number;
+  headers?: Record<string, string>;
+}
+
+// Per rules/retry-idempotency.md — copied inline since this is a standalone
+// scaffolded script with no shared dependency on the parent repo's code.
+// See docs/reference/retry-idempotency.md for the canonical implementation.
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  maxAttempts = 3,
+  baseDelayMs = 100
+): Promise<T> {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (attempt === maxAttempts) throw err;
+      if (isNonRetryable(err)) throw err;
+      const delay = retryAfterMs(err) ?? backoffMs(attempt, baseDelayMs);
+      await new Promise((r) => setTimeout(r, Math.min(delay, 5000)));
+    }
+  }
+  throw new Error('unreachable');
+}
+
+function isNonRetryable(err: unknown): boolean {
+  const status = (err as RetryableError).status;
+  return status !== undefined && status >= 400 && status < 500 && status !== 429;
+}
+
+function backoffMs(attempt: number, baseDelayMs: number): number {
+  return baseDelayMs * 2 ** (attempt - 1) * (0.8 + Math.random() * 0.4);
+}
+
+// Honors Retry-After on 429s: seconds (e.g. "2") or an HTTP-date.
+function retryAfterMs(err: unknown): number | undefined {
+  const { status, headers } = err as RetryableError;
+  if (status !== 429) return undefined;
+  const value = headers?.['retry-after'];
+  if (!value) return undefined;
+  const seconds = Number(value);
+  if (!Number.isNaN(seconds)) return seconds * 1000;
+  const dateMs = Date.parse(value);
+  return Number.isNaN(dateMs) ? undefined : Math.max(0, dateMs - Date.now());
+}
 
 const TARGET_LANGUAGES: Record<string, string> = {
   es: 'Spanish (Latin America)',
@@ -78,6 +128,67 @@ function unflatten(flat: Record<string, string>): Record<string, unknown> {
   return out;
 }
 
+// ADAPT: update the system prompt's app description and any locale-specific rules
+const SYSTEM_PROMPT = `You are a professional software localisation expert translating UI strings for a web application.
+
+Rules:
+1. Return ONLY a valid JSON object mapping each input key to its translated value.
+2. Preserve ALL {{variable}} interpolation placeholders exactly — do not translate them.
+3. Preserve _one / _other plural suffix patterns in the keys — only translate the values.
+4. Keep HTML entities (&amp; etc) unchanged.
+5. Match the register (formal/informal) and tone of the English source.
+6. For Japanese: only use the _other plural form; the _one form may be the same.
+7. Translate naturally — not word-for-word. Consider the usage context provided.`;
+
+/** Loads per-key translator notes for `ns` from the optional manifest. */
+async function loadTranslationContext(ns: string): Promise<Record<string, string>> {
+  try {
+    const { TRANSLATION_CONTEXT } = await import('../src/i18n/manifest.ts');
+    return TRANSLATION_CONTEXT[ns] ?? {};
+  } catch (err) {
+    if ((err as { code?: string }).code !== 'ERR_MODULE_NOT_FOUND') throw err;
+    // manifest is optional — no TRANSLATION_CONTEXT exists for this project
+    return {};
+  }
+}
+
+function buildUserPrompt(
+  ns: string,
+  langName: string,
+  entries: Array<{ key: string; english: string; context: string }>
+): string {
+  return `Translate the following namespace ("${ns}") from English into ${langName}.
+
+Input (JSON array):
+${JSON.stringify(entries, null, 2)}
+
+Return a JSON object with the same keys and translated values. No markdown, no explanation — just the JSON.`;
+}
+
+/** Calls Claude (retried per rules/retry-idempotency.md) and parses its JSON reply. */
+async function requestTranslation(
+  client: Anthropic,
+  userPrompt: string
+): Promise<Record<string, string>> {
+  const message = await withRetry(() =>
+    client.messages.create({
+      model: process.env.ANTHROPIC_MODEL ?? 'claude-opus-4-8',
+      max_tokens: 4096,
+      system: SYSTEM_PROMPT,
+      messages: [{ role: 'user', content: userPrompt }],
+    })
+  );
+
+  const rawText = message.content
+    .filter((b) => b.type === 'text')
+    .map((b) => (b as { type: 'text'; text: string }).text)
+    .join('');
+
+  const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('No JSON found in translation response');
+  return JSON.parse(jsonMatch[0]) as Record<string, string>;
+}
+
 async function translateNamespace(
   client: Anthropic,
   ns: string,
@@ -98,58 +209,17 @@ async function translateNamespace(
 
   const enRaw = JSON.parse(fs.readFileSync(enPath, 'utf-8')) as Record<string, unknown>;
   const flatEn = flattenJson(enRaw);
-
-  let contextMap: Record<string, string> = {};
-  try {
-    const { TRANSLATION_CONTEXT } = await import('../src/i18n/manifest.ts');
-    contextMap = TRANSLATION_CONTEXT[ns] ?? {};
-  } catch {
-    // manifest is optional
-  }
-
+  const contextMap = await loadTranslationContext(ns);
   const entries = Object.entries(flatEn).map(([key, value]) => ({
     key,
     english: value,
     context: contextMap[key] ?? '',
   }));
 
-  // ADAPT: update the system prompt's app description and any locale-specific rules
-  const systemPrompt = `You are a professional software localisation expert translating UI strings for a web application.
-
-Rules:
-1. Return ONLY a valid JSON object mapping each input key to its translated value.
-2. Preserve ALL {{variable}} interpolation placeholders exactly — do not translate them.
-3. Preserve _one / _other plural suffix patterns in the keys — only translate the values.
-4. Keep HTML entities (&amp; etc) unchanged.
-5. Match the register (formal/informal) and tone of the English source.
-6. For Japanese: only use the _other plural form; the _one form may be the same.
-7. Translate naturally — not word-for-word. Consider the usage context provided.`;
-
-  const userPrompt = `Translate the following namespace ("${ns}") from English into ${langName}.
-
-Input (JSON array):
-${JSON.stringify(entries, null, 2)}
-
-Return a JSON object with the same keys and translated values. No markdown, no explanation — just the JSON.`;
-
   console.log(`  Translating ${lang}/${ns}.json (${entries.length} strings)…`);
+  const userPrompt = buildUserPrompt(ns, langName, entries);
+  const translated = await requestTranslation(client, userPrompt);
 
-  const message = await client.messages.create({
-    model: process.env.ANTHROPIC_MODEL ?? 'claude-opus-4-8',
-    max_tokens: 4096,
-    system: systemPrompt,
-    messages: [{ role: 'user', content: userPrompt }],
-  });
-
-  const rawText = message.content
-    .filter((b) => b.type === 'text')
-    .map((b) => (b as { type: 'text'; text: string }).text)
-    .join('');
-
-  const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error(`No JSON found in response for ${lang}/${ns}`);
-
-  const translated = JSON.parse(jsonMatch[0]) as Record<string, string>;
   const mergedFlat: Record<string, string> = { ...flatEn, ...translated };
   const output = unflatten(mergedFlat);
 

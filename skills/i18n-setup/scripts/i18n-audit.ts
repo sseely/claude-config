@@ -43,19 +43,42 @@ function flatKeys(obj: Record<string, unknown>, prefix = ''): Set<string> {
   return out;
 }
 
-const locales = fs
-  .readdirSync(LOCALES_DIR)
-  .filter((f) => fs.statSync(path.join(LOCALES_DIR, f)).isDirectory());
+let failures = 0;
+let locales: string[] = [];
+
+try {
+  locales = fs
+    .readdirSync(LOCALES_DIR)
+    .filter((f) => fs.statSync(path.join(LOCALES_DIR, f)).isDirectory());
+} catch (err) {
+  console.error(
+    `MALFORMED FILE : ${LOCALES_DIR}  (${err instanceof Error ? err.message : String(err)})`
+  );
+  failures++;
+}
 
 const nonEnglish = locales.filter((l) => l !== 'en');
 
-let failures = 0;
+/** Reads and parses a locale JSON file, reporting and returning null on failure. */
+function readLocaleJson(filePath: string): Record<string, unknown> | null {
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+  } catch (err) {
+    console.error(`MALFORMED FILE : ${filePath}`);
+    return null;
+  }
+}
 
 for (const ns of NAMESPACES) {
   const enPath = path.join(LOCALES_DIR, 'en', `${ns}.json`);
   if (!fs.existsSync(enPath)) continue;
 
-  const enKeys = flatKeys(JSON.parse(fs.readFileSync(enPath, 'utf-8')));
+  const enJson = readLocaleJson(enPath);
+  if (enJson === null) {
+    failures++;
+    continue;
+  }
+  const enKeys = flatKeys(enJson);
 
   for (const locale of nonEnglish) {
     const localePath = path.join(LOCALES_DIR, locale, `${ns}.json`);
@@ -66,7 +89,12 @@ for (const ns of NAMESPACES) {
       continue;
     }
 
-    const localeKeys = flatKeys(JSON.parse(fs.readFileSync(localePath, 'utf-8')));
+    const localeJson = readLocaleJson(localePath);
+    if (localeJson === null) {
+      failures++;
+      continue;
+    }
+    const localeKeys = flatKeys(localeJson);
 
     for (const key of enKeys) {
       if (!localeKeys.has(key)) {

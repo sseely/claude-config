@@ -2,6 +2,7 @@
 name: i18n-setup
 description: Scaffold i18n infrastructure into a React/Vite project. Sets up i18next with 18 locales (en + 17), lazy-loading, browser language detection, localStorage persistence, a Claude-powered translate script, an audit script, and an optional server-side language preference endpoint. Keeps NAMESPACES in sync across all three files that reference them.
 user-invocable: true
+disable-model-invocation: true
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch, WebSearch
 ---
 
@@ -99,8 +100,8 @@ before relying on them.
 ## Step 2 — Install dependencies
 
 ```bash
-cd ui && npm install i18next react-i18next
-npm install --save-dev @anthropic-ai/sdk tsx
+cd ui && npm install i18next@26.4.2 react-i18next@17.0.14
+npm install --save-dev @anthropic-ai/sdk@0.127.0 tsx@4.23.15
 ```
 
 `@anthropic-ai/sdk` and `tsx` are dev-only — used only by the translate script.
@@ -131,6 +132,11 @@ On success, mark `- [x] locale-file-structure` in `.i18n-setup-progress.md`.
 ---
 
 ## Step 4 — Core i18n module
+
+Read `~/.claude/skills/i18n-setup/src/i18n_supported_languages.ts` → write
+verbatim to `ui/src/i18n/i18n_supported_languages.ts`. It has no browser or
+i18next imports by design — it must also be importable from a Workers
+backend route (Step 8), so no adaptation should introduce one.
 
 Read `~/.claude/skills/i18n-setup/src/i18n_index.ts`.
 
@@ -184,13 +190,20 @@ Read `~/.claude/skills/i18n-setup/scripts/i18n-audit.ts` → write to
 Read `~/.claude/skills/i18n-setup/scripts/translate.ts` → write to
 `ui/scripts/translate.ts`.
 - Update the `NAMESPACES` array to match Step 1.
-- Update the `systemPrompt` app description to match the project name and purpose.
+- Update the `SYSTEM_PROMPT` app description to match the project name and purpose.
+
+Read `~/.claude/skills/i18n-setup/scripts/check-namespaces.ts` → write to
+`ui/scripts/check-namespaces.ts`. No adaptation needed — it re-parses
+`NAMESPACES` out of the two files above and `src/i18n/index.ts`, so it stays
+correct as long as their `NAMESPACES` arrays are kept in the
+`const NAMESPACES = [ ... ]` shape.
 
 Add to `ui/package.json` scripts:
 
 ```json
 "translate":  "tsx scripts/translate.ts",
-"i18n:check": "tsx scripts/i18n-audit.ts"
+"i18n:check": "tsx scripts/i18n-audit.ts",
+"i18n:check-namespaces": "tsx scripts/check-namespaces.ts"
 ```
 
 On success, mark `- [x] scripts` in `.i18n-setup-progress.md`.
@@ -202,6 +215,10 @@ On success, mark `- [x] scripts` in `.i18n-setup-progress.md`.
 Read `~/.claude/skills/i18n-setup/backend/routes_me_language.ts`.
 
 Write to `src/routes/me_language.ts` (or merge into an existing `src/routes/me.ts`).
+Adjust the `SUPPORTED_LANGUAGES` import path to this project's actual
+distance from the route file to `ui/src/i18n/i18n_supported_languages.ts`
+(the default template assumes `src/routes/` and `ui/src/i18n/` as siblings
+under the project root).
 
 Add to the database schema / next migration:
 
@@ -240,8 +257,15 @@ framework (e.g. Vitest with the Workers pool). Cover at minimum:
   the stored value.
 - **Unauthenticated → 401**: no session returns 401 (no write).
 
-Validate the locale against the manifest's supported-locale list, not an
-ad-hoc check, so the test and the route share one source of truth.
+`backend/routes_me_language.test.ts` already covers the first two cases
+against a real test-database row (testing-setup's `createUser`/`query`
+helpers) — copy it to `src/routes/me_language.test.ts`, adjusting only the
+`Env`/`User` import path, and add the unauthenticated-401 case for however
+this project's router wires auth middleware in front of the handler.
+
+Validate the locale against `SUPPORTED_LANGUAGES` (Step 4/5's isomorphic
+module), not an ad-hoc check, so the test and the route share one source of
+truth.
 
 On success, mark `- [x] language-route-test` in `.i18n-setup-progress.md`.
 (Skip this mark if server-side persistence is no — the step was intentionally skipped.)
@@ -297,6 +321,14 @@ Should print: `✓ All 17 locales × N namespaces are in sync with English.`
 If it fails with `MISSING FILE` errors, translations haven't been generated yet
 (Step 10 was skipped). That's expected — note it for the user.
 
+```bash
+cd ui && npm run i18n:check-namespaces
+```
+
+Should print: `✓ NAMESPACES match across 3 files: [...]`. A failure here means
+`src/i18n/index.ts`, `scripts/i18n-audit.ts`, and `scripts/translate.ts` have
+drifted out of sync — update whichever one is stale.
+
 ---
 
 ## Operational Readiness — `PATCH /api/me/language`
@@ -329,7 +361,8 @@ Report:
 - Whether translations were generated or need to be run manually
 - Any ADAPT comments that still need attention
 - The three files that must stay in sync whenever a namespace is added:
-  `src/i18n/index.ts`, `scripts/translate.ts`, `scripts/i18n-audit.ts`
+  `src/i18n/index.ts`, `scripts/translate.ts`, `scripts/i18n-audit.ts` — run
+  `npm run i18n:check-namespaces` after editing any of them to verify
 
 ---
 
