@@ -33,7 +33,8 @@ import os
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 VENV_PYTHON = REPO_ROOT / "hooks" / ".venv" / "bin" / "python"
@@ -105,7 +106,7 @@ def load_frontmatter(path: Path, yaml_load: Callable[[str], Any]) -> dict[str, A
     return data
 
 
-def normalize_tool_field(value: Any) -> list[str]:
+def normalize_tool_field(value: object) -> list[str]:
     """Normalize a tools-like field to a list of tool names.
 
     Production frontmatter stores tools/disallowedTools/allowed-tools
@@ -307,7 +308,8 @@ def _render_agent_table(agents: list[AgentEntry]) -> str:
     for a in agents:
         tool_count = "all (inherited)" if a.tool_count is None else str(a.tool_count)
         lines.append(
-            f"| `{a.rel_path}` | {a.name} | {a.model} | {a.capability_tier} | {tool_count} |"
+            f"| `{a.rel_path}` | {a.name} | {a.model} | {a.capability_tier} "
+            f"| {tool_count} |"
         )
     return "\n".join(lines)
 
@@ -319,7 +321,8 @@ def _render_skill_table(skills: list[SkillEntry]) -> str:
     ]
     for s in skills:
         lines.append(
-            f"| `{s.rel_path}` | {s.name} | {s.model} | {s.blast_tier} | {s.allowed_tool_count} |"
+            f"| `{s.rel_path}` | {s.name} | {s.model} | {s.blast_tier} "
+            f"| {s.allowed_tool_count} |"
         )
     return "\n".join(lines)
 
