@@ -42,6 +42,10 @@ Phase 3 scores its own findings inline. Do not add a scoring agent to this
 phase; that would be a contract change, not a faithful application of the
 shared rubric.
 
+Agent I's per-file verdict table rows are not findings and are not scored or
+filtered by this procedure — they carry through to the Phase 5 appendix
+verbatim, as structured data.
+
 ## Filtering thresholds
 
 Apply the filtering rules from the same reference, after scoring:

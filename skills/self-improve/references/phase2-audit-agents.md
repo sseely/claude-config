@@ -1,10 +1,13 @@
 # Phase 2 — Configuration audit agent prompts
 
-Full prompts for the five Phase 2 audit agents, split out of `SKILL.md` to
+Full prompts for the six Phase 2 audit agents, split out of `SKILL.md` to
 keep it under Anthropic's 500-line skill ceiling. Dispatch order and the
 parallelism rule live in `SKILL.md`; everything an agent needs is here.
 
-All five are read-only.
+All six are read-only against source; Agent I additionally writes its own
+verdict table (see below).
+
+## Audit agent prompts
 
 ### Agent D — Settings, hooks, and MCP
 
@@ -31,7 +34,7 @@ Evaluate:
    List each entry by approximate line number.
 3. **Permission gaps**: Commands in `settings.local.json` or the
    autonomous template but absent from global `settings.json`.
-4. **WebSearch syntax**: Is `"WebSearch"` vs `"WebSearch(*)"` 
+4. **WebSearch syntax**: Is `"WebSearch"` vs `"WebSearch(*)"`
    consistent? Which form does Claude Code actually require?
 5. **MCP gaps**: What MCP servers would replace current `gh`, `curl`,
    or filesystem shell calls with structured, type-safe equivalents?
@@ -277,16 +280,51 @@ Group findings under:
 For each finding: `file:line`, severity (Warning / Suggestion / Note), and
 concrete fix. No findings without a concrete fix.
 
-Wait for all five agents to complete before Phase 3.
+### Agent I — Verdict pass
+
+Synthesis only. Do not re-read source files beyond the `wc -l` sweep below —
+this agent's job is to turn D-H's findings into one decisive per-file table,
+not to re-audit.
+
+Launch only after D, E, F, G, and H have all written their
+`.agent-notes/self-improve-phase2-[D|E|F|G|H].md` files.
+
+1. Read all five phase2 agent-note files in full:
+   `.agent-notes/self-improve-phase2-D.md` through `-phase2-H.md`.
+2. Run a line-count sweep (no content re-read):
+   ```bash
+   wc -l ~/.claude/rules/*.md
+   wc -l ~/.claude/agents/**/*.md
+   wc -l ~/.claude/skills/**/SKILL.md
+   wc -l ~/.claude/skills/**/references/*.md
+   wc -l ~/.claude/hooks/*.py ~/.claude/hooks/*.sh
+   ```
+3. Emit one row per file:
+   `file | category | lines | est. tokens | verdict | reason`
+   - `category`: `rule` / `agent` / `skill` / `hook`.
+   - `lines`: from the `wc -l` sweep above.
+   - `est. tokens`: `lines × 13`, stated as an estimate, not a measurement.
+   - `verdict`: one of `keep` / `trim` / `merge` / `delete`, synthesized from
+     what D-H said about that file. A file none of D-H mentioned gets
+     `keep` with reason `no D-H finding` — absence of a finding is not
+     itself a defect.
+   - `reason`: one line, citing which agent(s) drove the verdict.
+
+Write the full table to `.agent-notes/self-improve-phase2-I.md`.
+
+Wait for all six agents to complete before Phase 3.
 
 **Agent-crash handling:** If any agent in this phase returns no output
 (crashed, killed, or timed out), relaunch it once. If it fails again on
 retry, proceed without it and record the unaudited axis as an explicit gap
-in the Phase 4 report.
+in the Phase 4 report. Agent I additionally requires D-H's outputs to exist
+before it can run — if any of D-H was gapped per this rule, Agent I still
+runs, but its row for the gapped axis states `no D-H finding — axis gapped
+this run` rather than treating silence as `keep`.
 
 **Phase 2 completion:** Each agent writes its full output to
-`.agent-notes/self-improve-phase2-[D|E|F|G|H].md` before returning. Once all
-five have completed (or been retried/gapped per the crash-handling rule
+`.agent-notes/self-improve-phase2-[D|E|F|G|H|I].md` before returning. Once
+all six have completed (or been retried/gapped per the crash-handling rule
 above), append `phase-2: done` to `~/.claude/.self-improve-progress.md`.
 
 ---

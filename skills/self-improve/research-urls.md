@@ -124,7 +124,7 @@ often as the publisher's own cadence.
 
 ## Candidate URLs (not yet promoted — promote to an active section after one fetch that passes the thin-content bar above; 200 status alone is not sufficient)
 
-<!-- Code review (2026-08-01): 91 candidates, 6 ever promoted. No agent fetches candidates, so promotion is accidental. Revisit if this table passes 120 entries without a draining step. -->
+<!-- Code review (2026-09-20): drain rate raised to 20/run (was 10) per F165. An entry >270 days old and never promoted/cited is now marked "Demoted: expired (>270 days, never promoted)" instead of accumulating indefinitely — never deleted. Revisit the 20/run quota if the table keeps growing net of expiries. -->
 
 | URL                                                                                       | Purpose                                                                                    | Suggested by    | Date Added |
 | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | --------------- | ---------- |
@@ -217,7 +217,7 @@ often as the publisher's own cadence.
 | https://arxiv.org/pdf/2605.23135 | (rel: 68) PREPRINT: The Impact of AI Coding Assistants on Software Engineering — longitudinal study | Agent X | 2026-08-01 |
 | https://arxiv.org/pdf/2607.05677 | (rel: 66) PREPRINT: From Conversation to Contribution — characterizing coding agents in open-source software | Agent X | 2026-08-01 |
 | https://arxiv.org/pdf/2507.15003 | (rel: 65) PREPRINT: The Rise of AI Teammates in Software Engineering 3.0 | Agent X | 2026-08-01 |
-| https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5 | (rel: 95) Official Opus 5 prompting guide — verbosity control, over-verification/self-correction tuning, subagent delegation caps via CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH/MAX_CONCURRENT_SUBAGENTS; validates/extends parallelism.md's Opus behavioral compensation section | Agent X | 2026-09-02 |
+| https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5 | (rel: 95) Official Opus 5 prompting guide — verbosity control, over-verification/self-correction tuning, subagent delegation caps via CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH/MAX_CONCURRENT_SUBAGENTS; validates/extends model-routing.md's Opus behavioral compensation section | Agent X | 2026-09-02 |
 | https://www.anthropic.com/research/multiagent-systems | (rel: 90) Anthropic official (Aug 2026): multiagent failure modes — coordination breakdown, conformity cascades, epistemic brittleness, goal-conflict escalation to sabotage; directly informs parallelism.md | Agent X | 2026-09-02 |
 | https://arxiv.org/abs/2608.01326 | (rel: 90) PREPRINT (Aug 2026): Context Compaction Theory — game-theoretic proof summarization-based compaction can beat selection-based compaction for some query sets; empirically evaluates Anthropic's own compaction system | Agent X | 2026-09-02 |
 | https://www.anthropic.com/research/claude-code-expertise | (rel: 88) Anthropic official (Jun 2026): analysis of ~400K Claude Code sessions — users make ~70% of planning decisions, Claude ~80% of execution; domain expertise (not coding background) predicts success; informs agent-design/model-routing rules | Agent X | 2026-09-02 |
