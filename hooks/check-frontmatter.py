@@ -10,7 +10,7 @@ exit 0, fail-open on any unhandled exception.
 This hook fires on EVERY Write/Edit in EVERY project on this machine, not
 only ~/.claude. It therefore bails in microseconds — pure string checks, no
 file open, no subprocess — on any path that is not agents/**/*.md or
-skills/*/SKILL.md under THIS ~/.claude tree (identified via this script's
+skills/**/SKILL.md under THIS ~/.claude tree (identified via this script's
 own location, not via $HOME, so it is correct even if ~/.claude is a
 symlink target or the invoking shell's HOME differs).
 
@@ -24,12 +24,29 @@ skill.frontmatter.schema.json (T2) for the schemas enforced here, and FD-1
 (plans/fleet-governance/decisions.md) for the cross-surface tool-key rule:
 'tools'/'disallowedTools' are agent-only; 'allowed-tools' is skill-only and
 is a permission pre-approval, not a capability restriction.
+
+F035: skill frontmatter is matched by suffix (any-depth
+`skills/.../SKILL.md`), not by a fixed 3-segment path, so a synced skill at
+`skills/synced/<workspace-id>/<name>/SKILL.md` is validated exactly like a
+top-level one — see gen-fleet-inventory.py's `rglob("SKILL.md")`, which
+already treats any depth as a skill.
+
+F093: every `block()` call is also a HookDeny row appended to
+logs/hook-events.jsonl via `_hooklib.log_deny`, so on-call can count denies
+from this hook the same way as guard-bash's.
+
+CLI: `check-frontmatter.py --check FILE...` validates each given file
+directly (no stdin JSON payload), prints any violation, and exits 1 if any
+file was blocked — for use by scripts/fm-check.sh and quality gates that
+need a real exit code instead of a printed decision.
 """
 import json
 import os
 import re
 import subprocess
 import sys
+
+from _hooklib import log_deny
 
 HOOKS_DIR = os.path.dirname(os.path.abspath(__file__))
 CLAUDE_DIR = os.path.dirname(HOOKS_DIR)
@@ -42,6 +59,8 @@ AGENT_SCHEMA_PATH = os.path.join(
 SKILL_SCHEMA_PATH = os.path.join(
     CLAUDE_DIR, "docs", "fleet", "schema", "skill.frontmatter.schema.json"
 )
+
+HOOK_NAME = "check-frontmatter"
 
 FD1_NOTE = (
     "cross-surface rule FD-1 (plans/fleet-governance/decisions.md): "
@@ -63,9 +82,13 @@ YAML_PARSE_SNIPPET = (
 
 def block(reason: str) -> None:
     print(json.dumps({"decision": "block", "reason": reason}))
+    try:
+        log_deny(HOOK_NAME, reason)
+    except Exception:
+        pass  # A logging bug must never turn a deny into a silent allow.
 
 
-def classify_surface(file_path: str):
+def classify_surface(file_path: str) -> tuple[str | None, str | None]:
     """("agent"|"skill"|None, rel_path). Pure string check — no I/O."""
     if not file_path.endswith(".md"):
         return None, None
@@ -76,12 +99,12 @@ def classify_surface(file_path: str):
     parts = abs_path[len(prefix):].split(os.sep)
     if len(parts) >= 2 and parts[0] == "agents":
         return "agent", "/".join(parts)
-    if len(parts) == 3 and parts[0] == "skills" and parts[2] == "SKILL.md":
+    if len(parts) >= 3 and parts[0] == "skills" and parts[-1] == "SKILL.md":
         return "skill", "/".join(parts)
     return None, None
 
 
-def extract_frontmatter(text: str):
+def extract_frontmatter(text: str) -> str | None:
     """Text between the leading '---' delimiters, or None if absent."""
     lines = text.splitlines()
     if not lines or lines[0].strip() != "---":
@@ -92,7 +115,7 @@ def extract_frontmatter(text: str):
     return None
 
 
-def parse_yaml(text: str):
+def parse_yaml(text: str) -> tuple[bool, object]:
     """Shell out to hooks/.venv/bin/python (has PyYAML). (ok, data_or_err)."""
     result = subprocess.run(
         [VENV_PYTHON, "-c", YAML_PARSE_SNIPPET],
@@ -106,13 +129,13 @@ def parse_yaml(text: str):
     return False, payload.get("error", "unknown YAML error")
 
 
-def load_schema(surface: str):
+def load_schema(surface: str) -> dict[str, object]:
     path = AGENT_SCHEMA_PATH if surface == "agent" else SKILL_SCHEMA_PATH
     with open(path, encoding="utf-8") as fh:
         return json.load(fh)
 
 
-def _base_type_ok(value, t) -> bool:
+def _base_type_ok(value: object, t: object) -> bool:
     if t == "string":
         return isinstance(value, str)
     if t == "boolean":
@@ -122,25 +145,25 @@ def _base_type_ok(value, t) -> bool:
     return True
 
 
-def _array_items_ok(value, subschema) -> bool:
+def _array_items_ok(value: object, subschema: dict[str, object]) -> bool:
     items = subschema.get("items")
     if not items:
         return True
     return all(type_matches(item, items) for item in value)
 
 
-def _enum_ok(value, subschema) -> bool:
+def _enum_ok(value: object, subschema: dict[str, object]) -> bool:
     return "enum" not in subschema or value in subschema["enum"]
 
 
-def _pattern_ok(value, subschema) -> bool:
+def _pattern_ok(value: object, subschema: dict[str, object]) -> bool:
     pattern = subschema.get("pattern")
     if pattern is None:
         return True
     return isinstance(value, str) and re.match(pattern, value) is not None
 
 
-def type_matches(value, subschema) -> bool:
+def type_matches(value: object, subschema: dict[str, object]) -> bool:
     """Check `value` against one (non-anyOf) JSON Schema fragment."""
     t = subschema.get("type")
     if not _base_type_ok(value, t):
@@ -150,13 +173,15 @@ def type_matches(value, subschema) -> bool:
     return _enum_ok(value, subschema) and _pattern_ok(value, subschema)
 
 
-def matches_property_schema(value, subschema) -> bool:
+def matches_property_schema(value: object, subschema: dict[str, object]) -> bool:
     if "anyOf" in subschema:
         return any(type_matches(value, s) for s in subschema["anyOf"])
     return type_matches(value, subschema)
 
 
-def fd1_violations(data: dict, surface: str):
+def fd1_violations(
+    data: dict[str, object], surface: str
+) -> tuple[set[str], list[str]]:
     """Explicit FD-1 cross-surface check (schema also encodes this)."""
     fields = set()
     if surface == "agent" and "allowed-tools" in data:
@@ -173,7 +198,7 @@ def fd1_violations(data: dict, surface: str):
     return fields, [reason]
 
 
-def validate(data, schema: dict, surface: str):
+def validate(data: object, schema: dict[str, object], surface: str) -> list[str]:
     """Return a list of human-readable violation strings, empty if valid."""
     if not isinstance(data, dict):
         return [f"frontmatter must be a YAML mapping, got {type(data).__name__}"]
@@ -199,58 +224,92 @@ def validate(data, schema: dict, surface: str):
     return violations
 
 
-try:
-    payload = json.loads(sys.stdin.read())
-    raw_path = payload.get("tool_input", {}).get("file_path", "")
-
-    surface, rel_path = classify_surface(raw_path)
-    if surface is None:
-        sys.exit(0)
-
-    abs_path = os.path.abspath(raw_path)
-    if not os.path.isfile(abs_path):
-        sys.exit(0)
-
-    with open(abs_path, encoding="utf-8") as fh:
-        text = fh.read()
-
-    frontmatter_text = extract_frontmatter(text)
-    if frontmatter_text is None:
-        block(
-            f"{rel_path}: no YAML frontmatter block found (expected leading "
-            "'---' ... '---' delimiters)."
-        )
-        sys.exit(0)
-
+def _validate_frontmatter(
+    frontmatter_text: str, rel_path: str, surface: str
+) -> str | None:
+    """Parse + schema-validate an extracted frontmatter block."""
     if not (os.path.isfile(VENV_PYTHON) and os.access(VENV_PYTHON, os.X_OK)):
-        block(
+        return (
             "Frontmatter validation requires PyYAML in the shared hooks "
             "venv, which is not installed.\n\n"
             f"Please ask the user for permission to run:\n  {SETUP_SCRIPT}\n\n"
             "This installs into ~/.claude/hooks/.venv and does not affect "
             "any project dependencies."
         )
-        sys.exit(0)
 
     ok, result = parse_yaml(frontmatter_text)
     if not ok:
-        block(f"{rel_path}: unparseable YAML frontmatter — {result}")
-        sys.exit(0)
+        return f"{rel_path}: unparseable YAML frontmatter — {result}"
 
     schema = load_schema(surface)
     violations = validate(result, schema, surface)
-    if violations:
-        detail = "\n".join(f"  - {v}" for v in violations)
-        block(
-            f"Frontmatter validation failed for {rel_path} "
-            f"({surface} schema):\n{detail}"
+    if not violations:
+        return None
+    detail = "\n".join(f"  - {v}" for v in violations)
+    return (
+        f"Frontmatter validation failed for {rel_path} "
+        f"({surface} schema):\n{detail}"
+    )
+
+
+def check_single_file(file_path: str) -> str | None:
+    """Return a block reason for `file_path`, or None if it's fine to allow."""
+    surface, rel_path = classify_surface(file_path)
+    if surface is None:
+        return None
+
+    abs_path = os.path.abspath(file_path)
+    if not os.path.isfile(abs_path):
+        return None
+
+    with open(abs_path, encoding="utf-8") as fh:
+        text = fh.read()
+
+    frontmatter_text = extract_frontmatter(text)
+    if frontmatter_text is None:
+        return (
+            f"{rel_path}: no YAML frontmatter block found (expected leading "
+            "'---' ... '---' delimiters)."
         )
 
-except Exception as exc:
-    # Fail open — hook bugs must never block writes. Log why so a silent
-    # bug doesn't go unnoticed forever.
-    print(
-        f"check-frontmatter.py: unhandled {type(exc).__name__}: {exc}",
-        file=sys.stderr,
-    )
+    return _validate_frontmatter(frontmatter_text, rel_path, surface)
+
+
+def run_hook_mode() -> None:
+    """Read the PostToolUse JSON payload from stdin. Always exits 0."""
+    try:
+        payload = json.loads(sys.stdin.read())
+        raw_path = payload.get("tool_input", {}).get("file_path", "")
+        reason = check_single_file(raw_path)
+        if reason is not None:
+            block(reason)
+    except Exception as exc:
+        # Fail open — hook bugs must never block writes. Log why so a
+        # silent bug doesn't go unnoticed forever.
+        print(
+            f"check-frontmatter.py: unhandled {type(exc).__name__}: {exc}",
+            file=sys.stderr,
+        )
     sys.exit(0)
+
+
+def run_check_mode(file_paths: list[str]) -> None:
+    """Validate each file directly; exit 1 if any of them was blocked."""
+    any_violation = False
+    for file_path in file_paths:
+        reason = check_single_file(file_path)
+        if reason is not None:
+            block(reason)
+            any_violation = True
+    sys.exit(1 if any_violation else 0)
+
+
+def main() -> None:
+    if len(sys.argv) > 1 and sys.argv[1] == "--check":
+        run_check_mode(sys.argv[2:])
+        return
+    run_hook_mode()
+
+
+if __name__ == "__main__":
+    main()
