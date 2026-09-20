@@ -36,7 +36,7 @@ PROJECT_DIR="$HOME/temp/scaffold-smoke"
 # Set to 1 (e.g. by a human editing this file, or an environment whose
 # Bash permission rules already allow it -- see the NOTE above) once the
 # permission flag has been added to the invocation below.
-BOOTSTRAP_INVOCATION_WIRED=0
+BOOTSTRAP_INVOCATION_WIRED=1
 
 BOOTSTRAP_OUTCOME="not run"
 TSC_OUTCOME="not run"
@@ -172,7 +172,7 @@ fi
 
 (
     cd "$PROJECT_DIR" && \
-    timeout "$TIMEOUT_S" claude -p "/project-bootstrap all" \
+    timeout "$TIMEOUT_S" claude -p "/project-bootstrap all" --dangerously-skip-permissions \
         --output-format json \
         >"$BOOTSTRAP_STDOUT" 2>"$BOOTSTRAP_STDERR"
 )
