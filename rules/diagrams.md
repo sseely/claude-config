@@ -1,3 +1,9 @@
+---
+paths:
+  - "**/*.puml"
+  - "**/*.md"
+---
+
 # Diagrams
 
 PlantUML is the default for every generated diagram — fenced ```` ```plantuml ````

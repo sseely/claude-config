@@ -40,8 +40,10 @@ or hook that verifies it) or **unverified intention** (no check exists yet).
   ≤5 parameters (`rules/code-principles.md`).
 - `rules/` stays under its 2020-line cap — checked by `test $(cat rules/*.md
   | wc -l) -le 2020`.
-- No rule file adds `paths:` frontmatter — checked by `! grep -rln
-  '^paths:' rules/` (AD-1; a prior pilot of scoped loading came back RED).
+- No rule file adds `paths:` frontmatter except `rules/diagrams.md`
+  (piloted T16, green — see `decision-journal.md`) — checked by `test
+  "$(grep -rln '^paths:' rules/)" = "rules/diagrams.md"` (AD-1; a prior
+  pilot of scoped loading came back RED, predating v2.1.278).
 - `skills/self-improve/SKILL.md` stays within its 150-line / 10,240-byte
   budget — checked by `test $(wc -l < skills/self-improve/SKILL.md) -le 150
   && test $(wc -c < skills/self-improve/SKILL.md) -le 10240`.
