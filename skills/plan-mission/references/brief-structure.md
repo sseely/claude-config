@@ -41,6 +41,8 @@ overview docs.
    - Quality gate commands (from Phase 1)
    - Table of batches with status checkboxes
    - Links to every other doc in the plan
+   - An instruction to read `docs/reference/autonomous-execution.md`
+     at mission start — `rules/autonomous-execution.md` is now a stub
    This is what the executor re-reads after compaction. Keep it
    under 200 lines — it must fit comfortably in context alongside
    the CLAUDE.md chain.
