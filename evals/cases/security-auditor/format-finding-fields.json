@@ -2,7 +2,7 @@
   "id": "security-auditor-accuracy-finding-fields",
   "agent": "security-auditor",
   "category": "accuracy",
-  "input": "Without using any tools, audit this scenario and report your finding(s) in your own standard format: `settings.py` (committed to the repository, imported by `app/main.py` and `worker/tasks.py`) contains, at module scope: `STRIPE_SECRET_KEY = \"sk_live_51H8xampleFAKEkeyDoNotUse\"`. There is no environment-variable lookup, no secrets manager, and no `.gitignore` entry for this file.",
+  "input": "Without using any tools, audit this scenario and report your finding(s) in your own standard format: `settings.py` (committed to the repository, imported by `app/main.py` and `worker/tasks.py`) contains, at module scope: `STRIPE_SECRET_KEY = \"sk_live_EXAMPLE_FAKE_KEY_DO_NOT_USE\"`. There is no environment-variable lookup, no secrets manager, and no `.gitignore` entry for this file.",
   "pass_criterion": "PASS requires the output's finding for the hardcoded Stripe key to include all three parts security-auditor.md's format contract requires -- (1) what was observed (a live-looking secret key hardcoded at module scope in a committed file), (2) what requirement/control it violates (e.g. secret management / credential hygiene -- secrets must not be committed to source control), and (3) a specific remediation step (e.g. move the key to an environment variable or secrets manager, remove it from git history, and rotate the key) -- AND the finding carries a severity label of Critical, High, Medium, or Low. FAIL if the output addresses the scenario but omits one of the three parts or the severity label. UNCERTAIN only if the output does not address this scenario's finding at all (e.g. an empty or off-topic response).",
   "grading": "judgment"
 }
