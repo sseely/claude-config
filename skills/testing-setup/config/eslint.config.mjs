@@ -6,10 +6,21 @@ import tseslint from 'typescript-eslint';
 import reactHooks from 'eslint-plugin-react-hooks';
 
 export default tseslint.config(
-  ...tseslint.configs.recommended,
+  // Global ignores MUST be an object containing only `ignores`. Combined with
+  // any other key (e.g. `rules`) it degrades to a per-config exclusion and the
+  // paths still get linted — which silently lints minified build output.
   {
     // ADAPT: add other generated or vendored directories to ignore
-    ignores: ['dist/**', 'node_modules/**', 'ui/node_modules/**'],
+    ignores: [
+      'dist/**',
+      'ui/dist/**',
+      'node_modules/**',
+      'ui/node_modules/**',
+      'coverage/**',
+    ],
+  },
+  ...tseslint.configs.recommended,
+  {
     rules: {
       '@typescript-eslint/no-unused-vars': [
         'error',

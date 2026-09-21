@@ -1,5 +1,10 @@
 # Claude Code — Global Instructions
 
+## Interaction Style
+
+- Be direct. No filler phrases ("Perfect!", "Great!", "Certainly!"), no pleasantries.
+- After completing a task, briefly summarize what was done and the reasoning behind any non-obvious decisions. Identify any agents used.
+
 ## Verification
 
 Before answering questions about code, APIs, or libraries, use tools first:
@@ -27,15 +32,15 @@ hook-enforced complexity limits), **security.md**, **parallelism.md**
 
 ## Diagnosis
 
-On an observed discrepancy (failing test, oracle mismatch, symptom vs. intent), enter diagnosis mode per `~/.claude/rules/diagnosis.md`: state the mechanism — cause, `file:line`, causal chain, what you ruled out — before any fix. Symptom gone ≠ done; not for greenfield.
+On an observed discrepancy (failing test, oracle mismatch, symptom vs. intent), enter diagnosis mode before any fix. See `~/.claude/rules/diagnosis.md` for the full diagnosis-artifact definition. Symptom gone ≠ done; not for greenfield.
 
 ## Complex Tasks
 
 For multi-part tasks or more than ~2 pages of output:
 1. Present an outline for review before executing
 2. Complete one section at a time
-3. Track progress in the mission brief's checkboxes; use TodoWrite only if the
-   session exposes it
+3. Progress tracking: see `docs/reference/autonomous-execution.md` when a
+   mission brief is active.
 
 For features requiring 1-4 hours of autonomous work, use `/plan-mission` to generate a mission brief first.
 
@@ -43,11 +48,16 @@ For features requiring 1-4 hours of autonomous work, use `/plan-mission` to gene
 
 ## Agents
 
-Agents live in `~/.claude/agents/`. Invoke via the Agent tool with `subagent_type` matching the agent's `name`. Default to handling tasks directly for tasks under ~30 min; delegate when the task clearly falls within a specialist's domain. Agent descriptions are loaded automatically. Always announce which agent you are invoking and why before calling it. Use Workflow (via `Workflow` tool) for multi-step parallel orchestration with deterministic control flow. Prefer Agent tool for individual specialist delegation. Workflow is user-opt-in only — never invoke unless the user explicitly requests it or a skill instructs it. `subagent_type: "agent-team"` is available for multi-agent collaboration alongside the Agent tool and Workflow.
+- Agents live in `~/.claude/agents/`; invoke via the `Agent` tool with `subagent_type` matching the agent's `name`.
+- Default to handling tasks directly for tasks under ~30 min; delegate when the task clearly falls within a specialist's domain.
+- Agent descriptions are loaded automatically.
+- Always announce which agent you are invoking and why before calling it.
+- `Workflow` (via the `Workflow` tool) is for multi-step parallel orchestration with deterministic control flow, but is user-opt-in only — never invoke unless the user explicitly requests it or a skill instructs it.
+- `subagent_type: "agent-team"` is available for multi-agent collaboration alongside the Agent tool and Workflow.
 
 ## Multi-Agent Parallelism
 
-Plan before executing: list subtasks, mark dependencies, assign file ownership (one writer per file), batch independent work in parallel, sequence dependent batches. See `~/.claude/rules/parallelism.md` for full rules.
+See `~/.claude/rules/parallelism.md` for the full 5-point planning procedure.
 
 ## Session Notes
 
@@ -67,8 +77,3 @@ A `PostCompact` hook injects `~/.claude/post-compact-context.md`,
 which restores 5 sections of condensed `rules/` content: autonomous
 execution recovery, model routing, commit format, autonomous
 restraint, and batch close-out.
-
-## Interaction Style
-
-- Be direct. No filler phrases ("Perfect!", "Great!", "Certainly!"), no pleasantries.
-- After completing a task, briefly summarize what was done and the reasoning behind any non-obvious decisions. Identify any agents used.

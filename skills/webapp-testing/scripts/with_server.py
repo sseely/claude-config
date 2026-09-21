@@ -32,7 +32,8 @@ def is_server_ready(port, timeout=30):
     return False
 
 
-def main():
+def _parse_args():
+    """Parse and validate CLI arguments."""
     parser = argparse.ArgumentParser(description='Run command with one or more servers')
     parser.add_argument('--server', action='append', dest='servers', required=True, help='Server command (can be repeated)')
     parser.add_argument('--port', action='append', dest='ports', type=int, required=True, help='Port for each server (must match --server count)')
@@ -49,57 +50,67 @@ def main():
         print("Error: No command specified to run")
         sys.exit(1)
 
-    # Parse server configurations
     if len(args.servers) != len(args.ports):
         print("Error: Number of --server and --port arguments must match")
         sys.exit(1)
 
-    servers = []
-    for cmd, port in zip(args.servers, args.ports):
-        servers.append({'cmd': cmd, 'port': port})
+    return args
+
+
+def _start_servers(servers, timeout):
+    """Start each server and wait for it to become ready.
+
+    Returns the list of Popen processes, in start order.
+    """
+    server_processes = []
+    for i, server in enumerate(servers):
+        print(f"Starting server {i+1}/{len(servers)}: {server['cmd']}")
+
+        # Use shell=True to support commands with cd and &&. Output
+        # inherits the terminal instead of buffering unread.
+        process = subprocess.Popen(server['cmd'], shell=True)
+        server_processes.append(process)
+
+        print(f"Waiting for server on port {server['port']}...")
+        if not is_server_ready(server['port'], timeout=timeout):
+            raise RuntimeError(
+                f"Server failed to start on port {server['port']} within "
+                f"{timeout}s (command: {server['cmd']!r})"
+            )
+
+        print(f"Server ready on port {server['port']}")
+
+    print(f"\nAll {len(server_processes)} server(s) ready")
+    return server_processes
+
+
+def _stop_servers(server_processes):
+    """Terminate (or kill) every started server process."""
+    print(f"\nStopping {len(server_processes)} server(s)...")
+    for i, process in enumerate(server_processes):
+        try:
+            process.terminate()
+            process.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.wait()
+        print(f"Server {i+1} stopped")
+    print("All servers stopped")
+
+
+def main():
+    args = _parse_args()
+    servers = [{'cmd': cmd, 'port': port} for cmd, port in zip(args.servers, args.ports)]
 
     server_processes = []
-
     try:
-        # Start all servers
-        for i, server in enumerate(servers):
-            print(f"Starting server {i+1}/{len(servers)}: {server['cmd']}")
+        server_processes = _start_servers(servers, args.timeout)
 
-            # Use shell=True to support commands with cd and &&
-            process = subprocess.Popen(
-                server['cmd'],
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
-            )
-            server_processes.append(process)
-
-            # Wait for this server to be ready
-            print(f"Waiting for server on port {server['port']}...")
-            if not is_server_ready(server['port'], timeout=args.timeout):
-                raise RuntimeError(f"Server failed to start on port {server['port']} within {args.timeout}s")
-
-            print(f"Server ready on port {server['port']}")
-
-        print(f"\nAll {len(servers)} server(s) ready")
-
-        # Run the command
         print(f"Running: {' '.join(args.command)}\n")
         result = subprocess.run(args.command)
         sys.exit(result.returncode)
-
     finally:
-        # Clean up all servers
-        print(f"\nStopping {len(server_processes)} server(s)...")
-        for i, process in enumerate(server_processes):
-            try:
-                process.terminate()
-                process.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                process.kill()
-                process.wait()
-            print(f"Server {i+1} stopped")
-        print("All servers stopped")
+        _stop_servers(server_processes)
 
 
 if __name__ == '__main__':

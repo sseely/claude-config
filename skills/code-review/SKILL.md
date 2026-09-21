@@ -16,13 +16,17 @@ disable-model-invocation: false
 | Step | Agent role | Model |
 |------|-----------|-------|
 | Step 2 — 11 parallel reviewers | Code analysis | `sonnet` |
-| Step 3 — Deduplication pass | Dedup + grouping | `haiku` |
-| Step 4 — Confidence scoring | Verify each finding against source | `sonnet` |
+| Step 3 — Deduplication pass | Dedup + grouping | `sonnet` |
+| Step 4 — Confidence scoring (batched by file) | Verify each finding against source | `sonnet` |
 
 Scoring runs on Sonnet, not Haiku: the rubric asks the scorer to read the
 source and verify the condition is real, which is code analysis, not
 format checking. A weaker gatekeeper judging a stronger reviewer's output
-is where true positives quietly die.
+is where true positives quietly die. Step 3 is routed to Sonnet for the
+same reason: resolving a "cannot occur" contradiction requires reading
+the source and reasoning about code paths, which is code analysis Haiku
+is not routed for anywhere else in this skill — a wrong Haiku call at
+this step silently drops a real finding before Step 4 ever sees it.
 
 ## Step 0 — Resume check
 
@@ -185,9 +189,10 @@ them and the checkpoint is unusable.
 
 ---
 
-## Step 3 — Deduplication pass (run after all 11 agents complete)
+## Step 3 — Run a single Sonnet dedup agent (run after all 11 agents complete)
 
-Run a single dedup agent. Give it all findings from all 11 agents.
+Run a single dedup agent, routed to Sonnet per the Model Routing table
+above. Give it all findings from all 11 agents.
 
 The dedup agent must:
 
@@ -212,12 +217,25 @@ The dedup agent must:
 
 ## Step 4 — Confidence scoring (run after dedup, before final report)
 
-For each finding from Step 3, launch a parallel Sonnet agent. Give each
-agent the finding, the relevant source file(s), any CLAUDE.md files
-that apply, the **scope kind** (`diff` or `files`) from scope
-determination, and the originating agent's dimension (so security
-findings can be recognised as such). The agent must score the finding 0–100 and return the score
-with a one-sentence justification.
+Group Step 3's deduplicated findings by the file they reference, then
+launch one parallel Sonnet agent per file — not one agent per finding.
+Give each agent all of that file's findings batched into a single
+prompt, the file itself, any CLAUDE.md files that apply, the **scope
+kind** (`diff` or `files`) from scope determination, and each finding's
+originating agent dimension (so security findings can be recognised as
+such). The agent scores each finding 0–100 independently and returns
+one score plus a one-sentence justification per finding, not one score
+for the whole file.
+
+If a single file accumulates more than ~35 findings (rare — typically
+only in a "full project" scope), split that file's findings across two
+scoring agents rather than handing one agent an oversized prompt. This
+is the batching rule the 2026-09-20 review run should have used from
+the start: that run produced 198 raw findings and the orchestrator
+batched them into 6 scoring agents ad hoc, by file, because spawning
+one Sonnet agent per finding would have meant ~20 spawns re-reading the
+same handful of files from scratch instead of ~8 agents each reading
+their file once.
 
 The scoring rubric, the numeric filtering rules, the Note-vs-Suggestion
 classification criteria, and the false-positive watch-list are stable

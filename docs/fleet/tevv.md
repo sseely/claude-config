@@ -6,8 +6,9 @@ agent's own output — a written mission brief, a diagnosis, a refusal
 decision, a summary — is itself correct. That gap is named three times in
 `docs/nist-ai-rmf/crosswalk.md` (MAP 2.3, MEASURE 2.1, MEASURE 2.3): no
 artifact defines test-and-evaluation (TEVV) for the agents' own decision
-process. This document is that artifact. No eval harness exists today — 0
-runs. This defines the approach; T11 builds it under `evals/` and runs it
+process. This document is that artifact. The harness has produced 18
+case results across 7 runs to date (see `evals/results.jsonl`). This
+document defines the approach; T11 built it under `evals/` and runs it
 against the risk register's top 5 (`docs/fleet/risk-register.md`): Explore,
 Plan, ad-security-reviewer, angular-architect, api-designer.
 

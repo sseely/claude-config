@@ -3,6 +3,7 @@ name: powerpoint-addin-setup
 description: Scaffold a PowerPoint Office Add-in (task pane and optional content surface) into an existing Vite + React project, covering HTTPS dev certs, manifest generation, React entry points, Vite config, and the wef manifest sync for sideloading.
 user-invocable: true
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch, WebSearch
+disable-model-invocation: true
 ---
 
 Model routing: Sonnet for implementation steps; WebFetch verification steps need no routing.

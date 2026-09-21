@@ -10,6 +10,6 @@ CREATE TABLE IF NOT EXISTS user_feedback (
 );
 
 -- Prevent duplicate ratings for the same session item (null poll_id = general feedback).
-CREATE UNIQUE INDEX IF NOT EXISTS idx_feedback_user_poll
+CREATE UNIQUE INDEX IF NOT EXISTS idx_user_feedback_user_poll
   ON user_feedback (user_id, poll_id)
   WHERE poll_id IS NOT NULL;

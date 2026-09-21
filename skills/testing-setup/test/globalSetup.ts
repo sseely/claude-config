@@ -22,7 +22,7 @@ let dockerStartedBySetup = false;
 export default function setup() {
   const dbUrl =
     process.env.DATABASE_URL ??
-    'postgresql://dev:devpass@localhost:5432/myapp'; // ADAPT
+    `postgresql://dev:devpass@localhost:${process.env.TEST_PG_PORT ?? '5432'}/myapp`; // ADAPT
   const root = process.cwd();
 
   // Only start Docker if the DB isn't already reachable.

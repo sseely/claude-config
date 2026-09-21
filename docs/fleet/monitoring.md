@@ -60,9 +60,10 @@ repo itself. "Drift" here means three concrete, checkable signals:
 
 ## MEASURE 3.1 — risk tracking
 
-Risk tracking will live in `docs/fleet/risk-register.md`. That file does not
-exist yet as of this document; its contents (what gets scored, how, and
-against what scale) are that file's job to define, not this one's.
+Risk tracking lives in `docs/fleet/risk-register.md`, which exists and is
+populated (123 lines as of this document). MEASURE 3.1 points at that file
+for what gets scored, how, and against what scale — that remains the
+register's job to define, not this one's.
 
 ## MANAGE 4.1 — near-miss capture, feedback on agent output, appeal path
 

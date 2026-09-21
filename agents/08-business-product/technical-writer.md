@@ -1,6 +1,6 @@
 ---
 name: technical-writer
-description: Technical writer for both structured documentation (API refs, user guides, READMEs) and long-form technical content (blog posts, articles). Use for anything written for a technical audience.
+description: Technical writer for both structured documentation (API refs, user guides, READMEs) and long-form technical content (blog posts, articles). Use for anything written for a technical audience. For docs-as-code pipelines, API-doc generation, or maintainable developer-facing documentation systems, use documentation-engineer instead.
 tools: Read, Write, Glob, WebFetch, Grep
 model: sonnet
 ---

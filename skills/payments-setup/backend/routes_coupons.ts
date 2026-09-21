@@ -8,6 +8,7 @@ import { Env } from '../types';
 import { requireAuth } from '../middleware/auth';
 import { VALID_PACK_SIZES, MAX_COUPON_COUNT } from '../constants';
 import { generateCouponCode } from '../utils/code-generation';
+import { log } from '../logger';
 
 const COUPON_EXPIRY_DAYS = 14; // ADAPT: change default coupon lifetime
 const COUPON_CODE_RETRY_ATTEMPTS = 5;
@@ -41,13 +42,22 @@ function validateCouponInput(
 
 /**
  * Constant-time string comparison to prevent timing attacks.
+ * Compares fixed-length HMAC digests of both inputs rather than the inputs
+ * themselves, so a length mismatch never short-circuits the loop and
+ * `ADMIN_SECRET`'s length is never observable via timing.
  */
-function timingSafeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
+async function timingSafeEqual(a: string, b: string): Promise<boolean> {
+  const key = await crypto.subtle.importKey(
+    'raw', new TextEncoder().encode('coupon-admin-secret-compare'),
+    { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+  );
+  const [da, db] = await Promise.all([
+    crypto.subtle.sign('HMAC', key, new TextEncoder().encode(a)),
+    crypto.subtle.sign('HMAC', key, new TextEncoder().encode(b)),
+  ]);
+  const [ba, bb] = [new Uint8Array(da), new Uint8Array(db)];
   let diff = 0;
-  for (let i = 0; i < a.length; i++) {
-    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  }
+  for (let i = 0; i < ba.length; i++) diff |= ba[i] ^ bb[i];
   return diff === 0;
 }
 
@@ -78,7 +88,7 @@ async function generateUniqueCouponCode(
 
 export async function handleCreateCoupons(request: Request, env: Env): Promise<Response> {
   const secret = request.headers.get('X-Admin-Secret');
-  if (!env.ADMIN_SECRET || !secret || !timingSafeEqual(secret, env.ADMIN_SECRET)) {
+  if (!env.ADMIN_SECRET || !secret || !(await timingSafeEqual(secret, env.ADMIN_SECRET))) {
     return Response.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -107,10 +117,7 @@ export async function handleCreateCoupons(request: Request, env: Env): Promise<R
       [code, pack_size, max_uses, email ?? null]
     );
 
-    console.info(
-      '[coupons] created',
-      JSON.stringify({ code, pack_size, max_uses, email: email ?? null })
-    );
+    log('info', 'coupon created', { code, pack_size, max_uses, email: email ?? null });
 
     return Response.json(inserted[0], { status: 201 });
   } finally {
@@ -233,10 +240,7 @@ export async function handleIssueCoupons(request: Request, env: Env): Promise<Re
       [code, pack_size, max_uses, email ?? null, defaultExpiry]
     );
 
-    console.info(
-      '[coupons] issued',
-      JSON.stringify({ code, pack_size, max_uses, email: email ?? null, issuedBy: user.id })
-    );
+    log('info', 'coupon issued', { code, pack_size, max_uses, email: email ?? null, issuedBy: user.id });
 
     return Response.json(inserted[0], { status: 201 });
   } finally {
@@ -274,14 +278,15 @@ export async function handleRedeemCoupon(
     await db.query('BEGIN');
 
     try {
+      // Lock the coupon row before reading its redemption count. FOR UPDATE
+      // cannot be combined with GROUP BY/aggregates in the same query, so
+      // the lock and the count are two statements inside one transaction —
+      // the lock still serializes concurrent redeemers of this coupon.
       const { rows } = await db.query(
-        `SELECT c.id, c.pack_size, c.email, c.max_uses, c.expires_at,
-                COUNT(r.id)::int AS use_count
-         FROM coupon_codes c
-         LEFT JOIN coupon_redemptions r ON r.coupon_id = c.id
-         WHERE c.code = $1
-         GROUP BY c.id
-         FOR UPDATE OF c`,
+        `SELECT id, pack_size, email, max_uses, expires_at
+         FROM coupon_codes
+         WHERE code = $1
+         FOR UPDATE`,
         [code]
       );
 
@@ -290,10 +295,15 @@ export async function handleRedeemCoupon(
         return Response.json({ error: 'Invalid coupon code' }, { status: 404 });
       }
 
-      const coupon = rows[0] as {
+      const couponRow = rows[0] as {
         id: string; pack_size: number; email: string | null;
-        max_uses: number; expires_at: string; use_count: number;
+        max_uses: number; expires_at: string;
       };
+      const { rows: countRows } = await db.query(
+        `SELECT COUNT(*)::int AS use_count FROM coupon_redemptions WHERE coupon_id = $1`,
+        [couponRow.id]
+      );
+      const coupon = { ...couponRow, use_count: (countRows[0] as { use_count: number }).use_count };
 
       if (new Date(coupon.expires_at) < new Date()) {
         await db.query('ROLLBACK');
@@ -329,10 +339,7 @@ export async function handleRedeemCoupon(
 
       await db.query('COMMIT');
 
-      console.info(
-        '[coupons] redeemed',
-        JSON.stringify({ code, userId: user.id, packSize: coupon.pack_size })
-      );
+      log('info', 'coupon redeemed', { code, userId: user.id, packSize: coupon.pack_size });
 
       return Response.json({
         redeemed:        true,

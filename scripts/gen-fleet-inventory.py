@@ -30,13 +30,16 @@ from __future__ import annotations
 import argparse
 import difflib
 import os
+import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 VENV_PYTHON = REPO_ROOT / "hooks" / ".venv" / "bin" / "python"
+SETUP_SCRIPT = REPO_ROOT / "hooks" / "setup-complexity.sh"
 OUTPUT_PATH = REPO_ROOT / "docs" / "fleet" / "inventory.md"
 GENERATOR_COMMAND = "python3 scripts/gen-fleet-inventory.py"
 _REEXEC_MARKER = "_FLEET_INVENTORY_REEXEC"
@@ -52,14 +55,30 @@ def _reexec_into_venv_python_if_needed() -> None:
     venv` typically symlinks the venv's binary to the base
     interpreter, so both interpreters report the same realpath even
     though only the venv one has PyYAML on its `sys.path`.
+
+    If the venv itself is missing, fail with the same actionable message
+    `hooks/check-frontmatter.py` and `hooks/check-complexity.py` give
+    (F125) instead of letting a bare `ModuleNotFoundError: No module named
+    'yaml'` surface from the system interpreter.
     """
     if os.environ.get(_REEXEC_MARKER):
         return
     venv_dir = VENV_PYTHON.parent.parent.resolve()
     already_venv = Path(sys.prefix).resolve() == venv_dir
-    if VENV_PYTHON.exists() and not already_venv:
-        os.environ[_REEXEC_MARKER] = "1"
-        os.execv(str(VENV_PYTHON), [str(VENV_PYTHON), __file__, *sys.argv[1:]])
+    if already_venv:
+        return
+    if not VENV_PYTHON.exists():
+        print(
+            "Fleet inventory generation requires PyYAML in the shared "
+            "hooks venv, which is not installed.\n\n"
+            f"Please ask the user for permission to run:\n  {SETUP_SCRIPT}\n\n"
+            "This installs into ~/.claude/hooks/.venv and does not affect "
+            "any project dependencies.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    os.environ[_REEXEC_MARKER] = "1"
+    os.execv(str(VENV_PYTHON), [str(VENV_PYTHON), __file__, *sys.argv[1:]])
 
 
 _reexec_into_venv_python_if_needed()
@@ -105,7 +124,7 @@ def load_frontmatter(path: Path, yaml_load: Callable[[str], Any]) -> dict[str, A
     return data
 
 
-def normalize_tool_field(value: Any) -> list[str]:
+def normalize_tool_field(value: object) -> list[str]:
     """Normalize a tools-like field to a list of tool names.
 
     Production frontmatter stores tools/disallowedTools/allowed-tools
@@ -220,18 +239,42 @@ def build_skill_entry(
 # --- Discovery ------------------------------------------------------------
 
 
+def _drop_git_ignored(repo_root: Path, paths: list[Path]) -> list[Path]:
+    """Remove paths that .gitignore excludes (e.g. skills/synced/, the
+    no-redistribution doc skills). The inventory documents the committed
+    fleet, so an on-disk file git ignores is not part of it. Fails open
+    when git is unavailable."""
+    if not paths:
+        return paths
+    rel = [str(p.relative_to(repo_root)) for p in paths]
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(repo_root), "check-ignore", "--stdin", "-z"],
+            input="\0".join(rel) + "\0",
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return paths
+    ignored = {entry for entry in proc.stdout.split("\0") if entry}
+    return [p for p, r in zip(paths, rel) if r not in ignored]
+
+
 def discover_agent_paths(repo_root: Path) -> list[Path]:
     """Find every agent frontmatter file, at any depth under agents/.
 
     The fleet has two layouts: agents/NN-category/name.md (the norm)
     and a handful of files loose at agents/ root — rglob catches both.
     """
-    return sorted((repo_root / "agents").rglob("*.md"))
+    found = sorted((repo_root / "agents").rglob("*.md"))
+    return _drop_git_ignored(repo_root, found)
 
 
 def discover_skill_paths(repo_root: Path) -> list[Path]:
-    """Find every skill frontmatter file: skills/*/SKILL.md."""
-    return sorted((repo_root / "skills").rglob("SKILL.md"))
+    """Find every skill frontmatter file: skills/*/SKILL.md, minus ignored."""
+    found = sorted((repo_root / "skills").rglob("SKILL.md"))
+    return _drop_git_ignored(repo_root, found)
 
 
 # --- Rendering --------------------------------------------------------
@@ -307,7 +350,8 @@ def _render_agent_table(agents: list[AgentEntry]) -> str:
     for a in agents:
         tool_count = "all (inherited)" if a.tool_count is None else str(a.tool_count)
         lines.append(
-            f"| `{a.rel_path}` | {a.name} | {a.model} | {a.capability_tier} | {tool_count} |"
+            f"| `{a.rel_path}` | {a.name} | {a.model} | {a.capability_tier} "
+            f"| {tool_count} |"
         )
     return "\n".join(lines)
 
@@ -319,7 +363,8 @@ def _render_skill_table(skills: list[SkillEntry]) -> str:
     ]
     for s in skills:
         lines.append(
-            f"| `{s.rel_path}` | {s.name} | {s.model} | {s.blast_tier} | {s.allowed_tool_count} |"
+            f"| `{s.rel_path}` | {s.name} | {s.model} | {s.blast_tier} "
+            f"| {s.allowed_tool_count} |"
         )
     return "\n".join(lines)
 

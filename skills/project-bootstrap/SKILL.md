@@ -3,6 +3,7 @@ name: project-bootstrap
 description: Meta-skill that layers production concerns (testing, i18n, auth, payments, compliance, analytics) onto an existing Cloudflare Workers + Neon + React/Vite prototype by collecting all inputs upfront and executing the selected sub-skills in dependency order.
 user-invocable: true
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+disable-model-invocation: true
 ---
 
 Model routing: Sonnet for implementation steps; WebFetch verification steps need no routing.
@@ -83,7 +84,7 @@ Apply these dependency rules regardless of what the user selected:
 
 | Skill              | Requires                                              |
 |--------------------|-------------------------------------------------------|
-| `testing-setup`    | nothing (but knows about auth/payments if selected)    |
+| `testing-setup`    | nothing (but knows about auth/payments/i18n if selected — run last so its answers are correct) |
 | `auth-setup`       | nothing                                                |
 | `i18n-setup`       | nothing                                                |
 | `payments-setup`   | `auth-setup` (needs User + sessions)                   |
@@ -99,12 +100,12 @@ already set up in the project, warn:
 Do not silently add it — tell the user and let them confirm.
 
 Execution order when multiple skills are selected:
-1. `testing-setup` (no dependencies — run first so every subsequent skill lands in a tested codebase)
-2. `i18n-setup` (no dependencies, sets up namespace infra first)
-3. `auth-setup` (users table and session middleware)
-4. `payments-setup` (depends on User)
-5. `compliance-setup` (depends on User, benefits from i18n namespaces)
-6. `analytics-setup` (runs last — needs to know which other skills are in place to plan events and consent gating correctly)
+1. `i18n-setup` (no dependencies, sets up namespace infra first)
+2. `auth-setup` (users table and session middleware)
+3. `payments-setup` (depends on User)
+4. `compliance-setup` (depends on User, benefits from i18n namespaces)
+5. `analytics-setup` (needs to know which other skills are in place to plan events and consent gating correctly)
+6. `testing-setup` (runs last — its Step 1 asks whether Stripe/KV/i18n are already present to decide `vitest.config.ts`/`docker-compose.yml`/CI bindings, so it must see the final project state)
 
 ---
 

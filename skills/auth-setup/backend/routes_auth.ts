@@ -16,6 +16,7 @@ import {
 } from '../utils/oauth';
 import { parseCookies } from '../middleware/auth';
 import { COOKIE, COOKIE_MAX_AGE, OAUTH } from '../constants';
+import { log } from '../logger';
 
 function safeDecodeURIComponent(value: string): string | null {
   try { return decodeURIComponent(value); } catch { return null; }
@@ -23,8 +24,9 @@ function safeDecodeURIComponent(value: string): string | null {
 
 function validateAppUrl(url: string): string {
   const parsed = new URL(url);
-  if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
-    throw new Error(`APP_URL must use http(s), got: ${parsed.protocol}`);
+  const isLocal = parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1';
+  if (parsed.protocol !== 'https:' && !(isLocal && parsed.protocol === 'http:')) {
+    throw new Error(`APP_URL must use https (or http on localhost), got: ${parsed.protocol}`);
   }
   return parsed.origin;
 }
@@ -208,6 +210,32 @@ async function handleOAuthInit(
 // Generic OAuth callback — exchanges code, upserts user, creates session
 // ---------------------------------------------------------------------------
 
+async function completeOAuthLogin(
+  request: Request,
+  env: Env,
+  provider: Provider,
+  code: string
+): Promise<Response> {
+  const tokens = await exchangeCode({
+    tokenUrl: OAUTH[provider].tokenUrl,
+    code,
+    clientId: getClientId(env, provider),
+    clientSecret: getClientSecret(env, provider),
+    redirectUri: `${validateAppUrl(env.APP_URL)}/auth/${provider}/callback`,
+  });
+  const profile = await fetchUserProfile(OAUTH[provider].userInfoUrl, tokens.access_token);
+  const { user } = await upsertUser(env, {
+    provider,
+    provider_id: profile.sub,
+    email: profile.email,
+    name: profile.name?.trim(),
+    picture: profile.picture,
+    // ADAPT: remove linkedin_access_token if not posting to LinkedIn
+    linkedin_access_token: provider === 'linkedin' ? tokens.access_token : undefined,
+  });
+  return createSessionAndRedirect(request, env, user);
+}
+
 async function handleOAuthCallback(
   request: Request,
   env: Env,
@@ -218,26 +246,12 @@ async function handleOAuthCallback(
     return new Response('Invalid callback', { status: 400 });
   }
   try {
-    const tokens = await exchangeCode({
-      tokenUrl: OAUTH[provider].tokenUrl,
-      code,
-      clientId: getClientId(env, provider),
-      clientSecret: getClientSecret(env, provider),
-      redirectUri: `${validateAppUrl(env.APP_URL)}/auth/${provider}/callback`,
-    });
-    const profile = await fetchUserProfile(OAUTH[provider].userInfoUrl, tokens.access_token);
-    const { user } = await upsertUser(env, {
-      provider,
-      provider_id: profile.sub,
-      email: profile.email,
-      name: profile.name?.trim(),
-      picture: profile.picture,
-      // ADAPT: remove linkedin_access_token if not posting to LinkedIn
-      linkedin_access_token: provider === 'linkedin' ? tokens.access_token : undefined,
-    });
-    return createSessionAndRedirect(request, env, user);
+    return await completeOAuthLogin(request, env, provider, code);
   } catch (err) {
-    console.error(`[${provider} callback]`, err instanceof Error ? err.message : String(err));
+    log('error', 'oauth callback failed', {
+      provider,
+      err: err instanceof Error ? err.message : String(err),
+    });
     return new Response('Authentication failed', { status: 502 });
   }
 }

@@ -84,12 +84,38 @@ Instruction files loaded every session alongside `CLAUDE.md`.
 
 | File | Content |
 |------|---------|
-| `autonomous-execution.md` | Mission-brief protocol for unattended multi-hour sessions — startup sequence, batch execution, quality gates, decision-making rules, compaction recovery |
+| `api-design.md` | REST/HTTP conventions — resource naming, envelopes, versioning, status codes. Stub; body in `docs/reference/api-design.md` |
+| `architecture.md` | Blast-radius analysis, ADRs, fitness functions, reversibility, migration patterns |
+| `autonomous-execution.md` | Mission-brief protocol for unattended multi-hour sessions. Stub; body in `docs/reference/autonomous-execution.md` |
 | `code-principles.md` | SOLID, no magic literals, prefer native `fetch` over HTTP libraries |
 | `commits.md` | Conventional Commits spec — subject format, body criteria, `BREAKING CHANGE` footer, examples |
+| `diagnosis.md` | Diagnosis-mode protocol for observed discrepancies — mechanism, origin, causal chain, ruled-out evidence before any fix |
+| `diagrams.md` | PlantUML-by-default diagramming rubric. Stub with `paths:` frontmatter (the mission's one pilot); body in `docs/reference/diagrams.md` |
+| `environment.md` | Env-var naming, startup validation, logging redaction. Stub; body in `docs/reference/environment.md` |
+| `error-handling.md` | Throw vs. return, module-boundary wrapping, async errors, cancellation and shared-state races |
+| `extended-thinking.md` | When to request deeper reasoning, self-refine passes, the autonomous self-assessment trigger |
+| `logging.md` | Structured JSON logs, level semantics, no PII/secrets, error-log content requirements |
+| `lsp.md` | Code-navigation priority order — LSP, then ast-grep, then Grep/Glob; Serena tools for subagents |
+| `memory.md` | `.agent-notes/` session-observation discipline — what to write, what not to |
+| `model-routing.md` | Model-to-task routing table, Opus/Fable behavioral compensation, anti-patterns |
+| `naming-conventions.md` | Folder layout, file naming, symbol case, DB naming. Stub; body in `docs/reference/naming-conventions.md` |
+| `observability.md` | SLO-first design, RED metrics, distributed tracing, alerting, on-call readiness |
 | `parallelism.md` | Multi-agent planning rules — file ownership (one writer per file), agent prompt structure, when to parallelize vs. serialize |
+| `pr-workflow.md` | Branch naming, PR size, merge strategy, pre-existing-violation handling |
+| `prompting-quality.md` | Constraint keywords, specificity, agent context budget, constraint-budget ceiling, register shifting |
+| `research-sources.md` | Tier 1–5 source hierarchy and confidence-declaration rules. Stub; body in `docs/reference/research-sources.md` |
+| `retry-idempotency.md` | Retry policy (max attempts, backoff, jitter), idempotency keys; worked example in `docs/reference/retry-idempotency.md` |
 | `security.md` | Input validation, secrets management, error response hygiene, auth/authz checklist, injection prevention |
+| `string-formatting.md` | Templates over concatenation, accumulation-in-a-loop builders; per-language verdicts in `docs/reference/string-formatting.md` |
+| `testability.md` | Pure functions, functional core/imperative shell, observe-don't-mock, eliminate temporal coupling |
 | `testing.md` | TDD (red-green-refactor), 90/90/90 coverage floor, shared test helpers in `test/helpers/` |
+
+Several rules (`api-design`, `autonomous-execution`, `diagrams`,
+`environment`, `naming-conventions`, `research-sources`) are ≤15-line
+resident stubs whose full body lives in `docs/reference/<name>.md` —
+this keeps the per-session resident footprint down while the detail
+stays one Read away. If a rule's row above says "Stub", follow its
+pointer before assuming the file is the whole rule.
 
 ### `skills/`
 
@@ -112,10 +138,18 @@ Shell scripts triggered by Claude Code lifecycle events.
 
 | Hook | Event | Description |
 |------|-------|-------------|
+| `session-start.sh` | `SessionStart`, `ConfigChange` | Prints working directory and checks CLI tool availability (git, node, python3, gh, docker, ast-grep, lizard) |
 | `record-turn-start.sh` | `UserPromptSubmit` | Writes a Unix timestamp to `~/.claude/.runtime/claude-turn-start` |
+| `project-init.sh` | `UserPromptSubmit` | Initializes memory and Serena for the current project (idempotent, async) |
+| `guard-bash.py` | `PreToolUse` (matcher: `Bash`) | Blocks catastrophic Bash commands — recursive deletes aimed at a protected root |
+| `nudge-search-tool.py` | `PreToolUse` (matcher: `Grep`) | Nudges toward LSP/Serena/ast-grep on symbol-shaped Grep calls; never blocks |
+| `check-complexity.py` | `PostToolUse` (matcher: `Write\|Edit`) | Blocks a Write/Edit that introduces or worsens a code-complexity violation |
+| `check-frontmatter.py` | `PostToolUse` (matcher: `Write\|Edit`) | Validates agent/skill YAML frontmatter after Write/Edit |
+| `log-instructions-loaded.sh` | `InstructionsLoaded` | Appends one JSON line per event to `logs/instructions-loaded.jsonl` so `paths:`-scoped rules can be proven to fire |
 | `notify-on-stop.sh` | `Stop` | macOS notification with elapsed time if the turn took >30 seconds |
 | `quality-gate.sh` | Manual | Runs project-specific quality checks — reads `.claude-quality-gates` or auto-detects (Node, Python, Go, Rust, .NET) |
 | `autonomous-toggle.sh` | Manual | Copies autonomous permissions into a project's `.claude/settings.json` (with backup/restore) for unattended sessions |
+| `log-hook-event.sh` | `PermissionDenied`, `PostToolUseFailure`, `SubagentStop`, `PostModelSwitch` | Generic append-only logger for events without a dedicated script; appends to `logs/hook-events.jsonl` |
 
 ### `templates/`
 
@@ -125,76 +159,77 @@ Shell scripts triggered by Claude Code lifecycle events.
 
 ### `agents/`
 
-128 specialist agents across 10 categories. Invoked automatically by Claude
-Code when a task matches their domain, or explicitly via the `Agent` tool.
+112 specialist agents across 10 categories (109 categorized + 3
+uncategorized at the repo root: `explore`, `plan`,
+`plantuml-visual-qa`). Invoked automatically by Claude Code when a task
+matches their domain, or explicitly via the `Agent` tool. Counts are
+generated by `python3 scripts/gen-fleet-inventory.py`; see
+`docs/fleet/inventory.md` for the full per-agent breakdown.
 
 Model assignments:
-- `opusplan` — architecture agents (complex reasoning, plan-then-execute)
+- `opusplan`/`opus` — architecture and highest-judgment review agents
 - `sonnet` — implementation agents (default workhorse)
 - `haiku` — review/audit/research agents (read-only, fast, cheap)
 
 **01-core-development** (10 agents)
 `api-designer`, `backend-developer`, `electron-pro`, `frontend-developer`,
-`fullstack-developer`, `graphql-architect`\*, `microservices-architect`\*,
+`fullstack-developer`, `graphql-architect`\*, `microservices-architect`,
 `mobile-developer`, `ui-designer`, `websocket-engineer`
 
-**02-language-specialists** (29 agents)
+**02-language-specialists** (27 agents)
 `angular-architect`, `cpp-pro`, `csharp-developer`, `django-developer`,
-`dotnet-core-expert`, `dotnet-framework-4.8-expert`, `elixir-expert`,
+`dotnet-framework-4.8-expert`, `elixir-expert`,
 `flutter-expert`, `golang-pro`, `java-architect`\*, `javascript-pro`,
 `kotlin-specialist`, `laravel-specialist`, `nextjs-developer`, `php-pro`,
 `powershell-5.1-expert`, `powershell-7-expert`, `python-pro`, `rails-expert`,
 `react-specialist`, `ruby-2-7-specialist`, `ruby-specialist`, `rust-engineer`,
 `spring-boot-engineer`, `sql-pro`, `swift-expert`, `typescript-pro`,
-`vue-expert`, `wordpress-master`
+`vue-expert`
 
-**03-infrastructure** (16 agents)
+**03-infrastructure** (15 agents)
 `azure-infra-engineer`, `cloud-architect`\*, `database-administrator`,
-`deployment-engineer`, `devops-engineer`, `devops-incident-responder`,
+`deployment-engineer`, `devops-engineer`,
 `docker-expert`, `incident-responder`, `kubernetes-specialist`,
 `network-engineer`, `platform-engineer`, `security-engineer`, `sre-engineer`,
 `terraform-engineer`, `terragrunt-expert`, `windows-infra-admin`
 
-**04-quality-security** (14 agents)
-`accessibility-tester`, `ad-security-reviewer`, `architect-reviewer`,
-`chaos-engineer`, `code-reviewer`, `compliance-auditor`, `debugger`,
-`error-detective`, `penetration-tester`, `performance-engineer`,
-`powershell-security-hardening`, `qa-expert`, `security-auditor`,
+**04-quality-security** (15 agents)
+`accessibility-tester`, `ad-security-reviewer`\*\*, `ai-risk-auditor`,
+`architect-reviewer`, `chaos-engineer`, `code-reviewer`, `compliance-auditor`,
+`debugger`, `error-detective`, `penetration-tester`, `performance-engineer`,
+`powershell-security-hardening`\*\*, `qa-expert`, `security-auditor`,
 `test-automator`
 
-**05-data-ai** (13 agents)
+**05-data-ai** (11 agents)
 `ai-engineer`, `data-analyst`, `data-engineer`, `data-scientist`,
-`database-optimizer`, `llm-architect`\*, `machine-learning-engineer`,
+`database-optimizer`, `llm-architect`\*,
 `ml-engineer`, `mlops-engineer`, `nlp-engineer`, `postgres-pro`,
 `prompt-engineer`
 
-**06-developer-experience** (13 agents)
+**06-developer-experience** (12 agents)
 `build-engineer`, `cli-developer`, `dependency-manager`,
-`documentation-engineer`, `dx-optimizer`, `git-workflow-manager`,
+`documentation-engineer`, `git-workflow-manager`,
 `legacy-modernizer`, `mcp-developer`, `powershell-module-architect`,
 `powershell-ui-architect`, `refactoring-specialist`, `slack-expert`,
 `tooling-engineer`
 
-**07-specialized-domains** (12 agents)
-`api-documenter`, `blockchain-developer`, `embedded-systems`,
-`fintech-engineer`, `game-developer`, `iot-engineer`, `m365-admin`,
-`mobile-app-developer`, `payment-integration`, `quant-analyst`,
-`risk-manager`, `seo-specialist`
+**07-specialized-domains** (6 agents)
+`api-documenter`, `forge-app-developer`, `m365-admin`,
+`mobile-app-developer`, `payment-integration`, `risk-manager`
 
-**08-business-product** (11 agents)
-`business-analyst`, `content-marketer`, `customer-success-manager`,
-`legal-advisor`, `product-manager`, `project-manager`, `sales-engineer`,
-`scrum-master`, `technical-writer`, `ux-researcher`
+**08-business-product** (7 agents)
+`business-analyst`, `content-marketer`,
+`legal-advisor`, `product-manager`, `project-manager`,
+`technical-writer`, `ux-researcher`
 
-**09-meta-orchestration** (3 agents)
-`agent-installer`, `it-ops-orchestrator`, `memory-curator`
+**09-meta-orchestration** (2 agents)
+`agent-installer`, `it-ops-orchestrator`
 
-**10-research-analysis** (7 agents)
-`competitive-analyst`, `data-researcher`, `market-researcher`,
-`research-analyst`, `scientific-literature-researcher`, `search-specialist`,
-`trend-analyst`
+**10-research-analysis** (4 agents)
+`data-researcher`, `market-intelligence-analyst`,
+`research-analyst`, `search-specialist`
 
-\* `opusplan` model
+\* `opusplan` model  \*\* `opus` model
 
 ## Dependencies
 
@@ -203,7 +238,6 @@ updated when those repos change:
 
 | Agent | Source repo |
 |-------|-------------|
-| `agents/09-meta-orchestration/memory-curator.md` | [sseely/claude-memory](https://github.com/sseely/claude-memory) |
 
 ## Updating
 

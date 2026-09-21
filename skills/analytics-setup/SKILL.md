@@ -2,6 +2,7 @@
 name: analytics-setup
 description: Plan and instrument PostHog analytics into a Cloudflare Workers + Neon + React/Vite project — produces a reviewed event plan, then wires backend captureEvent calls and a consent-gated frontend AnalyticsContext.
 user-invocable: true
+disable-model-invocation: true
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch, WebSearch
 ---
 
@@ -214,7 +215,7 @@ If the capture endpoint path or payload keys have changed, adapt
 
 ```bash
 # Frontend only — backend uses fetch directly, no SDK needed
-npm install posthog-js
+npm install posthog-js@1.434.2
 ```
 
 Check `ui/package.json` first; skip if already installed.
@@ -308,15 +309,21 @@ import { AnalyticsEvent } from '../../shared/constants';
 // Inside the handler, after the primary DB write succeeds:
 captureEvent(
   env,
-  user.id,              // distinct_id
+  user.id,                  // distinct_id
   AnalyticsEvent.ITEM_STARTED,
-  { rehearsal_mode: body.rehearsal_mode, item_count: items.length },
-  ctx                   // pass ctx when available
+  hasAnalyticsConsent(request), // caller resolves consent — see below
+  { properties: { rehearsal_mode: body.rehearsal_mode, item_count: items.length }, ctx }
 );
 ```
 
 Rules:
 - Call `captureEvent` **after** the primary operation succeeds, never before.
+- `captureEvent`'s consent parameter is required, not optional: the frontend
+  Termly gate only protects browser-initiated calls, so every backend call
+  site must resolve consent itself before this call — e.g. from a
+  compliance-setup consent cookie/header, or the user's stored consent
+  record. There is no fixed helper name; adapt `hasAnalyticsConsent` above to
+  however this project already reads that signal.
 - Always pass `ctx` when the handler receives it — this prevents premature
   Worker shutdown cutting off the fetch.
 - Never `await` the call — fire and forget.
@@ -380,7 +387,13 @@ build time, not a secret.
 
 ## Step 13b — Write tests
 
-Write at minimum:
+`backend/services_analytics.test.ts` already covers `captureEvent` itself
+(no-consent no-op, missing-key no-op, the `res.ok` warn branch, and the
+network-rejection warn branch) — copy it to
+`src/services/analytics.test.ts` using testing-setup's Vitest helpers.
+Adapt only the `Env` import path.
+
+Write at minimum, in addition:
 - **Event emission test**: call the core action API — assert the backend analytics event is queued/sent.
 - **No-consent test**: if compliance-setup is in place, assert events do NOT fire when consent is absent.
 - **Identify test**: call login endpoint — assert `identify()` fires with the user ID.

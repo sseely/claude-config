@@ -6,6 +6,8 @@ disclosure) — content unchanged, only moved out of the top-level skill
 file. Each dispatched agent is given its corresponding checklist below
 verbatim, along with the full file inventory from Step 1.
 
+## Per-dimension checklists
+
 ### Agent 1 — Correctness & Code Quality
 
 - Logic errors and off-by-one errors

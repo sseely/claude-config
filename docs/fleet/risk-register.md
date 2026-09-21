@@ -1,6 +1,8 @@
 # Fleet Risk Register
 
-Every agent in `docs/fleet/inventory.md` (130 total), scored on Likelihood ×
+111 of the 112 agents in `docs/fleet/inventory.md` (19 archive-tier agents
+deleted, `market-intelligence-analyst` created and not yet scored — see
+`.agent-notes/fleet-signals.md` 2026-09-20 row), scored on Likelihood ×
 Magnitude and ranked by Score. This is the risk register MAP 5.1 was
 missing — no prior artifact characterized likelihood or magnitude of impact
 for anything in the fleet. Per **FD-9**, this register is load-bearing: T11
@@ -49,7 +51,7 @@ do.
 The scale's other Magnitude-2 trigger — "invoked by an `allowed-tools`
 skill" — is a **skills** signal (`inventory.md`'s Skills table), not an
 agents one; the inventory carries no agent-to-skill invocation mapping, so
-it is not applied here. This register scores the 130 **agents** only, per
+it is not applied here. This register scores 111 **agents** only, per
 the task scope; skills are out of scope for this pass.
 
 ### Score and tiers
@@ -92,27 +94,27 @@ columns (Capability tier, Tool count).
 | angular-architect | 2 | 3 | 6 | High | Tool count 17 (≥15) — write/exec-capable, full Serena edit suite. |
 | api-designer | 2 | 3 | 6 | High | Tool count 20 (≥15) — write/exec-capable, full Serena edit suite. |
 | backend-developer, electron-pro, frontend-developer, fullstack-developer, graphql-architect, microservices-architect, mobile-developer, ui-designer, websocket-engineer | 2 | 3 | 6 | High | `01-core-development` remainder. Tool count 15–20 (≥15); same capability class as the top-5 core-development picks — excluded from top-5 only by the name-ascending tie-break. |
-| cpp-pro, csharp-developer, django-developer, elixir-expert, flutter-expert, golang-pro, java-architect, javascript-pro, kotlin-specialist, laravel-specialist, nextjs-developer, php-pro, powershell-5.1-expert, powershell-7-expert, python-pro, rails-expert, react-specialist, ruby-2-7-specialist, ruby-specialist, rust-engineer, spring-boot-engineer, sql-pro, swift-expert, typescript-pro, vue-expert | 2 | 3 | 6 | High | `02-language-specialists` remainder (excludes angular-architect, above; excludes dotnet-core-expert / dotnet-framework-4.8-expert, which are read-only). Tool count 17–22 (≥15). |
+| cpp-pro, csharp-developer, django-developer, elixir-expert, flutter-expert, golang-pro, java-architect, javascript-pro, kotlin-specialist, laravel-specialist, nextjs-developer, php-pro, powershell-5.1-expert, powershell-7-expert, python-pro, rails-expert, react-specialist, ruby-2-7-specialist, ruby-specialist, rust-engineer, spring-boot-engineer, sql-pro, swift-expert, typescript-pro, vue-expert | 2 | 3 | 6 | High | `02-language-specialists` remainder (excludes angular-architect, above; excludes dotnet-framework-4.8-expert, scored separately below — not re-scored by this pass). Tool count 17–22 (≥15). |
 | chaos-engineer, debugger, powershell-security-hardening, test-automator | 2 | 3 | 6 | High | `04-quality-security` remainder (excludes ad-security-reviewer, above; excludes the six read-only agents in this category, scored separately below). Tool count 17 (≥15). |
-| build-engineer, cli-developer, dependency-manager, documentation-engineer, dx-optimizer, git-workflow-manager, legacy-modernizer, mcp-developer, powershell-module-architect, powershell-ui-architect, refactoring-specialist, slack-expert, tooling-engineer | 2 | 3 | 6 | High | `06-developer-experience`. Tool count 15–22 (≥15). |
-| azure-infra-engineer, cloud-architect, database-administrator, deployment-engineer, devops-engineer, devops-incident-responder, docker-expert, incident-responder, kubernetes-specialist, network-engineer, platform-engineer, security-engineer, sre-engineer, terraform-engineer, terragrunt-expert, windows-infra-admin | 2 | 2 | 4 | Medium | `03-infrastructure`. Tool count 4–11 (4–14 band) — write/exec-capable against ordinary repo files, below the 15-tool threshold. |
+| build-engineer, cli-developer, dependency-manager, documentation-engineer, git-workflow-manager, legacy-modernizer, mcp-developer, powershell-module-architect, powershell-ui-architect, refactoring-specialist, slack-expert, tooling-engineer | 2 | 3 | 6 | High | `06-developer-experience` (dx-optimizer deleted — merged into build-engineer). Tool count 15–22 (≥15). |
+| azure-infra-engineer, cloud-architect, database-administrator, deployment-engineer, devops-engineer, docker-expert, incident-responder, kubernetes-specialist, network-engineer, platform-engineer, security-engineer, sre-engineer, terraform-engineer, terragrunt-expert, windows-infra-admin | 2 | 2 | 4 | Medium | `03-infrastructure` (devops-incident-responder deleted — merged into incident-responder). Tool count 4–11 (4–14 band) — write/exec-capable against ordinary repo files, below the 15-tool threshold. |
 | accessibility-tester, compliance-auditor, penetration-tester, performance-engineer | 2 | 2 | 4 | Medium | `04-quality-security` partial. Tool count 10 (4–14 band). |
-| ai-engineer, data-analyst, data-engineer, data-scientist, database-optimizer, llm-architect, machine-learning-engineer, ml-engineer, mlops-engineer, nlp-engineer, postgres-pro, prompt-engineer | 2 | 2 | 4 | Medium | `05-data-ai`. Tool count 4–11 (4–14 band). |
-| api-documenter, blockchain-developer, embedded-systems, fintech-engineer, forge-app-developer, game-developer, iot-engineer, m365-admin, mobile-app-developer, payment-integration, quant-analyst, risk-manager, seo-specialist | 2 | 2 | 4 | Medium | `07-specialized-domains`. Tool count 4–14 — forge-app-developer sits at 14, one short of the ≥15 High threshold; its tool list is Forge-MCP domain tools, not a general toolchain. |
-| business-analyst, customer-success-manager, sales-engineer, technical-writer, wordpress-master | 2 | 2 | 4 | Medium | `08-business-product` partial (excludes ux-researcher, read-only, scored below; excludes the five Tool-count-3 agents, scored below). Tool count 4–9 (4–14 band). |
+| ai-engineer, data-analyst, data-engineer, data-scientist, database-optimizer, llm-architect, ml-engineer, mlops-engineer, nlp-engineer, postgres-pro, prompt-engineer | 2 | 2 | 4 | Medium | `05-data-ai` (machine-learning-engineer deleted — merged into ml-engineer). Tool count 4–11 (4–14 band). |
+| api-documenter, forge-app-developer, m365-admin, mobile-app-developer, payment-integration, risk-manager | 2 | 2 | 4 | Medium | `07-specialized-domains` (blockchain-developer, embedded-systems, fintech-engineer, game-developer, iot-engineer, quant-analyst, seo-specialist deleted — archive-tier, F162). Tool count 4–14 — forge-app-developer sits at 14, one short of the ≥15 High threshold; its tool list is Forge-MCP domain tools, not a general toolchain. |
+| business-analyst, technical-writer | 2 | 2 | 4 | Medium | `08-business-product` partial (customer-success-manager, sales-engineer, wordpress-master deleted — archive-tier, F162; excludes ux-researcher, read-only, scored below; excludes the four remaining Tool-count-3 agents, scored below). Tool count 4–9 (4–14 band). |
 | agent-installer, it-ops-orchestrator | 2 | 2 | 4 | Medium | `09-meta-orchestration`. Tool count 5–6 (4–14 band). |
-| competitive-analyst, data-researcher, market-researcher, research-analyst, search-specialist, trend-analyst | 2 | 2 | 4 | Medium | `10-research-analysis` (excludes scientific-literature-researcher, read-only, scored below). Tool count 5 (4–14 band). |
+| data-researcher, research-analyst, search-specialist | 2 | 2 | 4 | Medium | `10-research-analysis` (competitive-analyst, market-researcher, trend-analyst, scientific-literature-researcher deleted — collapsed into market-intelligence-analyst / merged into research-analyst, F158; market-intelligence-analyst not yet scored). Tool count 5 (4–14 band). |
 | plantuml-visual-qa | 2 | 2 | 4 | Medium | Root-level, not part of a numbered category. Tool count 5 (4–14 band). |
-| content-marketer, legal-advisor, product-manager, project-manager, scrum-master | 2 | 1 | 2 | Low | `08-business-product` partial. Tool count 3 — below the Magnitude-2 floor; write-capable but minimal standing capability. |
-| ai-risk-auditor, architect-reviewer, code-reviewer, dotnet-core-expert, dotnet-framework-4.8-expert, error-detective, qa-expert, scientific-literature-researcher, security-auditor, ux-researcher | 1 | 1 | 1 | Low | Capability tier = read-only across `04-quality-security`, `02-language-specialists`, `08-business-product`, `10-research-analysis`. No write path exists to score against. |
+| content-marketer, legal-advisor, product-manager, project-manager | 2 | 1 | 2 | Low | `08-business-product` partial (scrum-master deleted — merged into project-manager). Tool count 3 — below the Magnitude-2 floor; write-capable but minimal standing capability. |
+| ai-risk-auditor, architect-reviewer, code-reviewer, dotnet-framework-4.8-expert, error-detective, qa-expert, security-auditor, ux-researcher | 1 | 1 | 1 | Low | Capability tier = read-only across `04-quality-security`, `02-language-specialists`, `08-business-product`, `10-research-analysis` (dotnet-core-expert, scientific-literature-researcher deleted). dotnet-framework-4.8-expert's tools were widened by F004 (now write/exec-capable, tool count 17) — not re-scored/relocated by this pass; see the `02-language-specialists` High-tier row. No write path exists to score the rest against. |
 
 ### Tier counts
 
 | Tier | Agent count |
 |---|---|
-| High (6–9) | 56 (2 at Score 9, 54 at Score 6) |
-| Medium (3–4) | 59 |
-| Low (1–2) | 15 (5 at Score 2, 10 at Score 1) |
+| High (6–9) | 55 (2 at Score 9, 53 at Score 6) |
+| Medium (3–4) | 44 |
+| Low (1–2) | 12 (4 at Score 2, 8 at Score 1) |
 
 ## Mitigating control (context only, not a scoring input)
 

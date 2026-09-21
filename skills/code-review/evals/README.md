@@ -86,9 +86,22 @@ unassisted model already finds is not earning its context.
 
 | Case | Dimension | Baseline | With skill |
 |------|-----------|----------|------------|
-| 01 | Correctness | | |
-| 02 | Security | | |
-| 03 | Dead code / style | | |
+| 01 | Correctness | HIT | HIT |
+| 02 | Security | DOWNGRADE | HIT |
+| 03 | Dead code / style | DOWNGRADE | HIT |
+
+Run 2026-09-20 (F132): both columns are real reviews, each in its own
+fresh session with no shared context and no prior look at the
+`.expected.md` files -- baseline was a plain "review this file" request,
+with-skill dispatched the `code-reviewer` agent the skill itself uses,
+scoped to one fixture. No NOISE in either column on any case; every MUST
+expectation was found in both. The delta is severity conformance, not
+detection: baseline found both Case 02 MUST defects but rated the logged
+secret "High" instead of "Critical," and split Case 03's combined
+`applyLegacyTax`/`LEGACY_RATE` finding into two ratings, one ("Minor")
+below the "Warning" floor. With-skill matched or exceeded every required
+floor across all three cases, because it works from the skill's own
+three-tier scale (Critical/Warning/Suggestion) rather than an ad hoc one.
 
 Fill in HIT/MISS/DOWNGRADE per cell. Re-run after any material change to
 `SKILL.md` or `references/checklists.md`; a dimension that regresses to

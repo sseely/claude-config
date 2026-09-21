@@ -2,9 +2,13 @@
 """
 PreToolUse hook: nudge toward LSP/Serena/ast-grep on symbol-shaped Greps.
 
-Never blocks and never auto-approves — emits `permissionDecision: defer`
-with `additionalContext`, so the normal permission flow is untouched and
-Claude simply sees a reminder before deciding.
+Never blocks — emits `permissionDecision: allow` with `additionalContext`,
+so the tool call proceeds normally and Claude sees a reminder attached to
+the result. F090: this hook previously emitted `permissionDecision: defer`,
+which is documented (code.claude.com/docs/en/hooks, fetched 2026-09-20) to
+exit the tool call for later resumption and to *ignore* `additionalContext`
+entirely — the reminder was silently dropped on every nudge. `allow` is the
+documented value that honors `additionalContext`.
 
 Fail-open: any exception exits 0 silently rather than disrupting a search.
 
@@ -25,8 +29,9 @@ import json
 import os
 import re
 import sys
-from datetime import datetime, timezone
-from pathlib import Path
+from typing import Any
+
+from _hooklib import log_error
 
 # A bare identifier — no regex metacharacters, no whitespace. This is the
 # signature of "I am looking for a symbol", which is exactly what LSP and
@@ -114,7 +119,7 @@ NON_CODE_TYPES = frozenset([
 ])
 
 
-def is_symbol_like(pattern):
+def is_symbol_like(pattern: object) -> bool:
     """True when the pattern is a bare identifier long enough to be a symbol."""
     return (
         isinstance(pattern, str)
@@ -123,14 +128,14 @@ def is_symbol_like(pattern):
     )
 
 
-def glob_suffixes(glob):
+def glob_suffixes(glob: object) -> list[str]:
     """Extension tokens in a glob — handles '*.md' and '**/*.{md,txt}'."""
     if not isinstance(glob, str):
         return []
     return [s.lower() for s in re.findall(r"\.([A-Za-z0-9]+)", glob)]
 
 
-def targets_non_code(tool_input):
+def targets_non_code(tool_input: dict[str, Any]) -> bool:
     """True when the search is explicitly scoped to prose or config files."""
     file_type = tool_input.get("type")
     if isinstance(file_type, str) and file_type.lower() in NON_CODE_TYPES:
@@ -139,7 +144,7 @@ def targets_non_code(tool_input):
     return bool(suffixes) and all(s in NON_CODE_SUFFIXES for s in suffixes)
 
 
-def lang_from_input(tool_input):
+def lang_from_input(tool_input: dict[str, Any]) -> str | None:
     """Language implied by the Grep call's own type/glob arguments."""
     file_type = tool_input.get("type")
     if isinstance(file_type, str):
@@ -153,7 +158,7 @@ def lang_from_input(tool_input):
     return None
 
 
-def lang_from_cwd(cwd):
+def lang_from_cwd(cwd: object) -> str | None:
     """Language implied by project marker files in the session directory."""
     if not isinstance(cwd, str) or not os.path.isdir(cwd):
         return None
@@ -167,7 +172,7 @@ def lang_from_cwd(cwd):
     return None
 
 
-def tool_hint(lang):
+def tool_hint(lang: str | None) -> str:
     """The language-appropriate first and second choice, as a sentence."""
     if lang is None:
         return (
@@ -187,13 +192,16 @@ def tool_hint(lang):
             f"is installed for {lang}, so the LSP tool will not help here"
         )
     if astgrep_lang:
-        second = f" For structural shape, use `ast-grep -p '<pattern>' --lang {astgrep_lang}`."
+        second = (
+            f" For structural shape, use "
+            f"`ast-grep -p '<pattern>' --lang {astgrep_lang}`."
+        )
     else:
         second = f" ast-grep does not support {lang}; Grep is the correct fallback."
     return first + "." + second
 
 
-def build_nudge(lang):
+def build_nudge(lang: str | None) -> str:
     """Assemble the reminder injected into Claude's context."""
     return (
         "Symbol-shaped Grep detected (the pattern is a bare identifier"
@@ -205,7 +213,7 @@ def build_nudge(lang):
     )
 
 
-def should_nudge(event):
+def should_nudge(event: dict[str, Any]) -> bool:
     """Gate the nudge on tool name, pattern shape, and search scope."""
     if event.get("tool_name") != "Grep":
         return False
@@ -217,19 +225,7 @@ def should_nudge(event):
     return not targets_non_code(tool_input)
 
 
-def log_error(hook_name, exc):
-    """Best-effort append of one error line to logs/<hook_name>.err."""
-    try:
-        log_dir = Path(__file__).resolve().parent.parent / "logs"
-        log_dir.mkdir(parents=True, exist_ok=True)
-        ts = datetime.now(timezone.utc).isoformat()
-        with open(log_dir / f"{hook_name}.err", "a") as f:
-            f.write(f"{ts} {hook_name}: {exc!r}\n")
-    except Exception:
-        pass  # Logging must never itself raise.
-
-
-def main():
+def main() -> None:
     try:
         event = json.load(sys.stdin)
     except Exception as e:
@@ -244,7 +240,7 @@ def main():
         json.dump({
             "hookSpecificOutput": {
                 "hookEventName": "PreToolUse",
-                "permissionDecision": "defer",
+                "permissionDecision": "allow",
                 "additionalContext": build_nudge(lang),
             }
         }, sys.stdout)

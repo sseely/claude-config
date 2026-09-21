@@ -1,34 +1,13 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import { STORAGE_KEYS } from '../constants/storage';
+export { SUPPORTED_LANGUAGES, type SupportedLanguage } from './i18n_supported_languages';
+import { SUPPORTED_LANGUAGES } from './i18n_supported_languages';
 
 // ADAPT: import one JSON file per namespace from the en locale.
 // Add a matching entry to NAMESPACES, resources.en, and loadLocale below
 // every time you add a new namespace.
 import enCommon from './locales/en/common.json';
-
-export const SUPPORTED_LANGUAGES = [
-  { code: 'en', label: 'English' },
-  { code: 'es', label: 'Español' },
-  { code: 'fr', label: 'Français' },
-  { code: 'de', label: 'Deutsch' },
-  { code: 'nl', label: 'Nederlands' },
-  { code: 'it', label: 'Italiano' },
-  { code: 'pt-BR', label: 'Português (BR)' },
-  { code: 'pt-PT', label: 'Português (PT)' },
-  { code: 'hi', label: 'हिन्दी' },
-  { code: 'zh-CN', label: '中文（简体）' },
-  { code: 'ja', label: '日本語' },
-  { code: 'ar', label: 'العربية' },
-  { code: 'bn', label: 'বাংলা' },
-  { code: 'ru', label: 'Русский' },
-  { code: 'ur', label: 'اردو' },
-  { code: 'id', label: 'Bahasa Indonesia' },
-  { code: 'tr', label: 'Türkçe' },
-  { code: 'ko', label: '한국어' },
-] as const;
-
-export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number]['code'];
 
 // ADAPT: keep in sync with scripts/translate.ts and scripts/i18n-audit.ts
 const NAMESPACES = [

@@ -81,3 +81,9 @@ under "Must fix" or "Should fix" (depending on which agent depended on it):
   search for the page title); update the registry entry or remove if
   content is no longer published.
 ```
+
+## Appendix — per-file verdicts (Agent I)
+| File | Category | Lines | Est. tokens | Verdict | Reason |
+|------|----------|-------|-------------|---------|--------|
+
+Populate this table verbatim from `.agent-notes/self-improve-phase2-I.md`.

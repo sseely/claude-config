@@ -7,7 +7,6 @@ credentials, and a smoke test for each component.
 
 - **Docker Desktop** — installed and running (`docker info` should succeed)
 - **`gh` CLI** — installed and authenticated (`gh auth status` shows active login)
-- **Python 3.8+** — for the Jira client and entrypoint scripts
 - **macOS** — Keychain is required for secret storage
 
 ## Secrets setup
@@ -112,7 +111,8 @@ security find-generic-password -a "$USER" -s "GITHUB_ORG_TOKEN" -w
 
 ### 6. ATLASSIAN_API_TOKEN
 
-Jira API token used to post comments and update labels on tickets.
+**Optional — only needed if you pass `JIRA_TICKET`.** Jira API token used
+to post comments and update labels on tickets.
 
 **Get it:** [Atlassian account settings](https://id.atlassian.com/manage-profile/security/api-tokens)
 → Security → Create and manage API tokens → Create API token.
@@ -129,8 +129,9 @@ security find-generic-password -a "$USER" -s "ATLASSIAN_API_TOKEN" -w
 
 ### 7. ATLASSIAN_EMAIL
 
-The email address for your Atlassian account. Used together with the API token
-for Basic authentication.
+**Optional — only needed if you pass `JIRA_TICKET`.** The email address for
+your Atlassian account. Used together with the API token for Basic
+authentication.
 
 **Get it:** Your Atlassian login email.
 
@@ -146,7 +147,8 @@ security find-generic-password -a "$USER" -s "ATLASSIAN_EMAIL" -w
 
 ### 8. ATLASSIAN_BASE_URL
 
-Your Jira Cloud instance URL.
+**Optional — only needed if you pass `JIRA_TICKET`.** Your Jira Cloud
+instance URL.
 
 **Get it:** The base URL visible in your browser when logged in to Jira, e.g.
 `https://yourorg.atlassian.net`.
@@ -175,23 +177,15 @@ container.
 Run these checks before your first `/sandbox` invocation.
 
 ```bash
-# Test Jira connectivity
-export ATLASSIAN_EMAIL=$(security find-generic-password -a "$USER" -s "ATLASSIAN_EMAIL" -w)
-export ATLASSIAN_API_TOKEN=$(security find-generic-password -a "$USER" -s "ATLASSIAN_API_TOKEN" -w)
-export ATLASSIAN_BASE_URL=$(security find-generic-password -a "$USER" -s "ATLASSIAN_BASE_URL" -w)
-JIRA_TEST_TICKET=PROJECT-123 python3 tools/jira/test_jira_client.py
-
 # Test Docker base image build (2-3 minutes on first run, cached after)
 docker build -f templates/Dockerfile.base -t claude-sandbox-test ~/.claude \
   && echo "Build OK" && docker rmi claude-sandbox-test
 ```
 
-Replace `PROJECT-123` with a real Jira ticket you have access to.
-
 ## First run
 
 ```bash
-/sandbox PROJECT-123
+/sandbox my-session https://github.com/org/repo.git "fix the login bug"
 ```
 
 Expected sequence:
@@ -202,5 +196,3 @@ Expected sequence:
    layer cache and are much faster
 4. Container starts — watch for `[entrypoint]` log lines confirming the agent
    is running
-5. Jira ticket updated with a "Sandbox execution started" comment
-6. On completion: a PR link posted as a Jira comment on the same ticket

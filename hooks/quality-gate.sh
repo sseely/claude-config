@@ -127,8 +127,12 @@ fi
 # Anchored on this script's own location (not $PROJECT_DIR/cwd) so they
 # always check the real ~/.claude tree, matching code-review-tasks.md's
 # `[ "$(cat ~/.claude/rules/*.md | wc -l)" -le 2020 ]` check regardless of
-# which project directory quality-gate.sh was invoked against.
-if [[ -d "$CLAUDE_DIR/rules" ]]; then
+# which project directory quality-gate.sh was invoked against. Guarded by
+# an exact-path comparison against $CLAUDE_DIR (F010) — the previous guard,
+# `[[ -d "$CLAUDE_DIR/rules" ]]`, was a tautology (always true, since
+# $CLAUDE_DIR is derived from this script's own path) and so ran the fleet
+# block even when invoked against an unrelated $PROJECT_DIR.
+if [[ "$(cd "$PROJECT_DIR" && pwd)" == "$CLAUDE_DIR" ]]; then
     RULES_LINES="$(cat "$CLAUDE_DIR"/rules/*.md | wc -l | tr -d ' ')"
     export RULES_LINES CLAUDE_DIR
     run_gate "rules-line-cap" '[ "$(cat "$CLAUDE_DIR"/rules/*.md | wc -l)" -le 2020 ]'
@@ -162,28 +166,89 @@ if [[ -d "$CLAUDE_DIR/rules" ]]; then
     FRONTMATTER_RESULT="$(cat "$FRONTMATTER_TMP" 2>/dev/null || echo "0/0")"
     rm -f "$FRONTMATTER_TMP"
 
-    # Gate: the hook test suites, run directly, must both exit 0.
-    run_gate "hook-tests" \
-        "\"$CLAUDE_DIR/hooks/.venv/bin/python\" \"$CLAUDE_DIR/hooks/test_check_frontmatter.py\" && \"$CLAUDE_DIR/hooks/.venv/bin/python\" \"$CLAUDE_DIR/hooks/test_guard_bash.py\""
+    # Gate: the hook/script test suites, run directly, must all exit 0.
+    # Each test file is confirmed present before it's run — a parallel
+    # batch task landing out of order skips that test with a note instead
+    # of failing the whole gate on a missing file (F055; see T8's
+    # orchestrator addendum "Order note").
+    hook_tests_gate() {
+        local venv_py="$CLAUDE_DIR/hooks/.venv/bin/python"
+        local ok=0
+        local py_test
+        for py_test in \
+            "$CLAUDE_DIR/hooks/test_check_frontmatter.py" \
+            "$CLAUDE_DIR/hooks/test_guard_bash.py" \
+            "$CLAUDE_DIR/hooks/test_check_complexity.py"
+        do
+            if [[ -f "$py_test" ]]; then
+                "$venv_py" "$py_test" || ok=1
+            else
+                echo "  SKIP (missing): $py_test"
+            fi
+        done
+        if [[ -f "$CLAUDE_DIR/scripts/test_check_references.py" ]]; then
+            python3 "$CLAUDE_DIR/scripts/test_check_references.py" || ok=1
+        else
+            echo "  SKIP (missing): $CLAUDE_DIR/scripts/test_check_references.py"
+        fi
+        return $ok
+    }
+    export -f hook_tests_gate
+    run_gate "hook-tests" "hook_tests_gate"
     HOOK_TESTS_PASSED=$LAST_GATE_PASSED
 
+    # Gate: the fleet inventory doc must not have drifted from the agent/
+    # skill frontmatter it describes (F055). This only wires the check —
+    # it does not fix known pre-existing drift (F036, out of scope here).
+    run_gate "fleet-inventory-check" \
+        "python3 \"$CLAUDE_DIR/scripts/gen-fleet-inventory.py\" --check"
+    INVENTORY_STATUS="fail"
+    [[ "$LAST_GATE_PASSED" == "1" ]] && INVENTORY_STATUS="pass"
+
     # Gate: record today's fleet signals (rules budget, frontmatter parse
-    # rate, hook-test status) so MEASURE 2.4 has a live value each run.
+    # rate, hook-test status, inventory-check status) so MEASURE 2.4 has a
+    # live value each run. Atomic and deduped to one row per day
+    # (F048/F099): a bare `[[ ! -f ]]` check followed by a truncating `>`
+    # write let two concurrent runs wipe each other's rows, and with no
+    # dedup step, 7 identical rows had accumulated for 2026-09-02 alone.
+    #
+    # Locking: the task spec that produced this gate specifies GNU
+    # coreutils `flock -x 200`. That binary does not exist on this
+    # machine's default macOS toolchain (verified: no `flock` on PATH, not
+    # installed via Homebrew either) and quality-gate.sh must not assume a
+    # package the fleet doesn't otherwise depend on. A `mkdir`-based mutex
+    # gives the same mutual-exclusion guarantee `flock -x` would (mkdir is
+    # atomic on any POSIX filesystem) without the extra binary dependency.
     fleet_signals_gate() {
         local fs_file="$CLAUDE_DIR/.agent-notes/fleet-signals.md"
+        local lockdir="$fs_file.lockdir"
         local hook_status="fail"
         [[ "$HOOK_TESTS_PASSED" == "1" ]] && hook_status="pass"
         mkdir -p "$CLAUDE_DIR/.agent-notes"
+
+        local waited=0
+        until mkdir "$lockdir" 2>/dev/null; do
+            sleep 0.1
+            waited=$((waited + 1))
+            # Stale-lock guard: don't hang forever if a prior run crashed
+            # mid-critical-section and left the lock directory behind.
+            if [[ $waited -ge 100 ]]; then
+                rmdir "$lockdir" 2>/dev/null || true
+            fi
+        done
+        trap 'rmdir "$lockdir" 2>/dev/null || true' EXIT
+
         if [[ ! -f "$fs_file" ]]; then
-            {
-                echo "| Date | Rules Lines | Frontmatter Pass/Total | Hook Tests Pass |"
-                echo "|------|------------|------------------------|------------------|"
-            } > "$fs_file"
+            { echo "| Date | Rules Lines | Frontmatter Pass/Total | Hook Tests Pass | Inventory Check |"
+              echo "|------|------------|------------------------|------------------|------------------|"; } > "$fs_file"
         fi
-        echo "| $(date +%Y-%m-%d) | $RULES_LINES | $FRONTMATTER_RESULT | $hook_status |" >> "$fs_file"
-        echo "logged fleet signal to $fs_file"
+        grep -v "^| $(date +%Y-%m-%d) |" "$fs_file" > "$fs_file.tmp" || true
+        mv "$fs_file.tmp" "$fs_file"
+        echo "| $(date +%Y-%m-%d) | $RULES_LINES | $FRONTMATTER_RESULT | $hook_status | $INVENTORY_STATUS |" >> "$fs_file"
+
+        echo "logged fleet signal to $fs_file (deduped for today)"
     }
-    export HOOK_TESTS_PASSED FRONTMATTER_RESULT
+    export HOOK_TESTS_PASSED FRONTMATTER_RESULT INVENTORY_STATUS
     export -f fleet_signals_gate
     run_gate "fleet-signals-log" "fleet_signals_gate"
 fi

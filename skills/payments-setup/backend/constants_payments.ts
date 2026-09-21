@@ -2,8 +2,12 @@
 // ADAPT: update PACKS prices and session counts to match your pricing.
 // ADAPT: update STRIPE_API_VERSION to the latest Stripe API version.
 
-/** Stripe API version — update when upgrading the stripe npm package */
-export const STRIPE_API_VERSION = '2026-02-25.clover' as const;
+/** Stripe API version — must track the version pinned by the installed
+ *  `stripe` npm package (cjs/apiVersion.js's ApiVersion export). Update this
+ *  whenever that package is bumped, or Stripe.StripeConfig's apiVersion type
+ *  will reject it and the @ts-expect-error in routes_payments.ts must come
+ *  back. */
+export const STRIPE_API_VERSION = '2026-08-26.dahlia' as const;
 
 /** Valid session pack sizes — must match DB CHECK constraint */
 export const VALID_PACK_SIZES = [1, 3, 10] as const;

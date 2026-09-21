@@ -45,6 +45,9 @@ telemetry/
 chrome/
 .last-update-result.json
 
+# Auto-mutated by Claude Code's own runtime cleanup; produces a content-free diff
+.last-cleanup
+
 # MCP config has machine-specific paths
 .mcp.json
 
@@ -53,6 +56,9 @@ skills/doc-pdf/
 skills/doc-docx/
 skills/doc-pptx/
 skills/doc-xlsx/
+
+# Synced doc-skill mirrors (same no-redistribution class as skills/doc-*/)
+skills/synced/
 
 .serena/cache/
 .claude/

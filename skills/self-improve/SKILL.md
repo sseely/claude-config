@@ -9,7 +9,6 @@ description: >
   configuration current with the ecosystem.
 disable-model-invocation: false
 allowed-tools: Bash, Read, Grep, Glob, Agent, Write, Edit, WebFetch, WebSearch, TodoWrite
-clone-dir: ~/temp/self-improve
 ---
 
 # Self-Improve
@@ -23,6 +22,10 @@ Strategic audit of the `~/.claude` configuration repo against the current state 
 **Resume check**: Before doing anything, check `~/.claude/.self-improve-progress.md`.
 
 If it exists:
+- If `phase-2: done` (or later) is set but `phase-1: done` is NOT set, the run
+  was interrupted after the Phase 1 barrier fired (2 of 3 of A/B/C) but before
+  Agent X finished. Clear `phase-2: done` and `phase-3: done` from the file,
+  finish Phase 1 to full completion, then redo Phase 2.
 - If `phase-1: done` is set, skip Phase 1 agents — load their outputs from `.agent-notes/self-improve-phase1-A.md`, `-phase1-B.md`, `-phase1-C.md`, `-phase1-X.md`.
 - If `phase-2: done` is set, skip Phase 2 agents — load their outputs from `.agent-notes/self-improve-phase2-D.md` through `-phase2-H.md`.
 - If `phase-3: done` is set, skip Phase 3 — load deduplicated findings from `.agent-notes/self-improve-phase3.md`.
@@ -50,7 +53,7 @@ fields, and `docs/fleet/monitoring.md` signals vs. `.agent-notes/` evidence.
 
 ## Phase 2 — Configuration audit (parallel)
 
-Launch **D, E, F, G, and H together** — all read-only, no shared write targets. Full prompts, file lists, and sampling rules are in [references/phase2-audit-agents.md](references/phase2-audit-agents.md).
+Launch **D, E, F, G, and H together** — all read-only, no shared write targets. Once all five complete, launch **Agent I** (synthesis only — no source re-read). Full prompts, file lists, and sampling rules are in [references/phase2-audit-agents.md](references/phase2-audit-agents.md).
 
 | Agent | Scope |
 |-------|-------|
@@ -59,8 +62,9 @@ Launch **D, E, F, G, and H together** — all read-only, no shared write targets
 | **F** | Rules and CLAUDE.md |
 | **G** | Prompt structure audit |
 | **H** | Tightening audit |
+| **I** | Verdict pass — per-file keep/trim/merge/delete, synthesized from D-H |
 
-**Phase 2 completion:** each agent writes its full output to `.agent-notes/self-improve-phase2-[D|E|F|G|H].md` before returning. Once all five have completed (or been retried/gapped per the crash-handling rule in the reference), append `phase-2: done` to `~/.claude/.self-improve-progress.md`.
+**Phase 2 completion:** each agent writes its full output to `.agent-notes/self-improve-phase2-[D|E|F|G|H|I].md` before returning. Once all six have completed (or been retried/gapped per the crash-handling rule in the reference), append `phase-2: done` to `~/.claude/.self-improve-progress.md`.
 
 ## Phase 3 — Synthesize and deduplicate
 

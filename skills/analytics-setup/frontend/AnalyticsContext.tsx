@@ -1,7 +1,8 @@
 // Frontend PostHog analytics context.
 // ADAPT: remove the Termly consent gate if compliance-setup has not been run.
 //        In that case, initialize PostHog directly in the useEffect.
-// ADAPT: update the termly-consent-update event name if using a different CMP.
+// ADAPT: update the consent-category key below if using a different CMP than
+//        Termly, or a different Termly consent category than "analytics".
 
 import { createContext, useContext, useEffect, useRef, type ReactNode } from 'react';
 import posthog from 'posthog-js';
@@ -14,6 +15,23 @@ interface AnalyticsContextValue {
   capture:  (event: string, properties?: Record<string, unknown>) => void;
   identify: (userId: string, traits?: Record<string, unknown>) => void;
   reset:    () => void;
+}
+
+// Termly's client-side Event API. Verified against Termly's own support
+// docs (see the skill's README/commit note for the exact URLs and
+// confidence level) — `window.Termly` exists only once the CMP embed
+// script (added by compliance-setup) has finished loading, so every
+// access below is guarded.
+interface TermlyConsentState {
+  analytics?: boolean;
+  [category: string]: boolean | undefined;
+}
+interface TermlyGlobal {
+  getConsentState?: () => TermlyConsentState;
+  on?: (
+    event: 'consent' | 'initialized',
+    callback: (data: { consentState?: TermlyConsentState }) => void
+  ) => void;
 }
 
 // Safe no-op default — components can always call these without null-checking
@@ -39,17 +57,25 @@ export function AnalyticsProvider({ children }: { children: ReactNode }) {
 
     // ADAPT: if not using Termly (compliance-setup not run), replace this block with:
     //   init();
-    // and remove the event listener below.
-    const consent = (window as Window & { __termlyConsent?: { analytics?: boolean } })
-      .__termlyConsent;
-    if (consent?.analytics === true) init();
-
-    function handleTermlyConsent(e: Event) {
-      const detail = (e as CustomEvent<{ analytics?: boolean }>).detail;
-      if (detail?.analytics === true) init();
+    // and remove checkAndSubscribe/the polling fallback below.
+    function checkAndSubscribe(): boolean {
+      const termly = (window as Window & { Termly?: TermlyGlobal }).Termly;
+      if (!termly?.on) return false;
+      if (termly.getConsentState?.().analytics === true) init();
+      termly.on('consent', (data) => {
+        if (data?.consentState?.analytics === true) init();
+      });
+      return true;
     }
-    window.addEventListener('termly-consent-update', handleTermlyConsent);
-    return () => window.removeEventListener('termly-consent-update', handleTermlyConsent);
+
+    if (checkAndSubscribe()) return;
+
+    // compliance-setup's Termly embed script loads asynchronously, so
+    // `window.Termly` may not exist yet on mount — poll briefly until it does.
+    const pollId = window.setInterval(() => {
+      if (checkAndSubscribe()) window.clearInterval(pollId);
+    }, 200);
+    return () => window.clearInterval(pollId);
   }, []);
 
   const value: AnalyticsContextValue = {

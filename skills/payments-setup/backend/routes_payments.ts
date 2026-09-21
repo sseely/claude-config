@@ -8,6 +8,7 @@ import Stripe from 'stripe';
 import { createDbClient } from '../db/client';
 import { Env, User } from '../types';
 import { STRIPE_API_VERSION } from '../constants';
+import { log } from '../logger';
 
 // ADAPT: update prices and session counts
 const PACKS = {
@@ -22,7 +23,9 @@ function createStripeClient(env: Env): Stripe {
   if (!env.STRIPE_SECRET_KEY) {
     throw new Error('Stripe not configured: STRIPE_SECRET_KEY missing');
   }
-  // @ts-ignore — stripe-mock runs an older API; suppress version mismatch in tests
+  if (env.STRIPE_BASE_URL && env.ENVIRONMENT === 'production') {
+    throw new Error('STRIPE_BASE_URL must not be set in production');
+  }
   const config: Stripe.StripeConfig = { apiVersion: STRIPE_API_VERSION };
   if (env.STRIPE_BASE_URL) {
     const url = new URL(env.STRIPE_BASE_URL);
@@ -61,28 +64,33 @@ export async function handleBuyPack(request: Request, env: Env, user: User): Pro
   }
 
   const packInfo = PACKS[pack];
-  const session = await stripe.checkout.sessions.create({
-    mode: 'payment',
-    line_items: [
-      {
-        price_data: {
-          currency: 'usd',
-          unit_amount: packInfo.amount_cents,
-          product_data: {
-            // ADAPT: replace "My App" with your product name
-            name: `My App — ${packInfo.sessions} Session${packInfo.sessions > 1 ? 's' : ''}`,
-            description: `Valid for ${packInfo.sessions} live polling session${packInfo.sessions > 1 ? 's' : ''}. Credits never expire.`,
+  let session: Stripe.Checkout.Session;
+  try {
+    session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            unit_amount: packInfo.amount_cents,
+            product_data: {
+              // ADAPT: replace "My App" with your product name
+              name: `My App — ${packInfo.sessions} Session${packInfo.sessions > 1 ? 's' : ''}`,
+              description: `Valid for ${packInfo.sessions} live polling session${packInfo.sessions > 1 ? 's' : ''}. Credits never expire.`,
+            },
           },
+          quantity: 1,
         },
-        quantity: 1,
-      },
-    ],
-    metadata:      { user_id: user.id, pack },
-    // ADAPT: update paths if your post-checkout routes differ
-    success_url:   `${env.APP_URL}/dashboard?purchase=success`,
-    cancel_url:    `${env.APP_URL}/dashboard?purchase=cancelled`,
-    customer_email: user.email,
-  });
+      ],
+      metadata:      { user_id: user.id, pack },
+      // ADAPT: update paths if your post-checkout routes differ
+      success_url:   `${env.APP_URL}/dashboard?purchase=success`,
+      cancel_url:    `${env.APP_URL}/dashboard?purchase=cancelled`,
+      customer_email: user.email,
+    });
+  } catch {
+    return Response.json({ error: 'Payments unavailable' }, { status: 502 });
+  }
 
   // stripe-mock has no hosted checkout UI — simulate purchase directly in tests.
   // ADAPT: remove this block if not using stripe-mock
@@ -134,7 +142,7 @@ export async function handleStripeWebhook(
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     const isSignatureError = msg.toLowerCase().includes('signature');
-    console.error('[stripe webhook]', isSignatureError ? 'Signature validation failed' : 'Webhook error', msg);
+    log('error', isSignatureError ? 'Signature validation failed' : 'Webhook error', { error: msg });
     return new Response('Webhook error', { status: isSignatureError ? 400 : 500 });
   }
 
@@ -161,10 +169,9 @@ export async function handleStripeWebhook(
       await db.end();
     }
 
-    console.info(
-      '[stripe webhook] checkout.session.completed',
-      JSON.stringify({ userId, pack: packKey, amountCents: packInfo.amount_cents, stripeSessionId: session.id })
-    );
+    log('info', 'checkout.session.completed', {
+      userId, pack: packKey, amountCents: packInfo.amount_cents, stripeSessionId: session.id,
+    });
   }
 
   return Response.json({ received: true });

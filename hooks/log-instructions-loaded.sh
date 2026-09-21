@@ -22,35 +22,20 @@ set -uo pipefail
 
 LOG_DIR="$HOME/.claude/logs"
 LOG_FILE="$LOG_DIR/instructions-loaded.jsonl"
+HOOKS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# shellcheck source=./_hooklib.sh
+source "$HOOKS_DIR/_hooklib.sh"
 
 mkdir -p "$LOG_DIR" 2>/dev/null || exit 0
 
 # Read the payload with a timeout so a stuck writer cannot stall session work.
-payload=""
-if ! IFS= read -r -t 5 -d '' payload; then
-    # -d '' returns non-zero at EOF even on success; keep whatever we got.
-    :
-fi
-[[ -n "$payload" ]] || exit 0
+hook_read_payload
+[[ -n "$HOOK_PAYLOAD" ]] || exit 0
 
 # Stamp arrival time and append. Prefer python3 for valid JSON assembly; fall
 # back to a raw append so an absent interpreter costs evidence, not the event.
-if command -v python3 >/dev/null 2>&1; then
-    python3 -c '
-import json, sys, datetime
-raw = sys.argv[1]
-try:
-    event = json.loads(raw)
-    if not isinstance(event, dict):
-        event = {"raw": raw}
-except Exception:
-    event = {"raw": raw}
-event["logged_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
-with open(sys.argv[2], "a", encoding="utf-8") as fh:
-    fh.write(json.dumps(event, separators=(",", ":")) + "\n")
-' "$payload" "$LOG_FILE" 2>/dev/null || printf '%s\n' "$payload" >> "$LOG_FILE" 2>/dev/null
-else
-    printf '%s\n' "$payload" >> "$LOG_FILE" 2>/dev/null
-fi
+hook_rotate_log "$LOG_FILE"
+hook_append_jsonl "InstructionsLoaded" "$HOOK_PAYLOAD" "$LOG_FILE"
 
 exit 0

@@ -1,5 +1,29 @@
 #!/bin/bash
+# Sets up the complexity-checker venv (lizard, PyYAML, pytest — pinned in
+# requirements.txt) used by check-complexity.py.
+#
+# Usage:
+#   setup-complexity.sh                    venv + pinned deps only (default)
+#   setup-complexity.sh --with-shellcheck  also installs shellcheck via
+#                                           Homebrew (`brew install
+#                                           shellcheck`), for linting the
+#                                           .sh hooks. Skipped with a message
+#                                           if `brew` is not on PATH. Opt-in
+#                                           only — never run automatically.
 set -euo pipefail
+
+WITH_SHELLCHECK=false
+for arg in "$@"; do
+    case "$arg" in
+        --with-shellcheck)
+            WITH_SHELLCHECK=true
+            ;;
+        *)
+            echo "ERROR: unknown argument: $arg" >&2
+            exit 1
+            ;;
+    esac
+done
 
 HOOKS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 VENV_DIR="$HOOKS_DIR/.venv"
@@ -40,3 +64,13 @@ echo "✓ Installed: $LIZARD_VERSION"
 echo "✓ Binary:    $LIZARD_BIN"
 echo ""
 echo "Complexity checking is ready."
+
+if [[ "$WITH_SHELLCHECK" == true ]]; then
+    echo ""
+    if command -v brew &>/dev/null; then
+        echo "Installing shellcheck via Homebrew..."
+        brew install shellcheck
+    else
+        echo "Skipping shellcheck install: brew not found on PATH."
+    fi
+fi

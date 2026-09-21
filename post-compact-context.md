@@ -16,7 +16,9 @@ Opus→planning/architecture and high-value implementation, Sonnet→routine
 implementation, Haiku→scoring/dedup.
 ---
 ## Commit Format (restored)
-<!-- Code review (2026-09-02): Commit Format section is at the 6-line flag. Revisit if any other section also reaches 6 lines. -->
+<!-- Kept 2026-09-20 (T15): /context unavailable in this session to verify
+whether rules/ content survives compaction as reliably as CLAUDE.md;
+defaulting to keep this section (safer, reversible) until confirmed. -->
 One commit per completed task; subject references the task ID —
 `feat(T3): add confirm endpoint`. Conventional Commits, `<type>(<scope>):
 <description>`, lowercase, no period, ≤72 chars. Full spec: `rules/commits.md`.
@@ -27,6 +29,10 @@ Claude Code" line in a project README is fine.
 ## Autonomous Restraint (restored)
 STOP brake: if the same location/approach fails the same check 3x
 consecutively, stop and log to the decision journal — do not keep iterating.
+This is a separate counter from Batch Close-Out's gate-fix-attempt cap
+below — one counts repeated edits to a location/approach, the other counts
+repeated fixes to one failing gate check; see
+`docs/reference/autonomous-execution.md` for the full distinction.
 Opus restraint: implement the simplest interpretation; no speculative
 abstractions; if scope is ambiguous, do the minimal reading and note it.
 ---

@@ -78,7 +78,7 @@ case "$ACTION" in
         # and the backup is still on disk at $BACKUP_FILE — recover by hand
         # with `cp "$BACKUP_FILE" "$SETTINGS_FILE"`. Never delete either file
         # to "clean up": losing the pre-autonomous profile is how an elevated
-        # profile survives a mission. Runbook: hooks/README or this comment.
+        # profile survives a mission. Runbook: this comment.
         if [[ -f "$BACKUP_FILE" ]]; then
             # cp, not mv — the backup must survive until the restore is
             # verified, so a second `off` is a no-op rather than a deletion.

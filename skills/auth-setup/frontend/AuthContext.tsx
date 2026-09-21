@@ -9,7 +9,16 @@ export interface AuthUser {
   email:      string;
   profile_url: string | null;
   is_admin:   boolean;
+  // ADAPT: present only if compliance-setup has been run.
+  terms_accepted_at: string | null;
+  terms_version: string | null;
+  privacy_policy_accepted_at: string | null;
+  privacy_policy_version: string | null;
   // ADAPT: add project-specific fields here
+}
+
+function isValidAuthUser(v: unknown): v is AuthUser {
+  return typeof v === 'object' && v !== null && typeof (v as { id?: unknown }).id === 'string';
 }
 
 interface AuthContextValue {
@@ -28,7 +37,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function refresh() {
     try {
       const res = await fetch('/api/me');
-      setUser(res.ok ? await res.json() : null);
+      if (!res.ok) { setUser(null); return; }
+      const data: unknown = await res.json();
+      setUser(isValidAuthUser(data) ? data : null);
     } catch (err) {
       console.error('[auth refresh]', err instanceof Error ? err.message : String(err));
       setUser(null);

@@ -1,12 +1,25 @@
-# Language fragment: .NET 8
+# Language fragment: .NET 10
 # Appended to Dockerfile.base by the /sandbox skill. No FROM line.
-# Installs the .NET 8 SDK via the official dotnet-install script into
+# Installs the .NET 10 SDK via the official dotnet-install script into
 # /usr/local/dotnet so it is available system-wide without PATH trickery
 # inside scripts that source /etc/environment.
-
+# dotnet-install.sh documents no checksum/signature-verification flag of
+# any kind (verified against the script's own --help output at
+# https://raw.githubusercontent.com/dotnet/install-scripts/main/src/dotnet-install.sh
+# on 2026-09-20); HTTPS transport plus Dockerfile.base's SHELL pipefail
+# (a truncated download now fails this RUN instead of silently producing
+# an empty install) is the mitigation.
+#
+# Installing to /usr/local needs root: Dockerfile.base ends on the
+# non-root "sandbox" user before fragments are appended (SKILL.md Phase 4
+# concatenates them after the whole base file, including its USER/
+# ENTRYPOINT lines), so this fragment switches back to root for the
+# install and returns to sandbox afterward.
+USER root
 RUN curl -sSL https://dot.net/v1/dotnet-install.sh \
-        | bash /dev/stdin --channel 8.0 --install-dir /usr/local/dotnet \
+        | bash /dev/stdin --channel 10.0 --install-dir /usr/local/dotnet \
     && ln -s /usr/local/dotnet/dotnet /usr/local/bin/dotnet
+USER sandbox
 
 ENV DOTNET_ROOT=/usr/local/dotnet
 ENV PATH="$PATH:/usr/local/dotnet"

@@ -121,6 +121,6 @@ Analytics tools:
 - `/Users/scottseely/.claude/rules/research-sources.md`
 - `/Users/scottseely/.claude/rules/architecture.md`
 - `/Users/scottseely/.claude/rules/security.md`
-- `diagnosis.md` — state the mechanism before any fix to an observed defect
+- `/Users/scottseely/.claude/rules/diagnosis.md` — state the mechanism before any fix to an observed defect
 
 Read the referenced rule file before relying on it — subagents do not auto-load rules/.

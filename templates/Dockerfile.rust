@@ -3,8 +3,15 @@
 # Uses rustup non-interactively. --no-modify-path keeps PATH management
 # explicit via the ENV instruction below rather than relying on shell
 # profile sourcing.
-
+# rustup's official install script performs its own integrity checks
+# over TLS; Dockerfile.base's SHELL pipefail already covers the
+# truncated-download risk, so no separate checksum step is added here.
+#
+# Runs as the non-root "sandbox" user (Dockerfile.base's final USER, in
+# effect since SKILL.md Phase 4 appends this fragment after the whole
+# base file), so rustup installs under $HOME/.cargo, i.e. /home/sandbox,
+# not /root/.cargo.
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
         | sh -s -- -y --no-modify-path
 
-ENV PATH="$PATH:/root/.cargo/bin"
+ENV PATH="$PATH:/home/sandbox/.cargo/bin"

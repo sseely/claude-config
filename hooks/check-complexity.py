@@ -44,6 +44,8 @@ import re
 import subprocess
 import sys
 
+from _hooklib import log_deny
+
 HOOKS_DIR = os.path.dirname(os.path.abspath(__file__))
 LIZARD_BIN = os.path.join(HOOKS_DIR, ".venv", "bin", "lizard")
 SETUP_SCRIPT = os.path.join(HOOKS_DIR, "setup-complexity.sh")
@@ -73,7 +75,8 @@ MAX_FUNC_NLOC = 30
 MAX_CCN = 10
 MAX_PARAMS = 5
 
-# `/path/file.ts:93: warning: name has 136 NLOC, 71 CCN, 1059 token, 3 PARAM, 183 length, 0 ND`
+# `/path/file.ts:93: warning: name has 136 NLOC, 71 CCN, 1059 token,
+#  3 PARAM, 183 length, 0 ND`
 WARNING_RE = re.compile(
     r"^(?P<path>.+?):(?P<line>\d+): warning: (?P<name>.+?) has "
     r"(?P<nloc>\d+) NLOC, (?P<ccn>\d+) CCN, \d+ token, (?P<param>\d+) PARAM"
@@ -82,7 +85,15 @@ METRICS = ("nloc", "ccn", "param")
 
 
 def block(reason: str) -> None:
-    print(json.dumps({"decision": "block", "reason": reason}))
+    print(json.dumps({
+        "decision": "block",
+        "reason": reason,
+        "systemMessage": reason,
+        "hookSpecificOutput": {
+            "hookEventName": "PostToolUse",
+            "additionalContext": reason,
+        },
+    }))
 
 
 def in_skip_dir(path: str) -> bool:
@@ -107,12 +118,13 @@ def is_unowned(file_path: str) -> bool:
         if not line or line.startswith("#"):
             continue
         pat = os.path.realpath(os.path.expanduser(os.path.expandvars(line)))
-        if target == pat or target.startswith(pat.rstrip("/") + os.sep) or fnmatch.fnmatch(target, pat):
+        prefix = target.startswith(pat.rstrip("/") + os.sep)
+        if target == pat or prefix or fnmatch.fnmatch(target, pat):
             return True
     return False
 
 
-def run_lizard(path: str):
+def run_lizard(path: str) -> tuple[int, str, dict[str, dict[str, object]]]:
     """(returncode, raw_output, {name: {metric: value}}) for one file."""
     result = subprocess.run(
         [LIZARD_BIN, path,
@@ -142,7 +154,7 @@ def run_lizard(path: str):
     return result.returncode, output, found
 
 
-def head_baseline(file_path: str):
+def head_baseline(file_path: str) -> dict[str, dict[str, object]] | None:
     """Violations in this file at git HEAD, or None if no baseline exists."""
     directory = os.path.dirname(os.path.abspath(file_path))
     try:
@@ -161,9 +173,7 @@ def head_baseline(file_path: str):
         if show.returncode != 0:
             return None  # new/untracked file — everything in it is new
         ext = os.path.splitext(file_path)[1]
-        tmp = os.path.join(
-            HOOKS_DIR, f".baseline-{os.getpid()}{ext}"
-        )
+        tmp = os.path.join(HOOKS_DIR, f".baseline-{os.getpid()}{ext}")
         try:
             with open(tmp, "w", encoding="utf-8") as fh:
                 fh.write(show.stdout)
@@ -176,7 +186,7 @@ def head_baseline(file_path: str):
         return None
 
 
-def head_line_count(file_path: str):
+def head_line_count(file_path: str) -> int | None:
     directory = os.path.dirname(os.path.abspath(file_path))
     try:
         top = subprocess.run(
@@ -229,20 +239,24 @@ try:
         before = head_line_count(file_path)
         if before is None or file_line_count > before:
             grew = "" if before is None else f" (was {before})"
-            block(
+            reason = (
                 f"{os.path.basename(file_path)} has {file_line_count} lines"
                 f"{grew} (max {MAX_FILE_LINES}). Split into smaller modules."
             )
+            log_deny("check-complexity", reason)
+            block(reason)
             sys.exit(0)
 
     # Function-level checks via lizard
     if not lizard_available():
-        block(
+        reason = (
             "Complexity checking requires lizard, which is not installed.\n\n"
             f"Please ask the user for permission to run:\n  {SETUP_SCRIPT}\n\n"
             "This installs lizard into a local venv at ~/.claude/hooks/.venv "
             "and does not affect any project dependencies."
         )
+        log_deny("check-complexity", reason)
+        block(reason)
         sys.exit(0)
 
     returncode, output, current = run_lizard(file_path)
@@ -253,11 +267,13 @@ try:
         if baseline is None:
             # No baseline to compare against (new file, or not a git repo):
             # fall back to the strict behaviour rather than pass silently.
-            block(
+            reason = (
                 f"Code complexity violations in {os.path.basename(file_path)}:\n\n"
                 f"{output}\n\n"
                 "Refactor before proceeding."
             )
+            log_deny("check-complexity", reason)
+            block(reason)
             sys.exit(0)
 
         introduced = []
@@ -282,11 +298,13 @@ try:
                 "allowed through — only what this edit introduced or worsened "
                 "is blocking."
             ) if carried else ""
-            block(
+            reason = (
                 "Code complexity violations INTRODUCED in "
                 f"{os.path.basename(file_path)}:\n\n{detail}{note}\n\n"
                 "Refactor before proceeding."
             )
+            log_deny("check-complexity", reason)
+            block(reason)
 
 except Exception as exc:
     # Fail open — hook bugs must never block writes. Log why so a silent
