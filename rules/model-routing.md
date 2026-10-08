@@ -9,8 +9,8 @@ Match model to task complexity and cost:
 | Implementation | `sonnet` | `high`/`xhigh`/`medium` | 1M | Feature work, bug fixes, refactoring, codegen |
 | Scoring / dedup / validation | `haiku` | n/a | 200k | Confidence scoring, dedup, format checks, grep |
 
-Aliases resolve to: `opus`=`claude-opus-5`, `fable`=`claude-fable-5-1`
-(v2.1.255+), `sonnet`=`claude-sonnet-5`, `haiku`=`claude-haiku-4-5-20251001`.
+Aliases resolve to: `opus`=`claude-opus-5-5`, `fable`=`claude-fable-5-1`
+(v2.1.255+), `sonnet`=`claude-sonnet-5-5`, `haiku`=`claude-haiku-4-5-20251001`.
 
 <!-- Code review (2026-08-01): PerspectiveGap (arXiv:2606.08878, preprint)
 scores opus-4-8 at 13.9% on orchestration-prompt composition, haiku-4-5
@@ -21,8 +21,10 @@ appears. -->
 > files to a Haiku agent in one prompt. It supports fixed-budget thinking
 > (`budget_tokens`) but not adaptive; `effort` returns 400 — do not set it.
 
-> **Version gate:** `opus` resolves to Opus 5 only on Claude Code
-> v2.1.219+; earlier versions get Opus 4.8. Confirm `claude --version`.
+> **Version gate:** aliases are baked into the binary. `opus` → Opus 5.5
+> on v2.1.280+ (Opus 5 on v2.1.219–2.1.278); `sonnet` → Sonnet 5.5 on
+> v2.1.285+. A session started before an upgrade keeps its old mapping —
+> restart long-running sessions after upgrading. Confirm `claude --version`.
 
 > **Effort:** set via `effort:` frontmatter, `--effort`, or `/effort`.
 > `budget_tokens` is removed on `claude-opus-4-8`/Sonnet 5 (400); use
