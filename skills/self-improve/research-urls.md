@@ -20,14 +20,13 @@ decay to `unknown` on the next run. An `unknown` entry is re-verified before use
 it is not removed. This prevents the trusted set from silently accumulating sources
 that were valid once and have since rotted.
 
-Last full verification: 2026-09-02 (PARTIAL — Agent A fetched 6 of 14 active
-Agent-A URLs (changelog, hooks, settings, memory, mcp, sub-agents) and time-boxed
-out overview, skills, agent-teams, agent-view, routines, worktrees, tutorials, and
-the anthropic blog, which retain their prior dates. Agent B fetched all 3, Agent C
-fetched anthropic.com/research plus 3 NIST pages, Agent X ran all 84 discovery
-queries -> 25 candidates added, 2 promoted, 3 demoted (ACM paywalls). Fable 5.1
-launched 2026-09-01; the models/overview page reflected it correctly this run.
-Prior header: 2026-08-01 PARTIAL, Agent A 9 of 13.)
+Partial verification 2026-10-08 — 38 of 46 active entries fetched.
+Not fetched this run (retain prior dates, all within staleness windows): Agent A
+effective-context-engineering and trustworthy-agents; Agent B Fable 5 intro doc;
+NIST playbook, glossary, 2 DOIs, and crosswalks. Agent A's changelog, hooks,
+settings, mcp, skills, sub-agents, and agent-view pages were read only up to
+WebFetch's 100k-char truncation (task S-068), which counts as fetched, not
+unreachable. Prior header: 2026-09-02 PARTIAL.
 CAVEAT: on 2026-07-24 the Agent-B models/overview + model-config pages returned
 200/rich but STALE content — they did NOT reflect the same-day Claude Opus 5
 launch (confirmed live via WebSearch). The fetch-guard cannot detect same-day
@@ -45,28 +44,36 @@ Note: platform.claude.com/docs/en/models/overview verified 404 on 2026-06-10.
 
 | URL                                                       | Purpose                                          | Last Verified | Status |
 | --------------------------------------------------------- | ------------------------------------------------ | ------------- | ------ |
-| https://code.claude.com/docs/en/changelog                 | PRIMARY: scan for new/changed/deprecated Claude Code features (last 90 days) | 2026-09-02    | active |
-| https://www.anthropic.com/blog                            | SECONDARY/optional: occasional Claude Code launch posts; thin (press newsroom) — use only if the changelog misses a topic | 2026-06-20    | active |
+| https://code.claude.com/docs/en/changelog                 | PRIMARY: scan for new/changed/deprecated Claude Code features (last 90 days) | 2026-10-08    | active |
+| https://www.anthropic.com/blog                            | SECONDARY/optional: occasional Claude Code launch posts; thin (press newsroom) — use only if the changelog misses a topic | 2026-10-08    | active |
 | https://platform.claude.com/docs/en/docs/claude-code/overview   | Core feature overview                            | 2026-06-10    | unreachable |
 | https://platform.claude.com/docs/en/docs/claude-code/hooks      | Hook events and configuration                    | 2026-06-10    | unreachable |
 | https://platform.claude.com/docs/en/docs/claude-code/settings   | Settings reference                               | 2026-06-10    | unreachable |
 | https://platform.claude.com/docs/en/docs/claude-code/memory     | Memory system docs                               | 2026-06-10    | unreachable |
 | https://platform.claude.com/docs/en/docs/claude-code/mcp        | MCP integration docs                             | 2026-06-10    | unreachable |
 | https://platform.claude.com/docs/en/docs/claude-code/sub-agents | Sub-agent docs                                   | 2026-06-10    | unreachable |
-| https://code.claude.com/docs/en/overview                  | Core feature overview — replaces unreachable platform.claude.com URL | 2026-07-24 | active |
-| https://code.claude.com/docs/en/hooks                     | Hook events and configuration — replaces unreachable platform.claude.com URL | 2026-09-02 | active |
-| https://code.claude.com/docs/en/settings                  | Settings reference — replaces unreachable platform.claude.com URL | 2026-09-02 | active |
-| https://code.claude.com/docs/en/memory                    | Memory system docs — replaces unreachable platform.claude.com URL | 2026-09-02 | active |
-| https://code.claude.com/docs/en/mcp                       | MCP integration docs — replaces unreachable platform.claude.com URL | 2026-09-02 | active |
-| https://code.claude.com/docs/en/sub-agents                | Sub-agent docs — replaces unreachable platform.claude.com URL | 2026-09-02 | active |
-| https://code.claude.com/docs/en/tutorials                 | Common workflows / tutorials — replaces unreachable platform.claude.com URL | 2026-07-24 | active |
-| https://code.claude.com/docs/en/skills                    | Skills config: context: fork, run-in-subagent, disable-model-invocation, frontmatter — PROMOTED 2026-07-24 (Agent A fetched 200/rich) | 2026-08-01 | active |
-| https://code.claude.com/docs/en/agent-teams               | Agent teams: parallel teammates, independent context, SendMessage — PROMOTED 2026-07-24 | 2026-08-01 | active |
-| https://code.claude.com/docs/en/agent-view                | Background agents: run/monitor many parallel sessions — PROMOTED 2026-07-24 | 2026-08-01 | active |
-| https://code.claude.com/docs/en/routines                  | Routines: hosted scheduled/cron + GitHub-event-triggered runs — PROMOTED 2026-07-24 | 2026-08-01 | active |
-| https://code.claude.com/docs/en/worktrees                 | Worktree isolation for subagents (isolation: worktree), base-branch selection — PROMOTED 2026-07-24 | 2026-07-24 | active |
+| https://code.claude.com/docs/en/overview                  | Core feature overview — replaces unreachable platform.claude.com URL | 2026-10-08 | active |
+| https://code.claude.com/docs/en/hooks                     | Hook events and configuration — replaces unreachable platform.claude.com URL | 2026-10-08 | active |
+| https://code.claude.com/docs/en/settings                  | Settings reference — replaces unreachable platform.claude.com URL | 2026-10-08 | active |
+| https://code.claude.com/docs/en/memory                    | Memory system docs — replaces unreachable platform.claude.com URL | 2026-10-08 | active |
+| https://code.claude.com/docs/en/mcp                       | MCP integration docs — replaces unreachable platform.claude.com URL | 2026-10-08 | active |
+| https://code.claude.com/docs/en/sub-agents                | Sub-agent docs — replaces unreachable platform.claude.com URL | 2026-10-08 | active |
+| https://code.claude.com/docs/en/tutorials                 | Common workflows / tutorials — replaces unreachable platform.claude.com URL | 2026-10-08 | active |
+| https://code.claude.com/docs/en/skills                    | Skills config: context: fork, run-in-subagent, disable-model-invocation, frontmatter — PROMOTED 2026-07-24 (Agent A fetched 200/rich) | 2026-10-08 | active |
+| https://code.claude.com/docs/en/agent-teams               | Agent teams: parallel teammates, independent context, SendMessage — PROMOTED 2026-07-24 | 2026-10-08 | active |
+| https://code.claude.com/docs/en/agent-view                | Background agents: run/monitor many parallel sessions — PROMOTED 2026-07-24 | 2026-10-08 | active |
+| https://code.claude.com/docs/en/routines                  | Routines: hosted scheduled/cron + GitHub-event-triggered runs — PROMOTED 2026-07-24 | 2026-10-08 | active |
+| https://code.claude.com/docs/en/worktrees                 | Worktree isolation for subagents (isolation: worktree), base-branch selection — PROMOTED 2026-07-24 | 2026-10-08 | active |
 | https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents | Anthropic official: how to shape agent context — write/select/compress/isolate; context rot from n² token relationships; system-prompt "altitude"; just-in-time retrieval; compaction, structured note-taking, sub-agent architectures for long-horizon tasks — PROMOTED 2026-09-02 (12.5K chars) | 2026-09-02 | active |
 | https://www.anthropic.com/research/trustworthy-agents      | Anthropic official research on trustworthy agent design: human control (granular permissions, Plan Mode), value alignment, secured interactions (prompt-injection defenses), transparency, privacy — PROMOTED 2026-09-02 (7.8K chars) | 2026-09-02 | active |
+| https://www.anthropic.com/research/multiagent-systems | Anthropic official (Aug 2026): multiagent failure modes — coordination breakdown, conformity cascades, goal-conflict escalation; informs parallelism.md (38K chars) — PROMOTED 2026-10-08 (fetched 200/rich) | 2026-10-08 | active |
+| https://www.anthropic.com/research/claude-code-expertise | Anthropic official (Jun 2026): ~400K Claude Code session analysis — human/Claude planning vs execution split; domain expertise predicts success (28K chars) — PROMOTED 2026-10-08 (fetched 200/rich) | 2026-10-08 | active |
+| https://code.claude.com/docs/en/whats-new | Weekly Claude Code feature digest (Week 13-37 2026) — complements /changelog — PROMOTED 2026-10-08 (fetched 200/rich) | 2026-10-08 | active |
+| https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents | Anthropic Engineering: initializer agent, progress files, one-feature-per-session for long-running agents (11K chars) — PROMOTED 2026-10-08 (fetched 200/rich) | 2026-10-08 | active |
+| https://code.claude.com/docs/en/hooks-guide | Official hooks how-to guide (companion to /hooks reference; ~60K chars) — PROMOTED 2026-10-08 (fetched 200/rich) | 2026-10-08 | active |
+| https://claude.com/blog/steering-claude-code-skills-hooks-rules-subagents-and-more | Anthropic blog: CLAUDE.md vs rules vs skills vs hooks vs subagents by load timing, compaction persistence, context cost (17K chars) — PROMOTED 2026-10-08 (fetched 200/rich) | 2026-10-08 | active |
+| https://www.anthropic.com/research/building-effective-agents | Anthropic: foundational agent patterns — workflows vs agents, ACI design (25K chars; tooling section flagged dated by publisher) — PROMOTED 2026-10-08 (fetched 200/rich) | 2026-10-08 | active |
+| https://www.anthropic.com/engineering/writing-tools-for-agents | Anthropic Engineering: designing/evaluating tools for agents (15K chars) — PROMOTED 2026-10-08 (fetched 200/rich) | 2026-10-08 | active |
 
 ---
 
@@ -74,9 +81,10 @@ Note: platform.claude.com/docs/en/models/overview verified 404 on 2026-06-10.
 
 | URL                                                             | Purpose                            | Last Verified | Status |
 | --------------------------------------------------------------- | ---------------------------------- | ------------- | ------ |
-| https://code.claude.com/docs/en/model-config                    | Model aliases and effort levels    | 2026-09-02    | active |
-| https://platform.claude.com/docs/en/about-claude/models/overview | Current model IDs and deprecations — WARNING: served STALE (pre-Opus-5) content on 2026-07-24 despite 200/rich; cross-check against WebSearch on launch days | 2026-09-02    | active |
+| https://code.claude.com/docs/en/model-config                    | Model aliases and effort levels    | 2026-10-08    | active |
+| https://platform.claude.com/docs/en/about-claude/models/overview | Current model IDs and deprecations — WARNING: served STALE (pre-Opus-5) content on 2026-07-24 despite 200/rich; cross-check against WebSearch on launch days | 2026-10-08    | active |
 | https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5 | Fable 5 / Mythos 5 facts: retention, thinking, positioning | 2026-09-02 | active |
+| https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5 | Official Opus 5 prompting guide: verbosity, over-verification removal, scope constraint, subagent spawn caps, thinking-disabled artifacts — PROMOTED 2026-10-08 (fetched 200/rich) | 2026-10-08 | active |
 
 **Standing instruction:** if a model launch is suspected (announcement, user
 mention, version bump elsewhere), cross-check the current-model list against
@@ -88,7 +96,16 @@ a fresh `WebSearch` — a 200/rich fetch from these docs pages can still be stal
 
 | URL                                | Purpose                                                                  | Last Verified | Status |
 | ---------------------------------- | ------------------------------------------------------------------------ | ------------- | ------ |
-| https://www.anthropic.com/research | Recent Anthropic papers on instruction-following and agent orchestration | 2026-09-02    | active |
+| https://www.anthropic.com/research | Recent Anthropic papers on instruction-following and agent orchestration | 2026-10-08    | active |
+| https://arxiv.org/abs/2608.01326 | PREPRINT: Context Compaction Theory — formal analysis of selection vs summary compaction — PROMOTED 2026-10-08 (fetched 200/rich) | 2026-10-08 | active |
+| https://arxiv.org/abs/2607.05139 | PREPRINT: tests generated after faulty code catch 14% of faults vs 25% independent — bears on testing.md test-first — PROMOTED 2026-10-08 (fetched 200/rich) | 2026-10-08 | active |
+| https://arxiv.org/abs/2606.10209 | PREPRINT: Less Context, Better Agents — recent-tool-interaction retention + summaries beat full history — PROMOTED 2026-10-08 (fetched 200/rich) | 2026-10-08 | active |
+| https://arxiv.org/html/2603.20432v1 | PREPRINT: Coding Agents are Effective Long-Context Processors — file-system externalization, +17.3% over SOTA (full paper) — PROMOTED 2026-10-08 (fetched 200/rich) | 2026-10-08 | active |
+| https://arxiv.org/abs/2606.11213 | PREPRINT: Context Window Lifecycle — deterministic non-LLM eviction of finished action content — PROMOTED 2026-10-08 (fetched 200/rich) | 2026-10-08 | active |
+| https://arxiv.org/abs/2505.16944 | PREPRINT (NeurIPS 2025 spotlight): AGENTIF — 707 agentic instructions, constraint-count degradation benchmark — PROMOTED 2026-10-08 (fetched 200/rich) | 2026-10-08 | active |
+| https://arxiv.org/abs/2608.02645 | PREPRINT: postcondition checks + verify-before-retry + idempotency keys cut duplicate actions — retry-idempotency.md — PROMOTED 2026-10-08 (fetched 200/rich) | 2026-10-08 | active |
+| https://arxiv.org/abs/2605.17304 | PREPRINT: Context Codec/CCL — typed source-linked semantic units so commitments survive compression — PROMOTED 2026-10-08 (fetched 200/rich) | 2026-10-08 | active |
+| https://arxiv.org/abs/2510.22251 | PREPRINT: Prompting Inversion — constraint-heavy prompts help GPT-4o but hurt GPT-5 on GSM8K — PROMOTED 2026-10-08 (fetched 200/rich) | 2026-10-08 | active |
 
 ---
 
@@ -111,10 +128,10 @@ often as the publisher's own cadence.
 
 | URL                                                        | Purpose                                          | Last Verified | Status |
 | ----------------------------------------------------------- | ------------------------------------------------- | -------------- | ------ |
-| https://airc.nist.gov/                                      | AIRC home                                          | 2026-08-09     | active |
-| https://airc.nist.gov/airmf-resources/airmf/                | AI RMF Core (framework)                            | 2026-09-02     | active |
+| https://airc.nist.gov/                                      | AIRC home                                          | 2026-10-08     | active |
+| https://airc.nist.gov/airmf-resources/airmf/                | AI RMF Core (framework)                            | 2026-10-08     | active |
 | https://airc.nist.gov/airmf-resources/playbook/              | AI RMF Playbook                                    | 2026-09-02     | active |
-| https://airc.nist.gov/airmf-resources/playbook/audit-log/    | Playbook audit log (revision history)              | 2026-09-02     | active |
+| https://airc.nist.gov/airmf-resources/playbook/audit-log/    | Playbook audit log (revision history)              | 2026-10-08     | active |
 | https://airc.nist.gov/glossary/                              | Glossary                                           | 2026-08-09     | active |
 | https://doi.org/10.6028/NIST.AI.100-1                        | AI RMF 1.0 document (DOI)                          | 2026-08-09     | active |
 | https://doi.org/10.6028/NIST.AI.600-1                        | Generative AI Profile (NIST AI 600-1, companion)   | 2026-08-09     | active |
@@ -159,11 +176,11 @@ often as the publisher's own cadence.
 | https://arxiv.org/abs/2510.05748                                                          | Communication enables cooperation in LLM multi-agent systems                               | Discovery agent | 2026-06-05 |
 | https://arxiv.org/pdf/2506.02943                                                          | Multi-agent LLMs for JUnit test generation — hallucination to consensus                    | Discovery agent | 2026-06-05 |
 | https://arxiv.org/pdf/2603.15911                                                          | Human-AI synergy in agentic code review — collaboration patterns                           | Discovery agent | 2026-06-05 |
-| https://www.anthropic.com/research/building-effective-agents                              | Anthropic: foundational agent design patterns — workflows vs autonomous agents, ACI design | Discovery agent | 2026-07-24 |
-| https://www.anthropic.com/engineering/writing-tools-for-agents                            | Anthropic: designing/evaluating tools for agents — prototyping, eval-driven tool description quality | Discovery agent | 2026-07-24 |
+| https://www.anthropic.com/research/building-effective-agents                              | Anthropic: foundational agent design patterns — workflows vs autonomous agents, ACI design PROMOTED 2026-10-08 to Agent A section | Discovery agent | 2026-07-24 |
+| https://www.anthropic.com/engineering/writing-tools-for-agents                            | Anthropic: designing/evaluating tools for agents — prototyping, eval-driven tool description quality PROMOTED 2026-10-08 to Agent A section | Discovery agent | 2026-07-24 |
 | https://www.anthropic.com/research/long-running-Claude                                    | Anthropic: CLAUDE.md special-file handling for long-running autonomous science agents      | Discovery agent | 2026-07-24 |
-| https://code.claude.com/docs/en/hooks-guide                                               | Official Claude Code hooks how-to guide (companion to /hooks reference)                    | Discovery agent | 2026-07-24 |
-| https://claude.com/blog/steering-claude-code-skills-hooks-rules-subagents-and-more         | Anthropic blog: when to use CLAUDE.md vs rules vs skills vs hooks vs subagents              | Discovery agent | 2026-07-24 |
+| https://code.claude.com/docs/en/hooks-guide                                               | Official Claude Code hooks how-to guide (companion to /hooks reference) PROMOTED 2026-10-08 to Agent A section | Discovery agent | 2026-07-24 |
+| https://claude.com/blog/steering-claude-code-skills-hooks-rules-subagents-and-more         | Anthropic blog: when to use CLAUDE.md vs rules vs skills vs hooks vs subagents PROMOTED 2026-10-08 to Agent A section | Discovery agent | 2026-07-24 |
 | https://martinfowler.com/articles/reliable-llm-bayer.html                                 | Martin Fowler/Thoughtworks (Jun 2026): context + harness engineering for production multi-agent reliability | Discovery agent | 2026-07-24 |
 | https://blog.jetbrains.com/research/2025/12/efficient-context-management/                 | JetBrains research: observation masking beats LLM summarization for agent context management | Discovery agent | 2026-07-24 |
 | https://semgrep.dev/blog/2026/comparing-open-source-ai-code-security-harnesses/            | Semgrep (Jul 2026): comparing LLM-led vs SAST-hybrid open-source AI security scanning approaches | Discovery agent | 2026-07-24 |
@@ -185,11 +202,11 @@ often as the publisher's own cadence.
 | https://arxiv.org/html/2606.11672v1                                                       | PREPRINT: open-source LLM agents underperform Bandit SAST tool (recall <0.25, high false-positive) | Discovery agent | 2026-07-24 |
 | https://arxiv.org/abs/2508.14419                                                          | PREPRINT: iterative static-analysis feedback (Bandit/Pylint) cuts LLM code security issues 40%->13% | Discovery agent | 2026-07-24 |
 | https://arxiv.org/abs/2607.01903                                                          | PREPRINT: HECATE — complexity metrics spanning prompt layer + code layer for LLM-integrated apps | Discovery agent | 2026-07-24 |
-| https://arxiv.org/pdf/2607.25398 | (rel: 92) PREPRINT: HANDBOOK.md — benchmark for long-context agentic instruction following; no model exceeds 25% strict pass@1, directly tests CLAUDE.md-style files | Agent X | 2026-08-01 |
+| https://arxiv.org/pdf/2607.25398 | (rel: 92) PREPRINT: HANDBOOK.md — benchmark for long-context agentic instruction following; no model exceeds 25% strict pass@1, directly tests CLAUDE.md-style files Demoted 2026-10-08: PDF body not extractable by fetch (binary stream, no readable text); retry via abs/HTML URL arxiv.org/abs/2607.25398 | Agent X | 2026-08-01 |
 | https://dl.acm.org/doi/10.1145/3786304.3787891 | (rel: 88) Offscript (CHIIR 2026, peer-reviewed): agentic auditing methodology for instruction adherence to behavioral guidelines — Demoted 2026-09-02: fetch returned HTTP 403 Forbidden (paywall/access wall), no content retrievable | Agent X | 2026-08-01 |
-| https://arxiv.org/abs/2606.10209 | (rel: 88) PREPRINT: Less Context, Better Agents — efficient context engineering for long-horizon tool-using agents; more context ≠ better | Agent X | 2026-08-01 |
-| https://arxiv.org/pdf/2603.24755 | (rel: 87) PREPRINT: SlopCodeBench — benchmarks how coding agents degrade over long-horizon iterative tasks; directly relevant to autonomous-execution quality gates | Agent X | 2026-08-01 |
-| https://arxiv.org/html/2603.20432v1 | (rel: 86) PREPRINT: Coding Agents are Effective Long-Context Processors — agents externalize context via files/tools instead of raw context stuffing | Agent X | 2026-08-01 |
+| https://arxiv.org/abs/2606.10209 | (rel: 88) PREPRINT: Less Context, Better Agents — efficient context engineering for long-horizon tool-using agents; more context ≠ better PROMOTED 2026-10-08 to Agent C section | Agent X | 2026-08-01 |
+| https://arxiv.org/pdf/2603.24755 | (rel: 87) PREPRINT: SlopCodeBench — benchmarks how coding agents degrade over long-horizon iterative tasks; directly relevant to autonomous-execution quality gates Demoted 2026-10-08: PDF body not extractable by fetch (binary stream, no readable text); retry via abs/HTML URL arxiv.org/abs/2603.24755 | Agent X | 2026-08-01 |
+| https://arxiv.org/html/2603.20432v1 | (rel: 86) PREPRINT: Coding Agents are Effective Long-Context Processors — agents externalize context via files/tools instead of raw context stuffing PROMOTED 2026-10-08 to Agent C section | Agent X | 2026-08-01 |
 | https://dl.acm.org/doi/10.1145/3748302 | (rel: 84) ACM TOIS (peer-reviewed): survey on memory mechanisms of LLM-based agents — Demoted 2026-09-02: fetch returned HTTP 403 Forbidden (paywall/access wall), no content retrievable | Agent X | 2026-08-01 |
 | https://dl.acm.org/doi/10.1145/3728894 | (rel: 84) ACM PACMSE (peer-reviewed): LLM hallucinations in practical code generation — phenomena, mechanism, mitigation — Demoted 2026-09-02: fetch returned HTTP 403 Forbidden (paywall/access wall), no content retrievable | Agent X | 2026-08-01 |
 | https://arxiv.org/pdf/2604.03515 | (rel: 83) PREPRINT: Inside the Scaffold — source-code taxonomy of coding agent architectures (harness design patterns) | Agent X | 2026-08-01 |
@@ -217,17 +234,17 @@ often as the publisher's own cadence.
 | https://arxiv.org/pdf/2605.23135 | (rel: 68) PREPRINT: The Impact of AI Coding Assistants on Software Engineering — longitudinal study | Agent X | 2026-08-01 |
 | https://arxiv.org/pdf/2607.05677 | (rel: 66) PREPRINT: From Conversation to Contribution — characterizing coding agents in open-source software | Agent X | 2026-08-01 |
 | https://arxiv.org/pdf/2507.15003 | (rel: 65) PREPRINT: The Rise of AI Teammates in Software Engineering 3.0 | Agent X | 2026-08-01 |
-| https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5 | (rel: 95) Official Opus 5 prompting guide — verbosity control, over-verification/self-correction tuning, subagent delegation caps via CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH/MAX_CONCURRENT_SUBAGENTS; validates/extends model-routing.md's Opus behavioral compensation section | Agent X | 2026-09-02 |
-| https://www.anthropic.com/research/multiagent-systems | (rel: 90) Anthropic official (Aug 2026): multiagent failure modes — coordination breakdown, conformity cascades, epistemic brittleness, goal-conflict escalation to sabotage; directly informs parallelism.md | Agent X | 2026-09-02 |
-| https://arxiv.org/abs/2608.01326 | (rel: 90) PREPRINT (Aug 2026): Context Compaction Theory — game-theoretic proof summarization-based compaction can beat selection-based compaction for some query sets; empirically evaluates Anthropic's own compaction system | Agent X | 2026-09-02 |
-| https://www.anthropic.com/research/claude-code-expertise | (rel: 88) Anthropic official (Jun 2026): analysis of ~400K Claude Code sessions — users make ~70% of planning decisions, Claude ~80% of execution; domain expertise (not coding background) predicts success; informs agent-design/model-routing rules | Agent X | 2026-09-02 |
-| https://arxiv.org/abs/2607.05139 | (rel: 88) PREPRINT: LLM tests generated after faulty code catch only 14% of faults vs 25% when generated independently — error-propagation risk bearing on testing.md's test-first mandate | Agent X | 2026-09-02 |
-| https://arxiv.org/abs/2606.11213 | (rel: 85) PREPRINT: Beyond Compaction — dependency-graph-based structured eviction instead of summarization; 89-task/80M-token eval shows no measurable accuracy loss vs per-task isolation | Agent X | 2026-09-02 |
-| https://arxiv.org/abs/2505.16944 | (rel: 85) AGENTIF: first systematic benchmark for instruction-following in agentic scenarios — 707 human-annotated instructions across 50 tasks, ~12 constraints/instruction avg; frontier models degrade with constraint count, anchors prompting-quality.md's constraint-budget claim with a purpose-built benchmark | Agent X | 2026-09-02 |
-| https://arxiv.org/abs/2608.02645 | (rel: 85) PREPRINT (Aug 2026): verified/idempotent tool calls with postcondition checks + verify-before-retry cut duplicate actions under non-atomic agent tool failures — directly informs retry-idempotency.md | Agent X | 2026-09-02 |
-| https://code.claude.com/docs/en/whats-new | (rel: 85) Official weekly Claude Code feature digest, distinct format from active /changelog — surfaces items changelog misses (fork mode default, cross-session messaging, auto mode rollout) | Agent X | 2026-09-02 |
-| https://arxiv.org/abs/2605.17304 | (rel: 84) PREPRINT: Compress the Context, Keep the Commitments — formal framework (Context Codec/CCL) for verifiable compression preserving goals/constraints/decisions as auditable "semantic atoms" vs lossy prose summary | Agent X | 2026-09-02 |
-| https://arxiv.org/abs/2510.22251 | (rel: 83) PREPRINT: "Prompting Inversion" — constraint-heavy prompts that help mid-tier models can hurt frontier models via a "guardrail-to-handcuff" effect on GSM8K; bears on prompting-quality.md's intensity-escalation guidance for Fable/Opus | Agent X | 2026-09-02 |
+| https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5 | (rel: 95) Official Opus 5 prompting guide — verbosity control, over-verification/self-correction tuning, subagent delegation caps via CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH/MAX_CONCURRENT_SUBAGENTS; validates/extends model-routing.md's Opus behavioral compensation section PROMOTED 2026-10-08 to Agent B section | Agent X | 2026-09-02 |
+| https://www.anthropic.com/research/multiagent-systems | (rel: 90) Anthropic official (Aug 2026): multiagent failure modes — coordination breakdown, conformity cascades, epistemic brittleness, goal-conflict escalation to sabotage; directly informs parallelism.md PROMOTED 2026-10-08 to Agent A section | Agent X | 2026-09-02 |
+| https://arxiv.org/abs/2608.01326 | (rel: 90) PREPRINT (Aug 2026): Context Compaction Theory — game-theoretic proof summarization-based compaction can beat selection-based compaction for some query sets; empirically evaluates Anthropic's own compaction system PROMOTED 2026-10-08 to Agent C section | Agent X | 2026-09-02 |
+| https://www.anthropic.com/research/claude-code-expertise | (rel: 88) Anthropic official (Jun 2026): analysis of ~400K Claude Code sessions — users make ~70% of planning decisions, Claude ~80% of execution; domain expertise (not coding background) predicts success; informs agent-design/model-routing rules PROMOTED 2026-10-08 to Agent A section | Agent X | 2026-09-02 |
+| https://arxiv.org/abs/2607.05139 | (rel: 88) PREPRINT: LLM tests generated after faulty code catch only 14% of faults vs 25% when generated independently — error-propagation risk bearing on testing.md's test-first mandate PROMOTED 2026-10-08 to Agent C section | Agent X | 2026-09-02 |
+| https://arxiv.org/abs/2606.11213 | (rel: 85) PREPRINT: Beyond Compaction — dependency-graph-based structured eviction instead of summarization; 89-task/80M-token eval shows no measurable accuracy loss vs per-task isolation PROMOTED 2026-10-08 to Agent C section | Agent X | 2026-09-02 |
+| https://arxiv.org/abs/2505.16944 | (rel: 85) AGENTIF: first systematic benchmark for instruction-following in agentic scenarios — 707 human-annotated instructions across 50 tasks, ~12 constraints/instruction avg; frontier models degrade with constraint count, anchors prompting-quality.md's constraint-budget claim with a purpose-built benchmark PROMOTED 2026-10-08 to Agent C section | Agent X | 2026-09-02 |
+| https://arxiv.org/abs/2608.02645 | (rel: 85) PREPRINT (Aug 2026): verified/idempotent tool calls with postcondition checks + verify-before-retry cut duplicate actions under non-atomic agent tool failures — directly informs retry-idempotency.md PROMOTED 2026-10-08 to Agent C section | Agent X | 2026-09-02 |
+| https://code.claude.com/docs/en/whats-new | (rel: 85) Official weekly Claude Code feature digest, distinct format from active /changelog — surfaces items changelog misses (fork mode default, cross-session messaging, auto mode rollout) PROMOTED 2026-10-08 to Agent A section | Agent X | 2026-09-02 |
+| https://arxiv.org/abs/2605.17304 | (rel: 84) PREPRINT: Compress the Context, Keep the Commitments — formal framework (Context Codec/CCL) for verifiable compression preserving goals/constraints/decisions as auditable "semantic atoms" vs lossy prose summary PROMOTED 2026-10-08 to Agent C section | Agent X | 2026-09-02 |
+| https://arxiv.org/abs/2510.22251 | (rel: 83) PREPRINT: "Prompting Inversion" — constraint-heavy prompts that help mid-tier models can hurt frontier models via a "guardrail-to-handcuff" effect on GSM8K; bears on prompting-quality.md's intensity-escalation guidance for Fable/Opus PROMOTED 2026-10-08 to Agent C section | Agent X | 2026-09-02 |
 | https://arxiv.org/pdf/2604.07192 | (rel: 80) PREPRINT: Compact Constraint Encoding for LLM Code Generation — compact/tag-based constraint headers cut prompt tokens 25-30% with no compliance loss; constraint type (counter-intuitive vs conventional) dominates compliance, not format | Agent X | 2026-09-02 |
 | https://arxiv.org/abs/2601.13118 | (rel: 80) PREPRINT: 10 empirically-derived guidelines for prompting LLMs on code generation (I/O spec, pre/post-conditions, examples, ambiguity removal), validated against 50 practitioners | Agent X | 2026-09-02 |
 | https://www.infoq.com/articles/agentic-fitness-functions-evolutionary-architecture/ | (rel: 80) InfoQ: LLM-judged "agentic fitness functions" as an advisory layer above deterministic fitness functions for architecture governance — extends architecture.md's fitness-function section | Agent X | 2026-09-02 |
@@ -250,9 +267,52 @@ often as the publisher's own cadence.
 | https://www.anthropic.com/news/redeploying-fable-5 | Anthropic statement on the Fable 5 access-restoration incident | Agent B | 2026-09-02 |
 | https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-anthropic-claude-fable-5-1.html | AWS Bedrock model card for Fable 5.1 — independent launch-date corroboration | Agent B | 2026-09-02 |
 | https://arxiv.org/abs/2607.19257 | PREPRINT: Prompt Design at Scale — instruction-count collapse (N=80), placement >= format effects, 64-128k context cliff; basis for P2/P5 [frontier-lag] | Agent C | 2026-09-02 |
-| https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents | Tier 3 Anthropic: progress files, initializer prompt, session-startup sequence for long-running agents | Agent C | 2026-09-02 |
+| https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents | Tier 3 Anthropic: progress files, initializer prompt, session-startup sequence for long-running agents PROMOTED 2026-10-08 to Agent A section | Agent C | 2026-09-02 |
 | https://arxiv.org/pdf/2606.20683 | PREPRINT: survey of agent system and harness design; PDF truncated this run, re-fetch HTML | Agent C | 2026-09-02 |
 | https://www.anthropic.com/research/teaching-claude-why | Anthropic research (2026-05-08): reducing agentic misalignment | Agent C | 2026-09-02 |
+| https://arxiv.org/abs/2608.11727 | (rel: 92) PREPRINT: Harness-IF — instruction following across the instruction surfaces of coding agents; all 12 models weaker on rules opposing default behavior | Agent X | 2026-10-08 |
+| https://arxiv.org/abs/2608.02639 | (rel: 88) PREPRINT: Instruction Stacking Collapse — adherence drops sharply up to 20 stacked constraints; prompt "compiler" helps weak models only | Agent X | 2026-10-08 |
+| https://arxiv.org/abs/2604.15579 | (rel: 85) PREPRINT: Symbolic Guardrails — ~75% of agent security/safety requirements enforceable by cheap symbolic checks outside the prompt | Agent X | 2026-10-08 |
+| https://arxiv.org/abs/2608.24641 | (rel: 85) PREPRINT: Aging of Prompt Engineering Techniques — structured-prompting gains shrink on newer GPT models, persist on Qwen/Mistral | Agent X | 2026-10-08 |
+| https://arxiv.org/abs/2510.00615 | (rel: 82) PREPRINT: ACON — failure-driven refinement of compression guidelines; 26-54% peak-token cut while preserving success | Agent X | 2026-10-08 |
+| https://arxiv.org/abs/2505.02709 | (rel: 82) PREPRINT: Evaluating Goal Drift in LM Agents — drift under competing objectives grows with context length | Agent X | 2026-10-08 |
+| https://arxiv.org/abs/2608.05263 | (rel: 82) PREPRINT: OrchestraBench — multi-agent failure modes (context pollution, premature action) and recoverability tiers | Agent X | 2026-10-08 |
+| https://arxiv.org/abs/2606.14831 | (rel: 80) PREPRINT: constraint-evasive fabrication — agents facing contradictory rules invent obstacles; bears on diagnosis.md/autonomous restraint | Agent X | 2026-10-08 |
+| https://research.google/blog/towards-a-science-of-scaling-agent-systems-when-and-why-agent-systems-work/ | (rel: 80) Google Research (Tier 3): 180 agent configs — multi-agent helps parallelizable tasks, hurts sequential; informs parallelism.md | Agent X | 2026-10-08 |
+| https://www.martinfowler.com/articles/reduce-friction-ai | (rel: 78) Martin Fowler/Thoughtworks (Mar 2026, Tier 3): five patterns for onboarding/design discussion/shared standards with AI assistants | Agent X | 2026-10-08 |
+| https://code.claude.com/docs/llms.txt | Full Claude Code docs index named in every page header; discovery source for new pages | Agent A | 2026-10-08 |
+| https://code.claude.com/docs/en/settings-reference | The real settings.json key reference (settings page is precedence only); modelSettings, effortLevel, maxEffortLevel, hook fields; fetched 200/rich by Agent B | Agent A | 2026-10-08 |
+| https://code.claude.com/docs/en/cross-session-messaging | Cross-session messaging semantics; relevant to parallelism.md | Agent A | 2026-10-08 |
+| https://code.claude.com/docs/en/costs | Official token-cost guidance incl. agent team costs | Agent A | 2026-10-08 |
+| https://code.claude.com/docs/en/prompt-caching | Prompt-cache TTL buckets per request type | Agent A | 2026-10-08 |
+| https://code.claude.com/docs/en/workflows | Dynamic workflows doc | Agent A | 2026-10-08 |
+| https://code.claude.com/docs/en/whats-new/2026-w37 | Per-week Claude Code digests (Week 37 newest known; check w38-w40) | Agent A | 2026-10-08 |
+| https://code.claude.com/docs/en/plugins/mods/overview | Claude Mods (2.1.287) plugin hooks and $.ui API | Agent A | 2026-10-08 |
+| https://code.claude.com/docs/en/best-practices | Official Claude Code best practices | Agent A | 2026-10-08 |
+| https://code.claude.com/docs/en/permission-modes | Permission modes; auto mode now default | Agent A | 2026-10-08 |
+| https://www.anthropic.com/claude-haiku-5-5 | Haiku 5.5 launch post (Oct 7 2026; fetched rich by Agent A) | Agent A | 2026-10-08 |
+| https://www.anthropic.com/claude-opus-5-5 | Opus 5.5 launch post (fetched rich by Agent A) | Agent A | 2026-10-08 |
+| https://www.anthropic.com/claude-sonnet-5-5 | Sonnet 5.5 launch post (not yet fetched) | Agent A | 2026-10-08 |
+| https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md | Full changelog without the 100k WebFetch truncation (975KB); curl to scratchpad and grep (see S-068) | Agent A | 2026-10-08 |
+| https://platform.claude.com/docs/en/models/opus-5-5/overview | Opus 5.5 spec page | Agent B | 2026-10-08 |
+| https://platform.claude.com/docs/en/models/opus-5-5/migration-guide | Opus 5.5 migration checklist from Opus 5 / Sonnet 5; fetched 200/rich by Agent B | Agent B | 2026-10-08 |
+| https://platform.claude.com/docs/en/models/haiku-5-5/overview | Haiku 5.5 spec page; fetched 200/rich by Agent B | Agent B | 2026-10-08 |
+| https://platform.claude.com/docs/en/models/haiku-5-5/whats-new-haiku-5-5 | Haiku 5.5 changes vs 4.5 | Agent B | 2026-10-08 |
+| https://platform.claude.com/docs/en/models/haiku-5-5/migration-guide | Haiku 5.5 migration guide | Agent B | 2026-10-08 |
+| https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-haiku-5-5 | Haiku 5.5 prompting guide (scorer/subagent prompts) | Agent B | 2026-10-08 |
+| https://platform.claude.com/docs/en/models/sonnet-5-5/overview | Sonnet 5.5 spec page; fetched 200/rich by Agent B | Agent B | 2026-10-08 |
+| https://platform.claude.com/docs/en/models/sonnet-5-5/whats-new-sonnet-5-5 | Sonnet 5.5 breaking changes (between_tools, forced tool use, thinking-block binding) | Agent B | 2026-10-08 |
+| https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-sonnet-5-5 | Sonnet 5.5 prompting guide | Agent B | 2026-10-08 |
+| https://platform.claude.com/docs/en/build-with-claude/effort | Effort parameter API reference; resolves Sonnet 5.5 default-effort conflict | Agent B | 2026-10-08 |
+| https://platform.claude.com/docs/en/build-with-claude/task-budgets | Task budgets (beta) for agentic workloads | Agent B | 2026-10-08 |
+| https://platform.claude.com/docs/en/about-claude/pricing | Full pricing incl. cache writes and long-context steps | Agent B | 2026-10-08 |
+| https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices | Tier 1 canonical prompting guide for all current models (66KB, fetched OK by Agent C) | Agent C | 2026-10-08 |
+| https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-sonnet-5 | Per-model guide for Sonnet 5 (not fetched) | Agent C | 2026-10-08 |
+| https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-4-8 | Older-generation Opus 4.8 guide; low priority | Agent C | 2026-10-08 |
+| https://aclanthology.org/2026.acl-long.820/ | AdvancedIF (ACL 2026): system-level/multi-turn instruction rubrics; not fetched | Agent C | 2026-10-08 |
+| https://arxiv.org/abs/2606.15376 | PREPRINT: CoAgent concurrency control for multi-agent coding; only seen via blog, verify | Agent C | 2026-10-08 |
+| https://www.nist.gov/itl/ai-risk-management-framework | NIST ITL parent page; best place to catch an AI RMF revision announcement (Tier 1) | Agent C | 2026-10-08 |
+| https://arxiv.org/abs/2607.25398 | PREPRINT: HANDBOOK.md abs page (fetched OK); replaces unreadable PDF URL in Agent X row | Agent C | 2026-10-08 |
 
 ---
 
