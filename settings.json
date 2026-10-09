@@ -20,14 +20,11 @@
       "Bash(grep:*)",
       "Bash(rg:*)",
       "Bash(openssl:*)",
-      "Bash(cp:*)",
-      "Bash(mv:*)",
       "Bash(pip3 install:*)",
       "Bash(shellcheck:*)",
       "Bash(ast-grep:*)",
       "Bash(lizard:*)",
       "Bash(gzip:*)",
-      "Bash(forge lint *)",
       "Bash(git status:*)",
       "Bash(git diff:*)",
       "Bash(git log:*)",
@@ -38,7 +35,8 @@
       "Bash(git rm:*)",
       "Bash(git check-ignore:*)",
       "Bash(git remote:*)",
-      "Bash(git push:*)",
+      "Bash(git push origin:*)",
+      "Bash(git push -u origin:*)",
       "Bash(git checkout:*)",
       "Bash(git reset:*)",
       "Bash(git -C:*)",
@@ -49,9 +47,10 @@
       "Bash(git merge:*)",
       "Bash(git cherry-pick:*)",
       "Bash(git pull:*)",
-      "Bash(git config:*)",
-      "Bash(gh api:*)",
-      "Bash(gh repo:*)",
+      "Bash(git config --get:*)",
+      "Bash(git config --list:*)",
+      "Bash(gh repo view:*)",
+      "Bash(gh repo clone:*)",
       "Bash(gh workflow list:*)",
       "Bash(gh auth:*)",
       "Bash(gh run:*)",
@@ -67,7 +66,6 @@
       "Bash(pnpm test:*)",
       "Bash(pnpm typecheck:*)",
       "Bash(pnpm lint:*)",
-      "Bash(volta install:*)",
       "Bash(cargo:*)",
       "Bash(go:*)",
       "Bash(dotnet:*)",
@@ -75,47 +73,71 @@
       "Bash(npm ci:*)",
       "Bash(pip:*)",
       "Bash(pytest:*)",
-      "Bash(uv:*)",
-      "Bash(mkdocs build:*)",
+      "Bash(uv sync:*)",
+      "Bash(uv add:*)",
+      "Bash(uv pip install:*)",
+      "Bash(uv run pytest:*)",
+      "Bash(uv run ruff:*)",
       "Bash(docker compose:*)",
       "Bash(docker exec:*)",
       "Bash(docker info:*)",
-      "Bash(docker model:*)",
-      "Bash(docker pull:*)",
-      "Bash(docker run:*)",
-      "Bash(docker search:*)",
-      "Bash(ollama list:*)",
-      "Bash(ollama show:*)",
       "Bash(command -v:*)",
       "Bash(claude mcp:*)",
-      "Bash(~/.claude/hooks/quality-gate.sh:*)",
       "Bash(~/.claude/hooks/setup-complexity.sh)",
-      "Bash(~/.claude/hooks/autonomous-toggle.sh on:*)",
       "Bash(~/.claude/hooks/autonomous-toggle.sh off:*)",
       "Bash(~/.claude/hooks/project-init.sh:*)",
       "Edit(~/git/**)",
       "Read(~/git/**)",
-      "Grep(~/git/**)",
-      "Edit(~/.claude/**)",
+      "Edit(~/.claude/rules/**)",
+      "Edit(~/.claude/skills/**)",
+      "Edit(~/.claude/agents/**)",
+      "Edit(~/.claude/docs/**)",
       "Read(~/.claude/**)",
-      "Grep(~/.claude/**)",
       "Edit(~/church/**)",
       "Read(~/church/**)",
-      "Grep(~/church/**)",
-      "WebFetch",
+      "WebFetch(domain:code.claude.com)",
+      "WebFetch(domain:platform.claude.com)",
+      "WebFetch(domain:docs.anthropic.com)",
+      "WebFetch(domain:www.anthropic.com)",
+      "WebFetch(domain:claude.com)",
+      "WebFetch(domain:modelcontextprotocol.io)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:api.github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:arxiv.org)",
+      "WebFetch(domain:airc.nist.gov)",
+      "WebFetch(domain:www.nist.gov)",
+      "WebFetch(domain:learn.microsoft.com)",
+      "WebFetch(domain:developer.atlassian.com)",
+      "WebFetch(domain:docs.stripe.com)",
+      "WebFetch(domain:registry.npmjs.org)",
+      "WebFetch(domain:www.npmjs.com)",
+      "WebFetch(domain:developer.mozilla.org)",
+      "WebFetch(domain:ast-grep.github.io)",
       "WebSearch",
       "Skill(update-config:*)",
       "Skill(plan-mission:*)",
       "mcp__serena__*"
     ],
+    "deny": [
+      "Bash(git push --force*)",
+      "Bash(git push * --force*)",
+      "Bash(git push -f*)",
+      "Bash(git push * -f)",
+      "Bash(gh repo delete*)"
+    ],
+    "defaultMode": "auto",
     "additionalDirectories": [
       "/tmp",
       "/private/tmp"
     ]
   },
   "model": "opus",
+  "fallbackModel": [
+    "sonnet"
+  ],
   "hooks": {
-    "ConfigChange": [
+    "SessionStart": [
       {
         "hooks": [
           {
@@ -123,14 +145,13 @@
             "command": "~/.claude/hooks/session-start.sh"
           }
         ]
-      }
-    ],
-    "SessionStart": [
+      },
       {
+        "matcher": "compact",
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/session-start.sh"
+            "command": "cat ~/.claude/post-compact-context.md"
           }
         ]
       }
@@ -151,33 +172,14 @@
         ]
       }
     ],
-    "PostCompact": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "cat ~/.claude/post-compact-context.md"
-          }
-        ]
-      }
-    ],
-    "PreCompact": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo '-- COMPACTING: verify open TODOs are committed --'"
-          }
-        ]
-      }
-    ],
     "PreToolUse": [
       {
         "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ~/.claude/hooks/guard-bash.py"
+            "command": "python3 ~/.claude/hooks/guard-bash.py",
+            "onFailure": "block"
           }
         ]
       },
@@ -223,6 +225,17 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/notify-on-stop.sh",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "StopFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/log-hook-event.sh StopFailure",
             "async": true
           }
         ]
@@ -293,8 +306,8 @@
   "subagentPromptCacheTtl": "1h",
   "effortLevel": "high",
   "modelSettings": {
-    "claude-opus-5": {
-      "effortLevel": "medium"
+    "claude-opus-5-5": {
+      "effortLevel": "high"
     }
   },
   "tui": "fullscreen",
@@ -304,34 +317,33 @@
     "soft_deny": [
       "$defaults",
       "Bash(npm run visual:upload:*) in /Users/scottseely/git/knowvah/plantuml-ts — publishes visual assets to a remote target; treat as Public Data-Sharing Upload pending confirmation",
-      "Bash(git push --force*) on knowvah/plantuml-ts main — no branch protection or ruleset is configured server-side, so a force-push is not blocked upstream"
+      "Bash(git push --force*) to the default branch of any repository — assume no server-side branch protection unless verified"
     ],
     "environment": [
       "### Org-wide",
       "**Organization**: None configured",
       "**Cloud provider(s)**: None configured",
-      "**Repository visibility**: PUBLIC — knowvah/plantuml-ts (github.com/knowvah/plantuml-ts). Any push here publishes.",
+      "**Repository visibility**: Varies per repository — check the remote's visibility (`gh repo view --json visibility`) before treating a push as private. github.com/knowvah/plantuml-ts is PUBLIC.",
       "**Internal sharing / snippet hosting**: None configured — treat public paste/gist services as outside the trust boundary",
       "**Secrets management**: None configured",
-      "**Default / protected branches**: Default branch `main`; no rulesets or classic protected branches listed on knowvah/plantuml-ts (gh reports none — this repo appears unprotected server-side, not merely ruleset-protected)",
+      "**Default / protected branches**: Default branch is usually `main`; assume no server-side branch protection unless verified, so a force-push is not blocked upstream.",
       "**CI/CD deploy targets**: None configured",
       "**Network posture**: None configured",
       "**Host containment**: None configured — assume Claude Code runs on an ordinary developer machine with open internet",
-      "**Source control**: The trusted repo (github.com/knowvah/plantuml-ts) and its origin remote only — no additional orgs configured",
+      "**Source control**: The working repository and its origin remote, plus repositories under `~/git/**` and the `~/.claude` configuration repo. No additional orgs configured.",
       "**Trusted internal domains**: None configured",
       "**Trusted cloud buckets**: None configured",
       "**Key internal services**: None configured",
       "**Internal package registry**: npm.pkg.github.com (GitHub Packages registry, scoped to this repo's package.json)",
-      "**Sensitive data locations & audiences**: any file or store holding personal data, confidential business data, credentials, regulated data, or similarly sensitive material; preserve exact handles when known and share only with audiences cleared at the [named+specifics] bar. Note: assets/manifests/k8s.json, assets/manifests/kubernetes.json, scripts/split-sprite-bundle/allowlist.ts flagged by filename scan as worth checking before wide sharing.",
+      "**Sensitive data locations & audiences**: any file or store holding personal data, confidential business data, credentials, regulated data, or similarly sensitive material; preserve exact handles when known and share only with audiences cleared at the [named+specifics] bar.",
       "**Data retention / declassification**: None configured",
       "**Sensitive remote targets**: any namespace, host, or container whose name carries `prod` or `production` as a whole word or name segment",
       "**Protected deployment namespaces / environments**: None configured — fall back to the Sensitive remote targets heuristic",
       "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries `prod` or `production` as a whole word or name segment",
       "### User-specific",
-      "**Primary use of Claude Code**: software development (porting PlantUML Java to TypeScript in this repo)",
-      "**Trusted repo**: /Users/scottseely/git/knowvah/plantuml-ts and its origin remote (github.com/knowvah/plantuml-ts, PUBLIC) — only this repo's own work belongs here; ported/repointed content from outside this session's repo is not its own work",
-      "**Org-specific CLIs**: None configured",
-      "routine under scottseely/ prefix: none identified from evidence"
+      "**Primary use of Claude Code**: software development, including maintaining the `~/.claude` Claude Code configuration repo.",
+      "**Trusted repo**: The repository Claude Code was started in and its origin remote, plus `~/.claude` (the user's Claude Code configuration repo) and repositories under `~/git/**`. Content ported or repointed from outside the session's repository is not that repository's own work.",
+      "**Org-specific CLIs**: None configured"
     ]
   }
 }

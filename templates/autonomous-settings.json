@@ -3,16 +3,42 @@
     "opus",
     "sonnet"
   ],
+  "env": {
+    "CLAUDE_CODE_RETRY_WATCHDOG": "1",
+    "CLAUDE_CODE_RETRY_WATCHDOG_MAX_WAIT_MS": "1800000"
+  },
   "permissions": {
     "allow": [
       "Bash(npm:*)",
       "Bash(npx:*)",
-      "Bash(node:*)",
-      "Bash(git:*)",
-      "Bash(docker:*)",
-      "Bash(docker-compose:*)",
-      "Bash(python3:*)",
-      "Bash(psql:*)",
+      "Bash(node --version)",
+      "Bash(node --test:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git branch:*)",
+      "Bash(git checkout:*)",
+      "Bash(git switch:*)",
+      "Bash(git merge:*)",
+      "Bash(git restore:*)",
+      "Bash(git stash:*)",
+      "Bash(git tag:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(git ls-files:*)",
+      "Bash(git check-ignore:*)",
+      "Bash(git config --get:*)",
+      "Bash(docker build:*)",
+      "Bash(docker ps:*)",
+      "Bash(docker logs:*)",
+      "Bash(docker compose up:*)",
+      "Bash(docker compose down:*)",
+      "Bash(docker compose ps:*)",
+      "Bash(docker compose logs:*)",
+      "Bash(python3 -m json.tool:*)",
+      "Bash(python3 -m pytest:*)",
       "Bash(cargo:*)",
       "Bash(go:*)",
       "Bash(dotnet:*)",
@@ -21,15 +47,25 @@
       "Bash(uv pip install:*)",
       "Bash(pip install:*)",
       "Bash(pytest:*)",
-      "Bash(gh:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr diff:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(gh issue view:*)",
+      "Bash(gh issue list:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh repo view:*)",
       "Bash(shellcheck:*)",
+      "Bash(ast-grep:*)",
+      "Bash(lizard:*)",
       "Bash(rg:*)",
       "Bash(ls:*)",
       "Bash(cat:*)",
       "Bash(mkdir:*)",
       "Bash(cp:*)",
       "Bash(mv:*)",
-      "Bash(chmod:*)",
+      "Bash(chmod +x:*)",
       "Bash(find:*)",
       "Bash(grep:*)",
       "Bash(wc:*)",
@@ -44,8 +80,6 @@
       "Read(./**)",
       "Write(./**)",
       "Edit(./**)",
-      "Glob(./**)",
-      "Grep(./**)",
       "WebFetch",
       "WebSearch",
       "mcp__serena__list_dir",
@@ -80,6 +114,15 @@
             "async": true
           }
         ]
+      },
+      {
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cat ~/.claude/post-compact-context.md"
+          }
+        ]
       }
     ],
     "UserPromptSubmit": [
@@ -109,33 +152,14 @@
         ]
       }
     ],
-    "PostCompact": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "cat ~/.claude/post-compact-context.md"
-          }
-        ]
-      }
-    ],
-    "PreCompact": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo '-- COMPACTING: verify open TODOs are committed --'"
-          }
-        ]
-      }
-    ],
     "PreToolUse": [
       {
         "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ~/.claude/hooks/guard-bash.py"
+            "command": "python3 ~/.claude/hooks/guard-bash.py",
+            "onFailure": "block"
           }
         ]
       },
@@ -170,6 +194,17 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/notify-on-stop.sh",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "StopFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/log-hook-event.sh StopFailure",
             "async": true
           }
         ]
